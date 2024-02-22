@@ -1,0 +1,7 @@
+first mode=1
+video_path=.\files\background.avi
+redball=10000
+buleball=10000
+Diamond=10000
+language=chinese
+namesfile=.\names.txt
