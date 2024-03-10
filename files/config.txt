@@ -1,5 +1,5 @@
 first mode=1
-video_path=.\files\background.avi
+off video=1
 redball=10000
 buleball=10000
 Diamond=10000

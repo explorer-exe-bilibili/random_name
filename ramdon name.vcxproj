@@ -113,6 +113,7 @@
       <ConformanceMode>true</ConformanceMode>
       <Optimization>Disabled</Optimization>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -125,9 +126,10 @@
       <WarningLevel>Level3</WarningLevel>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
-      <SDLCheck>true</SDLCheck>
+      <SDLCheck>false</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <LanguageStandard>stdcpp20</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -139,16 +141,23 @@
   <ItemGroup>
     <ClInclude Include="config.h" />
     <ClInclude Include="directshow.h" />
+    <ClInclude Include="genthen-impact.h" />
     <ClInclude Include="getname.h" />
     <ClInclude Include="mywindows.h" />
     <ClInclude Include="pictures.h" />
     <ClInclude Include="ramdon name.h" />
+    <ClInclude Include="showname.h" />
     <ClInclude Include="type.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ramdon name.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <Image Include="files\icos\exit.ico" />
+    <Image Include="files\icos\10blue.ico" />
+    <Image Include="files\icos\10pink.ico" />
+    <Image Include="files\icos\1blue.ico" />
+    <Image Include="files\icos\1pink.ico" />
     <Image Include="files\imgs\detailbg.bmp" />
     <Image Include="files\imgs\element-anemo-bg.bmp" />
     <Image Include="files\imgs\element-cryo-bg.bmp" />
@@ -159,10 +168,27 @@
     <Image Include="files\imgs\element-pyro-bg.bmp" />
     <Image Include="files\imgs\outfit-background.bmp" />
     <Image Include="files\imgs\over1.bmp" />
+    <Image Include="files\imgs\over2.bmp" />
+    <Image Include="files\imgs\over3.bmp" />
+    <Image Include="files\imgs\over4.bmp" />
     <Image Include="files\imgs\splash-background.bmp" />
     <Image Include="files\imgs\wish-background.bmp" />
-    <Image Include="ramdon name.ico" />
-    <Image Include="small.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="files\mp3\backsound.mp3" />
+    <Media Include="files\mp3\result-list.mp3" />
+    <Media Include="files\mp3\reveal-3star.mp3" />
+    <Media Include="files\mp3\reveal-4star.mp3" />
+    <Media Include="files\mp3\reveal-5star.mp3" />
+    <Media Include="files\video\3star-single.mp4" />
+    <Media Include="files\video\4star-multi.mp4" />
+    <Media Include="files\video\4star-single.mp4" />
+    <Media Include="files\video\5star-multi.mp4" />
+    <Media Include="files\video\5star-single.mp4" />
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="files\ttfs\icon.ttf" />
+    <Font Include="files\ttfs\text.ttf" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

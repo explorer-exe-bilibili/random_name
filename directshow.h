@@ -21,6 +21,10 @@ void play(const char* path) {
 	hr = pGraph->QueryInterface(IID_IMediaEvent, (void**)&pEvent);
 	pGraph->QueryInterface(IID_IVideoWindow, (void**)&pVideoWindow);
 	hr = pGraph->RenderFile(UTF8To16(path), NULL);
+	if (hr != S_OK) { 
+		errlog("read video unsuccessfully"); 
+		PostQuitMessage(0);
+	}
 	pVideoWindow->put_WindowStyle(WS_POPUP);
 	pVideoWindow->put_Width(screenWidth);
 	pVideoWindow->put_Height(screenHeight);
@@ -29,6 +33,8 @@ void play(const char* path) {
 
 	if (SUCCEEDED(hr))
 	{
+		mciSendString(L"stop bgm", NULL, 0, NULL); // Í£Ö¹²¥·Å
+		log("play begin");
 		hr = pControl->Run();
         long evCode;
         pEvent->WaitForCompletion(INFINITE, &evCode);
@@ -38,4 +44,5 @@ void play(const char* path) {
 	pEvent->Release();
 	pGraph->Release();
 	CoUninitialize();
+	log("play end");
 }

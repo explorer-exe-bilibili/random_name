@@ -13,6 +13,21 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="资源文件\icon">
+      <UniqueIdentifier>{e86e8e15-679f-4dae-908f-1ffd72bf41d4}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="资源文件\bmp">
+      <UniqueIdentifier>{24044db8-d17b-4ccf-8cd3-49b8357c70e0}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="资源文件\mp3">
+      <UniqueIdentifier>{07ce7d83-32c0-4067-b9a3-a9a3e09d909d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="资源文件\mp4">
+      <UniqueIdentifier>{5ae1e962-cdb2-4509-b072-5de24076671c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="资源文件\ttf">
+      <UniqueIdentifier>{6eca6dec-5cd8-4c5a-8be7-3305414c7e5f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="ramdon name.h">
@@ -36,6 +51,12 @@
     <ClInclude Include="type.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="showname.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="genthen-impact.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ramdon name.cpp">
@@ -43,47 +64,105 @@
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <Image Include="small.ico">
-      <Filter>资源文件</Filter>
+    <Image Include="files\icos\exit.ico">
+      <Filter>资源文件\icon</Filter>
     </Image>
-    <Image Include="ramdon name.ico">
-      <Filter>资源文件</Filter>
+    <Image Include="files\icos\1blue.ico">
+      <Filter>资源文件\icon</Filter>
+    </Image>
+    <Image Include="files\icos\1pink.ico">
+      <Filter>资源文件\icon</Filter>
+    </Image>
+    <Image Include="files\icos\10blue.ico">
+      <Filter>资源文件\icon</Filter>
+    </Image>
+    <Image Include="files\icos\10pink.ico">
+      <Filter>资源文件\icon</Filter>
     </Image>
     <Image Include="files\imgs\detailbg.bmp">
-      <Filter>资源文件</Filter>
+      <Filter>资源文件\bmp</Filter>
     </Image>
     <Image Include="files\imgs\element-anemo-bg.bmp">
-      <Filter>资源文件</Filter>
+      <Filter>资源文件\bmp</Filter>
     </Image>
     <Image Include="files\imgs\element-cryo-bg.bmp">
-      <Filter>资源文件</Filter>
+      <Filter>资源文件\bmp</Filter>
     </Image>
     <Image Include="files\imgs\element-dendro-bg.bmp">
-      <Filter>资源文件</Filter>
+      <Filter>资源文件\bmp</Filter>
     </Image>
     <Image Include="files\imgs\element-electro-bg.bmp">
-      <Filter>资源文件</Filter>
+      <Filter>资源文件\bmp</Filter>
     </Image>
     <Image Include="files\imgs\element-geo-bg.bmp">
-      <Filter>资源文件</Filter>
+      <Filter>资源文件\bmp</Filter>
     </Image>
     <Image Include="files\imgs\element-hydro-bg.bmp">
-      <Filter>资源文件</Filter>
+      <Filter>资源文件\bmp</Filter>
     </Image>
     <Image Include="files\imgs\element-pyro-bg.bmp">
-      <Filter>资源文件</Filter>
+      <Filter>资源文件\bmp</Filter>
     </Image>
     <Image Include="files\imgs\outfit-background.bmp">
-      <Filter>资源文件</Filter>
+      <Filter>资源文件\bmp</Filter>
     </Image>
     <Image Include="files\imgs\over1.bmp">
-      <Filter>资源文件</Filter>
+      <Filter>资源文件\bmp</Filter>
+    </Image>
+    <Image Include="files\imgs\over2.bmp">
+      <Filter>资源文件\bmp</Filter>
+    </Image>
+    <Image Include="files\imgs\over3.bmp">
+      <Filter>资源文件\bmp</Filter>
+    </Image>
+    <Image Include="files\imgs\over4.bmp">
+      <Filter>资源文件\bmp</Filter>
     </Image>
     <Image Include="files\imgs\splash-background.bmp">
-      <Filter>资源文件</Filter>
+      <Filter>资源文件\bmp</Filter>
     </Image>
     <Image Include="files\imgs\wish-background.bmp">
-      <Filter>资源文件</Filter>
+      <Filter>资源文件\bmp</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <Media Include="files\mp3\backsound.mp3">
+      <Filter>资源文件\mp3</Filter>
+    </Media>
+    <Media Include="files\mp3\result-list.mp3">
+      <Filter>资源文件\mp3</Filter>
+    </Media>
+    <Media Include="files\mp3\reveal-3star.mp3">
+      <Filter>资源文件\mp3</Filter>
+    </Media>
+    <Media Include="files\mp3\reveal-4star.mp3">
+      <Filter>资源文件\mp3</Filter>
+    </Media>
+    <Media Include="files\mp3\reveal-5star.mp3">
+      <Filter>资源文件\mp3</Filter>
+    </Media>
+    <Media Include="files\video\3star-single.mp4">
+      <Filter>资源文件\mp4</Filter>
+    </Media>
+    <Media Include="files\video\4star-multi.mp4">
+      <Filter>资源文件\mp4</Filter>
+    </Media>
+    <Media Include="files\video\4star-single.mp4">
+      <Filter>资源文件\mp4</Filter>
+    </Media>
+    <Media Include="files\video\5star-multi.mp4">
+      <Filter>资源文件\mp4</Filter>
+    </Media>
+    <Media Include="files\video\5star-single.mp4">
+      <Filter>资源文件\mp4</Filter>
+    </Media>
+  </ItemGroup>
+  <ItemGroup>
+    <Font Include="files\ttfs\icon.ttf">
+      <Filter>资源文件\ttf</Filter>
+    </Font>
+    <Font Include="files\ttfs\text.ttf">
+      <Filter>资源文件\ttf</Filter>
+    </Font>
   </ItemGroup>
 </Project>

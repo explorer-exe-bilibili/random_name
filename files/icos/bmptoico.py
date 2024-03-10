@@ -10,11 +10,11 @@ def bmptoico(f,b):
 # 获取目录下文件名
 files = os.listdir()
 # 给图标文件单独创建一个icon目录
-if not os.path.exists('bmps'):
-    os.mkdir('bmps')
+if not os.path.exists('icons'):
+    os.mkdir('icons')
 for inName in files:
 # 分离文件名与扩展名
     tmp = os.path.splitext(inName)
-    if tmp[1] == '.ico':
-        outName = '.\\bmps\\'+tmp[0] + '.bmp'
+    if tmp[1] == '.bmp':
+        outName = '.\\icons\\'+tmp[0] + '.ico'
         bmptoico(inName,outName)
