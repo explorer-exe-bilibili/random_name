@@ -13,27 +13,24 @@
 #define STAR L"E"
 #define QI_YUAN L"r"
 #define SETING L"'"
-#define FIRST_MENU 1
-#define SETTING 2
-#define SHOW_NAMES_ING 3
 
 std::chrono::steady_clock::time_point start, end;
 HANDLE random_handle;
 DWORD random_;
 HFONT text, icon, icon_star, text_big, text_mid, text_list, icon_mid;
-BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg_, exitinfo_, goldenbg, listbm_, list4star_, list5star_, list6star_, list3star_, buttom_;
 LPCWSTR names[256], temp[10];
 HINSTANCE hInstance = NULL;
 UINT_PTR timerID;// 在全局范围内定义计时器ID
 int currentBitmap = 1;      // 当前显示的背景图片
+Log randomedlist("name.txt",1);
 const char* video;
 wchar_t signame[10],*tmp;
-bool firsttime = 1, is5star = 0, is4star = 0, isball1 = 0, ing = 0, printing = 0, isball10 = 0, ball10ing = 0, clicked = 0, ft = 0, initing = 1, skipped = 0;
+bool firsttime = 1, is5star = 0, is4star = 0, isball1 = 0, ing = 0, printing = 0, isball10 = 0, ball10ing = 0, clicked = 0, ft = 0, skipped = 0;
 int number = 0,printnum,star_[10];
 int mode = 1, step = 0,bottom1x,bottom1y;
 int overlay1X, overlay2X, overlay3X, overlay4X, overlay1Y, overlayW, overlayH, button1x, button2x, button3x, button4x, buttony, overlayX, overlayY;
 int ball10x, bally, ball1x, ball1end, ball10end, ballyend, skipbmx, skipbmy, skipbmxend, skipbmyend, settingx, settingy, settingxend, settingyend;
-int ballW,ballH,screenmode=SETTING;
+int ballW,ballH;
 static int cx, cy, cxDib, cyDib;
 int listx[11], listy = 0, listxend, listyend;
 
@@ -53,7 +50,6 @@ void paintoverlay(HDC hdc, HDC hdcMem);
 
 
 void out10name(HDC hdc, HDC hdcMem) {
-    screenmode = SHOW_NAMES_ING;
     if (skipped) {
         menu(hdc, hdcMem);
         printing = !printing;
@@ -366,7 +362,7 @@ void printnames(HDC hdc, HDC hdcMem) {
 
 void destoryall() {
     // 释放资源并退出程序
-    for (char i = BitmapCounts; i >= 0; i--)DeleteObject(hbitmaps[i]);
+    for (char i = BitmapCounts-1; i >= 0; i--)DeleteObject(hbitmaps[i]);
     mciSendString(L"close bgm", NULL, 0, NULL); // 关闭音乐文件
     mciSendString(L"close star3", NULL, 0, NULL); // 关闭音乐文件
     mciSendString(L"close star4", NULL, 0, NULL); // 关闭音乐文件
@@ -382,18 +378,21 @@ void showname10() {
     printing = 1;
     ing = 1;
     ft = 1;
+    randomedlist << randomedlist.pt()<<"{" << randomedlist.nl();
     for (int tmp = number + 10; number < tmp; number++) {
         temp[10-(tmp - number)] = names[number];
         star_[10-(tmp - number)] = star[number];
         if (star[number] >= 5)is5star = 1;
         log("10balling number=%d,tmp=%d,star=%d", number, tmp,star_[10-(tmp-number)]);
+        randomedlist << "[" << star_[10 - (tmp - number)] << "星]" << "[" << LWStostr(temp[10 - (tmp - number)]) << "]"<<randomedlist.nl();
     }
+    randomedlist << "}"<<randomedlist.nl();
     mciSendString(L"stop bgm", NULL, 0, NULL); // 停止播放
     if (!offvideo) {
         if (is5star == 1)
-            play(".\\files\\video\\5star-multi.mp4");
+            play("\\files\\video\\5star-multi.mp4");
         else if (is5star == 0)
-            play(".\\files\\video\\4star-multi.mp4");
+            play("\\files\\video\\4star-multi.mp4");
     }
     else
         mciSendString(L"stop bgm", NULL, 0, NULL); // 停止播放
@@ -439,7 +438,7 @@ void printfirstmenu(HDC hdc,HDC hdcMem) {
     SelectObject(hdc, icon_mid);
     SetTextColor(hdc, RGB(0, 0, 0));
     SetBkColor(hdc, RGB(225, 222, 213));
-    //TextOut_(hdc, settingx,settingy, SETING);
+    TextOut_(hdc, settingx,settingy, SETING);
     paintoverlay(hdc,hdcMem);
     firsttime = !firsttime;
 }
@@ -480,9 +479,7 @@ void printstars(HDC hdc, int number) {
     switch (number)
     {
     case 3: {
-        mciSendString(L"close star3", NULL, 0, NULL); // 关闭音乐文件
-        mciSendString(L"open .\\files\\mp3\\reveal-3star.mp3 alias star3", NULL, 0, NULL);
-        mciSendString(L"play star3", 0, 0, 0);
+        openmusic(_1_3, "star3");
         Sleep(2000);
         TextOut_(hdc, windowWidth * 0.177, windowHeight * 31 / 52, STAR);
         Sleep(200);
@@ -491,9 +488,7 @@ void printstars(HDC hdc, int number) {
         TextOut_(hdc, windowWidth * 0.197, windowHeight * 31 / 52, STAR);
     }break;
     case 4: {
-        mciSendString(L"close star4", NULL, 0, NULL); // 关闭音乐文件
-        mciSendString(L"open .\\files\\mp3\\reveal-4star.mp3 alias star4", NULL, 0, NULL);
-        mciSendString(L"play star4", 0, 0, 0);
+        openmusic(_1_4, "star4");
         Sleep(2100);
         TextOut_(hdc, windowWidth * 0.177, windowHeight * 31 / 52, STAR);
         Sleep(200);
@@ -504,9 +499,7 @@ void printstars(HDC hdc, int number) {
         TextOut_(hdc, windowWidth * 0.207, windowHeight * 31 / 52, STAR);
     }break;
     case 5: {
-        mciSendString(L"close star5", NULL, 0, NULL); // 关闭音乐文件
-        mciSendString(L"open .\\files\\mp3\\reveal-5star.mp3 alias star5", NULL, 0, NULL);
-        mciSendString(L"play star5", 0, 0, 0);
+        openmusic(_1_5, "star5");
         Sleep(2150);
         TextOut_(hdc, windowWidth * 0.177, windowHeight * 31 / 52, STAR);
         Sleep(110);
@@ -519,18 +512,15 @@ void printstars(HDC hdc, int number) {
         TextOut_(hdc, windowWidth * 0.217, windowHeight * 31 / 52, STAR);
     }break;
     case 6: {
-        mciSendString(L"close starfull", NULL, 0, NULL); // 关闭音乐文件
-        mciSendString(L"open .\\files\\mp3\\reveal-fullstar.mp3 alias starfull", NULL, 0, NULL);
-        mciSendString(L"play starfull", 0, 0, 0);
+        openmusic(_1_6, "starfull");
         Sleep(2150);
         int x, y;
         for (int i = 500; i > 0; i--) {
             x = randomIntegerBetween(0, windowWidth * 0.99);
             y = randomIntegerBetween(0, windowHeight * 0.99);
             TextOut_(hdc, x, y, STAR);
-            Sleep(7);
+            Sleep(5);
         }
-        mciSendString(L"stop starfull", 0, 0, 0);
     }break;
     default:
         break;
@@ -542,16 +532,17 @@ void showname1() {
     ing = 1;
     temp[0] = names[number];
     star_[0] = star[number];
+    randomedlist << randomedlist.pt() << "[" << star_[0] << "星]" << "[" << LWStostr(temp[0]) << "]" << randomedlist.nl();
     printnum = 1;
     if (star_[0] >= 5)is5star = 1;
     if (star_[0] == 4)is4star = 1;
     if (!offvideo) {
         if (is4star == 0 AND is5star == 0)
-            play(".\\files\\video\\3star-single.mp4");
+            play("\\files\\video\\3star-single.mp4");
         if (is4star == 1 AND is5star == 0)
-            play(".\\files\\video\\4star-single.mp4");
+            play("\\files\\video\\4star-single.mp4");
         if (is5star == 1)
-            play(".\\files\\video\\5star-single.mp4");
+            play("\\files\\video\\5star-single.mp4");
     }
     else
         mciSendString(L"stop bgm", NULL, 0, NULL); // 停止播放
@@ -567,8 +558,10 @@ void showname1() {
 }
 
 DWORD static WINAPI RandomNumberGenerator() {
+    fileerr = 0;
     for (unsigned int i = 0; i <= 255; i++) {
         names[i] = random(i);
+        if (fileerr) { MessageBoxA(NULL, "名字文件打开失败，进入设置重新选择", "错误", MB_SYSTEMMODAL | MB_ICONERROR); return -1; }
     }
     log("random finish");
     return 0;
@@ -628,4 +621,10 @@ void paintoverlay(HDC hdc, HDC hdcMem) {
         log("set mode4 successfully");
     }
     log("paint overlay bitmap");
+}
+
+void rerandom() {
+    for (int i = 0; i <= 256; i++)names[i] = 0;
+    random_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)RandomNumberGenerator, NULL, 0, NULL);
+    reran = 0;
 }

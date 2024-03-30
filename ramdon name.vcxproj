@@ -154,6 +154,7 @@
     <ClInclude Include="directshow.h" />
     <ClInclude Include="genthen-impact.h" />
     <ClInclude Include="getname.h" />
+    <ClInclude Include="log.h" />
     <ClInclude Include="mywindows.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="setting.h" />

@@ -11,11 +11,6 @@ import os
 token=''
 file_name=''
 
-# 定义文件路径
-file_path = Path('version')
-
-# 读取文件内容
-content = file_path.read_text(encoding='ansi')
 
 def from_str(x: Any) -> str:
     assert isinstance(x, str)
@@ -41,7 +36,6 @@ def trim_string_until_char(s, char):
     else:
         # 如果没有找到特殊字符，返回原始字符串或None
         return s  # 或者 return None，取决于您的需求
-
 def getverson():
     url = "http://52.184.81.18:35244/api/auth/login" 
 
@@ -91,7 +85,6 @@ def getverson():
         file_name = file_name.replace(old, str(new))  # 使用str确保非字符串替换也能工作
 
     return file_name
-
 def get_string_until_char(s, char):
     # 找到特殊字符的索引
     index = s.find(char)
@@ -102,8 +95,6 @@ def get_string_until_char(s, char):
     else:
         # 如果没有找到特殊字符，返回整个字符串
         return s
-
-
 def download(url):
 
     # 发送GET请求
@@ -128,7 +119,23 @@ def download(url):
         print(f"下载失败，状态码：{response.status_code}")
         
 # 替换映射字典
-version=''
+content=''
+file_path = Path('version')
+try:
+    content = file_path.read_text(encoding='ansi')
+except:
+    versions=getverson()
+    version=versions
+    version=trim_string_until_char(version,"本")
+    download(version)
+    zip_path = 'download.zip'
+    # 指定解压目录
+    extract_to_path = '.'
+    # 使用with语句确保文件正确关闭
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        # 解压所有文件到指定目录
+        zip_ref.extractall(extract_to_path)
+    os.system(r"install.bat")
 versions=getverson()
 version=versions
 number=get_string_until_char(version,"版")
@@ -144,6 +151,7 @@ if content<number:
     with zipfile.ZipFile(zip_path, 'r') as zip_ref:
         # 解压所有文件到指定目录
         zip_ref.extractall(extract_to_path)
+        os.system(r"install.bat")
 else:
     print('已经是最新版本',content)
-    
+

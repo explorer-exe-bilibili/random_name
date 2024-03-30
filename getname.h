@@ -19,12 +19,14 @@ int randomIntegerBetween(int min, int max);
 
 int seed = 2434,seed2=32435;
 int star[256];
+bool fileerr = 0;
 
 LPCWSTR random(int i) {
     std::string tmp1;
     LPCWSTR tmp3;
     const char* path = getConfigValue("namesfile");
     tmp1 = RandomLineFromFile(path);
+    if (strcmp(tmp1.c_str(), "FOF") == 0)fileerr = 1;
     star[i] = getstar(tmp1);
     tmp1 = removeAfterDash(tmp1);
     tmp3 = UTF8To16(tmp1.c_str());
@@ -41,6 +43,8 @@ int getstar(const std::string& input) {
         std::string numberStr = input.substr(dashPos + 1);
         // 将数字字符串转换为整数
         int result = std::stoi(numberStr);
+        if (result > 6)result = 6;
+        if (result < 3)result = 3;
         return result;
     }
     // 如果未找到 "-" 或转换失败，返回默认值（可以根据需要修改）
@@ -66,7 +70,7 @@ std::string RandomLineFromFile(const std::string& filename)
     std::ifstream file(filename);
     if (!file)
     {
-        errlog("fail to open the file,it is not exist");
+        errlog("文件不存在");
         return "FOF";
     }
     std::string line="你好牛啊啊啊-3";

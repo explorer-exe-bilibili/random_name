@@ -3,15 +3,16 @@
 LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
     HDC hdc =GetDC(NULL);
     hWnd = hwnd;
+    if (reran)rerandom();
     switch (uMsg) {//通过判断消息进行消息响应
     case WM_CREATE: {
         // 加载两个背景图片
         hbitmaps[background] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\wish-background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-        hbitmaps[over1] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\over1.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-        hbitmaps[over2] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\over2.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-        hbitmaps[over3] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\over3.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-        hbitmaps[over4] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\over4.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-        hbitmaps[cardbackground] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\hbitmaps[cardbackground].bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+        hbitmaps[over1] = (HBITMAP)LoadImageA(NULL, getConfigValue(OVER1), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+        hbitmaps[over2] = (HBITMAP)LoadImageA(NULL, getConfigValue(OVER2), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+        hbitmaps[over3] = (HBITMAP)LoadImageA(NULL, getConfigValue(OVER3), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+        hbitmaps[over4] = (HBITMAP)LoadImageA(NULL, getConfigValue(OVER4), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+        hbitmaps[cardbackground] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\cardbg.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
         hbitmaps[pink1b] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\1pinkb.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
         hbitmaps[pink1i] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\1pinki.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
         hbitmaps[pink10i] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\10pinki.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
@@ -66,8 +67,8 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
         GetObject(hbitmaps[over1], sizeof(BITMAP), &overlay1Bm);
         GetObject(hbitmaps[over2], sizeof(BITMAP), &overlay2Bm);
         GetObject(hbitmaps[over3], sizeof(BITMAP), &overlay3Bm);
-        GetObject(hbitmaps[buttom], sizeof(BITMAP), &buttom_);
         GetObject(hbitmaps[over4], sizeof(BITMAP), &overlay4Bm);
+        GetObject(hbitmaps[buttom], sizeof(BITMAP), &buttom_);
         GetObject(hbitmaps[setbm], sizeof(BITMAP), &setbm_);
         // 打开并播放背景音乐
         mciSendString(L"open .\\files\\mp3\\backsound.mp3 alias bgm", NULL, 0, NULL); // 打开 MP3 文件并创建一个别名 'bgm'
@@ -185,7 +186,6 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
     case WM_LBUTTONDOWN: {
         int x = LOWORD(lParam);
         int y = HIWORD(lParam);
-        if (x >= exitx AND x <= exitxend AND y >= exity AND y <= exityend)PostQuitMessage(0);
         if (!ing) {
             switch (screenmode)
             {
@@ -193,13 +193,14 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
                 // 获取点击位置
                 SetStretchBltMode(hdc, HALFTONE);
                 if (x >= overlay1X AND x <= button1x AND y >= overlay1Y AND y <= buttony) mode = 1;
-                if (x >= overlay2X AND x <= button2x AND y >= overlay1Y AND y <= buttony) mode = 2;
-                if (x >= overlay3X AND x <= button3x AND y >= overlay1Y AND y <= buttony) mode = 3;
-                if (x >= overlay4X AND x <= button4x AND y >= overlay1Y AND y <= buttony) mode = 4;
-                if (x >= bottom1x AND x <= bottom1x + 123 AND y >= bottom1y AND y <= bottom1y + 31) { offvideo = !offvideo; InvalidateRect(hWnd, NULL, FALSE); }
-                if (x >= ball10x AND x <= ball10end AND y >= bally AND y <= ballyend)showname10();
-                if (x >= ball1x AND x <= ball1end AND y >= bally AND y <= ballyend)showname1();
-                if (x >= settingx AND x <= settingxend AND y >= settingy AND y <= settingyend)screenmode = SETTING;
+                else if (x >= overlay2X AND x <= button2x AND y >= overlay1Y AND y <= buttony) mode = 2;
+                else if (x >= overlay3X AND x <= button3x AND y >= overlay1Y AND y <= buttony) mode = 3;
+                else if (x >= overlay4X AND x <= button4x AND y >= overlay1Y AND y <= buttony) mode = 4;
+                else if (x >= bottom1x AND x <= bottom1x + 123 AND y >= bottom1y AND y <= bottom1y + 31) { offvideo = !offvideo; InvalidateRect(hWnd, NULL, FALSE); }
+                else if (x >= ball10x AND x <= ball10end AND y >= bally AND y <= ballyend)showname10();
+                else if (x >= ball1x AND x <= ball1end AND y >= bally AND y <= ballyend)showname1();
+                else if (x >= exitx AND x <= exitxend AND y >= exity AND y <= exityend)PostQuitMessage(0);
+                else if (x >= settingx AND x <= settingxend AND y >= settingy AND y <= settingyend)screenmode = SETTING;
             }break;
             case SHOW_NAMES_ING: {
                 if (ball10ing) {
@@ -214,7 +215,7 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
                 }
             }break;
             case SETTING: {
-                
+                settingkicked(x, y);
             }
             default:
                 break;
@@ -234,14 +235,18 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
         switch (HIWORD(wParam)) {
         case EN_CHANGE: {
             // 获取文本框的句柄，确保它是有效的
-            HWND editBoxHwnd = (HWND)LOWORD(lParam);
+            HWND editBoxHwnd = (HWND)(lParam);
+            int numberoftextbox = LOWORD(wParam);
             if (editBoxHwnd != NULL) {
                 // 分配缓冲区大小，这里假设文本框中的文本不会超过256个字符
-                // 获取文本框中的文本
-                GetWindowTextW(editBoxHwnd, buffer, 256);
+                TCHAR sz[256];
+                Edit_GetText(editBoxHwnd, sz, 256);
                 // 显示文本框中的文本
-                MessageBoxW(NULL, buffer, L"Text Changed", MB_OK);
-                delete[] buffer; // 释放分配的内存
+                char* tmp=TCHAR2CHAR(sz);
+                if (numberoftextbox == 0)
+                    replaceConfigOption(NAMES, tmp);
+                if (numberoftextbox == 1)
+                    replaceConfigOption(WINDOW_TITEL, tmp);
             }
             break;
         }
@@ -260,7 +265,9 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
 
 //main
 int WINAPI WinMain(HINSTANCE hInstance_, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
-    initlogs();
+    FILE* temppppppp;
+    GetModuleFileNameA(NULL, runpath, MAX_PATH);
+    removeFileNameFromPath(runpath);
     initconfig();
     SetConsoleOutputCP(65001); // 设置为UTF-8编码
     WNDCLASS wndcls; //创建一个窗体类
@@ -277,11 +284,11 @@ int WINAPI WinMain(HINSTANCE hInstance_, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     RegisterClass(&wndcls);//向操作系统注册窗体
     hInstance = hInstance_;
     fullscreen = !std::stoi(getConfigValue(INWINDOW));
-    if(fullscreen)hWnd = CreateWindowA("main", getConfigValue(WINDOW_TITEL), WS_POPUP | WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN, 0, 0, windowWidth, windowHeight, NULL, NULL, hInstance_, NULL);
+    if(fullscreen)hWnd = CreateWindowW(L"main", UTF8To16(getConfigValue(WINDOW_TITEL)), WS_POPUP | WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN, 0, 0, windowWidth, windowHeight, NULL, NULL, hInstance_, NULL);
     else {
         windowWidth = screenWidth * 0.6;
         windowHeight = screenHeight * 0.6;
-        hWnd = CreateWindowA("main", getConfigValue(WINDOW_TITEL), WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN| WS_THICKFRAME, 0, 0, windowWidth, windowHeight, NULL, NULL, hInstance_, NULL);
+        hWnd = CreateWindowW(L"main", UTF8To16(getConfigValue(WINDOW_TITEL)), WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN| WS_THICKFRAME, 0, 0, windowWidth, windowHeight, NULL, NULL, hInstance_, NULL);
     }
     DWORD threadId;
     // 创建线程
@@ -289,7 +296,6 @@ int WINAPI WinMain(HINSTANCE hInstance_, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     offvideo = std::stoi(getConfigValue(OFF_VIDEO));
     mode = std::stoi(getConfigValue(MODE));
 	ShowWindow(hWnd, SW_SHOWNORMAL);//把窗体显示出来
-    FILE *temppppppp;
     fopen_s(&temppppppp, ".\\version", "w");
     fprintf(temppppppp,"0.3.1");
     fclose(temppppppp);

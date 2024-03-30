@@ -6,6 +6,8 @@
 #include <cstdarg>
 #include <filesystem>
 #include"bitmaps.h"
+#include"log.h"
+#include<commctrl.h>
 
 #pragma comment(lib, "winmm.lib") // 链接到 Winmm.lib
 
@@ -15,7 +17,6 @@
 #define AND &&
 #define LOGPATH ".\\files\\log\\main.log"
 #define ERR_LOGPATH ".\\files\\log\\err.log"
-#define NAMESED L".\\history.txt"
 
 std::mutex logMutex,randomlock;
 int screenHeight = GetSystemMetrics(SM_CYSCREEN);
@@ -26,7 +27,8 @@ int windowTop, windowLeft;
 int indices[10];
 bool fullscreen;
 HWND hWnd;
-FILE *logfile_main,*logfile_err,*namesedfile;
+FILE *logfile_main,*logfile_err;
+Log infolog(LOGPATH, 0),errlogf(ERR_LOGPATH,0);
 
 HWND CreateButton(const char* classname, const char* title, int x, int y, int width, int height, HWND hWnd, int numberofbutton, const char* path,bool mode);
 LPCWSTR UTF8To16(const char* utf8String);
@@ -34,9 +36,28 @@ void PrintfDebugString(const wchar_t* format, ...);
 void IntMessageBox(int intValue);
 void log(const char* logstring,...);
 void errlog(const char* format, ...);
-void initlogs();
 HWND CreateEditBox(HWND hWndParent, int NUMBER, int x, int y, int w, int h, const char* words);
+std::string UTF_82ASCII(std::string& strUtf8Code);
+void removeFileNameFromPath(char* path);
+std::string WideByte2Acsi(std::wstring& wstrcode);
+std::string LWStostr(LPCWSTR lpcwszStr);
+std::wstring Utf82Unicode(const std::string& utf8string);
+HWND CreateEditBox(HWND hWndParent, int NUMBER, int x, int y, int w, int h, const char* words);
+int* find(int* array, int size, int valueToFind, int* count);
 
+
+
+void removeFileNameFromPath(char* path) {
+    // 获取字符串长度
+    size_t len = strlen(path);
+    // 找到最后一个'\'的位置
+    char* lastSlash = strrchr(path, '\\');
+    // 如果找到了最后一个'\'，并且它后面还有字符
+    if (lastSlash != NULL && lastSlash < path + len - 1) {
+        // 将最后一个'\'后面的所有字符（包括它自己）替换为字符串结束符'\0'
+        *lastSlash = '\0';
+    }
+}
 
 void IntMessageBox(int intValue) {
     char tmp[3];
@@ -74,9 +95,7 @@ void PrintfDebugString(const wchar_t* format, ...)
     va_end(args);
 }
 void log(const char* format,...) {
-    std::lock_guard<std::mutex> guard(logMutex); // 锁定互斥锁
     if (format == NULL)errlog("meet a void string");
-    if (format == NULL)return;
     va_list args;
     va_start(args, format);
     int length = vsnprintf(0,0,format, args) + 1;
@@ -88,21 +107,11 @@ void log(const char* format,...) {
         return;
     }
     vsnprintf_s(buffer, length, _TRUNCATE, format, args);
-    fopen_s(&logfile_main,LOGPATH, "a");
-    time_t now = time(NULL);
-    struct tm* localTime = localtime(&now);
-    wchar_t timeStr[32];
-    swprintf(timeStr, sizeof(timeStr) / sizeof(wchar_t), L"%04d-%02d-%02d %02d:%02d:%02d",
-        localTime->tm_year + 1900, localTime->tm_mon + 1, localTime->tm_mday,
-        localTime->tm_hour, localTime->tm_min, localTime->tm_sec);
-    fwprintf(logfile_main,L"[%s]",timeStr);
-    fprintf(logfile_main,"[INFO]%s\n", buffer);
-    fclose(logfile_main);
+    infolog << infolog.pt() << "[INFO]" << buffer<<infolog.nl();
     delete[] buffer;
     va_end(args);
 }
 void errlog(const char* format, ...) {
-    std::lock_guard<std::mutex> guard(logMutex); // 锁定互斥锁
     if (format == NULL)errlog("meet a void string");
     if (format == NULL)return;
     va_list args;
@@ -110,74 +119,31 @@ void errlog(const char* format, ...) {
     int length = _vscprintf(format, args) + 1;
     char* buffer = new char[length];
     vsnprintf_s(buffer, length, _TRUNCATE, format, args);
-    logfile_main = fopen(LOGPATH, "a");
-    logfile_err = fopen(ERR_LOGPATH, "a");
-    time_t now = time(NULL);
-    struct tm* localTime = localtime(&now);
-    wchar_t timeStr[32];
-    swprintf(timeStr, sizeof(timeStr) / sizeof(wchar_t), L"%04d-%02d-%02d %02d:%02d:%02d",
-        localTime->tm_year + 1900, localTime->tm_mon + 1, localTime->tm_mday,
-        localTime->tm_hour, localTime->tm_min, localTime->tm_sec);
-    fwprintf(logfile_main, L"[%s]", timeStr);
-    fprintf(logfile_main, "[ERROR]%s\n", buffer);
-    fclose(logfile_main);   
-    fwprintf(logfile_err, L"[%s]", timeStr);
-    fprintf(logfile_err, "[ERROR]%s\n", buffer);
-    fclose(logfile_err);
+    infolog << infolog.pt() << "[ERROR]" << buffer << infolog.nl();
+    errlogf << errlogf.pt() << "[ERROR]" << buffer << errlogf.nl();
     delete[] buffer;
     va_end(args);
 }
-//void randomed(LPCWSTR name, int star) {
-//    std::lock_guard<std::mutex> guard(randomlock); // 锁定互斥锁
-//    namesedfile = _wfopen(NAMESED, L"a");
-//    time_t now = time(NULL);
-//    struct tm* localTime = localtime(&now);
-//    wchar_t timeStr[32];
-//    swprintf(timeStr, sizeof(timeStr) / sizeof(wchar_t), L"%04d-%02d-%02d %02d:%02d:%02d",
-//        localTime->tm_year + 1900, localTime->tm_mon + 1, localTime->tm_mday,
-//        localTime->tm_hour, localTime->tm_min, localTime->tm_sec);
-//    fwprintf(namesedfile, L"[%s]", timeStr);
-//    fwprintf(namesedfile,L"[%s]", name);
-//    fwprintf(namesedfile, L"[%d]", star);
-//    fwprintf(namesedfile, L"\n");
-//    fclose(namesedfile);
-//    Sleep(10);
-//}
-void initlogs() {
-    namespace fs = std::filesystem;
-    // 指定log文件夹的路径
-    std::string log_folder_path = ".\\files\\log";
-    // 检查文件夹是否存在
-    if (!fs::exists(log_folder_path)) {
-        // 文件夹不存在，尝试创建
-        try {
-            fs::create_directory(log_folder_path);
-        }
-        catch (const fs::filesystem_error& e) {
-            errlog("Error creating directory: %s", e.what());
-        }
-    }
-    logfile_main = fopen(LOGPATH, "w");
-    logfile_err = fopen(ERR_LOGPATH, "w");
-    namesedfile = _wfopen(NAMESED, L"a");
-    if (logfile_err == NULL) {
-        MessageBox(NULL, L"创建日志文件失败，尝试检查文件权限，不要放在c盘根目录下", L"错误", MB_ICONERROR);
-        PostQuitMessage(0);
-    } 
-    if (logfile_main == NULL) {
-        MessageBox(NULL, L"创建日志文件失败，尝试检查文件权限，不要放在c盘根目录下", L"错误", MB_ICONERROR);
-        PostQuitMessage(0);
-    }
-    if (namesedfile == NULL) {
-        MessageBox(NULL, L"创建抽卡记录文件失败，尝试检查文件权限，不要放在c盘根目录下", L"错误", MB_ICONERROR);
-        PostQuitMessage(0);
-    }
-    fclose(logfile_err);
-    fclose(logfile_main); 
-    fclose(namesedfile);
 
-    log("logs init successfully");
+
+std::string LWStostr(LPCWSTR lpcwszStr)
+{
+    std::string str;
+    DWORD dwMinSize = 0;
+    LPSTR lpszStr = NULL;
+    dwMinSize = WideCharToMultiByte(CP_OEMCP, NULL, lpcwszStr, -1, NULL, 0, NULL, FALSE);
+    if (0 == dwMinSize)
+    {
+        return FALSE;
+    }
+    lpszStr = new char[dwMinSize];
+    WideCharToMultiByte(CP_OEMCP, NULL, lpcwszStr, -1, lpszStr, dwMinSize, NULL, FALSE);
+    str = lpszStr;
+    delete[] lpszStr;
+    return str;
 }
+
+
 // 函数用于查找数组中特定值的所有位置
 int* find(int* array, int size, int valueToFind, int* count) {
     // 分配一个动态数组来存储找到的索引
@@ -222,4 +188,66 @@ HWND CreateEditBox(HWND hWndParent,int NUMBER,int x,int y,int w,int h,const char
 
     // 返回文本框句柄
     return hEdit;
+}
+
+std::wstring Utf82Unicode(const std::string& utf8string)
+{
+    int widesize = ::MultiByteToWideChar(CP_UTF8, 0, utf8string.c_str(), -1, NULL, 0);
+    if (widesize == ERROR_NO_UNICODE_TRANSLATION)
+    {
+        throw std::exception("Invalid UTF-8 sequence.");
+    }
+    if (widesize == 0)
+    {
+        throw std::exception("Error in conversion.");
+    }
+
+    std::vector<wchar_t> resultstring(widesize);
+
+    int convresult = ::MultiByteToWideChar(CP_UTF8, 0, utf8string.c_str(), -1, &resultstring[0], widesize);
+
+    if (convresult != widesize)
+    {
+        throw std::exception("La falla!");
+    }
+
+    return std::wstring(&resultstring[0]);
+}
+
+
+//unicode 转为 ascii  
+
+
+std::string WideByte2Acsi(std::wstring& wstrcode)
+{
+    int asciisize = ::WideCharToMultiByte(CP_OEMCP, 0, wstrcode.c_str(), -1, NULL, 0, NULL, NULL);
+    if (asciisize == ERROR_NO_UNICODE_TRANSLATION)
+    {
+        throw std::exception("Invalid UTF-8 sequence.");
+    }
+    if (asciisize == 0)
+    {
+        throw std::exception("Error in conversion.");
+    }
+    std::vector<char> resultstring(asciisize);
+    int convresult = ::WideCharToMultiByte(CP_OEMCP, 0, wstrcode.c_str(), -1, &resultstring[0], asciisize, NULL, NULL);
+
+    if (convresult != asciisize)
+    {
+        throw std::exception("La falla!");
+    }
+
+    return std::string(&resultstring[0]);
+}
+//utf-8 转 ascii  
+
+
+std::string UTF_82ASCII(std::string& strUtf8Code)
+{
+    std::string strRet("");
+    //先把 utf8 转为 unicode  
+    std::wstring wstr = Utf82Unicode(strUtf8Code);
+    //最后把 unicode 转为 ascii  
+    strRet = WideByte2Acsi(wstr);
+    return strRet;
 }

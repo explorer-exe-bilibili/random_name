@@ -9,8 +9,15 @@ IMediaEvent* pEvent = NULL;
 IVideoWindow* pVideoWindow = NULL;
 IMediaEventEx* pMediaEvent = NULL;
 
-void play(const char* path) {
+#define _1_6 "\\files\\mp3\\reveal-fullstar.mp3"
+#define _1_5 "\\files\\mp3\\reveal-5star.mp3"
+#define _1_4 "\\files\\mp3\\reveal-4star.mp3"
+#define _1_3 "\\files\\mp3\\reveal-3star.mp3"
 
+void play(const char* path) {
+	std::string path_;
+	path_ = runpath;
+	path_ += path;
 	// Initialize the COM library.
 	HRESULT hr = CoInitialize(NULL);
 	if (FAILED(hr))return;
@@ -20,7 +27,7 @@ void play(const char* path) {
 	hr = pGraph->QueryInterface(IID_IMediaControl, (void**)&pControl);
 	hr = pGraph->QueryInterface(IID_IMediaEvent, (void**)&pEvent);
 	pGraph->QueryInterface(IID_IVideoWindow, (void**)&pVideoWindow);
-	hr = pGraph->RenderFile(UTF8To16(path), NULL);
+	hr = pGraph->RenderFile(UTF8To16(path_.c_str()), NULL);
 	if (hr != S_OK) { 
 		errlog("read video unsuccessfully"); 
 		errend();
@@ -48,4 +55,23 @@ void play(const char* path) {
 	pGraph->Release();
 	CoUninitialize();
 	log("play end");
+}
+
+void openmusic(const char* path,const char* miconname) {
+	std::string p;
+	p = "close ";
+	p += miconname;
+	mciSendStringA(p.c_str(), NULL, 0, NULL); // 关闭音乐文件
+	log(p.c_str());
+	p = "open \"";
+	p += runpath;
+	p += path;
+	p += "\" alias ";
+	p += miconname;
+	mciSendStringA(p.c_str(), NULL, 0, NULL);
+	log("打开%s,指令为%s",path, p.c_str());
+	p = "play ";
+	p += miconname;
+	log(p.c_str());
+	mciSendStringA(p.c_str(), 0, 0, 0);
 }

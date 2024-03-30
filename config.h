@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define CONFIG ".\\files\\config.txt"
+#define CONFIG_ "\\files\\config.txt"
 #define YUANSHI "Diamond"
 #define NAMES "namesfile"
 #define BLUE_BALL_COUNT "buleball"
@@ -10,6 +10,10 @@
 #define WINDOW_TITEL "title name"
 #define MODE "first mode"
 #define INWINDOW "window mode(not full screen)"
+#define OVER4 "over4"
+#define OVER3 "over3"
+#define OVER2 "over2"
+#define OVER1 "over1"
 // 定义配置项结构
 typedef struct {
     char* name;
@@ -25,7 +29,8 @@ typedef struct Node {
 // 定义链表头节点
 Node* head = NULL;
 const char* LogString;
-
+std::string configpath;
+const char* CONFIG;
 
 void addConfigItem(const char* name, const char* value);
 void readConfigFile();
@@ -38,6 +43,9 @@ void initconfig();
 const char* getConfigValue(const char* name);
 
 void initconfig() {
+    configpath = runpath;
+    configpath += CONFIG_;
+    CONFIG = configpath.c_str();
     FILE* file = fopen(CONFIG, "r");
     if (file == NULL) {
         addConfigItem(NAMES, ".\\names.txt");
@@ -48,6 +56,10 @@ void initconfig() {
         addConfigItem(MODE, "1");
         addConfigItem(INWINDOW, "0");
         addConfigItem(WINDOW_TITEL, "原神");
+        addConfigItem(OVER4, ".\\files\\imgs\\over4.bmp");
+        addConfigItem(OVER3, ".\\files\\imgs\\over3.bmp");
+        addConfigItem(OVER2, ".\\files\\imgs\\over2.bmp");
+        addConfigItem(OVER1, ".\\files\\imgs\\over1.bmp");
         saveConfigFile();
         readConfigFile();
         printAllConfigItems();
@@ -72,6 +84,14 @@ void initconfig() {
         if (strcmp(LogString, "err") == 0)addConfigItem(YUANSHI, "10000");
         LogString = getConfigValue(INWINDOW);
         if (strcmp(LogString, "err") == 0)addConfigItem(INWINDOW, "0");
+        LogString = getConfigValue(OVER1);
+        if (strcmp(LogString, "err") == 0)addConfigItem(OVER1, ".\\files\\imgs\\over1.bmp");
+        LogString = getConfigValue(OVER2);
+        if (strcmp(LogString, "err") == 0)addConfigItem(OVER2, ".\\files\\imgs\\over2.bmp");
+        LogString = getConfigValue(OVER3);
+        if (strcmp(LogString, "err") == 0)addConfigItem(OVER3, ".\\files\\imgs\\over3.bmp");
+        LogString = getConfigValue(OVER4);
+        if (strcmp(LogString, "err") == 0)addConfigItem(OVER4, ".\\files\\imgs\\over4.bmp");
         printAllConfigItems();
         log("config init successfully");
     }
@@ -193,39 +213,20 @@ void deleteConfigItem(const char* name) {
     }
     log("del %s success", name);
 }
-// 替换配置文件中的指定配置项
-void replaceConfigOption(const char* option, const char* value) {
-    FILE* file = fopen(CONFIG, "r");
-    if (file == NULL) {
-        errlog("Error opening file for reading");
-        return;
-    }
 
-    const char* tempFilename = "temp_config.txt";
-    FILE* tempFile = fopen(tempFilename, "w");
-    if (tempFile == NULL) {
-        errlog("Error opening temporary file for writing");
-        fclose(file);
-        return;
-    }
-    char line[256];
-    while (fgets(line, sizeof(line), file) != NULL) {
-        char* trimLine = strtok(line, "\n");  // 移除换行符
-        char* currentOption = strtok(trimLine, "=");
-        if (currentOption != NULL && strcmp(currentOption, option) == 0) {
-            // 替换现有配置项
-            fprintf(tempFile, "%s=%s\n", option, value);
+
+void replaceConfigOption(const char* name, const char* value) {
+    Node* prev = NULL;
+    Node* current = head;
+    while (current != NULL) {
+        if (strcmp(current->item.name, name) == 0) {
+            strcpy(current->item.value, value);
         }
-        else {
-            // 保留其他配置项
-            fprintf(tempFile, "%s\n", trimLine);
-        }
+        prev = current;
+        current = current->next;
     }
-    fclose(file);
-    fclose(tempFile);
-    // 替换原始文件
-    remove(CONFIG);
-    rename(tempFilename, CONFIG);
+    free(current);
+    saveConfigFile();
 }
 
 void printAllConfigItems() {
