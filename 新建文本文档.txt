@@ -1,0 +1,4 @@
+git branch -m 0.3 '0°æ±¾'
+git fetch origin
+git branch -u origin/'0°æ±¾' '0°æ±¾'
+git remote set-head origin -a
