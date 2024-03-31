@@ -4,9 +4,9 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
     HDC hdc =GetDC(NULL);
     hWnd = hwnd;
     if (reran)rerandom();
-    switch (uMsg) {//Í¨¹ıÅĞ¶ÏÏûÏ¢½øĞĞÏûÏ¢ÏìÓ¦
+    switch (uMsg) {//é€šè¿‡åˆ¤æ–­æ¶ˆæ¯è¿›è¡Œæ¶ˆæ¯å“åº”
     case WM_CREATE: {
-        // ¼ÓÔØÁ½¸ö±³¾°Í¼Æ¬
+        // åŠ è½½ä¸¤ä¸ªèƒŒæ™¯å›¾ç‰‡
         hbitmaps[background] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\wish-background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
         hbitmaps[over1] = (HBITMAP)LoadImageA(NULL, getConfigValue(OVER1), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
         hbitmaps[over2] = (HBITMAP)LoadImageA(NULL, getConfigValue(OVER2), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
@@ -34,10 +34,10 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
         hbitmaps[setbutton] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\settingbuttom.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
         
         int desiredPixelHeight = windowWidth*0.17;
-        // »ñÈ¡Éè±¸ÉÏÏÂÎÄµÄ DPI
-        HDC hdc = GetDC(NULL); // »ñÈ¡×ÀÃæÉè±¸ÉÏÏÂÎÄ
+        // è·å–è®¾å¤‡ä¸Šä¸‹æ–‡çš„ DPI
+        HDC hdc = GetDC(NULL); // è·å–æ¡Œé¢è®¾å¤‡ä¸Šä¸‹æ–‡
         int dpi = GetDeviceCaps(hdc, LOGPIXELSY);
-        // ¼ÆËãÂß¼­µ¥Î»¸ß¶È
+        // è®¡ç®—é€»è¾‘å•ä½é«˜åº¦
         int logicalHeight = MulDiv(desiredPixelHeight, 72, dpi);
         int logicalweidth = logicalHeight * 0.77;
         icon_star = CreateFontW(logicalHeight * 0.0862, logicalweidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
@@ -52,7 +52,7 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
         if (icon == NULL)errlog("icon font load error");
         if (text_big == NULL)errlog("icon font load error");
         if (icon_star == NULL)errlog("star load error");
-        // »ñÈ¡Í¼±êÎ»Í¼ĞÅÏ¢
+        // è·å–å›¾æ ‡ä½å›¾ä¿¡æ¯
         GetObject(hbitmaps[background], sizeof(BITMAP), &bm);
         GetObject(hbitmaps[setbutton], sizeof(BITMAP), &setbu);
         GetObject(hbitmaps[cardbackground], sizeof(BITMAP), &cardbg_);
@@ -70,14 +70,14 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
         GetObject(hbitmaps[over4], sizeof(BITMAP), &overlay4Bm);
         GetObject(hbitmaps[buttom], sizeof(BITMAP), &buttom_);
         GetObject(hbitmaps[setbm], sizeof(BITMAP), &setbm_);
-        // ´ò¿ª²¢²¥·Å±³¾°ÒôÀÖ
-        mciSendString(L"open .\\files\\mp3\\backsound.mp3 alias bgm", NULL, 0, NULL); // ´ò¿ª MP3 ÎÄ¼ş²¢´´½¨Ò»¸ö±ğÃû 'bgm'
+        // æ‰“å¼€å¹¶æ’­æ”¾èƒŒæ™¯éŸ³ä¹
+        mciSendString(L"open .\\files\\mp3\\backsound.mp3 alias bgm", NULL, 0, NULL); // æ‰“å¼€ MP3 æ–‡ä»¶å¹¶åˆ›å»ºä¸€ä¸ªåˆ«å 'bgm'
         mciSendString(L"open .\\files\\mp3\\result-list.mp3 alias listbgm", NULL, 0, NULL);
         mciSendString(L"open .\\files\\mp3\\reveal-3star.mp3 alias star3", NULL, 0, NULL);
         mciSendString(L"open .\\files\\mp3\\reveal-4star.mp3 alias star4", NULL, 0, NULL);
         mciSendString(L"open .\\files\\mp3\\reveal-5star.mp3 alias star5", NULL, 0, NULL);
         mciSendString(L"open .\\files\\mp3\\reveal-fullstar.mp3 alias starfull", NULL, 0, NULL);
-        mciSendString(L"play bgm repeat", NULL, 0, NULL); // Ê¹ÓÃ±ğÃû 'bgm' ²¥·ÅÒôÀÖ£¬²¢ÉèÖÃÎªÑ­»·²¥·Å
+        mciSendString(L"play bgm repeat", NULL, 0, NULL); // ä½¿ç”¨åˆ«å 'bgm' æ’­æ”¾éŸ³ä¹ï¼Œå¹¶è®¾ç½®ä¸ºå¾ªç¯æ’­æ”¾
         SetWindowPos(hWnd, HWND_TOP, 0, 0, windowWidth, windowHeight, SWP_NOZORDER | SWP_FRAMECHANGED);
         ReleaseDC(0, hdc);
         break;
@@ -85,7 +85,7 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
     case WM_PAINT: {
         RECT rect;
         GetClientRect(hwnd, &rect);
-        // ¼ÆËã´°¿ÚµÄ¿í¶ÈºÍ¸ß¶È
+        // è®¡ç®—çª—å£çš„å®½åº¦å’Œé«˜åº¦
         windowTop = rect.left;
         windowLeft = rect.top;
         int tempint = rect.right - rect.left;
@@ -138,6 +138,14 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
             for (char i = 0; i <= 9; i++) {
                 listx[i + 1] = listx[i] + listxend;
             }
+            hbitmaps[over1] = (HBITMAP)LoadImageA(NULL, getConfigValue(OVER1), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+            hbitmaps[over2] = (HBITMAP)LoadImageA(NULL, getConfigValue(OVER2), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+            hbitmaps[over3] = (HBITMAP)LoadImageA(NULL, getConfigValue(OVER3), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+            hbitmaps[over4] = (HBITMAP)LoadImageA(NULL, getConfigValue(OVER4), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+            GetObject(hbitmaps[over1], sizeof(BITMAP), &overlay1Bm);
+            GetObject(hbitmaps[over2], sizeof(BITMAP), &overlay2Bm);
+            GetObject(hbitmaps[over3], sizeof(BITMAP), &overlay3Bm);
+            GetObject(hbitmaps[over4], sizeof(BITMAP), &overlay4Bm);
         }
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
@@ -149,9 +157,9 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
             if (initing)printfirstmenu(hdc, hdcMem);
             else if (!(initing AND firsttime)) {
                 if (offvideo)
-                    creatbuttom(hdc, hdcMem, bottom1x, bottom1y, L"Ìø¹ıÊÓÆµ:¿ª");
+                    creatbuttom(hdc, hdcMem, bottom1x, bottom1y, L"è·³è¿‡è§†é¢‘:å¼€");
                 if (!offvideo)
-                    creatbuttom(hdc, hdcMem, bottom1x, bottom1y, L"Ìø¹ıÊÓÆµ:¹Ø");
+                    creatbuttom(hdc, hdcMem, bottom1x, bottom1y, L"è·³è¿‡è§†é¢‘:å…³");
                 paintoverlay(hdc, hdcMem);
                 log("set mode %d", mode);
             }
@@ -190,7 +198,7 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
             switch (screenmode)
             {
             case FIRST_MENU: {
-                // »ñÈ¡µã»÷Î»ÖÃ
+                // è·å–ç‚¹å‡»ä½ç½®
                 SetStretchBltMode(hdc, HALFTONE);
                 if (x >= overlay1X AND x <= button1x AND y >= overlay1Y AND y <= buttony) mode = 1;
                 else if (x >= overlay2X AND x <= button2x AND y >= overlay1Y AND y <= buttony) mode = 2;
@@ -211,7 +219,7 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
                 else {
                     screenmode = FIRST_MENU;
                     firsttime = 1;
-                    mciSendString(L"play bgm repeat", NULL, 0, NULL); // Ê¹ÓÃ±ğÃû 'bgm' ²¥·ÅÒôÀÖ£¬²¢ÉèÖÃÎªÑ­»·²¥·Å
+                    mciSendString(L"play bgm repeat", NULL, 0, NULL); // ä½¿ç”¨åˆ«å 'bgm' æ’­æ”¾éŸ³ä¹ï¼Œå¹¶è®¾ç½®ä¸ºå¾ªç¯æ’­æ”¾
                 }
             }break;
             case SETTING: {
@@ -234,20 +242,29 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
     case WM_COMMAND:
         switch (HIWORD(wParam)) {
         case EN_CHANGE: {
-            // »ñÈ¡ÎÄ±¾¿òµÄ¾ä±ú£¬È·±£ËüÊÇÓĞĞ§µÄ
+            // è·å–æ–‡æœ¬æ¡†çš„å¥æŸ„ï¼Œç¡®ä¿å®ƒæ˜¯æœ‰æ•ˆçš„
             HWND editBoxHwnd = (HWND)(lParam);
             int numberoftextbox = LOWORD(wParam);
             if (editBoxHwnd != NULL) {
-                // ·ÖÅä»º³åÇø´óĞ¡£¬ÕâÀï¼ÙÉèÎÄ±¾¿òÖĞµÄÎÄ±¾²»»á³¬¹ı256¸ö×Ö·û
+                // åˆ†é…ç¼“å†²åŒºå¤§å°ï¼Œè¿™é‡Œå‡è®¾æ–‡æœ¬æ¡†ä¸­çš„æ–‡æœ¬ä¸ä¼šè¶…è¿‡256ä¸ªå­—ç¬¦
                 TCHAR sz[256];
                 Edit_GetText(editBoxHwnd, sz, 256);
-                // ÏÔÊ¾ÎÄ±¾¿òÖĞµÄÎÄ±¾
+                // æ˜¾ç¤ºæ–‡æœ¬æ¡†ä¸­çš„æ–‡æœ¬
                 char* tmp=TCHAR2CHAR(sz);
                 if (numberoftextbox == 0)
                     replaceConfigOption(NAMES, tmp);
                 if (numberoftextbox == 1)
                     replaceConfigOption(WINDOW_TITEL, tmp);
+                if (numberoftextbox == 2)
+                    replaceConfigOption(OVER1, tmp);
+                if (numberoftextbox == 3)
+                    replaceConfigOption(OVER2, tmp);
+                if (numberoftextbox == 4)
+                    replaceConfigOption(OVER3, tmp);
+                if (numberoftextbox == 5)
+                    replaceConfigOption(OVER4, tmp);
             }
+            initing = 1;
             break;
         }
         default:
@@ -258,7 +275,7 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
         PostQuitMessage(0);
     }break;
 	default:
-		return DefWindowProc(hWnd, uMsg, wParam, lParam);//¶Ô²»¸ĞĞËÈ¤µÄÏûÏ¢½øĞĞÈ±Ê¡´¦Àí£¬±ØĞëÓĞ¸Ã´úÂë£¬·ñÔò³ÌĞòÓĞÎÊÌâ
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);//å¯¹ä¸æ„Ÿå…´è¶£çš„æ¶ˆæ¯è¿›è¡Œç¼ºçœå¤„ç†ï¼Œå¿…é¡»æœ‰è¯¥ä»£ç ï¼Œå¦åˆ™ç¨‹åºæœ‰é—®é¢˜
 	}
 	return 0;
 }
@@ -269,19 +286,19 @@ int WINAPI WinMain(HINSTANCE hInstance_, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     GetModuleFileNameA(NULL, runpath, MAX_PATH);
     removeFileNameFromPath(runpath);
     initconfig();
-    SetConsoleOutputCP(65001); // ÉèÖÃÎªUTF-8±àÂë
-    WNDCLASS wndcls; //´´½¨Ò»¸ö´°ÌåÀà
-    wndcls.cbClsExtra = 0;//ÀàµÄ¶îÍâÄÚ´æ£¬Ä¬ÈÏÎª0¼´¿É
-    wndcls.cbWndExtra = 0;//´°¿ÚµÄ¶îÍâÄÚ´æ£¬Ä¬ÈÏÎª0¼´¿É
-    wndcls.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);//»ñÈ¡»­Ë¢¾ä±ú£¨½«·µ»ØµÄHGDIOBJ½øĞĞÇ¿ÖÆÀàĞÍ×ª»»£©
-    wndcls.hCursor = LoadCursorW(NULL, IDC_ARROW);//ÉèÖÃ¹â±ê
-    wndcls.hIcon = LoadIconW(NULL, IDI_ERROR);//ÉèÖÃ´°Ìå×óÉÏ½ÇµÄÍ¼±ê
-    wndcls.hInstance = hInstance;//ÉèÖÃ´°ÌåËùÊôµÄÓ¦ÓÃ³ÌĞòÊµÀı
-    wndcls.lpfnWndProc = WinSunProc;//ÉèÖÃ´°ÌåµÄ»Øµ÷º¯Êı£¬ÔİÊ±Ã»Ğ´£¬ÏÈÉèÖÃÎªNULL£¬ºóÃæ²¹ÉÏ
-    wndcls.lpszClassName = L"main";//ÉèÖÃ´°ÌåµÄÀàÃû
-    wndcls.lpszMenuName = NULL;//ÉèÖÃ´°ÌåµÄ²Ëµ¥,Ã»ÓĞ£¬ÌîNULL
-    wndcls.style = CS_HREDRAW | CS_VREDRAW;//ÉèÖÃ´°Ìå·ç¸ñÎªË®Æ½ÖØ»­ºÍ´¹Ö±ÖØ»­
-    RegisterClass(&wndcls);//Ïò²Ù×÷ÏµÍ³×¢²á´°Ìå
+    SetConsoleOutputCP(65001); // è®¾ç½®ä¸ºUTF-8ç¼–ç 
+    WNDCLASS wndcls; //åˆ›å»ºä¸€ä¸ªçª—ä½“ç±»
+    wndcls.cbClsExtra = 0;//ç±»çš„é¢å¤–å†…å­˜ï¼Œé»˜è®¤ä¸º0å³å¯
+    wndcls.cbWndExtra = 0;//çª—å£çš„é¢å¤–å†…å­˜ï¼Œé»˜è®¤ä¸º0å³å¯
+    wndcls.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);//è·å–ç”»åˆ·å¥æŸ„ï¼ˆå°†è¿”å›çš„HGDIOBJè¿›è¡Œå¼ºåˆ¶ç±»å‹è½¬æ¢ï¼‰
+    wndcls.hCursor = LoadCursorW(NULL, IDC_ARROW);//è®¾ç½®å…‰æ ‡
+    wndcls.hIcon = LoadIconW(NULL, IDI_ERROR);//è®¾ç½®çª—ä½“å·¦ä¸Šè§’çš„å›¾æ ‡
+    wndcls.hInstance = hInstance;//è®¾ç½®çª—ä½“æ‰€å±çš„åº”ç”¨ç¨‹åºå®ä¾‹
+    wndcls.lpfnWndProc = WinSunProc;//è®¾ç½®çª—ä½“çš„å›è°ƒå‡½æ•°ï¼Œæš‚æ—¶æ²¡å†™ï¼Œå…ˆè®¾ç½®ä¸ºNULLï¼Œåé¢è¡¥ä¸Š
+    wndcls.lpszClassName = L"main";//è®¾ç½®çª—ä½“çš„ç±»å
+    wndcls.lpszMenuName = NULL;//è®¾ç½®çª—ä½“çš„èœå•,æ²¡æœ‰ï¼Œå¡«NULL
+    wndcls.style = CS_HREDRAW | CS_VREDRAW;//è®¾ç½®çª—ä½“é£æ ¼ä¸ºæ°´å¹³é‡ç”»å’Œå‚ç›´é‡ç”»
+    RegisterClass(&wndcls);//å‘æ“ä½œç³»ç»Ÿæ³¨å†Œçª—ä½“
     hInstance = hInstance_;
     fullscreen = !std::stoi(getConfigValue(INWINDOW));
     if(fullscreen)hWnd = CreateWindowW(L"main", UTF8To16(getConfigValue(WINDOW_TITEL)), WS_POPUP | WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN, 0, 0, windowWidth, windowHeight, NULL, NULL, hInstance_, NULL);
@@ -291,11 +308,11 @@ int WINAPI WinMain(HINSTANCE hInstance_, HINSTANCE hPrevInstance, LPSTR lpCmdLin
         hWnd = CreateWindowW(L"main", UTF8To16(getConfigValue(WINDOW_TITEL)), WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN| WS_THICKFRAME, 0, 0, windowWidth, windowHeight, NULL, NULL, hInstance_, NULL);
     }
     DWORD threadId;
-    // ´´½¨Ïß³Ì
+    // åˆ›å»ºçº¿ç¨‹
     random_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)RandomNumberGenerator, NULL, 0, &threadId);
     offvideo = std::stoi(getConfigValue(OFF_VIDEO));
     mode = std::stoi(getConfigValue(MODE));
-	ShowWindow(hWnd, SW_SHOWNORMAL);//°Ñ´°ÌåÏÔÊ¾³öÀ´
+	ShowWindow(hWnd, SW_SHOWNORMAL);//æŠŠçª—ä½“æ˜¾ç¤ºå‡ºæ¥
     fopen_s(&temppppppp, ".\\version", "w");
     fprintf(temppppppp,"0.3.1");
     fclose(temppppppp);

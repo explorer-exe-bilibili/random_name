@@ -1,0 +1,12 @@
+namesfile=.\names.txt
+Diamond=10000
+buleball=10000
+redball=10000
+off video=0
+first mode=1
+window mode(not full screen)=0
+title name=Ô­Éñ
+over4=.\files\imgs\over4.bmp
+over3=.\files\imgs\over3.bmp
+over2=.\files\imgs\over2.bmp
+over1=.\files\imgs\over1.bmp

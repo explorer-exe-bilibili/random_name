@@ -160,6 +160,7 @@
     <ClInclude Include="setting.h" />
     <ClInclude Include="showname.h" />
     <ClInclude Include="type.h" />
+    <ClInclude Include="voice.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="ramdon name.cpp" />

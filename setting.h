@@ -55,6 +55,7 @@ void paintsettingpage(HDC hdc, HDC hdcMem,HFONT text_mid) {
     case 1: {
         switchbm(fullscreen, L"全屏模式", 1, hdc, hdcMem, text_mid);
         switchbm(offvideo, L"关闭视频", 2, hdc, hdcMem, text_mid);
+        switchbm(offvideo, L"关闭视频", 2, hdc, hdcMem, text_mid);
         textbox(1, 11, WINDOW_TITEL, L"标题名称", hdc, hdcMem, text_mid, 0);
         textbox(0, 12, NAMES, L"名字文件", hdc, hdcMem, text_mid, 1);
         textbox(2, 3, OVER1, L"卡池1图片", hdc, hdcMem, text_mid, 1);
@@ -158,14 +159,14 @@ void settingkicked(int x,int y) {
             GetObject(hbitmaps[over1], sizeof(BITMAP), &overlay1Bm);
             break;
         case 4:
-            OnButtonClick(hWnd, L"选择3卡池图片文件", L"bmp图片文件(*.bmp)\0 * .bmp\0", 3, OVER3);
+            OnButtonClick(hWnd, L"选择3卡池图片文件", L"bmp图片文件(*.bmp)\0 * .bmp\0", 4, OVER3);
             hbitmaps[over3] = (HBITMAP)LoadImageA(NULL, getConfigValue(OVER3), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-            GetObject(hbitmaps[over3], sizeof(BITMAP), &overlay2Bm);
+            GetObject(hbitmaps[over3], sizeof(BITMAP), &overlay3Bm);
             break;
         case 13:
-            OnButtonClick(hWnd, L"选择2卡池图片文件", L"bmp图片文件(*.bmp)\0 * .bmp\0", 4, OVER2);
+            OnButtonClick(hWnd, L"选择2卡池图片文件", L"bmp图片文件(*.bmp)\0 * .bmp\0", 3, OVER2);
             hbitmaps[over2] = (HBITMAP)LoadImageA(NULL, getConfigValue(OVER2), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-            GetObject(hbitmaps[over2], sizeof(BITMAP), &overlay3Bm);
+            GetObject(hbitmaps[over2], sizeof(BITMAP), &overlay2Bm);
             break;
         case 14:
             OnButtonClick(hWnd, L"选择4卡池图片文件", L"bmp图片文件(*.bmp)\0 * .bmp\0", 5, OVER4);
