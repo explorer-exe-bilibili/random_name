@@ -25,7 +25,7 @@ int windowWidth = screenWidth;
 int windowHeight = screenHeight;
 int windowTop, windowLeft;
 int indices[10];
-bool fullscreen;
+bool fullscreen,offmusic = 0;
 HWND hWnd;
 FILE *logfile_main,*logfile_err;
 Log infolog(LOGPATH, 0),errlogf(ERR_LOGPATH,0);
@@ -44,7 +44,7 @@ std::string LWStostr(LPCWSTR lpcwszStr);
 std::wstring Utf82Unicode(const std::string& utf8string);
 HWND CreateEditBox(HWND hWndParent, int NUMBER, int x, int y, int w, int h, const char* words);
 int* find(int* array, int size, int valueToFind, int* count);
-
+char* const_char_ptr_to_char_ptr(const char* const_char_ptr);
 
 
 void removeFileNameFromPath(char* path) {
@@ -250,4 +250,8 @@ std::string UTF_82ASCII(std::string& strUtf8Code)
     //最后把 unicode 转为 ascii  
     strRet = WideByte2Acsi(wstr);
     return strRet;
+}
+
+char* const_char_ptr_to_char_ptr(const char* const_char_ptr) {
+    return const_cast<char*>(const_char_ptr);
 }

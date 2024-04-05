@@ -142,6 +142,9 @@
     <Image Include="files\icos\icons\apple-touch-icon.ico">
       <Filter>资源文件</Filter>
     </Image>
+    <Image Include="files\apple-touch-icon.ico">
+      <Filter>资源文件</Filter>
+    </Image>
   </ItemGroup>
   <ItemGroup>
     <Media Include="files\mp3\backsound.mp3">
