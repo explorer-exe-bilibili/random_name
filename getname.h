@@ -14,20 +14,25 @@
 std::string RandomLineFromFile(const std::string& filename);
 std::string removeAfterDash(const std::string& input);
 int getstar(const std::string& input);
-LPCWSTR random(int i);
+LPCWSTR random(int m,int i);
 int randomIntegerBetween(int min, int max);
 
 int seed = 2434,seed2=32435;
-int star[256];
+int star[4][256];
 bool fileerr = 0;
 
-LPCWSTR random(int i) {
+LPCWSTR random(int m,int i) {
     std::string tmp1;
     LPCWSTR tmp3;
-    const char* path = getConfigValue("namesfile");
+    const char* path;   
+    path= getConfigValue("namesfile");
+    if (m == 0) path = getConfigValue(NAMES1);
+    else if (m == 1) path = getConfigValue(NAMES2);
+    else if (m == 2) path = getConfigValue(NAMES3);
+    else if (m == 3) path = getConfigValue(NAMES4);
     tmp1 = RandomLineFromFile(path);
     if (strcmp(tmp1.c_str(), "FOF") == 0)fileerr = 1;
-    star[i] = getstar(tmp1);
+    star[m][i] = getstar(tmp1);
     tmp1 = removeAfterDash(tmp1);
     tmp3 = UTF8To16(tmp1.c_str());
     return tmp3;

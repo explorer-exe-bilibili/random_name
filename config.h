@@ -1,9 +1,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include<string>
+#include"mywindows.h"
 #define CONFIG_ "\\files\\config.txt"
 #define YUANSHI "Diamond"
 #define NAMES "namesfile"
+#define NAMES1 "namesfile1"
+#define NAMES2 "namesfile2"
+#define NAMES3 "namesfile3"
+#define NAMES4 "namesfile4"
 #define BLUE_BALL_COUNT "buleball"
 #define PINK_BALL_COUNT "redball"
 #define OFF_VIDEO "off video"
@@ -14,10 +20,12 @@
 #define OVER3 "over3"
 #define OVER2 "over2"
 #define OVER1 "over1"
+#define SPECIAL "special"
+#define OFFMUSIC "off music"
 // 定义配置项结构
 typedef struct {
     char* name;
-    char* value;
+    char value[260];
 } ConfigItem;
 
 // 定义链表节点
@@ -49,12 +57,18 @@ void initconfig() {
     FILE* file = fopen(CONFIG, "r");
     if (file == NULL) {
         addConfigItem(NAMES, ".\\names.txt");
+        addConfigItem(NAMES1, ".\\names1.txt");
+        addConfigItem(NAMES2, ".\\names2.txt");
+        addConfigItem(NAMES3, ".\\names3.txt");
+        addConfigItem(NAMES4, ".\\names4.txt");
         addConfigItem(YUANSHI, "10000");
         addConfigItem(BLUE_BALL_COUNT, "10000");
         addConfigItem(PINK_BALL_COUNT, "10000");
         addConfigItem(OFF_VIDEO, "0");
+        addConfigItem(SPECIAL, "0");
         addConfigItem(MODE, "1");
         addConfigItem(INWINDOW, "0");
+        addConfigItem(OFFMUSIC, "0");
         addConfigItem(WINDOW_TITEL, "原神");
         addConfigItem(OVER4, ".\\files\\imgs\\over4.bmp");
         addConfigItem(OVER3, ".\\files\\imgs\\over3.bmp");
@@ -76,12 +90,24 @@ void initconfig() {
         if (strcmp(LogString, "err") == 0)addConfigItem(WINDOW_TITEL, "原神");
         LogString = getConfigValue(NAMES);
         if (strcmp(LogString, "err") == 0)addConfigItem(NAMES, ".\\names.txt");
+        LogString = getConfigValue(NAMES1);
+        if (strcmp(LogString, "err") == 0)addConfigItem(NAMES1, ".\\names1.txt");
+        LogString = getConfigValue(NAMES2);
+        if (strcmp(LogString, "err") == 0)addConfigItem(NAMES2, ".\\names2.txt");
+        LogString = getConfigValue(NAMES3);
+        if (strcmp(LogString, "err") == 0)addConfigItem(NAMES3, ".\\names3.txt");
+        LogString = getConfigValue(NAMES4);
+        if (strcmp(LogString, "err") == 0)addConfigItem(NAMES4, ".\\names4.txt");
         LogString = getConfigValue(BLUE_BALL_COUNT);
         if (strcmp(LogString, "err") == 0)addConfigItem(BLUE_BALL_COUNT, "10000");
         LogString = getConfigValue(PINK_BALL_COUNT);
         if (strcmp(LogString, "err") == 0)addConfigItem(PINK_BALL_COUNT, "10000");
         LogString = getConfigValue(YUANSHI);
         if (strcmp(LogString, "err") == 0)addConfigItem(YUANSHI, "10000");
+        LogString = getConfigValue(SPECIAL);
+        if (strcmp(LogString, "err") == 0)addConfigItem(SPECIAL, "0");
+        LogString = getConfigValue(OFFMUSIC);
+        if (strcmp(LogString, "err") == 0)addConfigItem(OFFMUSIC, "0");
         LogString = getConfigValue(INWINDOW);
         if (strcmp(LogString, "err") == 0)addConfigItem(INWINDOW, "0");
         LogString = getConfigValue(OVER1);
@@ -125,7 +151,7 @@ void addConfigItem(const char* name, const char* value) {
     }
     ConfigItem newItem;
     newItem.name = _strdup(name);
-    newItem.value = _strdup(value);
+    strcpy(newItem.value, value);
 
     Node* newNode = (Node*)malloc(sizeof(Node));
     if (newNode == NULL) {

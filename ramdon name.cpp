@@ -1,4 +1,4 @@
-#include"genthen-impact.h"
+﻿#include"genthen-impact.h"
 
 LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
     HDC hdc =GetDC(NULL);
@@ -72,11 +72,7 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
         GetObject(hbitmaps[setbm], sizeof(BITMAP), &setbm_);
         // 打开并播放背景音乐
         mciSendString(L"open .\\files\\mp3\\backsound.mp3 alias bgm", NULL, 0, NULL); // 打开 MP3 文件并创建一个别名 'bgm'
-        mciSendString(L"open .\\files\\mp3\\result-list.mp3 alias listbgm", NULL, 0, NULL);
-        mciSendString(L"open .\\files\\mp3\\reveal-3star.mp3 alias star3", NULL, 0, NULL);
-        mciSendString(L"open .\\files\\mp3\\reveal-4star.mp3 alias star4", NULL, 0, NULL);
-        mciSendString(L"open .\\files\\mp3\\reveal-5star.mp3 alias star5", NULL, 0, NULL);
-        mciSendString(L"open .\\files\\mp3\\reveal-fullstar.mp3 alias starfull", NULL, 0, NULL);
+        if (!offmusic)
         mciSendString(L"play bgm repeat", NULL, 0, NULL); // 使用别名 'bgm' 播放音乐，并设置为循环播放
         SetWindowPos(hWnd, HWND_TOP, 0, 0, windowWidth, windowHeight, SWP_NOZORDER | SWP_FRAMECHANGED);
         ReleaseDC(0, hdc);
@@ -95,12 +91,14 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
         if (tempint != windowHeight)initing = 1;
         windowHeight = tempint;
         if (initing) {
-            ball10x = windowWidth - ball.bmWidth * 1.3;
-            bally = windowHeight - ball.bmHeight * 2;
-            ball1x = windowWidth - ball.bmWidth * 2.4;
-            ball1end = ball1x + ball.bmWidth;
-            ball10end = ball10x + ball.bmWidth;
-            ballyend = bally + ball.bmHeight;
+            ballW = 0.18 * windowWidth;
+            ballH = 0.075 * windowHeight;
+            ball10x = windowWidth - ballW * 1.3;
+            bally = windowHeight - ballH * 2;
+            ball1x = windowWidth - ballW * 2.4;
+            ball1end = ball1x + ballW;
+            ball10end = ball10x + ballW;
+            ballyend = bally + ballH;
             overlay1X = windowWidth * 3 / 9 - windowWidth / 17;
             overlay2X = windowWidth * 4 / 9 - windowWidth / 17;
             overlay3X = windowWidth * 5 / 9 - windowWidth / 17;
@@ -115,8 +113,6 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
             buttony = overlay1Y + overlayH;
             overlayX = windowWidth / 10 * 2;
             overlayY = windowHeight / 10 * 2;
-            ballW = 0.152 * windowWidth;
-            ballH = 0.0625 * windowHeight;
             bottom1x = windowWidth * 0.1;
             bottom1y = windowHeight * 0.85;
             listyend = windowHeight;
@@ -134,6 +130,10 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
             exityend = windowHeight * 0.045 + windowWidth * 0.03;
             listx[0] = windowWidth * 0.107;
             listxend = windowWidth * 0.078;
+            addnamex = windowWidth * 0.4;
+            addnameendx = addnamex + windowWidth * 0.12;
+            addnamey = windowHeight * 0.8;
+            addnameendy = addnamey + windowHeight * 0.036;
             initsetting();
             for (char i = 0; i <= 9; i++) {
                 listx[i + 1] = listx[i] + listxend;
@@ -146,6 +146,27 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
             GetObject(hbitmaps[over2], sizeof(BITMAP), &overlay2Bm);
             GetObject(hbitmaps[over3], sizeof(BITMAP), &overlay3Bm);
             GetObject(hbitmaps[over4], sizeof(BITMAP), &overlay4Bm);
+            DeleteObject(icon_star);
+            DeleteObject(text_mid);
+            DeleteObject(text_big);
+            DeleteObject(text);
+            DeleteObject(text_list);
+            DeleteObject(icon_mid);
+            DeleteObject(icon);
+            int desiredPixelHeight = windowWidth * 0.17;
+            // 获取设备上下文的 DPI
+            HDC hdc = GetDC(NULL); // 获取桌面设备上下文
+            int dpi = GetDeviceCaps(hdc, LOGPIXELSY);
+            // 计算逻辑单位高度
+            int logicalHeight = MulDiv(desiredPixelHeight, 72, dpi);
+            int logicalweidth = logicalHeight * 0.77;
+            icon_star = CreateFontW(logicalHeight * 0.0862, logicalweidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
+            icon_mid = CreateFontW(logicalHeight * 0.16, logicalweidth * 0.22, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
+            icon = CreateFontW(logicalHeight * 0.2299, logicalweidth * 0.3008, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
+            text = CreateFontW(logicalHeight * 0.1149, logicalweidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
+            text_mid = CreateFontW(logicalHeight * 0.1724, logicalweidth * 0.1729, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
+            text_big = CreateFontW(logicalHeight, logicalweidth, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
+            text_list = CreateFontW(logicalHeight * 0.7, logicalweidth * 0.7, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
         }
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(hWnd, &ps);
@@ -156,25 +177,27 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
         case FIRST_MENU: {
             if (initing)printfirstmenu(hdc, hdcMem);
             else if (!(initing AND firsttime)) {
+                paintoverlay(hdc, hdcMem);
+                log("set mode %d", mode);
                 if (offvideo)
                     creatbuttom(hdc, hdcMem, bottom1x, bottom1y, L"跳过视频:开");
                 if (!offvideo)
                     creatbuttom(hdc, hdcMem, bottom1x, bottom1y, L"跳过视频:关");
-                paintoverlay(hdc, hdcMem);
-                log("set mode %d", mode);
             }
             else if (firsttime)if (clicked) printfirstmenu(hdc, hdcMem);
         }break;
         case SHOW_NAMES_ING: {
             if (printing) {
-
                 if (isball1) {
                     out1name(hdc, hdcMem);
                     ing = 0;
                     initing = 1;
                 }
                 if (isball10) {
-                    if (ft) { if (!skipped)out10name(hdc, hdcMem); ft = 0; }
+                    if (ft) {
+                        if (!skipped)out10name(hdc, hdcMem);
+                        ft = 0; 
+                    }
                     else if (clicked)
                         out10name(hdc, hdcMem);
                     ing = 0;
@@ -200,25 +223,26 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
             case FIRST_MENU: {
                 // 获取点击位置
                 SetStretchBltMode(hdc, HALFTONE);
-                if (x >= overlay1X AND x <= button1x AND y >= overlay1Y AND y <= buttony) mode = 1;
-                else if (x >= overlay2X AND x <= button2x AND y >= overlay1Y AND y <= buttony) mode = 2;
-                else if (x >= overlay3X AND x <= button3x AND y >= overlay1Y AND y <= buttony) mode = 3;
-                else if (x >= overlay4X AND x <= button4x AND y >= overlay1Y AND y <= buttony) mode = 4;
-                else if (x >= bottom1x AND x <= bottom1x + 123 AND y >= bottom1y AND y <= bottom1y + 31) { offvideo = !offvideo; InvalidateRect(hWnd, NULL, FALSE); }
-                else if (x >= ball10x AND x <= ball10end AND y >= bally AND y <= ballyend)showname10();
-                else if (x >= ball1x AND x <= ball1end AND y >= bally AND y <= ballyend)showname1();
-                else if (x >= exitx AND x <= exitxend AND y >= exity AND y <= exityend)PostQuitMessage(0);
-                else if (x >= settingx AND x <= settingxend AND y >= settingy AND y <= settingyend)screenmode = SETTING;
+                if (x >= overlay1X AND x <= button1x AND y >= overlay1Y AND y <= buttony) { mode = 1; openmusic(CLICK); }
+                else if (x >= overlay2X AND x <= button2x AND y >= overlay1Y AND y <= buttony) { mode = 2; openmusic(CLICK); }
+                else if (x >= overlay3X AND x <= button3x AND y >= overlay1Y AND y <= buttony) { mode = 3; openmusic(CLICK); }
+                else if (x >= overlay4X AND x <= button4x AND y >= overlay1Y AND y <= buttony) { mode = 4; openmusic(CLICK); }
+                else if (x >= bottom1x AND x <= bottom1x + 123 AND y >= bottom1y AND y <= bottom1y + 31) { offvideo = !offvideo; openmusic(CLICK);}
+                else if (x >= ball10x AND x <= ball10end AND y >= bally AND y <= ballyend){ openmusic(CLICK); showname10(); }
+                else if (x >= ball1x AND x <= ball1end AND y >= bally AND y <= ballyend){ openmusic(CLICK); showname1(); }
+                else if (x >= exitx AND x <= exitxend AND y >= exity AND y <= exityend) { PostQuitMessage(0); }
+                else if (x >= settingx AND x <= settingxend AND y >= settingy AND y <= settingyend) { screenmode = SETTING; openmusic(ENTER); }
             }break;
             case SHOW_NAMES_ING: {
                 if (ball10ing) {
                     if (x >= skipbmx AND x <= skipbmxend AND y >= skipbmy AND y <= skipbmyend)skipped = 1;
                     clicked = 1;
-                    InvalidateRect(hWnd, NULL, FALSE);
                 }
-                else {
+                if (mode == std::stoi(getConfigValue(SPECIAL))AND x >= addnamex AND x <= addnameendx AND y >= addnamey AND y <= addnameendy)addaname();
+                if(!ball10ing) {
                     screenmode = FIRST_MENU;
                     firsttime = 1;
+                    if (!offmusic)
                     mciSendString(L"play bgm repeat", NULL, 0, NULL); // 使用别名 'bgm' 播放音乐，并设置为循环播放
                 }
             }break;
@@ -242,31 +266,13 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam){
     case WM_COMMAND:
         switch (HIWORD(wParam)) {
         case EN_CHANGE: {
-            // 获取文本框的句柄，确保它是有效的
-            HWND editBoxHwnd = (HWND)(lParam);
-            int numberoftextbox = LOWORD(wParam);
-            if (editBoxHwnd != NULL) {
-                // 分配缓冲区大小，这里假设文本框中的文本不会超过256个字符
-                TCHAR sz[256];
-                Edit_GetText(editBoxHwnd, sz, 256);
-                // 显示文本框中的文本
-                char* tmp=TCHAR2CHAR(sz);
-                if (numberoftextbox == 0)
-                    replaceConfigOption(NAMES, tmp);
-                if (numberoftextbox == 1)
-                    replaceConfigOption(WINDOW_TITEL, tmp);
-                if (numberoftextbox == 2)
-                    replaceConfigOption(OVER1, tmp);
-                if (numberoftextbox == 3)
-                    replaceConfigOption(OVER2, tmp);
-                if (numberoftextbox == 4)
-                    replaceConfigOption(OVER3, tmp);
-                if (numberoftextbox == 5)
-                    replaceConfigOption(OVER4, tmp);
+            switch (screenmode)
+            {
+            case SETTING:seteditbox(lParam, wParam); break;
+            default:
+                break;
             }
-            initing = 1;
-            break;
-        }
+        }break;
         default:
             break;
         }
@@ -312,9 +318,10 @@ int WINAPI WinMain(HINSTANCE hInstance_, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     random_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)RandomNumberGenerator, NULL, 0, &threadId);
     offvideo = std::stoi(getConfigValue(OFF_VIDEO));
     mode = std::stoi(getConfigValue(MODE));
+    offmusic = std::stoi(getConfigValue(OFFMUSIC));
 	ShowWindow(hWnd, SW_SHOWNORMAL);//把窗体显示出来
     fopen_s(&temppppppp, ".\\version", "w");
-    fprintf(temppppppp,"0.3.1");
+    fprintf(temppppppp,"0.5.5");
     fclose(temppppppp);
     log("INIT COMPETLLY SUCCESSFULLY");
 	MSG msg;
@@ -322,7 +329,6 @@ int WINAPI WinMain(HINSTANCE hInstance_, HINSTANCE hPrevInstance, LPSTR lpCmdLin
 		TranslateMessage(&msg);
 		DispatchMessageW(&msg);
     }
-    destoryall();
     log("bye!");
 }
 

@@ -13,6 +13,9 @@ IMediaEventEx* pMediaEvent = NULL;
 #define _1_5 "\\files\\mp3\\reveal-5star.mp3"
 #define _1_4 "\\files\\mp3\\reveal-4star.mp3"
 #define _1_3 "\\files\\mp3\\reveal-3star.mp3"
+#define CLICK "\\files\\mp3\\click.mp3"
+#define ENTER "\\files\\mp3\\enter.mp3"
+#define MP4_3sin 
 
 void play(const char* path) {
 	std::string path_;
@@ -43,6 +46,7 @@ void play(const char* path) {
 
 	if (SUCCEEDED(hr))
 	{
+		if(!offmusic)
 		mciSendString(L"stop bgm", NULL, 0, NULL); // 停止播放
 		log("play begin");
 		hr = pControl->Run();
@@ -57,21 +61,25 @@ void play(const char* path) {
 	log("play end");
 }
 
-void openmusic(const char* path,const char* miconname) {
-	std::string p;
-	p = "close ";
-	p += miconname;
-	mciSendStringA(p.c_str(), NULL, 0, NULL); // 关闭音乐文件
-	log(p.c_str());
-	p = "open \"";
-	p += runpath;
-	p += path;
-	p += "\" alias ";
-	p += miconname;
-	mciSendStringA(p.c_str(), NULL, 0, NULL);
-	log("打开%s,指令为%s",path, p.c_str());
-	p = "play ";
-	p += miconname;
-	log(p.c_str());
-	mciSendStringA(p.c_str(), 0, 0, 0);
+void openmusic(const char* path) {
+	if (!offmusic) {
+		std::string p;
+		const char* miconname;
+		miconname = "temp";
+		p = "close ";
+		p += miconname;
+		mciSendStringA(p.c_str(), NULL, 0, NULL); // 关闭音乐文件
+		log(p.c_str());
+		p = "open \"";
+		p += runpath;
+		p += path;
+		p += "\" alias ";
+		p += miconname;
+		mciSendStringA(p.c_str(), NULL, 0, NULL);
+		log("打开%s,指令为%s", path, p.c_str());
+		p = "play ";
+		p += miconname;
+		log(p.c_str());
+		mciSendStringA(p.c_str(), 0, 0, 0);
+	}
 }

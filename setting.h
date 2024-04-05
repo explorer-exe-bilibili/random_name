@@ -24,7 +24,7 @@ sNode *shead = NULL;
 int exitx, exitxend, exity, exityend,settingpage=1;
 BITMAP exitbm,setbm_,setbu;
 wchar_t string[3][32];
-bool musicplayed = 0, offvideo = 0,reran=0, initing = 1;
+bool musicplayed = 0, offvideo = 0, reran = 0, initing = 1;
 HWND textboxhwnd[TEXTBOXHWNDNUMBER] = { NULL };
 int screenmode=FIRST_MENU,textboxnumber = 0;
 bool isused[TEXTBOXHWNDNUMBER+BOTTONNUMBER] = { 0 };
@@ -55,13 +55,17 @@ void paintsettingpage(HDC hdc, HDC hdcMem,HFONT text_mid) {
     case 1: {
         switchbm(fullscreen, L"全屏模式", 1, hdc, hdcMem, text_mid);
         switchbm(offvideo, L"关闭视频", 2, hdc, hdcMem, text_mid);
-        switchbm(offvideo, L"关闭视频", 2, hdc, hdcMem, text_mid);
         textbox(1, 11, WINDOW_TITEL, L"标题名称", hdc, hdcMem, text_mid, 0);
-        textbox(0, 12, NAMES, L"名字文件", hdc, hdcMem, text_mid, 1);
+        textbox(0, 12, SPECIAL, L"抽背卡池", hdc, hdcMem, text_mid, 0);
         textbox(2, 3, OVER1, L"卡池1图片", hdc, hdcMem, text_mid, 1);
         textbox(3, 13, OVER2, L"卡池2图片", hdc, hdcMem, text_mid, 1);
         textbox(4, 4, OVER3, L"卡池3图片", hdc, hdcMem, text_mid, 1);
         textbox(5, 14, OVER4, L"卡池4图片", hdc, hdcMem, text_mid, 1);
+        textbox(6, 5, NAMES1, L"名字文件1", hdc, hdcMem, text_mid, 1);
+        textbox(7, 15, NAMES2, L"名字文件2", hdc, hdcMem, text_mid, 1);
+        textbox(8, 6, NAMES3, L"名字文件3", hdc, hdcMem, text_mid, 1);
+        textbox(9, 16, NAMES4, L"名字文件4", hdc, hdcMem, text_mid, 1);
+        switchbm(offmusic, L"关闭音乐", 7, hdc, hdcMem, text_mid);
     }
     default:
         break;
@@ -139,14 +143,14 @@ void settingkicked(int x,int y) {
         current = current->next;
     }
     if (number != -1) {
+        openmusic(CLICK);
         switch (number)
         {
-        case 1:
+        case 1: {
             fullscreen = !fullscreen;
-            if (fullscreen)
-                replaceConfigOption(INWINDOW, "0");
+            if (fullscreen) replaceConfigOption(INWINDOW, "0");
             else replaceConfigOption(INWINDOW, "1");
-            break;
+        }break;
         case 2:
             offvideo = !offvideo;
             if (offvideo)
@@ -173,14 +177,85 @@ void settingkicked(int x,int y) {
             hbitmaps[over4] = (HBITMAP)LoadImageA(NULL, getConfigValue(OVER4), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
             GetObject(hbitmaps[over4], sizeof(BITMAP), &overlay4Bm);
             break;
-        case 12:
-            OnButtonClick(hWnd, L"选择名字文件", L"姓名文件(*.txt)\0 * .txt\0", 0, NAMES);
+        case 5:
+            OnButtonClick(hWnd, L"选择名字文件", L"姓名文件(*.txt)\0 * .txt\0", 6, NAMES1);
             reran=1;
             break;
+        case 15:
+            OnButtonClick(hWnd, L"选择名字文件", L"姓名文件(*.txt)\0 * .txt\0", 7, NAMES2);
+            reran = 1;
+            break;
+        case 6:
+            OnButtonClick(hWnd, L"选择名字文件", L"姓名文件(*.txt)\0 * .txt\0", 8, NAMES3);
+            reran = 1;
+            break;
+        case 16:
+            OnButtonClick(hWnd, L"选择名字文件", L"姓名文件(*.txt)\0 * .txt\0", 9, NAMES4);
+            reran = 1;
+            break;
+        case 7:
+            offmusic = !offmusic;
+            if (offmusic) {
+                mciSendString(L"stop bgm", NULL, 0, NULL);
+                replaceConfigOption(OFFMUSIC, "1");
+            }
+            else
+            {
+                mciSendString(L"play bgm repeat", NULL, 0, NULL);
+                replaceConfigOption(OFFMUSIC, "0");
+            }break;
         default:
             break;
         }
     }
+}
+
+void seteditbox(LPARAM lParam,WPARAM wParam) {
+    // 获取文本框的句柄，确保它是有效的
+    HWND editBoxHwnd = (HWND)(lParam);
+    int numberoftextbox = LOWORD(wParam);
+    if (editBoxHwnd != NULL) {
+        // 分配缓冲区大小，这里假设文本框中的文本不会超过256个字符
+        TCHAR sz[256];
+        Edit_GetText(editBoxHwnd, sz, 256);
+        // 显示文本框中的文本
+        if (_tcslen(sz)!=0) {
+            char* tmp = TCHAR2CHAR(sz);
+            switch (numberoftextbox)
+            {
+            case 0:
+                if (tmp != "") {
+                    if (std::stoi(tmp) < 0 || std::stoi(tmp) > 4) {
+                        MessageBox(NULL, L"输入一个0-4之间的数字（0表示禁用）", L"错误", MB_ICONERROR);
+                        return;
+                    }
+                    else replaceConfigOption(SPECIAL, tmp);
+                }
+                break;
+            case 1: 
+                replaceConfigOption(WINDOW_TITEL, tmp); SetWindowTextW(hWnd, UTF8To16(tmp)); break;
+            case 2:
+                replaceConfigOption(OVER1, tmp); break;
+            case 3:
+                replaceConfigOption(OVER2, tmp); break;
+            case 4:
+                replaceConfigOption(OVER3, tmp); break;
+            case 5:
+                replaceConfigOption(OVER4, tmp); break;
+            case 6:
+                replaceConfigOption(NAMES1, tmp); break;
+            case 7:
+                replaceConfigOption(NAMES2, tmp); break;
+            case 8:
+                replaceConfigOption(NAMES3, tmp); break;
+            case 9:
+                replaceConfigOption(NAMES4, tmp); break;
+            default:
+                break;
+            }
+        }
+    }
+    initing = 1;
 }
 
 void initsetting() {
@@ -225,7 +300,7 @@ void OnButtonClick(HWND hwnd,LPCWSTR title,LPCWSTR filter,int number,const char*
     if (GetOpenFileName(&ofn))
     {
         MessageBox(NULL, strFilename, TEXT("选择的文件"), 0);
-        replaceConfigOption(configname, LWStostr(strFilename).c_str());
+        //replaceConfigOption(configname, LWStostr(strFilename).c_str());
         Edit_SetText(textboxhwnd[number], strFilename);
     }
     else {
@@ -236,6 +311,7 @@ void OnButtonClick(HWND hwnd,LPCWSTR title,LPCWSTR filter,int number,const char*
 }
 
 void quitsettingpage() {
+    openmusic(ENTER);
     char n = 0;
     while (textboxhwnd[n] != 0) {
         DestroyWindow(textboxhwnd[n]);
