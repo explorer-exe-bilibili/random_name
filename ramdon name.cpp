@@ -319,6 +319,7 @@ int WINAPI WinMain(HINSTANCE hInstance_, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     random_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)RandomNumberGenerator, NULL, 0, &threadId);
     offvideo = std::stoi(getConfigValue(OFF_VIDEO));
     mode = std::stoi(getConfigValue(MODE));
+    offmusic = std::stoi(getConfigValue(OFFMUSIC));
 	ShowWindow(hWnd, SW_SHOWNORMAL);//把窗体显示出来
     fopen_s(&temppppppp, ".\\version", "w");
     fprintf(temppppppp,"0.5.5");
