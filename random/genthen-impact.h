@@ -480,9 +480,13 @@ void printstars(HDC hdc, int number) {
 	setting::musicplayed = 1;
 	if (number <= 4) {
 		SetBkColor(hdc, RGB(21, 26, 38));
+		SelectObject(hdc, icon_star);
 		SetTextColor(hdc, RGB(220, 184, 14));
 	}
 	else {
+		SetBkColor(hdc, RGB(53, 35, 27));
+		SelectObject(hdc, icon_star);
+		SetTextColor(hdc, RGB(220, 184, 14));
 	}
 	switch (number)
 	{
@@ -508,7 +512,7 @@ void printstars(HDC hdc, int number) {
 	default:
 		break;
 	}
-	}
+}
 }
 void showname1() {
 	directshow::music(CLICK);
