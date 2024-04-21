@@ -4,49 +4,43 @@
 #include <string.h>
 #include<string>
 #include"mywindows.h"
-// 定义配置项结构
-
-typedef struct ConfigItem {
-    char* name;
-    char value[260];
-} ConfigItem;
-
-// 定义链表节点
-typedef struct Node {
-    ConfigItem item;
-    struct Node* next;
-} Node;
+#include <codecvt>
 
 // 定义链表头节点
-Node* config::head = NULL;
-const char* config::LogString;
-std::string config::configpath;
-const char* config::CONFIG;
+config::Node* config::head = NULL;
+const wchar_t* config::LogString;
+std::wstring config::configpath;
+using namespace std;
 
+//读取和补全配置项
 void config::init() {
-    configpath = Log::runpath;
+    mywindows::log("initing config start");
+    configpath = Log::wrunpath;
     configpath += CONFIG_;
-    CONFIG = configpath.c_str();
-    FILE* file = fopen(CONFIG, "r");
+    FILE* file = _wfopen(configpath.c_str(), L"r");
     if (file == NULL) {
-        add(NAMES, ".\\names.txt");
-        add(NAMES1, ".\\names1.txt");
-        add(NAMES2, ".\\names2.txt");
-        add(NAMES3, ".\\names3.txt");
-        add(NAMES4, ".\\names4.txt");
-        add(YUANSHI, "10000");
-        add(BLUE_BALL_COUNT, "10000");
-        add(PINK_BALL_COUNT, "10000");
-        add(OFF_VIDEO, "0");
-        add(SPECIAL, "0");
-        add(MODE, "1");
-        add(INWINDOW, "0");
-        add(OFFMUSIC, "0");
-        add(WINDOW_TITEL, "原神");
-        add(OVER4, ".\\files\\imgs\\over4.bmp");
-        add(OVER3, ".\\files\\imgs\\over3.bmp");
-        add(OVER2, ".\\files\\imgs\\over2.bmp");
-        add(OVER1, ".\\files\\imgs\\over1.bmp");
+        add(NAMES1, L".\\names1.txt");
+        add(NAMES2, L".\\names2.txt");
+        add(NAMES3, L".\\names3.txt");
+        add(NAMES4, L".\\names4.txt");
+        add(YUANSHI, L"10000");
+        add(BLUE_BALL_COUNT, L"10000");
+        add(PINK_BALL_COUNT, L"10000");
+        add(OFF_VIDEO, L"0");
+        add(SPECIAL, L"0");
+        add(MODE, L"1");
+        add(INWINDOW, L"0");
+        add(OFFMUSIC, L"0");
+        add(WINDOW_TITEL, L"祈愿");
+        add(OVER4, L".\\files\\imgs\\over4.bmp");
+        add(OVER3,L".\\files\\imgs\\over3.bmp");
+        add(OVER2, L".\\files\\imgs\\over2.bmp");
+        add(OVER1, L".\\files\\imgs\\over1.bmp");
+        add(SIGNALSTAR3, L"\\files\\video\\3star-single.mp4");
+        add(SIGNALSTAR4, L"\\files\\video\\4star-single.mp4");
+        add(SIGNALSTAR5, L"\\files\\video\\5star-single.mp4");
+        add(GROUPSTAR4, L"\\files\\video\\4star-multi.mp4");
+        add(GROUPSTAR5, L"\\files\\video\\5star-multi.mp4");
         saveFile();
         readFile();
         printAllConfigItems();
@@ -55,179 +49,205 @@ void config::init() {
     {
         fclose(file);
         readFile();
-        const char* LogString = get(MODE);
-        if (strcmp(LogString, "err") == 0)add(MODE, "1");
+        wstring LogString = get(MODE);
+        if (wcscmp(LogString.c_str(), L"err") == 0)add(MODE, L"1");
         LogString = get(OFF_VIDEO);
-        if (strcmp(LogString, "err") == 0)add(OFF_VIDEO, "0");
+        if (wcscmp(LogString.c_str(), L"err") == 0)add(OFF_VIDEO, L"0");
         LogString = get(WINDOW_TITEL);
-        if (strcmp(LogString, "err") == 0)add(WINDOW_TITEL, "原神");
-        LogString = get(NAMES);
-        if (strcmp(LogString, "err") == 0)add(NAMES, ".\\names.txt");
+        if (wcscmp(LogString.c_str(), L"err") == 0)add(WINDOW_TITEL, L"原神");
         LogString = get(NAMES1);
-        if (strcmp(LogString, "err") == 0)add(NAMES1, ".\\names1.txt");
+        if (wcscmp(LogString.c_str(), L"err") == 0)add(NAMES1, L".\\names1.txt");
         LogString = get(NAMES2);
-        if (strcmp(LogString, "err") == 0)add(NAMES2, ".\\names2.txt");
+        if (wcscmp(LogString.c_str(), L"err") == 0)add(NAMES2, L".\\names2.txt");
         LogString = get(NAMES3);
-        if (strcmp(LogString, "err") == 0)add(NAMES3, ".\\names3.txt");
+        if (wcscmp(LogString.c_str(), L"err") == 0)add(NAMES3, L".\\names3.txt");
         LogString = get(NAMES4);
-        if (strcmp(LogString, "err") == 0)add(NAMES4, ".\\names4.txt");
+        if (wcscmp(LogString.c_str(), L"err") == 0)add(NAMES4, L".\\names4.txt");
         LogString = get(BLUE_BALL_COUNT);
-        if (strcmp(LogString, "err") == 0)add(BLUE_BALL_COUNT, "10000");
+        if (wcscmp(LogString.c_str(), L"err") == 0)add(BLUE_BALL_COUNT, L"10000");
         LogString = get(PINK_BALL_COUNT);
-        if (strcmp(LogString, "err") == 0)add(PINK_BALL_COUNT, "10000");
+        if (wcscmp(LogString.c_str(), L"err") == 0)add(PINK_BALL_COUNT, L"10000");
         LogString = get(YUANSHI);
-        if (strcmp(LogString, "err") == 0)add(YUANSHI, "10000");
+        if (wcscmp(LogString.c_str(), L"err") == 0)add(YUANSHI, L"10000");
         LogString = get(SPECIAL);
-        if (strcmp(LogString, "err") == 0)add(SPECIAL, "0");
+        if (wcscmp(LogString.c_str(), L"err") == 0)add(SPECIAL, L"0");
         LogString = get(OFFMUSIC);
-        if (strcmp(LogString, "err") == 0)add(OFFMUSIC, "0");
+        if (wcscmp(LogString.c_str(), L"err") == 0)add(OFFMUSIC, L"0");
         LogString = get(INWINDOW);
-        if (strcmp(LogString, "err") == 0)add(INWINDOW, "0");
+        if (wcscmp(LogString.c_str(), L"err") == 0)add(INWINDOW, L"0");
         LogString = get(OVER1);
-        if (strcmp(LogString, "err") == 0)add(OVER1, ".\\files\\imgs\\over1.bmp");
+        if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER1, L".\\files\\imgs\\over1.bmpL");
         LogString = get(OVER2);
-        if (strcmp(LogString, "err") == 0)add(OVER2, ".\\files\\imgs\\over2.bmp");
+        if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER2, L".\\files\\imgs\\over2.bmpL");
         LogString = get(OVER3);
-        if (strcmp(LogString, "err") == 0)add(OVER3, ".\\files\\imgs\\over3.bmp");
+        if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER3, L".\\files\\imgs\\over3.bmpL");
         LogString = get(OVER4);
-        if (strcmp(LogString, "err") == 0)add(OVER4, ".\\files\\imgs\\over4.bmp");
+        if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER4, L".\\files\\imgs\\over4.bmpL");
+        LogString = get(SIGNALSTAR3);
+        if (wcscmp(LogString.c_str(), L"err") == 0)add(SIGNALSTAR3, L"\\files\\video\\3star-single.mp4");
+        LogString = get(SIGNALSTAR4);
+        if (wcscmp(LogString.c_str(), L"err") == 0) add(SIGNALSTAR4, L"\\files\\video\\4star-single.mp4");
+        LogString = get(SIGNALSTAR5);
+        if (wcscmp(LogString.c_str(), L"err") == 0)add(SIGNALSTAR5, L"\\files\\video\\5star-single.mp4");
+        LogString = get(GROUPSTAR4);
+        if (wcscmp(LogString.c_str(), L"err") == 0)add(GROUPSTAR4, L"\\files\\video\\4star-multi.mp4");
+        LogString = get(GROUPSTAR5);
+        if (wcscmp(LogString.c_str(), L"err") == 0)add(GROUPSTAR5, L"\\files\\video\\5star-multi.mp4");
+        saveFile();
         printAllConfigItems();
-        mywindows::log("config init successfully");
+        mywindows::log(L"config init successfully");
     }
 }
-
-const char* config::get(const char* name) {
+//获取配置项内容
+std::wstring config::get(const std::wstring& name) {
     Node* current = head;
 
     // 遍历链表查找匹配的配置项
     while (current != NULL) {
-        if (strcmp(current->item.name, name) == 0) {
-            // 找到匹配的配置项，返回其参数值
+        if (current->item.name == name) {
+            // 找到匹配的配置项,返回其参数值
             return current->item.value;
         }
         current = current->next;
     }
 
-    // 如果没有找到匹配的配置项，返回空字符串或适当的默认值
-    return "err";
+    // 如果没有找到匹配的配置项,返回L"err"
+    return L"err";
 }
 // 添加配置项到链表
-void config::add(const char* name, const char* value) {
+void config::add(const std::wstring& name, const std::wstring& value) {
     Node* current = head;
-    Node* prev = NULL;
-    while (current != NULL) {
-        if (strcmp(current->item.name, name) == 0) {
-            strcpy(current->item.value, value);
+    Node* prev = nullptr;
+
+    while (current != nullptr) {
+        if (current->item.name == name) {
+            current->item.value = value;
             return;
         }
         prev = current;
         current = current->next;
     }
-    ConfigItem newItem;
-    newItem.name = _strdup(name);
-    strcpy(newItem.value, value);
 
-    Node* newNode = (Node*)malloc(sizeof(Node));
-    if (newNode == NULL) {
-        mywindows::errlog("Memory allocation error(add)");
+    ConfigItem newItem;
+    newItem.name = name;
+    newItem.value = value;
+
+    Node* newNode = new Node;
+    if (newNode == nullptr) {
+        mywindows::errlog(L"Memory allocation error(add)");
+        return;
     }
 
     newNode->item = newItem;
     newNode->next = head;
     head = newNode;
-    saveFile();
 }
 // 读取配置文件并保存配置项到链表
 void config::readFile() {
-    FILE* file = fopen(CONFIG, "r");
+    FILE* file = _wfopen(configpath.c_str(), L"r, ccs=UNICODE");
     if (file == NULL) {
-        mywindows::errlog("Error opening file for reading");
+        mywindows::errlog(L"Error opening file for reading");
         return;
     }
-    char line[256];
-    while (fgets(line, sizeof(line), file) != NULL) {
-        char* trimLine = strtok(line, "\n");  // 移除换行符
-        char* currentOption = strtok(trimLine, "=");
+
+    wchar_t line[256];
+    while (fgetws(line, sizeof(line) / sizeof(wchar_t), file) != NULL) {
+        wchar_t* trimLine = wcstok(line, L"\n"); // 移除换行符
+
+        wchar_t* currentOption = wcstok(trimLine, L"=");
         if (currentOption != NULL) {
-            char* value = strtok(NULL, "=");
+            wchar_t* value = wcstok(NULL, L"=");
             // 添加配置项到链表
-            add(currentOption, value);
+            add(std::wstring(currentOption), std::wstring(value));
             mywindows::log(trimLine);
         }
     }
+
     fclose(file);
 }
 // 保存配置项到配置文件
 void config::saveFile() {
-    FILE* file = fopen(CONFIG, "w");
+    FILE* file = _wfopen(configpath.c_str(), L"w, ccs=UNICODE");
     if (file == NULL) {
-        mywindows::errlog("Error opening file for writing");
+        mywindows::errlog(L"Error opening file for writing");
         return;
     }
+
     Node* current = head;
     while (current != NULL) {
-        fprintf(file, "%s=%s\n", current->item.name, current->item.value);
+        fwprintf(file, L"%s=%s\n", current->item.name.c_str(), current->item.value.c_str());
         current = current->next;
     }
+
     fclose(file);
 }
 // 释放链表节点的内存
 void config::cleanup() {
     Node* current = head;
     Node* next;
+
     while (current != NULL) {
         next = current->next;
-        free(current->item.name);
-        free(current->item.value);
-        free(current);
+        // 不需要手动释放 std::wstring 对象的内存
+        delete current;
         current = next;
     }
+
     head = NULL;
-    mywindows::log("Free ConfigList complete");
+    mywindows::log(L"Free ConfigList complete");
 }
 // 删除配置项
-void config::deleteItem(const char* name) {
-    Node* prev = NULL;
+void config::deleteItem(const std::wstring& name) {
+    Node* prev = nullptr;
     Node* current = head;
-    while (current != NULL) {
-        if (strcmp(current->item.name, name) == 0) {
-            // 找到匹配的配置项，删除它
-            if (prev != NULL) {
+
+    while (current != nullptr) {
+        if (current->item.name == name) {
+            // 找到匹配的配置项,删除它
+            if (prev != nullptr) {
                 prev->next = current->next;
             }
             else {
                 head = current->next;
             }
-            free(current->item.name);
-            free(current->item.value);
-            free(current);
-            break;
-        }
-        prev = current;
-        current = current->next;
-    }
-    mywindows::log("del %s success", name);
-}
 
-void config::replace(const char* name, const char* value) {
-    Node* prev = NULL;
-    Node* current = head;
-    while (current != NULL) {
-        if (strcmp(current->item.name, name) == 0) {
-            strcpy(current->item.value, value);
+            delete current;
+            mywindows::log(L"del %s success", name.c_str());
+            return;
         }
+
         prev = current;
         current = current->next;
     }
-    free(current);
+
+    mywindows::log(L"del %s failed, not found", name.c_str());
+}
+//替换配置项
+void config::replace(const std::wstring& name, const std::wstring& value) {
+    Node* prev = nullptr;
+    Node* current = head;
+
+    while (current != nullptr) {
+        if (current->item.name == name) {
+            current->item.value = value;
+            saveFile();
+            return;
+        }
+
+        prev = current;
+        current = current->next;
+    }
+
+    // 如果没有找到匹配的配置项,则添加新的配置项
+    add(name, value);
     saveFile();
 }
-
+//打印配置
 void config::printAllConfigItems() {
-    mywindows::log(" Configuration:");
+    mywindows::log(L" Configuration:");
     Node* current = head;
     while (current != NULL) {
-        mywindows::log("%s: %s", current->item.name, current->item.value);
+        mywindows::log(L"%s: %s", current->item.name.c_str(), current->item.value.c_str());
         current = current->next;
     }
 }

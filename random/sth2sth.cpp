@@ -1,6 +1,8 @@
 #include "sth2sth.h"
 #include <vector>
 
+wchar_t sth2sth::signame[10] = { 0 };
+
 LPCWSTR sth2sth::UTF8To16(const char* utf8String)
 {
     int bufferSize = MultiByteToWideChar(CP_UTF8, 0, utf8String, -1, nullptr, 0);
@@ -26,7 +28,6 @@ std::string sth2sth::LWStostr(LPCWSTR lpcwszStr)
     delete[] lpszStr;
     return str;
 }
-
 std::wstring sth2sth::Utf82Unicode(const std::string& utf8string)
 {
     int widesize = ::MultiByteToWideChar(CP_UTF8, 0, utf8string.c_str(), -1, NULL, 0);
@@ -50,8 +51,6 @@ std::wstring sth2sth::Utf82Unicode(const std::string& utf8string)
 
     return std::wstring(&resultstring[0]);
 }
-
-//unicode תΪ ascii  
 std::string sth2sth::WideByte2Acsi(std::wstring& wstrcode)
 {
     int asciisize = ::WideCharToMultiByte(CP_OEMCP, 0, wstrcode.c_str(), -1, NULL, 0, NULL, NULL);
@@ -73,7 +72,6 @@ std::string sth2sth::WideByte2Acsi(std::wstring& wstrcode)
 
     return std::string(&resultstring[0]);
 }
-//utf-8 ת ascii  
 std::string sth2sth::UTF_82ASCII(std::string& strUtf8Code)
 {
     std::string strRet("");
@@ -83,11 +81,9 @@ std::string sth2sth::UTF_82ASCII(std::string& strUtf8Code)
     strRet = WideByte2Acsi(wstr);
     return strRet;
 }
-
 char* sth2sth::const_char_ptr_to_char_ptr(const char* const_char_ptr) {
     return const_cast<char*>(const_char_ptr);
 }
-
 std::string sth2sth::TCHAR2STRING(TCHAR* STR)
 {
     int iLen = WideCharToMultiByte(CP_UTF8, 0, STR, -1, NULL, 0, NULL, NULL);
@@ -103,4 +99,14 @@ char* sth2sth::TCHAR2CHAR(TCHAR* STR)
     char* chRtn = new char[iLen * sizeof(char)];
     WideCharToMultiByte(CP_UTF8, 0, STR, -1, chRtn, iLen, NULL, NULL);
     return chRtn;
+}
+char sth2sth::Lstrtosingal(LPCWSTR in) {
+    LPCWSTR it = in;
+    int i = 0;
+    for (LPCWSTR it = in; *it != L'\0'; it++) {
+        if (*it != 65279)signame[i] = *it;
+        else i--;
+        i++;
+    }
+    return i;
 }

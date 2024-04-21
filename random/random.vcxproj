@@ -70,6 +70,12 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <TargetName>$(ProjectName)</TargetName>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <TargetName>$(ProjectName)测试</TargetName>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
@@ -132,6 +138,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="bitmaps.h" />
+    <ClInclude Include="click.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="directshow.h" />
     <ClInclude Include="framework.h" />
@@ -139,28 +146,35 @@
     <ClInclude Include="getname.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="mywindows.h" />
+    <ClInclude Include="paintfirstscreen.h" />
+    <ClInclude Include="paintname.h" />
     <ClInclude Include="random.h" />
     <ClInclude Include="Resource.h" />
+    <ClInclude Include="resource1.h" />
     <ClInclude Include="setting.h" />
     <ClInclude Include="sth2sth.h" />
     <ClInclude Include="targetver.h" />
+    <ClInclude Include="ui.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="click.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="directshow.cpp" />
     <ClCompile Include="getname.cpp" />
     <ClCompile Include="log.cpp" />
     <ClCompile Include="mywindows.cpp" />
+    <ClCompile Include="paintfirstscreen.cpp" />
+    <ClCompile Include="paintname.cpp" />
     <ClCompile Include="random.cpp" />
     <ClCompile Include="setting.cpp" />
     <ClCompile Include="sth2sth.cpp" />
+    <ClCompile Include="ui.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="random.rc" />
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="random.ico" />
-    <Image Include="small.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

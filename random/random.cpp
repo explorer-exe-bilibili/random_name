@@ -1,17 +1,18 @@
 ﻿#include"genthen-impact.h"
+#include "click.h"
 
 LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
     HDC hdc = GetDC(NULL);
     mywindows::hWnd = hwnd;
-    if (setting::reran)rerandom();
+    if (setting::reran)paintname::rerandom();
     switch (uMsg) {//通过判断消息进行消息响应
     case WM_CREATE: {
         // 加载两个背景图片
         hbitmaps[background] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\wish-background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-        hbitmaps[over1] = (HBITMAP)LoadImageA(NULL, config::get(OVER1), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-        hbitmaps[over2] = (HBITMAP)LoadImageA(NULL, config::get(OVER2), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-        hbitmaps[over3] = (HBITMAP)LoadImageA(NULL, config::get(OVER3), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-        hbitmaps[over4] = (HBITMAP)LoadImageA(NULL, config::get(OVER4), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+        hbitmaps[over1] = (HBITMAP)LoadImage(NULL, config::get(OVER1).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+        hbitmaps[over2] = (HBITMAP)LoadImage(NULL, config::get(OVER2).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+        hbitmaps[over3] = (HBITMAP)LoadImage(NULL, config::get(OVER3).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+        hbitmaps[over4] = (HBITMAP)LoadImage(NULL, config::get(OVER4).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
         hbitmaps[cardbackground] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\cardbg.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
         hbitmaps[pink1b] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\1pinkb.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
         hbitmaps[pink1i] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\1pinki.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
@@ -33,25 +34,24 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         hbitmaps[setbm] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\setting.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
         hbitmaps[setbutton] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\settingbuttom.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
-        int desiredPixelHeight = mywindows::mywindows::windowWidth * 0.17;
+        int desiredPixelHeight = mywindows::windowWidth * 0.17;
         // 获取设备上下文的 DPI
         HDC hdc = GetDC(NULL); // 获取桌面设备上下文
         int dpi = GetDeviceCaps(hdc, LOGPIXELSY);
         // 计算逻辑单位高度
         int logicalHeight = MulDiv(desiredPixelHeight, 72, dpi);
         int logicalweidth = logicalHeight * 0.77;
-        icon_star = CreateFontW(logicalHeight * 0.0862, logicalweidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
-        icon_mid = CreateFontW(logicalHeight * 0.16, logicalweidth * 0.22, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
-        icon = CreateFontW(logicalHeight * 0.2299, logicalweidth * 0.3008, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
-        text = CreateFontW(logicalHeight * 0.1149, logicalweidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
-        text_mid = CreateFontW(logicalHeight * 0.1724, logicalweidth * 0.1729, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
-        text_big = CreateFontW(logicalHeight, logicalweidth, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
-        text_list = CreateFontW(logicalHeight * 0.7, logicalweidth * 0.7, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
+        paintname::icon_star = CreateFontW(logicalHeight * 0.0862, logicalweidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
+        ui::icon_mid = CreateFontW(logicalHeight * 0.16, logicalweidth * 0.22, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
+        ui::icon = CreateFontW(logicalHeight * 0.2299, logicalweidth * 0.3008, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
+        ui::text = CreateFontW(logicalHeight * 0.1149, logicalweidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
+        ui::text_mid = CreateFontW(logicalHeight * 0.1724, logicalweidth * 0.1729, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
+        ui::text_big = CreateFontW(logicalHeight, logicalweidth, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
+        ui::text_list = CreateFontW(logicalHeight * 0.7, logicalweidth * 0.7, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
         ReleaseDC(NULL, hdc);
-        if (text == NULL)mywindows::errlog("text font load error");
-        if (icon == NULL)mywindows::errlog("icon font load error");
-        if (text_big == NULL)mywindows::errlog("icon font load error");
-        if (icon_star == NULL)mywindows::errlog("star load error");
+        if (ui::text == NULL)mywindows::errlog("text font load error");
+        if (ui::icon == NULL)mywindows::errlog("icon font load error");
+        if (ui::text_big == NULL)mywindows::errlog("icon font load error");
         // 获取图标位图信息
         GetObject(hbitmaps[background], sizeof(BITMAP), &bm);
         GetObject(hbitmaps[setbutton], sizeof(BITMAP), &setting::setbu);
@@ -72,9 +72,9 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         GetObject(hbitmaps[setbm], sizeof(BITMAP), &setting::setbm_);
         // 打开并播放背景音乐
         mciSendString(L"open .\\files\\mp3\\backsound.mp3 alias bgm", NULL, 0, NULL); // 打开 MP3 文件并创建一个别名 'bgm'
-        if (!mywindows::offmusic)
+        if (!setting::offmusic)
             mciSendString(L"play bgm repeat", NULL, 0, NULL); // 使用别名 'bgm' 播放音乐，并设置为循环播放
-        SetWindowPos(mywindows::hWnd, HWND_TOP, 0, 0, mywindows::mywindows::windowWidth, mywindows::mywindows::windowHeight, SWP_NOZORDER | SWP_FRAMECHANGED);
+        SetWindowPos(mywindows::hWnd, HWND_TOP, 0, 0, mywindows::windowWidth, mywindows::windowHeight, SWP_NOZORDER | SWP_FRAMECHANGED);
         ReleaseDC(0, hdc);
         break;
     }
@@ -85,74 +85,86 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
         mywindows::windowTop = rect.left;
         mywindows::windowLeft = rect.top;
         int tempint = rect.right - rect.left;
-        if (tempint != mywindows::mywindows::windowWidth)setting::initing = 1;
-        mywindows::mywindows::windowWidth = tempint;
+        if (tempint != mywindows::windowWidth)setting::initing = 1;
+        mywindows::windowWidth = tempint;
         tempint = rect.bottom - rect.top;
-        if (tempint != mywindows::mywindows::windowHeight)setting::initing = 1;
+        if (tempint != mywindows::windowHeight)setting::initing = 1;
         mywindows::windowHeight = tempint;
         if (setting::initing) {
-            ballW = 0.18 * mywindows::mywindows::windowWidth;
-            ballH = 0.075 * mywindows::mywindows::windowHeight;
-            ball10x = mywindows::windowWidth - ballW * 1.3;
-            bally = mywindows::windowHeight - ballH * 2;
-            ball1x = mywindows::windowWidth - ballW * 2.4;
-            ball1end = ball1x + ballW;
-            ball10end = ball10x + ballW;
-            ballyend = bally + ballH;
-            overlay1X = mywindows::windowWidth * 3 / 9 - mywindows::windowWidth / 17;
-            overlay2X = mywindows::windowWidth * 4 / 9 - mywindows::windowWidth / 17;
-            overlay3X = mywindows::windowWidth * 5 / 9 - mywindows::windowWidth / 17;
-            overlay4X = mywindows::windowWidth * 6 / 9 - mywindows::windowWidth / 17;
-            overlay1Y = mywindows::windowHeight * 3 / 40;
-            overlayW = mywindows::windowWidth * 3 / 40;
-            overlayH = mywindows::windowHeight * 3 / 40;
-            button1x = overlay1X + overlayW;
-            button2x = overlay2X + overlayW;
-            button3x = overlay3X + overlayW;
-            button4x = overlay4X + overlayW;
-            buttony = overlay1Y + overlayH;
-            overlayX = mywindows::windowWidth / 10 * 2;
-            overlayY = mywindows::windowHeight / 10 * 2;
-            bottom1x = mywindows::windowWidth * 0.1;
-            bottom1y = mywindows::windowHeight * 0.85;
-            listyend = mywindows::windowHeight;
-            skipbmx = mywindows::windowWidth * 0.8;
-            skipbmy = mywindows::windowHeight * 0.045;
-            skipbmxend = skipbmx + mywindows::windowWidth * 0.1;
-            skipbmyend = skipbmy + 100;
-            settingx = mywindows::windowWidth * 0.05;
-            settingy = mywindows::windowHeight * 0.85;
-            settingxend = settingx + mywindows::windowWidth * 0.023;
-            settingyend = settingy + mywindows::windowHeight * 0.036;
+            ui::ballW = 0.18 * mywindows::windowWidth;
+            ui::ballH = 0.075 * mywindows::windowHeight;
+            ui::ball10x = mywindows::windowWidth - ui::ballW * 1.3;
+            ui::bally = mywindows::windowHeight - ui::ballH * 2;
+            ui::ball1x = mywindows::windowWidth - ui::ballW * 2.4;
+            ui::ball1end = ui::ball1x + ui::ballW;
+            ui::ball10end = ui::ball10x + ui::ballW;
+            ui::ballyend = ui::bally + ui::ballH;
+            ui::overlay1X = mywindows::windowWidth * 3 / 9 - mywindows::windowWidth / 17;
+            ui::overlay2X = mywindows::windowWidth * 4 / 9 - mywindows::windowWidth / 17;
+            ui::overlay3X = mywindows::windowWidth * 5 / 9 - mywindows::windowWidth / 17;
+            ui::overlay4X = mywindows::windowWidth * 6 / 9 - mywindows::windowWidth / 17;
+            ui::overlay1Y = mywindows::windowHeight * 3 / 40;
+            ui::overlayW = mywindows::windowWidth * 3 / 40;
+            ui::overlayH = mywindows::windowHeight * 3 / 40;
+            ui::button1x = ui::overlay1X + ui::overlayW;
+            ui::button2x = ui::overlay2X + ui::overlayW;
+            ui::button3x = ui::overlay3X + ui::overlayW;
+            ui::button4x = ui::overlay4X + ui::overlayW;
+            ui::buttony = ui::overlay1Y + ui::overlayH;
+            ui::overlayX = mywindows::windowWidth / 10 * 2;
+            ui::overlayY = mywindows::windowHeight / 10 * 2;
+            ui::bottom1x = mywindows::windowWidth * 0.1;
+            ui::bottom1y = mywindows::windowHeight * 0.85;
+            ui::listyend = mywindows::windowHeight;
+            paintname::skipbmx = mywindows::windowWidth * 0.8;
+            paintname::skipbmy = mywindows::windowHeight * 0.045;
+            paintname::skipbmxend = paintname::skipbmx + mywindows::windowWidth * 0.1;
+            paintname::skipbmyend = paintname::skipbmy + 100;
+            ui::settingx = mywindows::windowWidth * 0.05;
+            ui::settingy = mywindows::windowHeight * 0.85;
+            ui::settingxend = ui::settingx + mywindows::windowWidth * 0.023;
+            ui::settingyend = ui::settingy + mywindows::windowHeight * 0.036;
             setting::exitx = mywindows::windowWidth * 0.9;
             setting::exitxend = mywindows::windowWidth * 0.93;
             setting::exity = mywindows::windowHeight * 0.045;
             setting::exityend = mywindows::windowHeight * 0.045 + mywindows::windowWidth * 0.03;
-            listx[0] = mywindows::windowWidth * 0.107;
-            listxend = mywindows::windowWidth * 0.078;
-            addnamex = mywindows::windowWidth * 0.4;
-            addnameendx = addnamex + mywindows::windowWidth * 0.12;
-            addnamey = mywindows::windowHeight * 0.8;
-            addnameendy = addnamey + mywindows::windowHeight * 0.036;
+            ui::listx[0] = mywindows::windowWidth * 0.107;
+            ui::listxend = mywindows::windowWidth * 0.078;
+            ui::addnamex = mywindows::windowWidth * 0.4;
+            ui::addnameendx = ui::addnamex + mywindows::windowWidth * 0.12;
+            ui::addnamey = mywindows::windowHeight * 0.8;
+            ui::addnameendy = ui::addnamey + mywindows::windowHeight * 0.036;
             setting::init();
             for (char i = 0; i <= 9; i++) {
-                listx[i + 1] = listx[i] + listxend;
+                ui::listx[i + 1] = ui::listx[i] + ui::listxend;
             }
-            hbitmaps[over1] = (HBITMAP)LoadImageA(NULL, config::get(OVER1), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-            hbitmaps[over2] = (HBITMAP)LoadImageA(NULL, config::get(OVER2), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-            hbitmaps[over3] = (HBITMAP)LoadImageA(NULL, config::get(OVER3), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-            hbitmaps[over4] = (HBITMAP)LoadImageA(NULL, config::get(OVER4), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-            GetObject(hbitmaps[over1], sizeof(BITMAP), &overlay1Bm);
-            GetObject(hbitmaps[over2], sizeof(BITMAP), &overlay2Bm);
-            GetObject(hbitmaps[over3], sizeof(BITMAP), &overlay3Bm);
-            GetObject(hbitmaps[over4], sizeof(BITMAP), &overlay4Bm);
-            DeleteObject(icon_star);
-            DeleteObject(text_mid);
-            DeleteObject(text_big);
-            DeleteObject(text);
-            DeleteObject(text_list);
-            DeleteObject(icon_mid);
-            DeleteObject(icon);
+            if (setting::changebitmap[0]) {
+                hbitmaps[over1] = (HBITMAP)LoadImage(NULL, config::get(OVER1).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+                GetObject(hbitmaps[over1], sizeof(BITMAP), &overlay1Bm);
+                setting::changebitmap[0] = 0;
+            }
+            if (setting::changebitmap[1]) {
+                hbitmaps[over2] = (HBITMAP)LoadImage(NULL, config::get(OVER2).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+                GetObject(hbitmaps[over2], sizeof(BITMAP), &overlay2Bm);
+                setting::changebitmap[1] = 0;
+            }
+            if (setting::changebitmap[2]) {
+                hbitmaps[over3] = (HBITMAP)LoadImage(NULL, config::get(OVER3).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+                GetObject(hbitmaps[over3], sizeof(BITMAP), &overlay3Bm);
+                setting::changebitmap[2] = 0;
+            }
+            if (setting::changebitmap[3]) {
+                hbitmaps[over4] = (HBITMAP)LoadImage(NULL, config::get(OVER4).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+                GetObject(hbitmaps[over4], sizeof(BITMAP), &overlay4Bm);
+                setting::changebitmap[3] = 0;
+            }
+            DeleteObject(paintname::icon_star);
+            DeleteObject(ui::text_mid);
+            DeleteObject(ui::text_big);
+            DeleteObject(ui::text);
+            DeleteObject(ui::text_list);
+            DeleteObject(ui::icon_mid);
+            DeleteObject(ui::icon);
             int desiredPixelHeight = mywindows::windowWidth * 0.17;
             // 获取设备上下文的 DPI
             HDC hdc = GetDC(NULL); // 获取桌面设备上下文
@@ -160,52 +172,56 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
             // 计算逻辑单位高度
             int logicalHeight = MulDiv(desiredPixelHeight, 72, dpi);
             int logicalweidth = logicalHeight * 0.77;
-            icon_star = CreateFontW(logicalHeight * 0.0862, logicalweidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
-            icon_mid = CreateFontW(logicalHeight * 0.16, logicalweidth * 0.22, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
-            icon = CreateFontW(logicalHeight * 0.2299, logicalweidth * 0.3008, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
-            text = CreateFontW(logicalHeight * 0.1149, logicalweidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
-            text_mid = CreateFontW(logicalHeight * 0.1724, logicalweidth * 0.1729, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
-            text_big = CreateFontW(logicalHeight, logicalweidth, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
-            text_list = CreateFontW(logicalHeight * 0.7, logicalweidth * 0.7, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
+            paintname::icon_star = CreateFontW(logicalHeight * 0.0862, logicalweidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
+            ui::icon_mid = CreateFontW(logicalHeight * 0.16, logicalweidth * 0.22, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
+            ui::icon = CreateFontW(logicalHeight * 0.2299, logicalweidth * 0.3008, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
+            ui::text = CreateFontW(logicalHeight * 0.1149, logicalweidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
+            ui::text_mid = CreateFontW(logicalHeight * 0.1724, logicalweidth * 0.1729, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
+            ui::text_big = CreateFontW(logicalHeight, logicalweidth, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
+            ui::text_list = CreateFontW(logicalHeight * 0.7, logicalweidth * 0.7, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
         }
         PAINTSTRUCT ps;
         HDC hdc = BeginPaint(mywindows::hWnd, &ps);
         HDC hdcMem = CreateCompatibleDC(hdc);
         SetStretchBltMode(hdc, HALFTONE);
-        switch (setting::screenmode)
+        switch (ui::screenmode)
         {
         case FIRST_MENU: {
-            if (setting::initing)printfirstmenu(hdc, hdcMem);
-            else if (!(setting::initing AND firsttime)) {
-                paintoverlay(hdc, hdcMem);
-                mywindows::log("set mode %d", mode);
-                if (setting::offvideo)
-                    creatbuttom(hdc, hdcMem, bottom1x, bottom1y, L"跳过视频:开");
-                if (!setting::offvideo)
-                    creatbuttom(hdc, hdcMem, bottom1x, bottom1y, L"跳过视频:关");
-            }
-            else if (firsttime)if (clicked) printfirstmenu(hdc, hdcMem);
+            paintfirstscreen::printfirstmenu(hdc,hdcMem);
+            //if (setting::initing)paintfirstscreen::printfirstmenu(hdc, hdcMem);
+            //else if (!(setting::initing AND paintfirstscreen::firsttime)) {
+            //    paintfirstscreen::printfirstmenu(hdc, hdcMem);
+            //    mywindows::log("set mode %d", ui::mode);
+            //    if (setting::offvideo)
+            //        ui::creatbuttom(hdc, hdcMem, ui::bottom1x, ui::bottom1y, L"跳过视频:开");
+            //    if (!setting::offvideo)
+            //        ui::creatbuttom(hdc, hdcMem, ui::bottom1x, ui::bottom1y, L"跳过视频:关");
+            //}
+            //else if (paintfirstscreen::firsttime)
+            //    if (ui::clicked) paintfirstscreen::printfirstmenu(hdc, hdcMem);
         }break;
         case SHOW_NAMES_ING: {
-            if (printing) {
-                if (isball1) {
-                    out1name(hdc, hdcMem);
-                    ing = 0;
+            setting::initing = 0;
+            if (ui::printing) {
+                if (ui::isball1) {
+                    paintname::out1name(hdc, hdcMem);
+                    ui::ing = 0;
                     setting::initing = 1;
                 }
-                if (isball10) {
-                    if (ft) {
-                        if (!skipped)out10name(hdc, hdcMem);
-                        ft = 0;
+                if (ui::isball10) {
+                    if (ui::ft) {
+                        if (!paintname::skipped)paintname::out10name(hdc, hdcMem);
+                        ui::ft = 0;
                     }
-                    else if (clicked)
-                        out10name(hdc, hdcMem);
-                    ing = 0;
+                    else if (ui::clicked)
+                        paintname::out10name(hdc, hdcMem);
+                    ui::ing = 0;
                 }
             }
         }break;
         case SETTING: {
-            setting::paintsettingpage(hdc, hdcMem, text_mid);
+            setting::initing = 0;
+            setting::paintsettingpage(hdc, hdcMem);
         }break;
         default:
             break;
@@ -217,43 +233,22 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     case WM_LBUTTONDOWN: {
         int x = LOWORD(lParam);
         int y = HIWORD(lParam);
-        if (!ing) {
-            switch (setting::screenmode)
+        if (!ui::ing) {
+            switch (ui::screenmode)
             {
-            case FIRST_MENU: {
-                // 获取点击位置
-                SetStretchBltMode(hdc, HALFTONE);
-                if (x >= overlay1X AND x <= button1x AND y >= overlay1Y AND y <= buttony) { mode = 1; directshow::music(CLICK); }
-                else if (x >= overlay2X AND x <= button2x AND y >= overlay1Y AND y <= buttony) { mode = 2; directshow::music(CLICK); }
-                else if (x >= overlay3X AND x <= button3x AND y >= overlay1Y AND y <= buttony) { mode = 3; directshow::music(CLICK); }
-                else if (x >= overlay4X AND x <= button4x AND y >= overlay1Y AND y <= buttony) { mode = 4; directshow::music(CLICK); }
-                else if (x >= bottom1x AND x <= bottom1x + 123 AND y >= bottom1y AND y <= bottom1y + 31) { setting::offvideo = !setting::offvideo; directshow::music(CLICK); }
-                else if (x >= ball10x AND x <= ball10end AND y >= bally AND y <= ballyend) { directshow::music(CLICK); showname10(); }
-                else if (x >= ball1x AND x <= ball1end AND y >= bally AND y <= ballyend) { directshow::music(CLICK); showname1(); }
-                else if (x >= setting::exitx AND x <= setting::exitxend AND y >= setting::exity AND y <= setting::exityend) { PostQuitMessage(0); }
-                else if (x >= settingx AND x <= settingxend AND y >= settingy AND y <= settingyend) { setting::screenmode = SETTING; directshow::music(ENTER); }
-            }break;
-            case SHOW_NAMES_ING: {
-                if (ball10ing) {
-                    if (x >= skipbmx AND x <= skipbmxend AND y >= skipbmy AND y <= skipbmyend)skipped = 1;
-                    clicked = 1;
-                }
-                if (mode == std::stoi(config::get(SPECIAL))AND x >= addnamex AND x <= addnameendx AND y >= addnamey AND y <= addnameendy)addaname();
-                if (!ball10ing) {
-                    setting::screenmode = FIRST_MENU;
-                    firsttime = 1;
-                    if (!mywindows::offmusic)
-                        mciSendString(L"play bgm repeat", NULL, 0, NULL); // 使用别名 'bgm' 播放音乐，并设置为循环播放
-                }
-            }break;
-            case SETTING: {
-                setting::settingkicked(x, y);
-            }
-            default:
+            case FIRST_MENU:
+                click::firstscreen(x, y);
+                break;
+            case SHOW_NAMES_ING:
+                click::showname(x,y);
+                break;
+            case SETTING:
+                click::setting(x, y);
                 break;
             }
-            InvalidateRect(mywindows::hWnd, NULL, FALSE);
         }
+        paintname::KillAllTimer();
+        InvalidateRect(mywindows::hWnd, NULL, FALSE);
     }break;
     case WM_KEYDOWN: switch (wParam) {
     case VK_ESCAPE: {
@@ -266,7 +261,7 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     case WM_COMMAND:
         switch (HIWORD(wParam)) {
         case EN_CHANGE: {
-            switch (setting::screenmode)
+            switch (ui::screenmode)
             {
             case SETTING:setting::seteditbox(lParam, wParam); break;
             default:
@@ -280,21 +275,44 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
     case WM_DESTROY: {
         PostQuitMessage(0);
     }break;
+    case WM_ACTIVATEAPP:
+        switch (ui::screenmode) {
+        case FIRST_MENU:
+            paintfirstscreen::repaint();
+            break;
+        case SETTING:
+            setting::repaint();
+            break;
+        }
     default:
         return DefWindowProc(mywindows::hWnd, uMsg, wParam, lParam);//对不感兴趣的消息进行缺省处理，必须有该代码，否则程序有问题
     }
     return 0;
 }
 
-//main
-int WINAPI WinMain(HINSTANCE hInstance_, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nShowCmd) {
+int WINAPI WinMain(
+    _In_ HINSTANCE hInstance,      // handle to current instance
+    _In_opt_ HINSTANCE hPrevInstance,  // handle to previous instance
+    _In_ LPSTR lpCmdLine,          // command line
+    _In_ int nCmdShow              // show state
+) {
+    SetConsoleOutputCP(65001); // 设置为UTF-8编码
     CHAR run[260] = {0};
     GetModuleFileNameA(NULL, run, MAX_PATH);
+    int len = MultiByteToWideChar(CP_ACP, 0, run, -1, NULL, 0);
+    wchar_t* run_ = new wchar_t[len];
+    MultiByteToWideChar(CP_ACP, 0, run, -1, run_, len);
+    Log::wrunpath = run_;
+    mywindows::log("getting runpath \n%s", run);
+    mywindows::log(L"getting runpath \n%s", run_);
     mywindows::removeFileNameFromPath(run);
+    Log::wrunpath = run_;
+    mywindows::removeFileNameFromPath(Log::wrunpath);
     Log::runpath = run;
+    mywindows::log("initing runpath %s", Log::runpath.c_str());
+    mywindows::log(L"initing runpath %ws", Log::wrunpath.c_str());
     config::init();
-    mywindows::offmusic = std::stoi(config::get(OFFMUSIC));
-    SetConsoleOutputCP(65001); // 设置为UTF-8编码
+    setting::offmusic = std::stoi(config::get(OFFMUSIC));
     WNDCLASS wndcls; //创建一个窗体类
     wndcls.cbClsExtra = 0;//类的额外内存，默认为0即可
     wndcls.cbWndExtra = 0;//窗口的额外内存，默认为0即可
@@ -307,31 +325,30 @@ int WINAPI WinMain(HINSTANCE hInstance_, HINSTANCE hPrevInstance, LPSTR lpCmdLin
     wndcls.lpszMenuName = NULL;//设置窗体的菜单,没有，填NULL
     wndcls.style = CS_HREDRAW | CS_VREDRAW;//设置窗体风格为水平重画和垂直重画
     RegisterClass(&wndcls);//向操作系统注册窗体
-    hInstance = hInstance_;
-    mywindows::fullscreen = !std::stoi(config::get(INWINDOW));
-    if (mywindows::fullscreen)mywindows::hWnd = CreateWindowW(L"main", sth2sth::UTF8To16(config::get(WINDOW_TITEL)), WS_POPUP | WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN, 0, 0, mywindows::windowWidth, mywindows::windowHeight, NULL, NULL, hInstance_, NULL);
+    setting::fullscreen = !std::stoi(config::get(INWINDOW));
+    if (setting::fullscreen)mywindows::hWnd = CreateWindowW(L"main", config::get(WINDOW_TITEL).c_str(), WS_POPUP | WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN, 0, 0, mywindows::windowWidth, mywindows::windowHeight, NULL, NULL, hInstance, NULL);
     else {
         mywindows::windowWidth = mywindows::screenWidth * 0.6;
         mywindows::windowHeight = mywindows::screenHeight * 0.6;
-        mywindows::hWnd = CreateWindowW(L"main", sth2sth::UTF8To16(config::get(WINDOW_TITEL)), WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN | WS_THICKFRAME, 0, 0, mywindows::windowWidth, mywindows::windowHeight, NULL, NULL, hInstance_, NULL);
+        mywindows::hWnd = CreateWindowW(L"main", config::get(WINDOW_TITEL).c_str(), WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN | WS_THICKFRAME, 0, 0, mywindows::windowWidth, mywindows::windowHeight, NULL, NULL, hInstance, NULL);
     }
-    DWORD threadId, upgrade;
+    DWORD threadId;
     // 创建线程
-    random_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)RandomNumberGenerator, NULL, 0, &threadId);
+    paintname::random_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)paintname::RandomNumberGenerator, NULL, 0, &threadId);
     setting::offvideo = std::stoi(config::get(OFF_VIDEO));
-    mode = std::stoi(config::get(MODE));
-    mywindows::offmusic = std::stoi(config::get(OFFMUSIC));
+    ui::mode = std::stoi(config::get(MODE));
+    setting::offmusic = std::stoi(config::get(OFFMUSIC));
     ShowWindow(mywindows::hWnd, SW_SHOWNORMAL);//把窗体显示出来
     FILE* t;
     fopen_s(&t, ".\\version", "w");
-    fprintf(t, "0.5.5");
+    fprintf(t, "1.0.0");
     fclose(t);
     if (std::filesystem::exists("upgrade_temp.exe"))
     {
         std::filesystem::remove("upgrade.exe");
         std::filesystem::rename("upgrade_temp.exe", "upgrade.exe");
     }
-    upgrade_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)startupgrade, NULL, 0, &upgrade);
+    ShellExecute(NULL, L"open", L"upgrade.exe", NULL, NULL, SW_SHOWNORMAL);
     mywindows::log("INIT COMPETLLY SUCCESSFULLY");
     MSG msg;
     while (GetMessageW(&msg, NULL, NULL, NULL)) {
@@ -339,5 +356,6 @@ int WINAPI WinMain(HINSTANCE hInstance_, HINSTANCE hPrevInstance, LPSTR lpCmdLin
         DispatchMessageW(&msg);
     }
     mywindows::log("bye!");
+    return 0;
 }
 

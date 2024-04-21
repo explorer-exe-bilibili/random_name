@@ -54,6 +54,21 @@
     <ClInclude Include="genthen-impact.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="paintfirstscreen.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="paintname.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ui.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="click.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="resource1.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="random.cpp">
@@ -80,18 +95,25 @@
     <ClCompile Include="sth2sth.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="paintfirstscreen.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="paintname.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="ui.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="click.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="random.rc">
       <Filter>资源文件</Filter>
     </ResourceCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <Image Include="small.ico">
-      <Filter>资源文件</Filter>
-    </Image>
-    <Image Include="random.ico">
-      <Filter>资源文件</Filter>
-    </Image>
   </ItemGroup>
 </Project>

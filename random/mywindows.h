@@ -23,17 +23,16 @@ public:
 	static int windowTop;
 	static int windowLeft;
 	static int indices[10];
-	static bool fullscreen, offmusic;
 	static HWND hWnd;
-	static FILE* logfile_main, * logfile_err;
 	static void removeFileNameFromPath(char* path);
-	static void IntMessageBox(int intValue);
-	static HWND CreateButton(const char* classname, const char* title, int x, int y, int width, int height, HWND hWnd, int numberofbutton, const char* path, bool mode);
-	static void PrintfDebugString(const wchar_t* format, ...);
+	static void removeFileNameFromPath(wchar_t* path);
+	static void removeFileNameFromPath(std::wstring& path);
 	static void log(const char* format, ...);
+	static void log(const wchar_t* format, ...);
 	static void errlog(const char* format, ...);
+	static void errlog(const wchar_t* format, ...);
 	static int* find(int* array, int size, int valueToFind, int* count);
-	static void errend();
-	static HWND CreateEditBox(HWND hWndParent, int NUMBER, int x, int y, int w, int h, const char* words);
+	bool CreatedMultipleDirectory(const std::string& direct);
+
 };
 

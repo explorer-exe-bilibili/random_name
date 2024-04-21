@@ -1,5 +1,6 @@
 #pragma once
 #include <dshow.h>
+#include<string>
 
 #define _1_6 "\\files\\mp3\\reveal-fullstar.mp3"
 #define _1_5 "\\files\\mp3\\reveal-5star.mp3"
@@ -18,7 +19,8 @@ private:
 	static IDispatch* pDispatch;
 	static IBasicAudio* pBaicAudio;
 public:
-	static void play(const char* path);
+	static void play(std::wstring path);
 	static void music(const char* path);
+	static void stopmusic();
 };
 

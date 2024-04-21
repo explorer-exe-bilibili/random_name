@@ -1,9 +1,13 @@
 #define _CRT_SECURE_NO_WARNINGS
+#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
 #include "Log.h"
 #include <ctime>
 #include <Shlwapi.h> 
 #include <vector>
+#include <locale>
+#include <codecvt>
 
+std::wstring Log::wrunpath = L"";
 std::string Log::runpath = "";
 
 bool Log::CreatedMultipleDirectory(const std::string& direct)
@@ -49,6 +53,11 @@ Log::~Log() {
 }
 Log& Log::operator<<(const std::string& str) {
     writeToLog(str);
+    return *this;
+}
+Log& Log::operator<<(const std::wstring& str) {
+	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
+    writeToLog(converter.to_bytes(str));
     return *this;
 }
 Log& Log::operator<<(long double value) {

@@ -1,12 +1,14 @@
 #include "directshow.h"
-#include"mywindows.h"
+#include "mywindows.h"
 #include "log.h"
 #include "config.h"
-#include"sth2sth.h"
+#include "sth2sth.h"
+#include "setting.h"
 
 #pragma comment(lib, "Quartz.lib")
 #pragma comment(lib, "Strmiids.lib")
 
+using namespace std;
 
 IGraphBuilder* directshow::pGraph=0;
 IMediaControl* directshow::pControl=0;
@@ -16,10 +18,15 @@ IMediaEventEx* directshow::pMediaEvent=0;
 IDispatch* directshow::pDispatch=0;
 IBasicAudio* directshow::pBaicAudio=0;
 
-void directshow::play(const char* path) {
-	std::string path_;
-	path_ = Log::runpath;
-	path_ += path;
+void directshow::play(wstring path) {
+	std::wstring path_;
+	if (path.find_first_of(L'\\') == 0) {
+		path_ = Log::wrunpath;
+		path_ += path;
+	}
+	else {
+		path_ = path;
+	}
 	// Initialize the COM library.
 	HRESULT hr = CoInitialize(NULL);
 	if (FAILED(hr))return;
@@ -30,7 +37,7 @@ void directshow::play(const char* path) {
 	hr = pGraph->QueryInterface(IID_IMediaEvent, (void**)&pEvent);
 	pGraph->QueryInterface(IID_IVideoWindow, (void**)&pVideoWindow);
 	pGraph->QueryInterface(IID_IBasicAudio, (void**)&pBaicAudio);
-	hr = pGraph->RenderFile(sth2sth::UTF8To16(path_.c_str()), NULL);
+	hr = pGraph->RenderFile(path_.c_str(), NULL);
 	if (hr != S_OK) {
 		mywindows::errlog("read video unsuccessfully");
 	}
@@ -38,18 +45,18 @@ void directshow::play(const char* path) {
 		pVideoWindow->put_WindowStyle(WS_POPUP);
 	else
 		pVideoWindow->put_WindowStyle(WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN | WS_THICKFRAME);
-	pVideoWindow->put_Width(mywindows::mywindows::windowWidth * 1.02);
-	pVideoWindow->put_Height(mywindows::mywindows::windowHeight * 1.1);
+	pVideoWindow->put_Width(mywindows::windowWidth * 1.02);
+	pVideoWindow->put_Height(mywindows::windowHeight * 1.1);
 	pVideoWindow->put_Left(mywindows::windowLeft);
 	pVideoWindow->put_Top(mywindows::windowTop);
 
 	if (SUCCEEDED(hr))
 	{
-		if (!mywindows::offmusic) {
+		if (!setting::offmusic) {
 			mciSendString(L"stop bgm", NULL, 0, NULL); // 停止播放
 			pBaicAudio->put_Volume(0);
 		}
-		if (mywindows::offmusic) pBaicAudio->put_Volume(-10000);
+		if (setting::offmusic) pBaicAudio->put_Volume(-10000);
 		mywindows::log("play begin");
 		hr = pControl->Run();
 		long evCode;
@@ -65,24 +72,26 @@ void directshow::play(const char* path) {
 }
 
 void directshow::music(const char* path) {
-	if (!mywindows::offmusic) {
+	if (!setting::offmusic) {
 		std::string p;
-		const char* miconname;
-		miconname = "temp";
 		p = "close ";
-		p += miconname;
+		p += "temp";
 		mciSendStringA(p.c_str(), NULL, 0, NULL); // 关闭音乐文件
 		mywindows::log(p.c_str());
 		p = "open \"";
 		p += Log::runpath;
 		p += path;
 		p += "\" alias ";
-		p += miconname;
+		p += "temp";
 		mciSendStringA(p.c_str(), NULL, 0, NULL);
 		mywindows::log("打开%s,指令为%s", path, p.c_str());
 		p = "play ";
-		p += miconname;
+		p += "temp";
 		mywindows::log(p.c_str());
 		mciSendStringA(p.c_str(), 0, 0, 0);
 	}
+}
+
+void directshow::stopmusic() {
+	mciSendStringA("close temp", NULL, 0, 0);
 }

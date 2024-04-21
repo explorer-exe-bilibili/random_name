@@ -18,7 +18,7 @@ using namespace std;
 LPCWSTR getname::random(int m, int i) {
     std::string tmp1;
     LPCWSTR tmp3;
-    string path;
+    wstring path;
     if (m == 0) path = config::get(NAMES1);
     else if (m == 1) path = config::get(NAMES2);
     else if (m == 2) path = config::get(NAMES3);
@@ -62,7 +62,7 @@ std::string getname::removeAfterDash(const std::string& input) {
     }
 }
 
-std::string getname::RandomLineFromFile(const std::string& filename)
+std::string getname::RandomLineFromFile(const std::wstring& filename)
 {
     std::vector<std::string> lines;
     std::ifstream file(filename);

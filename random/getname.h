@@ -11,6 +11,6 @@ public:
 	static LPCWSTR random(int m, int i);
 	static int getstar(const std::string& input);
 	static std::string removeAfterDash(const std::string& input);
-	static std::string RandomLineFromFile(const std::string& filename);
+	static std::string RandomLineFromFile(const std::wstring& filename);
 	static int randomIntegerBetween(int min, int max);
 };
