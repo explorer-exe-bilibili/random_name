@@ -12,6 +12,7 @@
 #include "ui.h"
 #include "paintname.h"
 #include"paintfirstscreen.h"
+#include "click.h"
 
 HBITMAP hbitmaps[BitmapCounts];
 BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg_, exitinfo_, goldenbg, listbm_, list4star_, list5star_, list6star_, list3star_, buttom_;

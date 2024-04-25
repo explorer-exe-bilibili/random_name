@@ -72,6 +72,9 @@
     <ClInclude Include="resource2.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="set-json.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="random.cpp">
@@ -110,9 +113,9 @@
     <ClCompile Include="click.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram.cd" />
+    <ClCompile Include="set-json.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="random.rc">
@@ -123,5 +126,8 @@
     <Image Include="OIP-C.ico">
       <Filter>资源文件</Filter>
     </Image>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

@@ -1,2 +1,105 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
-<ClassDiagram /> 
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="directshow" Collapsed="true">
+    <Position X="8" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BABAAAAAQAABAAAEAEAAAAACBACAAAAAAAAQAAAAAAA=</HashCode>
+      <FileName>directshow.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="click">
+    <Position X="2.75" Y="3.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAEAAA=</HashCode>
+      <FileName>click.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="config">
+    <Position X="5" Y="1.75" Width="1.5" />
+    <NestedTypes>
+      <Struct Name="config::ConfigItem" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>config.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+      <Struct Name="config::Node" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>config.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>QAAAYABAgAgAAAAAAAAAYAAAAAAEAAIAAQAAAAACAAA=</HashCode>
+      <FileName>config.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="getname">
+    <Position X="6.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAACAQACAABAAAAAAAACAACQAAAQAAAAAAAA=</HashCode>
+      <FileName>getname.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Log">
+    <Position X="0.5" Y="0.5" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>gAAAAAAAgAAAAAAAAACAAAAAAAgQAMAAACAAEAABAAA=</HashCode>
+      <FileName>log.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="mywindows" Collapsed="true">
+    <Position X="8" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>BAAAUAAAgABAAQAQAgAQKAQAAAAAAAAACAAAQAAAAIA=</HashCode>
+      <FileName>mywindows.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="paintfirstscreen" Collapsed="true">
+    <Position X="9.75" Y="2.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAAAEAAAAAAAAACAAAIAAAAAAAAAAAAAEAAAAA=</HashCode>
+      <FileName>paintfirstscreen.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="paintname" Collapsed="true">
+    <Position X="3" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>YAUAAAABIGHiQAQEAAMQAIg0AiwgAACAQAQCACiABIA=</HashCode>
+      <FileName>paintname.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="setting">
+    <Position X="6.25" Y="0.75" Width="1.5" />
+    <NestedTypes>
+      <Struct Name="setting::sNode">
+        <TypeIdentifier>
+          <NewMemberFileName>setting.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+      <Struct Name="setting::settingxy">
+        <TypeIdentifier>
+          <NewMemberFileName>setting.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>gAACAAAAIALAAYAgAAQCghAAgAAAcAICAAADAAwABAA=</HashCode>
+      <FileName>setting.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="sth2sth" Collapsed="true">
+    <Position X="8" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAACAAAAABAAAAAgAAAAQAAIAAEAAEQAACAAAA=</HashCode>
+      <FileName>sth2sth.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ui" Collapsed="true">
+    <Position X="9.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIEJBCIgAAADAiICAAAEkAAAEAQARBoEwFg/YZCmBE=</HashCode>
+      <FileName>ui.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="微软雅黑" Size="9" />
+</ClassDiagram>

@@ -6,6 +6,7 @@
 #include <vector>
 #include <locale>
 #include <codecvt>
+#include"sth2sth.h"
 
 std::wstring Log::wrunpath = L"";
 std::string Log::runpath = "";
@@ -40,10 +41,18 @@ bool Log::CreatedMultipleDirectory(const std::string& direct)
 	return bSuccess;
     return false;
 }
+Log::Log(const std::string& fileName) {
+	std::string filepath;
+	filepath = runpath;
+	filepath += fileName;
+	CreatedMultipleDirectory(".\\files\\log");
+	logFile.open(fileName, std::ios::app);
+}
 Log::Log(const std::string& fileName, bool add) {
 	std::string filepath;
 	filepath = runpath;
 	filepath += fileName;
+	CreatedMultipleDirectory(".\\files\\log");
 	if (add)
 		logFile.open(fileName, std::ios::app /*std::ios::app*/);
 	else logFile.open(fileName, std::ios::ate /*std::ios::app*/);
@@ -57,8 +66,19 @@ Log& Log::operator<<(const std::string& str) {
 }
 Log& Log::operator<<(const std::wstring& str) {
 	std::wstring_convert<std::codecvt_utf8<wchar_t>> converter;
-    writeToLog(converter.to_bytes(str));
+	std::string s = converter.to_bytes(str);
+    writeToLog(sth2sth::UTF_82ASCII(s));
     return *this;
+}
+Log& operator<<(Log& log, std::ostream& (*f)(std::ostream&)) {
+	// 先将新行字符写入日志文件
+	log.writeToLog("\n");
+
+	// 然后刷新日志文件的缓冲区
+	log.logFile.flush();
+
+	// 最后返回 log 对象,以支持链式调用
+	return log;
 }
 Log& Log::operator<<(long double value) {
 	if (value != INSIDEINT) {
@@ -89,3 +109,4 @@ int Log::pt() {
 void Log::writeToLog(const std::string& message) {
     logFile << message;
 }
+

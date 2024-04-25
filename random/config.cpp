@@ -114,6 +114,22 @@ std::wstring config::get(const std::wstring& name) {
     // 如果没有找到匹配的配置项,返回L"err"
     return L"err";
 }
+int config::getint(const std::wstring& name)
+{
+    Node* current = head;
+
+    // 遍历链表查找匹配的配置项
+    while (current != NULL) {
+        if (current->item.name == name) {
+            // 找到匹配的配置项,返回其参数值
+            return stoi(current->item.value);
+        }
+        current = current->next;
+    }
+
+    // 如果没有找到匹配的配置项,返回L"err"
+    return -1;
+}
 // 添加配置项到链表
 void config::add(const std::wstring& name, const std::wstring& value) {
     Node* current = head;

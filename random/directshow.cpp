@@ -41,15 +41,16 @@ void directshow::play(wstring path) {
 	if (hr != S_OK) {
 		mywindows::errlog("read video unsuccessfully");
 	}
-	if (!(std::stoi(config::get(INWINDOW))))
-		pVideoWindow->put_WindowStyle(WS_POPUP);
-	else
+	if (!(std::stoi(config::get(INWINDOW)))) {
+		pVideoWindow->put_WindowStyle(WS_POPUP|WS_CHILD);
+	}
+	else {
 		pVideoWindow->put_WindowStyle(WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN | WS_THICKFRAME);
-	pVideoWindow->put_Width(mywindows::windowWidth * 1.02);
-	pVideoWindow->put_Height(mywindows::windowHeight * 1.1);
+		pVideoWindow->put_Width(mywindows::windowWidth * 1.02);
+		pVideoWindow->put_Height(mywindows::windowHeight * 1.1);
+	}
 	pVideoWindow->put_Left(mywindows::windowLeft);
 	pVideoWindow->put_Top(mywindows::windowTop);
-
 	if (SUCCEEDED(hr))
 	{
 		if (!setting::offmusic) {
@@ -58,6 +59,7 @@ void directshow::play(wstring path) {
 		}
 		if (setting::offmusic) pBaicAudio->put_Volume(-10000);
 		mywindows::log("play begin");
+		pVideoWindow->SetWindowPosition(0, 0, mywindows::windowWidth, mywindows::windowHeight);
 		hr = pControl->Run();
 		long evCode;
 		pEvent->WaitForCompletion(INFINITE, &evCode);

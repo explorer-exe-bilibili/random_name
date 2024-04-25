@@ -12,7 +12,8 @@ public:
 	static bool ing, printing, isball10, isball1, ball10ing, clicked, ft;
 	static int mode, bottom1x, bottom1y,screenmode;
 	static HFONT text, icon, text_big, text_mid, text_list, icon_mid;
-	static int overlay1X, overlay2X, overlay3X, overlay4X, overlay1Y, overlayW, overlayH, button1x, button2x, button3x, button4x, buttony, overlayX, overlayY;
+	static int overlay1X, overlay2X, overlay3X, overlay4X, overlay1Y, overlayW, overlayH, button1x, button2x, button3x, button4x, buttony, overX, overlayY;
 	static int ball10x, bally, ball1x, ball1end, ball10end, ballyend, settingx, settingy, settingxend, settingyend;
 	static int ballW, ballH, addnamex, addnamey, addnameendx, addnameendy, addnameW, addnameH;
+	static int exitx, exitxend, exity, exityend;
 };

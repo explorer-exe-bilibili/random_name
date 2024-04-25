@@ -30,7 +30,6 @@ LPCWSTR getname::random(int m, int i) {
     tmp3 = sth2sth::UTF8To16(tmp1.c_str());
     return tmp3;
 }
-
 int getname::getstar(const std::string& input) {
     // 找到第一个 "-"
     std::cerr << input << "\n";
@@ -48,7 +47,6 @@ int getname::getstar(const std::string& input) {
     // 如果未找到 "-" 或转换失败，返回默认值（可以根据需要修改）
     return 3;
 }
-
 std::string getname::removeAfterDash(const std::string& input) {
     // 找到第一个 "-"
     size_t dashPos = input.find("-");
@@ -61,7 +59,6 @@ std::string getname::removeAfterDash(const std::string& input) {
         return input;
     }
 }
-
 std::string getname::RandomLineFromFile(const std::wstring& filename)
 {
     std::vector<std::string> lines;

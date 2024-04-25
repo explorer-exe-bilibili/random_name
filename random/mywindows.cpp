@@ -60,7 +60,8 @@ void mywindows::removeFileNameFromPath(char* path) {
         // 将最后一个'\'后面的所有字符（包括它自己）替换为字符串结束符'\0'
         *lastSlash = '\0';
     }
-}void mywindows::removeFileNameFromPath(wchar_t* path) {
+}
+void mywindows::removeFileNameFromPath(wchar_t* path) {
     // 获取字符串长度
     size_t len = wcslen(path);
     // 找到最后一个'\'的位置

@@ -10,7 +10,7 @@
 void click::firstscreen(int x, int y)
 {
     if (x >= ui::overlay1X AND x <= ui::button1x AND y >= ui::overlay1Y AND y <= ui::buttony) { ui::mode = 1; directshow::music(CLICK); }
-    else if (x >= ui::overlay1X AND x <= ui::button2x AND y >= ui::overlay1Y AND y <= ui::buttony) { ui::mode = 2; directshow::music(CLICK); }
+    else if (x >= ui::overlay2X AND x <= ui::button2x AND y >= ui::overlay1Y AND y <= ui::buttony) { ui::mode = 2; directshow::music(CLICK); }
     else if (x >= ui::overlay3X AND x <= ui::button3x AND y >= ui::overlay1Y AND y <= ui::buttony) { ui::mode = 3; directshow::music(CLICK); }
     else if (x >= ui::overlay4X AND x <= ui::button4x AND y >= ui::overlay1Y AND y <= ui::buttony) { ui::mode = 4; directshow::music(CLICK); }
     else if (x >= ui::bottom1x AND x <= ui::bottom1x + mywindows::windowWidth * 0.073 AND y >= ui::bottom1y AND y <= ui::bottom1y + mywindows::windowHeight * 0.039) { setting::offvideo = !setting::offvideo; directshow::music(CLICK); }

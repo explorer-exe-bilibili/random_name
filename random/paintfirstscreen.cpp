@@ -53,17 +53,15 @@ void paintfirstscreen::printfirstmenu(HDC hdc, HDC hdcMem) {
 	paintoverlay(hdc, hdcMem);
 	firsttime = !firsttime;
 }
-
 void paintfirstscreen::repaint()
 {
 	firstpaint = 1;
 	InvalidateRect(mywindows::hWnd, 0, 0);
 }
-
 void paintfirstscreen::paintoverlay(HDC hdc, HDC hdcMem) {
 	if (ui::mode == 1) {
 		SelectObject(hdcMem, hbitmaps[over1]);
-		StretchBlt(hdc, ui::overlayX, ui::overlayY, (mywindows::windowWidth * 0.6), (mywindows::windowHeight * 0.6), hdcMem, 0, 0, overlay1Bm.bmWidth, overlay1Bm.bmHeight, SRCCOPY);
+		StretchBlt(hdc, ui::overX, ui::overlayY, (mywindows::windowWidth * 0.6), (mywindows::windowHeight * 0.6), hdcMem, 0, 0, overlay1Bm.bmWidth, overlay1Bm.bmHeight, SRCCOPY);
 		SelectObject(hdcMem, hbitmaps[pink1b]);
 		StretchBlt(hdc, ui::ball1x, ui::bally, ui::ballW, ui::ballH, hdcMem, 0, 0, ball.bmWidth, ball.bmHeight, SRCAND);
 		SelectObject(hdcMem, hbitmaps[pink1i]);
@@ -76,7 +74,7 @@ void paintfirstscreen::paintoverlay(HDC hdc, HDC hdcMem) {
 	}
 	else if (ui::mode == 2) {
 		SelectObject(hdcMem, hbitmaps[over2]);
-		StretchBlt(hdc, ui::overlayX, ui::overlayY, (mywindows::windowWidth * 0.6), (mywindows::windowHeight * 0.6), hdcMem, 0, 0, overlay2Bm.bmWidth, overlay2Bm.bmHeight, SRCCOPY);
+		StretchBlt(hdc, ui::overX, ui::overlayY, (mywindows::windowWidth * 0.6), (mywindows::windowHeight * 0.6), hdcMem, 0, 0, overlay2Bm.bmWidth, overlay2Bm.bmHeight, SRCCOPY);
 		SelectObject(hdcMem, hbitmaps[pink1b]);
 		StretchBlt(hdc, ui::ball1x, ui::bally, ui::ballW, ui::ballH, hdcMem, 0, 0, ball.bmWidth, ball.bmHeight, SRCAND);
 		SelectObject(hdcMem, hbitmaps[pink1i]);
@@ -89,7 +87,7 @@ void paintfirstscreen::paintoverlay(HDC hdc, HDC hdcMem) {
 	}
 	else if (ui::mode == 3) {
 		SelectObject(hdcMem, hbitmaps[over3]);
-		StretchBlt(hdc, ui::overlayX, ui::overlayY, (mywindows::windowWidth * 0.6), (mywindows::windowHeight * 0.6), hdcMem, 0, 0, overlay3Bm.bmWidth, overlay3Bm.bmHeight, SRCCOPY);
+		StretchBlt(hdc, ui::overX, ui::overlayY, (mywindows::windowWidth * 0.6), (mywindows::windowHeight * 0.6), hdcMem, 0, 0, overlay3Bm.bmWidth, overlay3Bm.bmHeight, SRCCOPY);
 		SelectObject(hdcMem, hbitmaps[pink1b]);
 		StretchBlt(hdc, ui::ball1x, ui::bally, ui::ballW, ui::ballH, hdcMem, 0, 0, ball.bmWidth, ball.bmHeight, SRCAND);
 		SelectObject(hdcMem, hbitmaps[pink1i]);
@@ -102,7 +100,7 @@ void paintfirstscreen::paintoverlay(HDC hdc, HDC hdcMem) {
 	}
 	else if (ui::mode == 4) {
 		SelectObject(hdcMem, hbitmaps[over4]);
-		StretchBlt(hdc, ui::overlayX, ui::overlayY, (mywindows::windowWidth * 0.6), (mywindows::windowHeight * 0.6), hdcMem, 0, 0, overlay4Bm.bmWidth, overlay4Bm.bmHeight, SRCCOPY);
+		StretchBlt(hdc, ui::overX, ui::overlayY, (mywindows::windowWidth * 0.6), (mywindows::windowHeight * 0.6), hdcMem, 0, 0, overlay4Bm.bmWidth, overlay4Bm.bmHeight, SRCCOPY);
 		SelectObject(hdcMem, hbitmaps[blue1b]);
 		StretchBlt(hdc, ui::ball1x, ui::bally, ui::ballW, ui::ballH, hdcMem, 0, 0, ball.bmWidth, ball.bmHeight, SRCAND);
 		SelectObject(hdcMem, hbitmaps[blue1i]);
