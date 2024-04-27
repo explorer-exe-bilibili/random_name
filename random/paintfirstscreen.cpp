@@ -13,15 +13,15 @@ bool paintfirstscreen::firsttime = 1;
 bool paintfirstscreen::firstpaint = 1;
 
 extern HBITMAP hbitmaps[BitmapCounts];
-extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg_, exitinfo_, goldenbg, listbm_, list4star_, list5star_, list6star_, list3star_, buttom_;
+extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg, exitinfo, goldenbg, listbm;
 
 void paintfirstscreen::printfirstmenu(HDC hdc, HDC hdcMem) {
-	if (setting::initing)firstpaint = 1;
+	if (ui::ScreenModeChanged)firstpaint = 1;
 	if (firstpaint) {
 		firstpaint = 0;
 		SelectObject(hdcMem, hbitmaps[background]);
 		StretchBlt(hdc, 0, 0, mywindows::windowWidth, mywindows::windowHeight, hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
-		setting::initing = 0;
+		ui::ScreenModeChanged = 0;
 	}
 	if (setting::offvideo)
 		ui::creatbuttom(hdc, hdcMem, ui::bottom1x, ui::bottom1y, L"Ìø¹ýÊÓÆµ:¿ª");
@@ -36,9 +36,9 @@ void paintfirstscreen::printfirstmenu(HDC hdc, HDC hdcMem) {
 	SelectObject(hdcMem, hbitmaps[over4]);
 	StretchBlt(hdc, ui::overlay4X, ui::overlay1Y, ui::overlayW, ui::overlayH, hdcMem, 0, 0, overlay4Bm.bmWidth, overlay4Bm.bmHeight, SRCCOPY);
 	SelectObject(hdcMem, hbitmaps[exitb]);
-	StretchBlt(hdc, setting::exitx, setting::exity, setting::exitxend - setting::exitx, setting::exityend - setting::exity, hdcMem, 0, 0, setting::exitbm.bmWidth, setting::exitbm.bmHeight, SRCAND);
+	StretchBlt(hdc, ui::exitx, ui::exity, ui::exitxend - ui::exitx, ui::exityend - ui::exity, hdcMem, 0, 0, exitinfo.bmWidth, exitinfo.bmHeight, SRCAND);
 	SelectObject(hdcMem, hbitmaps[exiti]);
-	StretchBlt(hdc, setting::exitx, setting::exity, setting::exitxend - setting::exitx, setting::exityend - setting::exity, hdcMem, 0, 0, setting::exitbm.bmWidth, setting::exitbm.bmHeight, SRCPAINT);
+	StretchBlt(hdc, ui::exitx, ui::exity, ui::exitxend - ui::exitx, ui::exityend - ui::exity, hdcMem, 0, 0, exitinfo.bmWidth, exitinfo.bmHeight, SRCPAINT);
 	SelectObject(hdc, ui::icon);
 	SetBkColor(hdc, RGB(255, 255, 255));
 	SetTextColor(hdc, RGB(211, 188, 142));

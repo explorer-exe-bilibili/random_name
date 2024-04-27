@@ -130,6 +130,21 @@ int config::getint(const std::wstring& name)
     // 如果没有找到匹配的配置项,返回L"err"
     return -1;
 }
+int config::turnUpSideDown(const std::wstring& name)
+{
+    wstring val = get(name);
+    try {
+        bool t = !stoi(val);
+        replace(name, to_wstring(t));
+        return t;
+    }
+    catch(invalid_argument& e)
+    {
+        string estr(e.what());
+        mywindows::errlog(estr.c_str());
+        return -1;
+    }
+}
 // 添加配置项到链表
 void config::add(const std::wstring& name, const std::wstring& value) {
     Node* current = head;

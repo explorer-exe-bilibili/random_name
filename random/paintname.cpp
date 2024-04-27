@@ -35,7 +35,7 @@ HWND paintname::Case6TimerHwnd = 0;
 HWND paintname::StarTimerHwnd = 0;
 
 extern HBITMAP hbitmaps[BitmapCounts];
-extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg_, exitinfo_, goldenbg, listbm_, list4star_, list5star_, list6star_, list3star_, buttom_;
+extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg, exitinfo, goldenbg, listbm, liststar;
 
 void paintname::showname1() {
 	directshow::music(CLICK);
@@ -126,7 +126,7 @@ void paintname::out10name(HDC hdc, HDC hdcMem) {
 void paintname::printnames(HDC hdc, HDC hdcMem) {
 	if (star_[step] < 5) {
 		SelectObject(hdcMem, hbitmaps[cardbackground]);
-		StretchBlt(hdc, 0, 0, mywindows::windowWidth, mywindows::windowHeight, hdcMem, 0, 0, cardbg_.bmWidth, cardbg_.bmHeight, SRCCOPY);
+		StretchBlt(hdc, 0, 0, mywindows::windowWidth, mywindows::windowHeight, hdcMem, 0, 0, cardbg.bmWidth, cardbg.bmHeight, SRCCOPY);
 		SetTextColor(hdc, RGB(240, 240, 240));
 		SetBkColor(hdc, RGB(21, 26, 38));
 	}
@@ -190,7 +190,6 @@ void paintname::printnames(HDC hdc, HDC hdcMem) {
 }
 void paintname::printstars(HDC hdc, int number) {
 	TextOut_(hdc, -1201, -1234, STAR);
-	setting::musicplayed = 1;
 	if (number <= 4) {
 		SetBkColor(hdc, RGB(21, 26, 38));
 		SelectObject(hdc, icon_star);
@@ -274,7 +273,7 @@ void paintname::listpainter(LPCWSTR tmp_, int i, HDC hdc) {
 }
 void paintname::menu(HDC hdc, HDC hdcMem) {
 	SelectObject(hdcMem, hbitmaps[listbg]);
-	StretchBlt(hdc, 0, 0, mywindows::windowWidth, mywindows::windowHeight, hdcMem, 0, 0, listbm_.bmWidth, listbm_.bmHeight, SRCCOPY);
+	StretchBlt(hdc, 0, 0, mywindows::windowWidth, mywindows::windowHeight, hdcMem, 0, 0, listbm.bmWidth, listbm.bmHeight, SRCCOPY);
 	LPCWSTR tmp_[10] = { 0 };
 	int count, count1, count2, count3;
 	int* itmp = mywindows::find(star_, sizeof(star_) / sizeof(getname::star[ui::mode - 1][0]), 6, &count);
@@ -289,7 +288,7 @@ void paintname::menu(HDC hdc, HDC hdcMem) {
 	for (int i = 0; i < count; ++i) {
 		Sleep(20);
 		SelectObject(hdcMem, hbitmaps[list6]);
-		StretchBlt(hdc, ui::listx[i], ui::listy, ui::listxend, ui::listyend, hdcMem, 0, 0, list6star_.bmWidth, list6star_.bmHeight, SRCCOPY);
+		StretchBlt(hdc, ui::listx[i], ui::listy, ui::listxend, ui::listyend, hdcMem, 0, 0, liststar.bmWidth, liststar.bmHeight, SRCCOPY);
 		SelectObject(hdc, ui::text_list);
 		SetBkColor(hdc, RGB(223, 228, 158));
 		listpainter(tmp_[i], i, hdc);
@@ -297,7 +296,7 @@ void paintname::menu(HDC hdc, HDC hdcMem) {
 	for (int i = count; i < count + count1; ++i) {
 		Sleep(20);
 		SelectObject(hdcMem, hbitmaps[list5]);
-		StretchBlt(hdc, ui::listx[i], ui::listy, ui::listxend, ui::listyend, hdcMem, 0, 0, list5star_.bmWidth, list5star_.bmHeight, SRCCOPY);
+		StretchBlt(hdc, ui::listx[i], ui::listy, ui::listxend, ui::listyend, hdcMem, 0, 0, liststar.bmWidth, liststar.bmHeight, SRCCOPY);
 		SelectObject(hdc, ui::text_list);
 		SetBkColor(hdc, RGB(223, 228, 158));
 		listpainter(tmp_[i], i, hdc);
@@ -305,7 +304,7 @@ void paintname::menu(HDC hdc, HDC hdcMem) {
 	for (int i = count + count1; i < count + count1 + count2; ++i) {
 		Sleep(20);
 		SelectObject(hdcMem, hbitmaps[list4]);
-		StretchBlt(hdc, ui::listx[i], ui::listy, ui::listxend, ui::listyend, hdcMem, 0, 0, list4star_.bmWidth, list4star_.bmHeight, SRCCOPY);
+		StretchBlt(hdc, ui::listx[i], ui::listy, ui::listxend, ui::listyend, hdcMem, 0, 0, liststar.bmWidth, liststar.bmHeight, SRCCOPY);
 		SelectObject(hdc, ui::text_list);
 		SetBkColor(hdc, RGB(154, 130, 220));
 		listpainter(tmp_[i], i, hdc);
@@ -313,13 +312,13 @@ void paintname::menu(HDC hdc, HDC hdcMem) {
 	for (int i = count + count1 + count2; i < count + count1 + count2 + count3; ++i) {
 		Sleep(20);
 		SelectObject(hdcMem, hbitmaps[list3]);
-		StretchBlt(hdc, ui::listx[i], ui::listy, ui::listxend, ui::listyend, hdcMem, 0, 0, list3star_.bmWidth, list3star_.bmHeight, SRCCOPY);
+		StretchBlt(hdc, ui::listx[i], ui::listy, ui::listxend, ui::listyend, hdcMem, 0, 0, liststar.bmWidth, liststar.bmHeight, SRCCOPY);
 		SelectObject(hdc, ui::text_list);
 		SetBkColor(hdc, RGB(149, 157, 136));
 		listpainter(tmp_[i], i, hdc);
 	}
 	skipped = 0;
-	setting::initing = 1;
+	ui::ScreenModeChanged = 1;
 	ui::printing = 0;
 	ui::ing = 0;
 	ui::isball10 = 0;

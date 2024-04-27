@@ -16,7 +16,7 @@ void click::firstscreen(int x, int y)
     else if (x >= ui::bottom1x AND x <= ui::bottom1x + mywindows::windowWidth * 0.073 AND y >= ui::bottom1y AND y <= ui::bottom1y + mywindows::windowHeight * 0.039) { setting::offvideo = !setting::offvideo; directshow::music(CLICK); }
     else if (x >= ui::ball10x AND x <= ui::ball10end AND y >= ui::bally AND y <= ui::ballyend) { paintname::showname10(); }
     else if (x >= ui::ball1x AND x <= ui::ball1end AND y >= ui::bally AND y <= ui::ballyend) { paintname::showname1(); }
-    else if (x >= setting::exitx AND x <= setting::exitxend AND y >= setting::exity AND y <= setting::exityend) { PostQuitMessage(0); }
+    else if (x >= ui::exitx AND x <= ui::exitxend AND y >= ui::exity AND y <= ui::exityend) { PostQuitMessage(0); }
     else if (x >= ui::settingx AND x <= ui::settingxend AND y >= ui::settingy AND y <= ui::settingyend) { ui::screenmode = SETTING; directshow::music(ENTER); }
 }
 

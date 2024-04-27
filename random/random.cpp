@@ -21,7 +21,7 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		hbitmaps[blue1i] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\1bluei.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		hbitmaps[exiti] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\exiti.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		hbitmaps[exitb] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\exitb.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-		hbitmaps[buttom] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\buttom.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		hbitmaps[Buttom] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\buttom.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		hbitmaps[blue10i] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\10bluei.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		hbitmaps[blue10b] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\10blueb.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		hbitmaps[goldencardbg] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\goldenbg.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
@@ -30,7 +30,7 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		hbitmaps[list4] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\4list.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		hbitmaps[list5] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\5list.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		hbitmaps[list6] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\fulllist.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-		hbitmaps[setbm] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\setting.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		hbitmaps[SetBM] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\setting.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		hbitmaps[setbutton] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\settingbuttom.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
 		int desiredPixelHeight = mywindows::windowWidth * 0.17;
@@ -54,21 +54,18 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		// 获取图标位图信息
 		GetObject(hbitmaps[background], sizeof(BITMAP), &bm);
 		GetObject(hbitmaps[setbutton], sizeof(BITMAP), &setting::setbu);
-		GetObject(hbitmaps[cardbackground], sizeof(BITMAP), &cardbg_);
-		GetObject(hbitmaps[listbg], sizeof(BITMAP), &listbm_);
-		GetObject(hbitmaps[exitb], sizeof(BITMAP), &setting::exitbm);
+		GetObject(hbitmaps[cardbackground], sizeof(BITMAP), &cardbg);
+		GetObject(hbitmaps[listbg], sizeof(BITMAP), &listbm);
+		GetObject(hbitmaps[exitb], sizeof(BITMAP), &exitinfo);
 		GetObject(hbitmaps[goldencardbg], sizeof(BITMAP), &goldenbg);
 		GetObject(hbitmaps[pink1b], sizeof(BITMAP), &ball);
-		GetObject(hbitmaps[list3], sizeof(BITMAP), &list3star_);
-		GetObject(hbitmaps[list4], sizeof(BITMAP), &list4star_);
-		GetObject(hbitmaps[list5], sizeof(BITMAP), &list5star_);
-		GetObject(hbitmaps[list6], sizeof(BITMAP), &list6star_);
+		GetObject(hbitmaps[list3], sizeof(BITMAP), &liststar);
 		GetObject(hbitmaps[over1], sizeof(BITMAP), &overlay1Bm);
 		GetObject(hbitmaps[over2], sizeof(BITMAP), &overlay2Bm);
 		GetObject(hbitmaps[over3], sizeof(BITMAP), &overlay3Bm);
 		GetObject(hbitmaps[over4], sizeof(BITMAP), &overlay4Bm);
-		GetObject(hbitmaps[buttom], sizeof(BITMAP), &buttom_);
-		GetObject(hbitmaps[setbm], sizeof(BITMAP), &setting::setbm_);
+		GetObject(hbitmaps[Buttom], sizeof(BITMAP), &buttom);
+		GetObject(hbitmaps[SetBM], sizeof(BITMAP), &setting::setbm);
 		// 打开并播放背景音乐
 		mciSendString(L"open .\\files\\mp3\\backsound.mp3 alias bgm", NULL, 0, NULL); // 打开 MP3 文件并创建一个别名 'bgm'
 		if (!setting::offmusic)
@@ -84,12 +81,12 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		mywindows::windowTop = rect.left;
 		mywindows::windowLeft = rect.top;
 		int tempint = rect.right - rect.left;
-		if (tempint != mywindows::windowWidth)setting::initing = 1;
+		if (tempint != mywindows::windowWidth)ui::ScreenModeChanged = 1;
 		mywindows::windowWidth = tempint;
 		tempint = rect.bottom - rect.top;
-		if (tempint != mywindows::windowHeight)setting::initing = 1;
+		if (tempint != mywindows::windowHeight)ui::ScreenModeChanged = 1;
 		mywindows::windowHeight = tempint;
-		if (setting::initing) {
+		if (ui::ScreenModeChanged) {
 			ui::ballW = 0.18 * mywindows::windowWidth;
 			ui::ballH = 0.075 * mywindows::windowHeight;
 			ui::ball10x = mywindows::windowWidth - ui::ballW * 1.3;
@@ -123,10 +120,10 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 			ui::settingy = mywindows::windowHeight * 0.85;
 			ui::settingxend = ui::settingx + mywindows::windowWidth * 0.023;
 			ui::settingyend = ui::settingy + mywindows::windowHeight * 0.036;
-			setting::exitx = mywindows::windowWidth * 0.9;
-			setting::exitxend = mywindows::windowWidth * 0.93;
-			setting::exity = mywindows::windowHeight * 0.045;
-			setting::exityend = mywindows::windowHeight * 0.045 + mywindows::windowWidth * 0.03;
+			ui::exitx = mywindows::windowWidth * 0.9;
+			ui::exitxend = mywindows::windowWidth * 0.93;
+			ui::exity = mywindows::windowHeight * 0.045;
+			ui::exityend = mywindows::windowHeight * 0.045 + mywindows::windowWidth * 0.03;
 			ui::listx[0] = mywindows::windowWidth * 0.107;
 			ui::listxend = mywindows::windowWidth * 0.078;
 			ui::addnamex = mywindows::windowWidth * 0.4;
@@ -185,27 +182,14 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		SetStretchBltMode(hdc, HALFTONE);
 		switch (ui::screenmode)
 		{
-		case FIRST_MENU: {
-			paintfirstscreen::printfirstmenu(hdc, hdcMem);
-			//if (setting::initing)paintfirstscreen::printfirstmenu(hdc, hdcMem);
-			//else if (!(setting::initing AND paintfirstscreen::firsttime)) {
-			//    paintfirstscreen::printfirstmenu(hdc, hdcMem);
-			//    mywindows::log("set mode %d", ui::mode);
-			//    if (setting::offvideo)
-			//        ui::creatbuttom(hdc, hdcMem, ui::bottom1x, ui::bottom1y, L"跳过视频:开");
-			//    if (!setting::offvideo)
-			//        ui::creatbuttom(hdc, hdcMem, ui::bottom1x, ui::bottom1y, L"跳过视频:关");
-			//}
-			//else if (paintfirstscreen::firsttime)
-			//    if (ui::clicked) paintfirstscreen::printfirstmenu(hdc, hdcMem);
-		}break;
+		case FIRST_MENU:paintfirstscreen::printfirstmenu(hdc, hdcMem);break;
 		case SHOW_NAMES_ING: {
-			setting::initing = 0;
+			ui::ScreenModeChanged = 0;
 			if (ui::printing) {
 				if (ui::isball1) {
 					paintname::out1name(hdc, hdcMem);
 					ui::ing = 0;
-					setting::initing = 1;
+					ui::ScreenModeChanged = 1;
 				}
 				if (ui::isball10) {
 					if (ui::ft) {
@@ -218,12 +202,7 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 				}
 			}
 		}break;
-		case SETTING: {
-			setting::initing = 0;
-			setting::paintsettingpage(hdc, hdcMem);
-		}break;
-		default:
-			break;
+		case SETTING: setting::paintsettingpage(hdc,hdcMem);break;
 		}
 		mywindows::log("paint successfully");
 		DeleteDC(hdcMem);
@@ -235,15 +214,9 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 		if (!ui::ing) {
 			switch (ui::screenmode)
 			{
-			case FIRST_MENU:
-				click::firstscreen(x, y);
-				break;
-			case SHOW_NAMES_ING:
-				click::showname(x, y);
-				break;
-			case SETTING:
-				click::setting(x, y);
-				break;
+			case FIRST_MENU:click::firstscreen(x, y);break;
+			case SHOW_NAMES_ING:click::showname(x, y);break;
+			case SETTING:click::setting(x, y);break;
 			}
 		}
 		paintname::KillAllTimer();
@@ -340,9 +313,11 @@ int WINAPI WinMain(
 	ShowWindow(mywindows::hWnd, SW_SHOWNORMAL);//把窗体显示出来
 	FILE* t;
 	fopen_s(&t, ".\\version", "w");
-	fprintf(t, "1.0.0");
-	fclose(t);
-	t = 0;
+	if (t != 0) {
+		fprintf(t, "1.0.0");
+		fclose(t);
+		t = 0;
+	}
 	if (std::filesystem::exists("upgrade_temp.exe"))
 	{
 		std::filesystem::remove("upgrade.exe");

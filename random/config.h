@@ -39,22 +39,23 @@ private:
 	// 定义链表节点
 	typedef struct Node {
 	ConfigItem item;
-	struct Node* next;
+	struct Node* next=0;
 	} Node;
 	// 定义链表头节点
 	static Node* head;
 	static const wchar_t* LogString;
 	static std::wstring configpath;
 public:
+	static int turnUpSideDown(const std::wstring& name);
 	static void add(const std::wstring& name, const std::wstring& value);
-	  static void readFile();
-	  static void saveFile();
-	  static void cleanup();
-	  static void deleteItem(const std::wstring& name);
-	  static void replace(const std::wstring& option, const std::wstring& value);
-	  static void printAllConfigItems();
-	  static void init();
-	  static std::wstring get(const std::wstring& name);
-	  static int getint(const std::wstring& name);
+	static void readFile();
+	static void saveFile();
+	static void cleanup();
+	static void deleteItem(const std::wstring& name);
+	static void replace(const std::wstring& option, const std::wstring& value);
+	static void printAllConfigItems();
+	static void init();
+	static std::wstring get(const std::wstring& name);
+	static int getint(const std::wstring& name);
 };
 

@@ -10,34 +10,37 @@
 #include "sth2sth.h"
 #include "bitmaps.h"
 #include"ui.h"
+using namespace std;
 
 namespace fs = std::filesystem;
 #pragma comment(lib, "comctl32.lib")
 
 extern HBITMAP hbitmaps[BitmapCounts];
-extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg_, exitinfo_, goldenbg, listbm_, list4star_, list5star_, list6star_, list3star_, buttom_;
+extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg, exitinfo, goldenbg, listbm;
 
 bool setting::fullscreen, setting::offmusic = 0;
 setting::sNode* setting::shead = NULL;
-int setting::exitx, setting::exitxend, setting::exity, setting::exityend, setting::settingpage = 1;
-BITMAP setting::exitbm, setting::setbm_, setting::setbu;
-bool setting::musicplayed = 0, setting::offvideo = 0, setting::reran = 0, setting::initing = 1;
+int setting::settingpage = 1;
+BITMAP setting::setbm, setting::setbu;
+bool setting::offvideo = 0, setting::reran = 0;
 HWND setting::textboxhwnd[TEXTBOXHWNDNUMBER] = { NULL };
 int setting::textboxnumber = 0;
 bool setting::isused[TEXTBOXHWNDNUMBER + BOTTONNUMBER] = { 0 }, setting::changebitmap[4] = { 0 };
 setting::settingxy setting::sxy[20];
 static bool firstpaint = 1;
-
+int nextbmx, nextbmy, nextxend, nextyend;
+int lastbmx, lastbmy, lastxend, lastyend;
+int totalp = 3;
 void setting::paintsettingpage(HDC hdc, HDC hdcMem) {
 	if (firstpaint) {
-		SelectObject(hdcMem, hbitmaps[setbm]);
-		StretchBlt(hdc, 0, 0, mywindows::windowWidth, mywindows::windowHeight, hdcMem, 0, 0, setbm_.bmWidth, setbm_.bmHeight, SRCCOPY);
+		SelectObject(hdcMem, hbitmaps[SetBM]);
+		StretchBlt(hdc, 0, 0, mywindows::windowWidth, mywindows::windowHeight, hdcMem, 0, 0, setbm.bmWidth, setbm.bmHeight, SRCCOPY);
 		firstpaint = 0;
 	}
 	SelectObject(hdcMem, hbitmaps[exitb]);
-	StretchBlt(hdc, exitx, exity, exitxend - exitx, exityend - exity, hdcMem, 0, 0, exitbm.bmWidth, exitbm.bmHeight, SRCAND);
+	StretchBlt(hdc, ui::exitx, ui::exity, ui::exitxend - ui::exitx, ui::exityend - ui::exity, hdcMem, 0, 0, exitinfo.bmWidth, exitinfo.bmHeight, SRCAND);
 	SelectObject(hdcMem, hbitmaps[exiti]);
-	StretchBlt(hdc, exitx, exity, exitxend - exitx, exityend - exity, hdcMem, 0, 0, exitbm.bmWidth, exitbm.bmHeight, SRCPAINT);
+	StretchBlt(hdc, ui::exitx, ui::exity, ui::exitxend - ui::exitx, ui::exityend - ui::exity, hdcMem, 0, 0, exitinfo.bmWidth, exitinfo.bmHeight, SRCPAINT);
 	switch (settingpage)
 	{
 	case 1: {
@@ -59,10 +62,14 @@ void setting::paintsettingpage(HDC hdc, HDC hdcMem) {
 		textbox(12, 16, SIGNALSTAR5, L"单发5星视频", hdc, hdcMem, 1);
 		textbox(13, 17, GROUPSTAR4, L"十发4星视频", hdc, hdcMem, 1);
 		textbox(14, 18, GROUPSTAR5, L"十发5星视频", hdc, hdcMem, 1);
+	}break;
 	}
-	default:
-		break;
-	}
+	wstring t = to_wstring(settingpage) + L"/" + to_wstring(totalp);
+	SelectObject(hdc, ui::icon_mid);
+	TextOut_(hdc, nextbmx , nextbmy , L"b");
+	TextOut_(hdc, lastbmx, lastbmy, L"c");
+	SelectObject(hdc, ui::text_mid);
+	TextOut_(hdc, mywindows::windowWidth * 0.765, mywindows::windowHeight * 0.91, t.c_str());
 }
 void setting::switchbm(const wchar_t* configname, const wchar_t* name, int number, HDC hdc, HDC hdcMem) {
 	SelectObject(hdc, ui::text_mid);
@@ -84,6 +91,16 @@ void setting::switchbm(const wchar_t* configname, const wchar_t* name, int numbe
 	newnode->next = shead;
 	newnode->number = number;
 	shead = newnode;
+}
+void setting::changepage()
+{
+	char n = 0;
+	while (textboxhwnd[n] != 0) {
+		DestroyWindow(textboxhwnd[n]);
+		n++;
+	}
+	for (n = 0; n < TEXTBOXHWNDNUMBER + BOTTONNUMBER; n++)isused[n] = 0;
+	firstpaint = 1;
 }
 void setting::switchbm(bool OnOrOff, const wchar_t* name, int number, HDC hdc, HDC hdcMem) {
 	SelectObject(hdc, ui::text_mid);
@@ -141,14 +158,31 @@ void setting::textbox(int ebnumber, int number, std::wstring configname, LPCWSTR
 void  setting::settingkicked(int x, int y) {
 	sNode* current = shead;
 	int number = -1;
-	if (x >= exitx AND x <= exitxend AND y >= exity AND y <= exityend)quit();
-	while (current != NULL) {
-		if (x >= current->x AND x <= current->xend AND y >= current->y AND y <= current->yend) {
-			number = current->number;
-			break;
+	if (x >= ui::exitx AND x <= ui::exitxend AND y >= ui::exity AND y <= ui::exityend)quit();
+	else if (x >= nextbmx AND x <= nextxend AND y >= nextbmy AND y <= nextyend) {
+		number = 0;
+		settingpage--;
+		if (settingpage < 1) {
+			settingpage = totalp;
 		}
-		current = current->next;
+		changepage();
 	}
+	else if (x >= lastbmx AND x <= lastxend AND y >= lastbmy AND y <= lastyend) {
+		number = 0;
+		settingpage++;
+		if (settingpage > totalp) {
+			settingpage = 1;
+		}
+		changepage();
+	}
+	else 
+		while (current != NULL) {
+			if (x >= current->x AND x <= current->xend AND y >= current->y AND y <= current->yend) {
+				number = current->number;
+				break;
+			}
+			current = current->next;
+		}
 	if (number != -1) {
 		directshow::music(CLICK);
 		switch (number)
@@ -225,8 +259,6 @@ void  setting::settingkicked(int x, int y) {
 			break;
 		case 18:
 			OnButtonClick(mywindows::hWnd, L"选择十发5星视频", L"视频文件(*.avi; *.mpg; *.mpeg; *.m2v; *.vob; *.mp4; *.m4v; *.mp4v; *.3gp; *.3gp2; *.wmv; *.asf; *.mov; *.qt; *.rm; *.rmvb; *.flv; *.f4v)\0 *.avi; *.mpg; *.mpeg; *.m2v; *.vob; *.mp4; *.m4v; *.mp4v; *.3gp; *.3gp2; *.wmv; *.asf; *.mov; *.qt; *.rm; *.rmvb; *.flv; *.f4v\0\0", 14, GROUPSTAR5);
-			break;
-		default:
 			break;
 		}
 	}
@@ -321,7 +353,7 @@ void setting::seteditbox(LPARAM lParam, WPARAM wParam) {
 			}
 		}
 	}
-	initing = 1;
+	ui::ScreenModeChanged = 1;
 }
 //创建一个文本框
 HWND setting::CreateEditBox(HWND hWndParent, int NUMBER, int x, int y, int w, int h, const wchar_t* words) {
@@ -359,6 +391,15 @@ void setting::init() {
 		sxy[i].bmw = mywindows::windowWidth * 0.1;
 		sxy[i].bmh = mywindows::windowWidth * 0.03;
 	}
+
+	nextbmx = mywindows::windowWidth * 0.73;
+	nextbmy = mywindows::windowHeight * 0.91;
+	nextxend = mywindows::windowWidth * 0.752;
+	nextyend = mywindows::windowHeight * 0.95;
+	lastbmx = mywindows::windowWidth * 0.8;
+	lastbmy = mywindows::windowHeight * 0.91;
+	lastxend = mywindows::windowWidth * 0.822;
+	lastyend = mywindows::windowHeight * 0.95;
 }
 // 假设这是在一个事件处理函数中，例如按钮点击事件
 void setting::OnButtonClick(HWND hwnd, LPCWSTR title, LPCWSTR filter, int number, const wchar_t* configname)
@@ -397,7 +438,7 @@ void  setting::quit() {
 		n++;
 	}
 	ui::screenmode = FIRST_MENU;
-	initing = 1;
+	ui::ScreenModeChanged = 1;
 	for (n = 0; n < TEXTBOXHWNDNUMBER + BOTTONNUMBER; n++)isused[n] = 0;
 	firstpaint = 1;
 }

@@ -16,4 +16,5 @@ public:
 	static int ball10x, bally, ball1x, ball1end, ball10end, ballyend, settingx, settingy, settingxend, settingyend;
 	static int ballW, ballH, addnamex, addnamey, addnameendx, addnameendy, addnameW, addnameH;
 	static int exitx, exitxend, exity, exityend;
+	static bool ScreenModeChanged;
 };

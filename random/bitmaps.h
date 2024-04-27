@@ -4,7 +4,7 @@
 #define BitmapCounts 25
 
 #define setbutton 24
-#define setbm 23
+#define SetBM 23
 #define exiti 22
 #define exitb 21
 #define list3 20
@@ -13,7 +13,7 @@
 #define list4 17
 #define listbg 16
 #define goldencardbg 15
-#define buttom 14
+#define Buttom 14
 #define blue10b 13
 #define blue10i 12
 #define blue1b 11

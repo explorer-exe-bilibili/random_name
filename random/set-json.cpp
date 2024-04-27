@@ -8,18 +8,45 @@
 #include "ui.h"
 
 #define BETWEENCOUNT 100
-#define WINDOWTITLE 200
+#define S_WINDOWTITLE 200
 #define ISFILE 300
+#define ISBITMAP 400
 #define NOLIMIT 0
 
 using json = nlohmann::json;
 using namespace std;
 Log setlog("set-json.log", 0);
 extern HBITMAP hbitmaps[BitmapCounts];
-extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg_, exitinfo_, goldenbg, listbm_, list4star_, list5star_, list6star_, list3star_, buttom_;
+extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg, exitinfo, goldenbg, listbm, liststar, buttom;
 
 set2::set2() {
-	initing = 1;
+	{
+		bitmaps[background] = &bm;
+		bitmaps[blue10b] = &ball;
+		bitmaps[blue10i] = &ball;
+		bitmaps[blue1b] = &ball;
+		bitmaps[blue1i] = &ball;
+		bitmaps[Buttom] = &buttom;
+		bitmaps[cardbackground] = &cardbg;
+		bitmaps[exitb] = &exitinfo;
+		bitmaps[exiti] = &exitinfo;
+		bitmaps[goldencardbg] = &goldenbg;
+		bitmaps[list3] = &liststar;
+		bitmaps[list4] = &liststar;
+		bitmaps[list5] = &liststar;
+		bitmaps[list6] = &liststar;
+		bitmaps[listbg] = &listbm;
+		bitmaps[over1] = &overlay1Bm;
+		bitmaps[over2] = &overlay2Bm;
+		bitmaps[over3] = &overlay3Bm;
+		bitmaps[over4] = &overlay4Bm;
+		bitmaps[pink10b] = &ball;
+		bitmaps[pink10i] = &ball;
+		bitmaps[pink1b] = &ball;
+		bitmaps[pink1i] = &ball;
+		bitmaps[SetBM] = &setbm;
+		bitmaps[setbutton] = &setbu;
+	}
 	offmusic = config::getint(OFFMUSIC);
 	fullscreen = config::getint(INWINDOW);
 	// 读取JSON文件
@@ -45,18 +72,21 @@ set2::set2() {
 	for (const auto& page : data["pages"]) {
 		in = 0;
 		spage pt;
+		pt.Title = sth2sth::str2wstr(page.value("Title", ""));
 		for (const auto& sItem : page["item"]) {
 			sitem t;
-			t.HaveChooseFileBM = sItem.value("IsFile", 0);
+			t.IsFile = sItem.value("IsFile", 0);
 			t.IsEditBox = sItem.value("IsEditBox", 0);
-			t.IsSwitchBM = sItem.value("IsSwitch", 0);
-			t.number = sItem.value("Number", in);
-			t.Name = sth2sth::str2wstr(sItem.value("Name", "unknow"));
-			t.ConfigName = sth2sth::str2wstr(sItem.value("ConfigName", "unknow"));
-			t.FileChooseWindowName = sth2sth::str2wstr(sItem.value("WindowName", "unknow"));
+			t.IsSwitch = sItem.value("IsSwitch", 0);
+			t.Limit = sItem.value("Limit", NOLIMIT);
+			t.Number = sItem.value("Number", in);
+			t.BitmapNumber = sItem.value("BitmapNumber", 0);
+			t.Name = sth2sth::str2wstr(sItem.value("Name", ""));
+			t.ConfigName = sth2sth::str2wstr(sItem.value("ConfigName", ""));
+			t.FileChooseWindowName = sth2sth::str2wstr(sItem.value("FileChooseWindowName", ""));
 			{
 				string tmp = sItem.value("FileType", "All");
-				if (tmp == "All" AND t.HaveChooseFileBM)
+				if (tmp == "All" AND t.IsFile)
 					t.FileType = L"所有文件\0 *.*\0\0";
 				else if (tmp == "bmp")
 					t.FileType = L"bmp图片文件(*.bmp)\0 * .bmp\0\0";
@@ -66,17 +96,51 @@ set2::set2() {
 					t.FileType = L"视频文件(*.avi; *.mpg; *.mpeg; *.m2v; *.vob; *.mp4; *.m4v; *.mp4v; *.3gp; *.3gp2; *.wmv; *.asf; *.mov; *.qt; *.rm; *.rmvb; *.flv; *.f4v)\0 *.avi; *.mpg; *.mpeg; *.m2v; *.vob; *.mp4; *.m4v; *.mp4v; *.3gp; *.3gp2; *.wmv; *.asf; *.mov; *.qt; *.rm; *.rmvb; *.flv; *.f4v\0\0";
 				else if (tmp == "picture")
 					t.FileType = L"图片文件(*.jpg;*.jpeg;*.bmp;*.png;*.tif;*.tiff;*.gif;*.wmf;*.emf)\0*.jpg;*.jpeg;*.bmp;*.png;*.tif;*.tiff;*.gif;*.wmf;*.emf\0\0";
+				else t.FileType = L"";
+			}
+			if (t.Limit == BETWEENCOUNT) {
+				t.max = sItem.value("max", 0);
+				t.min = sItem.value("min", 0);
+				t.OutOfLimitOutPut = sth2sth::str2wstr(sItem.value("OutOfLimit", ""));
 			}
 			pt.items.push_back(t);
 			in++;
 		}
+		pt.itemcount = in;
 		pages.push_back(pt);
 		sp++;
 	}
 	return;
 }
 set2::set2(std::string& jsonfile) {
-	initing = 1;
+	{
+
+		bitmaps[background] = &bm;
+		bitmaps[blue10b] = &ball;
+		bitmaps[blue10i] = &ball;
+		bitmaps[blue1b] = &ball;
+		bitmaps[blue1i] = &ball;
+		bitmaps[Buttom] = &buttom;
+		bitmaps[cardbackground] = &cardbg;
+		bitmaps[exitb] = &exitinfo;
+		bitmaps[exiti] = &exitinfo;
+		bitmaps[goldencardbg] = &goldenbg;
+		bitmaps[list3] = &liststar;
+		bitmaps[list4] = &liststar;
+		bitmaps[list5] = &liststar;
+		bitmaps[list6] = &liststar;
+		bitmaps[listbg] = &listbm;
+		bitmaps[over1] = &overlay1Bm;
+		bitmaps[over2] = &overlay2Bm;
+		bitmaps[over3] = &overlay3Bm;
+		bitmaps[over4] = &overlay4Bm;
+		bitmaps[pink10b] = &ball;
+		bitmaps[pink10i] = &ball;
+		bitmaps[pink1b] = &ball;
+		bitmaps[pink1i] = &ball;
+		bitmaps[SetBM] = &setbm;
+		bitmaps[setbutton] = &setbu;
+	}
 	offmusic = config::getint(OFFMUSIC);
 	fullscreen = config::getint(INWINDOW);
 	// 读取JSON文件
@@ -101,18 +165,21 @@ set2::set2(std::string& jsonfile) {
 	for (const auto& page : data["pages"]) {
 		in = 0;
 		spage pt;
+		pt.Title = sth2sth::str2wstr(page.value("Title", ""));
 		for (const auto& sItem : page["item"]) {
 			sitem t;
-			t.HaveChooseFileBM = sItem.value("IsFile", 0);
+			t.IsFile = sItem.value("IsFile", 0);
 			t.IsEditBox = sItem.value("IsEditBox", 0);
-			t.IsSwitchBM = sItem.value("IsSwitch", 0);
-			t.number = sItem.value("Number", in);
-			t.Name = sth2sth::str2wstr(sItem.value("Name", "unknow"));
-			t.ConfigName = sth2sth::str2wstr(sItem.value("ConfigName", "unknow"));
-			t.FileChooseWindowName = sth2sth::str2wstr(sItem.value("WindowName", "unknow"));
+			t.IsSwitch = sItem.value("IsSwitch", 0);
+			t.Limit = sItem.value("Limit", NOLIMIT);
+			t.Number = sItem.value("Number", in);
+			t.BitmapNumber = sItem.value("BitmapNumber", 0);
+			t.Name = sth2sth::str2wstr(sItem.value("Name", ""));
+			t.ConfigName = sth2sth::str2wstr(sItem.value("ConfigName", ""));
+			t.FileChooseWindowName = sth2sth::str2wstr(sItem.value("FileChooseWindowName", ""));
 			{
 				string tmp = sItem.value("FileType", "All");
-				if (tmp == "All" AND t.HaveChooseFileBM)
+				if (tmp == "All" AND t.IsFile)
 					t.FileType = L"所有文件\0 *.*\0\0";
 				else if (tmp == "bmp")
 					t.FileType = L"bmp图片文件(*.bmp)\0 * .bmp\0\0";
@@ -122,12 +189,16 @@ set2::set2(std::string& jsonfile) {
 					t.FileType = L"视频文件(*.avi; *.mpg; *.mpeg; *.m2v; *.vob; *.mp4; *.m4v; *.mp4v; *.3gp; *.3gp2; *.wmv; *.asf; *.mov; *.qt; *.rm; *.rmvb; *.flv; *.f4v)\0 *.avi; *.mpg; *.mpeg; *.m2v; *.vob; *.mp4; *.m4v; *.mp4v; *.3gp; *.3gp2; *.wmv; *.asf; *.mov; *.qt; *.rm; *.rmvb; *.flv; *.f4v\0\0";
 				else if (tmp == "picture")
 					t.FileType = L"图片文件(*.jpg;*.jpeg;*.bmp;*.png;*.tif;*.tiff;*.gif;*.wmf;*.emf)\0*.jpg;*.jpeg;*.bmp;*.png;*.tif;*.tiff;*.gif;*.wmf;*.emf\0\0";
+				else t.FileType = L"";
 			}
-			t.limit = sItem.value("Limit", NOLIMIT);
-			if (t.limit == BETWEENCOUNT) {
+			if (t.Limit == BETWEENCOUNT) {
 				t.max = sItem.value("max", 0);
 				t.min = sItem.value("min", 0);
-				t.OutOfLimitOutPut = sth2sth::str2wstr(sItem.value("OutOfLimit", "NULL"));
+				t.OutOfLimitOutPut = sth2sth::str2wstr(sItem.value("OutOfLimit", ""));
+			}
+			else if (t.Limit == ISFILE || t.Limit == ISBITMAP) {
+				t.IsEditBox = 1;
+				t.IsFile = 1;
 			}
 			pt.items.push_back(t);
 			in++;
@@ -140,9 +211,291 @@ set2::set2(std::string& jsonfile) {
 }
 void set2::paint(HDC hdc, HDC hdcMem) {
 	if (firstpaint) {
-		SelectObject(hdcMem, hbitmaps[setbm]);
-		StretchBlt(hdc, 0, 0, mywindows::windowWidth, mywindows::windowHeight, hdcMem, 0, 0, setbm_.bmWidth, setbm_.bmHeight, SRCCOPY);
+		SelectObject(hdcMem, hbitmaps[SetBM]);
+		StretchBlt(hdc, 0, 0, mywindows::windowWidth, mywindows::windowHeight, hdcMem, 0, 0, setbm.bmWidth, setbm.bmHeight, SRCCOPY);
 		firstpaint = 0;
+	}
+	SelectObject(hdc, ui::text_mid);
+	wstring title = pages[settingpage].Title;
+	int titlex, titley;
+	int stringWidth = 0.0272 * mywindows::windowWidth * title.length();
+	titlex= (mywindows::windowWidth - stringWidth) / 2;
+	titley = mywindows::windowHeight * 0.09;
+	TextOut_(hdc, titlex, titley, title.c_str());
+	SelectObject(hdcMem, hbitmaps[exitb]);
+	StretchBlt(hdc, ui::exitx, ui::exity, ui::exitxend - ui::exitx, ui::exityend - ui::exity, hdcMem, 0, 0, exitinfo.bmWidth, exitinfo.bmHeight, SRCAND);
+	SelectObject(hdcMem, hbitmaps[exiti]);
+	StretchBlt(hdc, ui::exitx, ui::exity, ui::exitxend - ui::exitx, ui::exityend - ui::exity, hdcMem, 0, 0, exitinfo.bmWidth, exitinfo.bmHeight, SRCPAINT);
+	for (const auto& item : pages[settingpage].items) {
+		showitem(item, hdc, hdcMem);
+	}
+	unsigned int totalp = static_cast<int>(pages.size());
+	wstring t = to_wstring(settingpage) + L"/" + to_wstring(totalp);
+	SelectObject(hdc, ui::icon_mid);
+	TextOut_(hdc, nextbmx, nextbmy, L"b");
+	TextOut_(hdc, lastbmx, lastbmy, L"c");
+	SelectObject(hdc, ui::text_mid);
+	TextOut_(hdc, mywindows::windowWidth * 0.765, mywindows::windowHeight * 0.91, t.c_str());
+
+}
+void set2::rollback(string jsonpath) {
+	json data;
+	data = {
+		{"Title","图片",
+		{"item",{
+			"Name","卡池1图片",
+			"ConfigName","over1",
+			"FileChooseWindowName","选择卡池1图片",
+			"FileType","bmp",
+			"Limit",ISBITMAP,
+			"Number",1,
+			"BitmapNumber",0
+			},{
+			"Name","卡池2图片",
+			"ConfigName","over2",
+			"FileChooseWindowName","选择卡池2图片",
+			"FileType","bmp",
+			"Limit",ISBITMAP,
+			"Number",2,
+			"BitmapNumber",1
+			},{
+			"Name","卡池3图片",
+			"ConfigName","over3",
+			"FileChooseWindowName","选择卡池3图片",
+			"FileType","bmp",
+			"Limit",ISBITMAP,
+			"Number",3,
+			"BitmapNumber",2
+			},{
+			"Name","卡池4图片",
+			"ConfigName","over4",
+			"FileChooseWindowName","选择卡池4图片",
+			"FileType","bmp",
+			"Limit",ISBITMAP,
+			"Number",4,
+			"BitmapNumber",3
+			},{
+			"Name","关闭音乐",
+			"ConfigName","off music",
+			"IsSwitch",1,
+			"Number",11
+			},{
+			"Name","关闭视频",
+			"ConfigName","off video",
+			"IsSwitch",1,
+			"Number",12
+			}
+		}},
+		{"Title","名单与卡池",
+		{"item",{
+			"Name","卡池1名单",
+			"ConfigName","namesfile1",
+			"FileChooseWindowName","选择卡池1名单",
+			"FileType","nameFile",
+			"Limit",ISFILE,
+			"Number",1
+			},{
+			"Name","卡池2名单",
+			"ConfigName","namesfile2",
+			"FileChooseWindowName","选择卡池2名单",
+			"FileType","nameFile",
+			"Limit",ISFILE,
+			"Number",2
+			},{
+			"Name","卡池3名单",
+			"ConfigName","namesfile3",
+			"FileChooseWindowName","选择卡池3名单",
+			"FileType","nameFile",
+			"Limit",ISFILE,
+			"Number",3
+			},{
+			"Name","卡池4名单",
+			"ConfigName","namesfile4",
+			"FileChooseWindowName","选择卡池4名单",
+			"FileType","nameFile",
+			"Limit",ISFILE,
+			"Number",4
+			},{
+			"Name","抽背卡池",
+			"ConfigName","special",
+			"IsEditBox",1,
+			"Limit",BETWEENCOUNT,
+			"max",4,
+			"min",0,
+			"OutOfLimitOutPut","输入一个0-4之间的数字（0表示禁用）",
+			"Number",11
+			},{
+			"Name","关闭音乐",
+			"ConfigName","off music",
+			"IsSwitch",1,
+			"Number",12
+			},{
+			"Name","关闭视频",
+			"ConfigName","off video",
+			"IsSwitch",1,
+			"Number",13
+			}
+		}},
+		{"Title","视频",
+		"item",{{
+			"Name","单发3星视频",
+			"ConfigName","signal 3star video",
+			"FileChooseWindowName","选择单发3星视频",
+			"FileType","video",
+			"Limit",ISFILE,
+			"Number",1
+			},{
+			"Name","单发4星视频",
+			"ConfigName","signal 4star video",
+			"FileChooseWindowName","选择单发4星视频",
+			"FileType","video",
+			"Limit",ISFILE,
+			"Number",2
+			},{
+			"Name","单发5星视频",
+			"ConfigName","signal 5star video",
+			"FileChooseWindowName","选择单发5星视频",
+			"FileType","video",
+			"Limit",ISFILE,
+			"Number",3
+			},{
+			"Name","十发4星视频",
+			"ConfigName","group 4star video",
+			"FileChooseWindowName","选择十发4星视频",
+			"FileType","video",
+			"Limit",ISFILE,
+			"Number",5
+			},{
+			"Name","十发5星视频",
+			"ConfigName","group 5star video",
+			"FileChooseWindowName","选择十发5星视频",
+			"FileType","video",
+			"Limit",ISFILE,
+			"Number",6
+			},{
+			"Name","关闭音乐",
+			"ConfigName","off music",
+			"IsSwitch",1,
+			"Number",11
+			},{
+			"Name","关闭视频",
+			"ConfigName","off video",
+			"IsSwitch",1,
+			"Number",12
+			}
+		}},
+		{"Title","杂项",
+		{"item",{{
+			"Name","窗口模式",
+			"ConfigName","window mode(not full screen)",
+			"IsSwitch",1,
+			"Number",1,
+			},{
+			"Name","标题",
+			"ConfigName","title name",
+			"IsEditBox",1,
+			"Number",2
+			},{
+			"Name","关闭音乐",
+			"ConfigName","off music",
+			"IsSwitch",1,
+			"Number",11
+			},{
+			"Name","关闭视频",
+			"ConfigName","off video",
+			"IsSwitch",1,
+			"Number",12
+			}
+		}}
+}
+	};
+	// 写入JSON文件
+	std::ofstream file("files\\setting.json");
+	if (file.is_open()) {
+		file << data.dump(4); // 将JSON数据写入文件，4表示缩进4个空格
+		file.close();
+		setlog<<setlog.pt()<<"[INFO]" << "JSON data written to 'files\\setting.json'" << std::endl;
+	}
+	else {
+		setlog << setlog.pt() << "[ERROR]" << "Failed to open file for writing" << std::endl;
+	}
+}
+void set2::clicked(int x, int y)
+{
+	int totalp = pages.size();
+	int number = -1;
+	if (x >= ui::exitx AND x <= ui::exitxend AND y >= ui::exity AND y <= ui::exityend)quit();
+	else if (x >= nextbmx AND x <= nextxend AND y >= nextbmy AND y <= nextyend) {
+		number = 0;
+		settingpage--;
+		if (settingpage < 1) {
+			settingpage = totalp;
+		}
+		changepage();
+	}
+	else if (x >= lastbmx AND x <= lastxend AND y >= lastbmy AND y <= lastyend) {
+		number = 0;
+		settingpage++;
+		if (settingpage > totalp) {
+			settingpage = 1;
+		}
+		changepage();
+	}
+	else {
+		sNode* current = shead;
+		while (current != NULL) {
+			if (x >= current->x AND x <= current->xend AND y >= current->y AND y <= current->yend) {
+				number = current->number;
+				break;
+			}
+			current = current->next;
+		}
+	}
+	if (number != -1) {
+		directshow::music(CLICK);
+		if (number > 0) {
+			for (const auto& item : pages[settingpage - 1].items) {
+				if (number = item.Number) {
+					if (item.IsSwitch)
+						config::turnUpSideDown(item.ConfigName);
+					else if (item.IsFile) {
+						ChooseFile(mywindows::hWnd, item);
+						if (item.Limit == ISBITMAP) {
+							reloadbmp(item);
+						}
+					}
+				}
+			}
+		}
+	}
+}
+void set2::reloadbmp(sitem item)
+{
+	DeleteObject(hbitmaps[item.BitmapNumber]);
+	hbitmaps[item.BitmapNumber] =
+		(HBITMAP)LoadImage(NULL, config::get(item.ConfigName).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	GetObject(hbitmaps[item.BitmapNumber], sizeof(BITMAP), bitmaps[item.BitmapNumber]);
+}
+void set2::rereadconfig() {
+	offmusic = config::getint(OFFMUSIC);
+	fullscreen = !config::getint(INWINDOW);
+}
+void set2::changepage()
+{
+	char n = 0;
+	while (textboxhwnd[n] != 0) {
+		DestroyWindow(textboxhwnd[n]);
+		n++;
+	}
+	for (n = 0; n < 40; n++)isused[n] = 0;
+	firstpaint = 1;
+}
+void set2::showitem(sitem item, HDC hdc, HDC hdcMem) {
+	if (item.IsSwitch) {
+		switchbm(item, hdc, hdcMem);
+	}
+	else if (item.IsEditBox) {
+		textbox(item, hdc, hdcMem);
 	}
 }
 void set2::seteditbox(LPARAM lParam, WPARAM wParam)
@@ -158,7 +511,7 @@ void set2::seteditbox(LPARAM lParam, WPARAM wParam)
 		if (wcslen(sz) != 0) {
 			std::wstring tmp(sz);
 			for (const auto& item : pages[settingpage].items) {
-				if (item.number == numberoftextbox) editboxeditor(item,tmp);
+				if (item.Number == numberoftextbox) editboxeditor(item,tmp);
 				else continue;
 			}
 		}
@@ -166,57 +519,22 @@ void set2::seteditbox(LPARAM lParam, WPARAM wParam)
 }
 void set2::textbox(sitem item, HDC hdc, HDC hdcMem)
 {
-}
-void set2::editboxeditor(sitem item, wstring tmp)
-{
-	switch (item.limit)
-	{
-	case WINDOWTITLE:
-		SetWindowTextW(mywindows::hWnd, tmp.c_str());
-		break;
-	case BETWEENCOUNT:
-		int value = std::stoi(tmp);
-		if (value < item.min || value > item.max) {
-			MessageBoxW(NULL, item.OutOfLimitOutPut.c_str(), L"错误", MB_ICONERROR);
-			return;
-		}
-		break;
-	case ISFILE:
-		if (!std::filesystem::exists(tmp))return;
-	default:
-		break;
-	}
-	if (item.limit == WINDOWTITLE) {
-	}
-	else if (item.limit == BETWEENCOUNT)
-	{
-
-	}
-	else if(item.limit)
-	config::replace(item.ConfigName, tmp);
-	return;
-}
-
-
-set2::~set2() {
-	return;
-}
-void set2::textbox(sitem item, HDC hdc, HDC hdcMem) {
 	SelectObject(hdc, ui::text_mid);
 	SetBkColor(hdc, RGB(236, 229, 216));
 	SelectObject(hdcMem, hbitmaps[setbutton]);
-	TextOut_(hdc, sxy[item.number].x, sxy[item.number].y + mywindows::windowHeight * 0.01, item.Name.c_str());
+	TextOut_(hdc, sxy[item.Number].x, sxy[item.Number].y + mywindows::windowHeight * 0.01, item.Name.c_str());
+	int number = item.Number;
 	std::wstring wst = config::get(item.ConfigName).c_str();
-	if (isused[item.number] == 0) {
-		textboxhwnd[item.number] = CreateEditBox(mywindows::hWnd, item.number, sxy[item.number].bmx, sxy[item.number].bmy, sxy[item.number].bmw, sxy[item.number].bmh, wst.c_str());
+	if (isused[number] == 0) {
+		textboxhwnd[number] = CreateEditBox(mywindows::hWnd, number, sxy[number].bmx, sxy[number].bmy, sxy[number].bmw, sxy[number].bmh, wst.c_str());
 	}
-	if (item.HaveChooseFileBM) {
-		if (!isused[item.number + 20]) {
-			StretchBlt(hdc, sxy[item.number].bmxend, sxy[item.number].bmy, sxy[item.number].bmw, sxy[item.number].bmh, hdcMem, 0, 0, setbu.bmWidth, setbu.bmHeight, SRCCOPY);
-			TextOut_(hdc, sxy[item.number].bmxend + mywindows::windowWidth * 0.02, sxy[item.number].y + mywindows::windowHeight * 0.01, L"选择文件");
+	if (item.IsFile) {
+		if (!isused[number + 20]) {
+			StretchBlt(hdc, sxy[number].bmxend, sxy[number].bmy, sxy[number].bmw, sxy[number].bmh, hdcMem, 0, 0, setbu.bmWidth, setbu.bmHeight, SRCCOPY);
+			TextOut_(hdc, sxy[number].bmxend + mywindows::windowWidth * 0.02, sxy[number].y + mywindows::windowHeight * 0.01, L"选择文件");
 
-			int x = sxy[item.number].bmxend, y = sxy[item.number].bmy, xend = sxy[item.number].bmxend + sxy[item.number].bmw, yend = sxy[item.number].bmh + sxy[item.number].bmy;
-			if (!isused[item.number]) {
+			int x = sxy[number].bmxend, y = sxy[number].bmy, xend = sxy[number].bmxend + sxy[number].bmw, yend = sxy[number].bmh + sxy[number].bmy;
+			if (!isused[number]) {
 				sNode* newnode = new sNode;
 				if (newnode == nullptr) {
 					mywindows::errlog(L"Memory allocation error(textbox)");
@@ -226,24 +544,51 @@ void set2::textbox(sitem item, HDC hdc, HDC hdcMem) {
 				newnode->y = y;
 				newnode->yend = yend;
 				newnode->next = shead;
-				newnode->number = item.number;
+				newnode->number = number;
 				shead = newnode;
 			}
 		}
 	}
-	isused[item.number] = 1;
+	isused[number] = 1;
+}
+void set2::editboxeditor(sitem item, wstring tmp)
+{
+	switch (item.Limit)
+	{
+	case S_WINDOWTITLE:
+		SetWindowTextW(mywindows::hWnd, tmp.c_str());
+		break;
+	case BETWEENCOUNT: {
+		int value = std::stoi(tmp);
+		if (value < item.min || value > item.max) {
+			MessageBoxW(NULL, item.OutOfLimitOutPut.c_str(), L"错误", MB_ICONERROR);
+			return;
+		}
+	}break;
+	case ISFILE:
+	case ISBITMAP:
+		if (!std::filesystem::exists(tmp))return;
+		break;
+	default:
+		break;
+	}
+	config::replace(item.ConfigName, tmp);
+	return;
+}
+set2::~set2() {
+	return;
 }
 void set2::switchbm(sitem item, HDC hdc, HDC hdcMem) {
 	SelectObject(hdc, ui::text_mid);
 	SetBkColor(hdc, RGB(236, 229, 216));
 	SelectObject(hdcMem, hbitmaps[setbutton]);
-	StretchBlt(hdc, sxy[item.number].bmx, sxy[item.number].bmy, sxy[item.number].bmw, sxy[item.number].bmh, hdcMem, 0, 0, setbu.bmWidth, setbu.bmHeight, SRCCOPY);
-	TextOut_(hdc, sxy[item.number].x, sxy[item.number].y + mywindows::windowHeight * 0.01, item.Name.c_str());
+	StretchBlt(hdc, sxy[item.Number].bmx, sxy[item.Number].bmy, sxy[item.Number].bmw, sxy[item.Number].bmh, hdcMem, 0, 0, setbu.bmWidth, setbu.bmHeight, SRCCOPY);
+	TextOut_(hdc, sxy[item.Number].x, sxy[item.Number].y + mywindows::windowHeight * 0.01, item.Name.c_str());
 	if (std::stoi(config::get(item.ConfigName)) == 1)
-		TextOut_(hdc, sxy[item.number].bmx + mywindows::windowWidth * 0.04, sxy[item.number].bmy + mywindows::windowHeight * 0.01, L"开");
+		TextOut_(hdc, sxy[item.Number].bmx + mywindows::windowWidth * 0.04, sxy[item.Number].bmy + mywindows::windowHeight * 0.01, L"开");
 	else
-		TextOut_(hdc, sxy[item.number].bmx + mywindows::windowWidth * 0.04, sxy[item.number].bmy + mywindows::windowHeight * 0.01, L"关");
-	int x = sxy[item.number].bmx, y = sxy[item.number].bmy, xend = sxy[item.number].bmxend, yend = sxy[item.number].bmh + sxy[item.number].bmy;
+		TextOut_(hdc, sxy[item.Number].bmx + mywindows::windowWidth * 0.04, sxy[item.Number].bmy + mywindows::windowHeight * 0.01, L"关");
+	int x = sxy[item.Number].bmx, y = sxy[item.Number].bmy, xend = sxy[item.Number].bmxend, yend = sxy[item.Number].bmh + sxy[item.Number].bmy;
 	sNode* newnode = new sNode;
 	if (newnode == NULL) {
 		mywindows::errlog("Memory allocation error(textbox)");
@@ -253,7 +598,7 @@ void set2::switchbm(sitem item, HDC hdc, HDC hdcMem) {
 	newnode->y = y;
 	newnode->yend = yend;
 	newnode->next = shead;
-	newnode->number = item.number;
+	newnode->number = item.Number;
 	shead = newnode;
 }
 void set2::resetplace() {
@@ -279,7 +624,7 @@ void set2::resetplace() {
 		sxy[i].bmh = mywindows::windowWidth * 0.03;
 	}
 }
-void set2::OnButtonClick(HWND hwnd, sitem item)
+void set2::ChooseFile(HWND hwnd, sitem item)
 {
 loop:
 	OPENFILENAMEW ofn = { 0 };
@@ -299,7 +644,7 @@ loop:
 	{
 		std::wstring filename(strFilename);
 		config::replace(item.ConfigName, filename);
-		Edit_SetText(textboxhwnd[item.number], filename.c_str());
+		Edit_SetText(textboxhwnd[item.Number], filename.c_str());
 	}
 	else
 	{
@@ -316,7 +661,7 @@ void set2::quit() {
 		n++;
 	}
 	ui::screenmode = FIRST_MENU;
-	initing = 1;
+	ui::ScreenModeChanged = 1;
 	for (n = 0; n < 40; n++)isused[n] = 0;
 	firstpaint = 1;
 }

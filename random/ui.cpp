@@ -3,7 +3,7 @@
 #include "bitmaps.h"
 
 extern HBITMAP hbitmaps[BitmapCounts];
-extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg_, exitinfo_, goldenbg, listbm_, list4star_, list5star_, list6star_, list3star_, buttom_;
+extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg, exitinfo, goldenbg, listbm, liststar, liststar, liststar, liststar, buttom;
 
 int ui::listx[11]={0}, ui::listy=0, ui::listxend=0, ui::listyend=0;
 bool ui::ing=0, ui::printing=0, ui::isball10=0, ui::isball1=0, ui::ball10ing=0, ui::clicked=0, ui::ft=0;
@@ -17,10 +17,11 @@ int ui::settingx = 0, ui::settingy = 0, ui::settingxend = 0, ui::settingyend = 0
 int ui::ballW = 0, ui::ballH = 0, ui::addnamex = 0, ui::addnamey = 0, ui::addnameendx = 0;
 int ui::addnameendy=0, ui::addnameW=0, ui::addnameH = 0;
 int ui::exitx = 0, ui::exitxend = 0, ui::exity = 0, ui::exityend = 0;
+bool ui::ScreenModeChanged = 1;
 
 void ui::creatbuttom(HDC hdc, HDC hdcMem, int x, int y, LPCWSTR text_out) {
-	SelectObject(hdcMem, hbitmaps[buttom]);
-	StretchBlt(hdc, x, y, mywindows::windowWidth * 0.073, mywindows::windowHeight * 0.039, hdcMem, 0, 0, buttom_.bmWidth, buttom_.bmHeight, SRCCOPY);
+	SelectObject(hdcMem, hbitmaps[Buttom]);
+	StretchBlt(hdc, x, y, mywindows::windowWidth * 0.073, mywindows::windowHeight * 0.039, hdcMem, 0, 0, buttom.bmWidth, buttom.bmHeight, SRCCOPY);
 	SelectObject(hdc, ui::text);
 	SetTextColor(hdc, RGB(0, 0, 0));
 	SetBkColor(hdc, RGB(225, 222, 213));

@@ -20,7 +20,7 @@ std::string sth2sth::LWStostr(LPCWSTR lpcwszStr)
 	dwMinSize = WideCharToMultiByte(CP_OEMCP, NULL, lpcwszStr, -1, NULL, 0, NULL, FALSE);
 	if (0 == dwMinSize)
 	{
-		return FALSE;
+		return "";
 	}
 	lpszStr = new char[dwMinSize];
 	WideCharToMultiByte(CP_OEMCP, NULL, lpcwszStr, -1, lpszStr, dwMinSize, NULL, FALSE);
@@ -90,7 +90,7 @@ std::string sth2sth::TCHAR2STRING(TCHAR* STR)
 	char* chRtn = new char[iLen * sizeof(char)];
 	WideCharToMultiByte(CP_UTF8, 0, STR, -1, chRtn, iLen, NULL, NULL);
 	std::string str(chRtn);
-	delete chRtn;
+	delete[] chRtn;
 	return str;
 }
 char* sth2sth::TCHAR2CHAR(TCHAR* STR)
@@ -114,10 +114,10 @@ std::wstring sth2sth::str2wstr(std::string str)
 {
 	std::wstring result;
 	//获取缓冲区大小，并申请空间，缓冲区大小按字符计算
-	int len = MultiByteToWideChar(CP_ACP, 0, str.c_str(), str.size(), NULL, 0);
-	TCHAR* buffer = new TCHAR[len + 1];
+	int len = MultiByteToWideChar(CP_ACP, 0, str.c_str(), static_cast<int>(str.size()), NULL, 0);
+	TCHAR* buffer = new TCHAR[(size_t)len + 1];
 	//多字节编码转换成宽字节编码
-	MultiByteToWideChar(CP_ACP, 0, str.c_str(), str.size(), buffer, len);
+	MultiByteToWideChar(CP_ACP, 0, str.c_str(), static_cast<int>(str.size()), buffer, len);
 	buffer[len] = '\0';             //添加字符串结尾
 	//删除缓冲区并返回值
 	result.append(buffer);

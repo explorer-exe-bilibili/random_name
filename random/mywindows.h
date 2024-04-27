@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include<Windows.h>
 
-#define TextOut_(hdc,x,y,string) TextOutW(hdc,x,y,string,wcslen(string)) 
+#define TextOut_(hdc,x,y,string) TextOutW(hdc,static_cast<int>(x),static_cast<int>(y),string,static_cast<int>(wcslen(string)))
 #define Itoa(number,goal) _itoa(number,(char*)goal,10)
 #define OR ||
 #define AND &&
@@ -32,7 +32,7 @@ public:
 	static void errlog(const char* format, ...);
 	static void errlog(const wchar_t* format, ...);
 	static int* find(int* array, int size, int valueToFind, int* count);
-	bool CreatedMultipleDirectory(const std::string& direct);
-
+	static bool CreatedMultipleDirectory(const std::string& direct);
+	static int GetStringWidth(HDC hdc, const std::wstring& str, int height);
 };
 

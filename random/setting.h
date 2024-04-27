@@ -21,9 +21,8 @@ private:
 		int x, y, bmy, bmx, bmyend, bmxend, bmw, bmh;
 	}settingxy;
 public:
-	static int exitx, exitxend, exity, exityend, settingpage;
-	static bool musicplayed, offvideo, reran, initing, offmusic, fullscreen;
-	static BITMAP exitbm, setbm_, setbu;
+	static bool offvideo, reran,offmusic, fullscreen;
+	static BITMAP setbm, setbu;
 	static void paintsettingpage(HDC hdc, HDC hdcMem);
 	static void seteditbox(LPARAM lParam, WPARAM wParam);
 	static void repaint();
@@ -32,6 +31,7 @@ public:
 	static void quit();
 	static bool changebitmap[4];
 private:
+	static int settingpage;
 	static sNode* shead;
 	static HWND textboxhwnd[TEXTBOXHWNDNUMBER];
 	static int textboxnumber;
@@ -42,5 +42,6 @@ private:
 	static void switchbm(const wchar_t* configname, const wchar_t* name, int number, HDC hdc, HDC hdcMem);
 	static void textbox(int ebnumber, int number, std::wstring configname, LPCWSTR name, HDC hdc, HDC hdcMem, bool getfile);
 	static HWND CreateEditBox(HWND hWndParent, int NUMBER, int x, int y, int w, int h, const wchar_t* words);
+	static void changepage();
 };
 

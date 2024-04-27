@@ -85,40 +85,40 @@ void mywindows::removeFileNameFromPath(std::wstring& path) {
 //INFO输出日志
 void mywindows::log(const char* format, ...) {
     if (format == NULL)errlog("meet a void string");
-    va_list args;
-    va_start(args, format);
-    int length = vsnprintf(0, 0, format, args) + 1;
-    char* buffer = new char[length];
-    if (buffer == NULL) {
-        // 如果内存分配失败，输出错误信息
-        errlog("memory error(log)");
+    else {
+        va_list args;
+        va_start(args, format);
+        int length = vsnprintf(0, 0, format, args) + 1;
+        char* buffer = new char[length];
+        if (buffer == NULL) {
+            // 如果内存分配失败，输出错误信息
+            errlog("memory error(log)");
+            va_end(args);
+            return;
+        }
+        vsnprintf_s(buffer, length, _TRUNCATE, format, args);
+        infolog << infolog.pt() << "[INFO]" << buffer << infolog.nl();
+        delete[] buffer;
         va_end(args);
-        return;
     }
-    vsnprintf_s(buffer, length, _TRUNCATE, format, args);
-    infolog << infolog.pt() << "[INFO]" << buffer << infolog.nl();
-    delete[] buffer;
-    va_end(args);
 }
 void mywindows::log(const wchar_t* format, ...) {
     if (format == NULL) errlog(L"meet a void string");
-
-    va_list args;
-    va_start(args, format);
-
-    int length = _vscwprintf(format, args) + 1; // 获取格式化字符串长度
-    std::wstring buffer;
-    buffer.resize(length); // 分配足够的内存
-
-    int ret = vswprintf(&buffer[0], length, format, args); // 格式化字符串
-    if (ret < 0) {
-        errlog(L"Failed to format string");
+    else {
+        va_list args;
+        va_start(args, format);
+        int length = _vscwprintf(format, args) + 1; // 获取格式化字符串长度
+        std::wstring buffer;
+        buffer.resize(length); // 分配足够的内存
+        int ret = vswprintf(&buffer[0], length, format, args); // 格式化字符串
+        if (ret < 0) {
+            errlog(L"Failed to format string");
+            va_end(args);
+            return;
+        }
+        infolog << infolog.pt() << L"[INFO]" << buffer << infolog.nl();
         va_end(args);
-        return;
     }
-
-    infolog << infolog.pt() << L"[INFO]" << buffer << infolog.nl();
-    va_end(args);
 }
 //ERROR输出日志
 void mywindows::errlog(const char* format, ...) {
@@ -178,4 +178,9 @@ int* mywindows::find(int* array, int size, int valueToFind, int* count) {
 
     return indices; // 返回包含所有匹配索引的数组
 }
-
+// 获取字符串宽度
+int mywindows::GetStringWidth(HDC hdc, const std::wstring& str, int height) {
+    RECT rect = { 0, 0, 0, 0 };
+    DrawText(hdc, str.c_str(), -1, &rect, DT_CALCRECT | DT_SINGLELINE);
+    return rect.right - rect.left;
+}
