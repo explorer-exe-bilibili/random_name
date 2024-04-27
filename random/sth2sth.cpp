@@ -1,4 +1,4 @@
-#include "sth2sth.h"
+ï»¿#include "sth2sth.h"
 #include <vector>
 
 wchar_t sth2sth::signame[10] = { 0 };
@@ -75,9 +75,9 @@ std::string sth2sth::WideByte2Acsi(std::wstring& wstrcode)
 std::string sth2sth::UTF_82ASCII(std::string& strUtf8Code)
 {
 	std::string strRet("");
-	//ÏÈ°Ñ utf8 ×ªÎª unicode
+	//å…ˆæŠŠ utf8 è½¬ä¸º unicode
 	std::wstring wstr = Utf82Unicode(strUtf8Code);
-	//×îºó°Ñ unicode ×ªÎª ascii
+	//æœ€åæŠŠ unicode è½¬ä¸º ascii
 	strRet = WideByte2Acsi(wstr);
 	return strRet;
 }
@@ -113,13 +113,13 @@ char sth2sth::Lstrtosingal(LPCWSTR in) {
 std::wstring sth2sth::str2wstr(std::string str)
 {
 	std::wstring result;
-	//»ñÈ¡»º³åÇø´óĞ¡£¬²¢ÉêÇë¿Õ¼ä£¬»º³åÇø´óĞ¡°´×Ö·û¼ÆËã
+	//è·å–ç¼“å†²åŒºå¤§å°ï¼Œå¹¶ç”³è¯·ç©ºé—´ï¼Œç¼“å†²åŒºå¤§å°æŒ‰å­—ç¬¦è®¡ç®—
 	int len = MultiByteToWideChar(CP_ACP, 0, str.c_str(), static_cast<int>(str.size()), NULL, 0);
 	TCHAR* buffer = new TCHAR[(size_t)len + 1];
-	//¶à×Ö½Ú±àÂë×ª»»³É¿í×Ö½Ú±àÂë
+	//å¤šå­—èŠ‚ç¼–ç è½¬æ¢æˆå®½å­—èŠ‚ç¼–ç 
 	MultiByteToWideChar(CP_ACP, 0, str.c_str(), static_cast<int>(str.size()), buffer, len);
-	buffer[len] = '\0';             //Ìí¼Ó×Ö·û´®½áÎ²
-	//É¾³ı»º³åÇø²¢·µ»ØÖµ
+	buffer[len] = '\0';             //æ·»åŠ å­—ç¬¦ä¸²ç»“å°¾
+	//åˆ é™¤ç¼“å†²åŒºå¹¶è¿”å›å€¼
 	result.append(buffer);
 	delete[] buffer;
 	return result;

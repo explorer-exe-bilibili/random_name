@@ -15,18 +15,6 @@
     </Filter>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="targetver.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="Resource.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="random.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="mywindows.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -45,13 +33,7 @@
     <ClInclude Include="directshow.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="setting.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="sth2sth.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="genthen-impact.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="paintfirstscreen.h">
@@ -66,13 +48,22 @@
     <ClInclude Include="click.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="resource1.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="resource2.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="set-json.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="init.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MSGback.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="floatwindow.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Gp.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -95,9 +86,6 @@
     <ClCompile Include="directshow.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="setting.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="sth2sth.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -116,6 +104,21 @@
     <ClCompile Include="set-json.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
+    <ClCompile Include="init.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MSGback.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="floatwindow.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Gp.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="ClassDiagram.cd" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="random.rc">
@@ -126,8 +129,5 @@
     <Image Include="OIP-C.ico">
       <Filter>资源文件</Filter>
     </Image>
-  </ItemGroup>
-  <ItemGroup>
-    <None Include="ClassDiagram.cd" />
   </ItemGroup>
 </Project>

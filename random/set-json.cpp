@@ -1,107 +1,107 @@
-#include "set-json.h"
-#include"nlohmann/json.hpp"
+ï»¿#include "set-json.h"
 #include"sth2sth.h"
 #include"config.h"
 #include "mywindows.h"
 #include "bitmaps.h"
 #include "directshow.h"
 #include "ui.h"
+#include<nlohmann\json.hpp>
+#include<thread>
+
 
 #define BETWEENCOUNT 100
 #define S_WINDOWTITLE 200
 #define ISFILE 300
 #define ISBITMAP 400
 #define NOLIMIT 0
+#define NAME "Name"
+#define CONFIGNAME "ConfigName"
+#define ISSWITCH "IsSwitch"
+#define ISEDIT "IsEditBox"
+#define NUMBER "Number"
+#define FILETYPE "FileType"
+#define FILECHOOSE "FileChooseWindowName"
+#define OUTOFLIMIT "OutOfLimitOutPut"
+#define LIMIT "Limit"
+#define TITLE "Title"
+#define BITMAPC "BitmapNumber"
+#define BEFORE 1
+#define AFTER 2
 
 using json = nlohmann::json;
 using namespace std;
-Log setlog("set-json.log", 0);
+Log slog("set-json.log", 1);
 extern HBITMAP hbitmaps[BitmapCounts];
 extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg, exitinfo, goldenbg, listbm, liststar, buttom;
 
-set2::set2() {
-	{
-		bitmaps[background] = &bm;
-		bitmaps[blue10b] = &ball;
-		bitmaps[blue10i] = &ball;
-		bitmaps[blue1b] = &ball;
-		bitmaps[blue1i] = &ball;
-		bitmaps[Buttom] = &buttom;
-		bitmaps[cardbackground] = &cardbg;
-		bitmaps[exitb] = &exitinfo;
-		bitmaps[exiti] = &exitinfo;
-		bitmaps[goldencardbg] = &goldenbg;
-		bitmaps[list3] = &liststar;
-		bitmaps[list4] = &liststar;
-		bitmaps[list5] = &liststar;
-		bitmaps[list6] = &liststar;
-		bitmaps[listbg] = &listbm;
-		bitmaps[over1] = &overlay1Bm;
-		bitmaps[over2] = &overlay2Bm;
-		bitmaps[over3] = &overlay3Bm;
-		bitmaps[over4] = &overlay4Bm;
-		bitmaps[pink10b] = &ball;
-		bitmaps[pink10i] = &ball;
-		bitmaps[pink1b] = &ball;
-		bitmaps[pink1i] = &ball;
-		bitmaps[SetBM] = &setbm;
-		bitmaps[setbutton] = &setbu;
-	}
-	offmusic = config::getint(OFFMUSIC);
-	fullscreen = config::getint(INWINDOW);
-	// ¶ÁÈ¡JSONÎÄ¼ş
-	string jsonpath = "files\\setting.json";
+
+void set2::Load(string jsonpath) {
+	init();
+	Log slog("set-json.log", 0);
+	// è¯»å–JSONæ–‡ä»¶
+openjsonfile:
 	std::ifstream fileStream(jsonpath);
 	if (!fileStream.is_open()) {
-		setlog << "Failed to open file" << std::endl;
+		slog << "Failed to open file" << std::endl;
 		if (!std::filesystem::exists(jsonpath))
 			rollback(jsonpath);
-		return;
+		goto openjsonfile;
 	}
-	// ½«ÎÄ¼şÄÚÈİ½âÎöÎªJSON¶ÔÏó
+	// å°†æ–‡ä»¶å†…å®¹è§£æä¸ºJSONå¯¹è±¡
 	json data{};
 	try {
 		fileStream >> data;
 	}
 	catch (const std::exception& e) {
-		setlog << "Failed to parse JSON: " << e.what() << std::endl;
+		slog << "[ERROR]Failed to parse JSON: " << e.what() << std::endl;
+		rollback(jsonpath);
 		return;
 	}
-	int sp = 0;//settingpage
+	int sp = 0;//setting page
 	int in = 0;//ItemNumber
 	for (const auto& page : data["pages"]) {
 		in = 0;
 		spage pt;
-		pt.Title = sth2sth::str2wstr(page.value("Title", ""));
+		pt.Title = sth2sth::str2wstr(U2G(page.value("Title", "")));
 		for (const auto& sItem : page["item"]) {
 			sitem t;
-			t.IsFile = sItem.value("IsFile", 0);
-			t.IsEditBox = sItem.value("IsEditBox", 0);
-			t.IsSwitch = sItem.value("IsSwitch", 0);
-			t.Limit = sItem.value("Limit", NOLIMIT);
-			t.Number = sItem.value("Number", in);
-			t.BitmapNumber = sItem.value("BitmapNumber", 0);
-			t.Name = sth2sth::str2wstr(sItem.value("Name", ""));
-			t.ConfigName = sth2sth::str2wstr(sItem.value("ConfigName", ""));
-			t.FileChooseWindowName = sth2sth::str2wstr(sItem.value("FileChooseWindowName", ""));
+			try
 			{
-				string tmp = sItem.value("FileType", "All");
-				if (tmp == "All" AND t.IsFile)
-					t.FileType = L"ËùÓĞÎÄ¼ş\0 *.*\0\0";
-				else if (tmp == "bmp")
-					t.FileType = L"bmpÍ¼Æ¬ÎÄ¼ş(*.bmp)\0 * .bmp\0\0";
-				else if (tmp == "nameFile")
-					t.FileType = L"ĞÕÃûÎÄ¼ş(*.txt)\0 * .txt\0\0";
-				else if (tmp == "video")
-					t.FileType = L"ÊÓÆµÎÄ¼ş(*.avi; *.mpg; *.mpeg; *.m2v; *.vob; *.mp4; *.m4v; *.mp4v; *.3gp; *.3gp2; *.wmv; *.asf; *.mov; *.qt; *.rm; *.rmvb; *.flv; *.f4v)\0 *.avi; *.mpg; *.mpeg; *.m2v; *.vob; *.mp4; *.m4v; *.mp4v; *.3gp; *.3gp2; *.wmv; *.asf; *.mov; *.qt; *.rm; *.rmvb; *.flv; *.f4v\0\0";
-				else if (tmp == "picture")
-					t.FileType = L"Í¼Æ¬ÎÄ¼ş(*.jpg;*.jpeg;*.bmp;*.png;*.tif;*.tiff;*.gif;*.wmf;*.emf)\0*.jpg;*.jpeg;*.bmp;*.png;*.tif;*.tiff;*.gif;*.wmf;*.emf\0\0";
-				else t.FileType = L"";
+				t.IsFile = sItem.value("IsFile", 0);
+				t.IsEditBox = sItem.value("IsEditBox", 0);
+				t.IsSwitch = sItem.value("IsSwitch", 0);
+				t.Limit = sItem.value("Limit", NOLIMIT);
+				t.Number = sItem.value("Number", in);
+				t.BitmapNumber = sItem.value("BitmapNumber", 0);
+				t.Name = sth2sth::str2wstr(U2G(sItem.value("Name", "")));
+				t.ConfigName = sth2sth::str2wstr(sItem.value("ConfigName", ""));
+				t.FileChooseWindowName = sth2sth::str2wstr(U2G(sItem.value("FileChooseWindowName", "")));
+				t.FileType = sItem.value("FileType", "All");
+				if (t.Limit == BETWEENCOUNT) {
+					t.max = sItem.value("max", 0);
+					t.min = sItem.value("min", 0);
+					t.OutOfLimitOutPut = sth2sth::str2wstr(sItem.value("OutOfLimitOutPut", ""));
+				}
+				else if (t.Limit == ISFILE || t.Limit == ISBITMAP) {
+					t.IsEditBox = 1;
+					t.IsFile = 1;
+				}
 			}
-			if (t.Limit == BETWEENCOUNT) {
-				t.max = sItem.value("max", 0);
-				t.min = sItem.value("min", 0);
-				t.OutOfLimitOutPut = sth2sth::str2wstr(sItem.value("OutOfLimit", ""));
+			catch (const std::exception& e)
+			{
+				slog << slog.pt() << "[ERROR]FAiled with reading json" << e.what() << endl;
+				t.IsFile = 0;
+				t.IsEditBox = 0;
+				t.IsSwitch = 0;
+				t.Limit = NOLIMIT;
+				t.Number = in;
+				t.ConfigName = L"unknow";
+				t.BitmapNumber = 0;
+				t.FileChooseWindowName = L"";
+				t.FileType = "All";
+				t.max = 0;
+				t.min = 0;
+				t.OutOfLimitOutPut = L"";
 			}
 			pt.items.push_back(t);
 			in++;
@@ -110,104 +110,70 @@ set2::set2() {
 		pages.push_back(pt);
 		sp++;
 	}
+	settingpage = 1;
 	return;
 }
-set2::set2(std::string& jsonfile) {
-	{
+// UTF8å­—ç¬¦ä¸²è½¬æˆGBKå­—ç¬¦ä¸²
+std::string set2::U2G(const std::string& utf8)
+{
+	int nwLen = MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), -1, NULL, 0);
+	wchar_t* pwBuf = new wchar_t[nwLen + 1];//åŠ 1ç”¨äºæˆªæ–­å­—ç¬¦ä¸² 
+	memset(pwBuf, 0, nwLen * 2 + 2);
 
-		bitmaps[background] = &bm;
-		bitmaps[blue10b] = &ball;
-		bitmaps[blue10i] = &ball;
-		bitmaps[blue1b] = &ball;
-		bitmaps[blue1i] = &ball;
-		bitmaps[Buttom] = &buttom;
-		bitmaps[cardbackground] = &cardbg;
-		bitmaps[exitb] = &exitinfo;
-		bitmaps[exiti] = &exitinfo;
-		bitmaps[goldencardbg] = &goldenbg;
-		bitmaps[list3] = &liststar;
-		bitmaps[list4] = &liststar;
-		bitmaps[list5] = &liststar;
-		bitmaps[list6] = &liststar;
-		bitmaps[listbg] = &listbm;
-		bitmaps[over1] = &overlay1Bm;
-		bitmaps[over2] = &overlay2Bm;
-		bitmaps[over3] = &overlay3Bm;
-		bitmaps[over4] = &overlay4Bm;
-		bitmaps[pink10b] = &ball;
-		bitmaps[pink10i] = &ball;
-		bitmaps[pink1b] = &ball;
-		bitmaps[pink1i] = &ball;
-		bitmaps[SetBM] = &setbm;
-		bitmaps[setbutton] = &setbu;
-	}
-	offmusic = config::getint(OFFMUSIC);
-	fullscreen = config::getint(INWINDOW);
-	// ¶ÁÈ¡JSONÎÄ¼ş
-	std::ifstream fileStream(jsonfile);
-	if (!fileStream.is_open()) {
-		setlog << "Failed to open file" << std::endl;
-		if (!std::filesystem::exists(jsonfile))
-			rollback(jsonfile);
-		return;
-	}
-	// ½«ÎÄ¼şÄÚÈİ½âÎöÎªJSON¶ÔÏó
-	json data{};
-	try {
-		fileStream >> data;
-	}
-	catch (const std::exception& e) {
-		setlog << "Failed to parse JSON: " << e.what() << std::endl;
-		return;
-	}
-	int sp = 0;//settingpage
-	int in = 0;//ItemNumber
-	for (const auto& page : data["pages"]) {
-		in = 0;
-		spage pt;
-		pt.Title = sth2sth::str2wstr(page.value("Title", ""));
-		for (const auto& sItem : page["item"]) {
-			sitem t;
-			t.IsFile = sItem.value("IsFile", 0);
-			t.IsEditBox = sItem.value("IsEditBox", 0);
-			t.IsSwitch = sItem.value("IsSwitch", 0);
-			t.Limit = sItem.value("Limit", NOLIMIT);
-			t.Number = sItem.value("Number", in);
-			t.BitmapNumber = sItem.value("BitmapNumber", 0);
-			t.Name = sth2sth::str2wstr(sItem.value("Name", ""));
-			t.ConfigName = sth2sth::str2wstr(sItem.value("ConfigName", ""));
-			t.FileChooseWindowName = sth2sth::str2wstr(sItem.value("FileChooseWindowName", ""));
-			{
-				string tmp = sItem.value("FileType", "All");
-				if (tmp == "All" AND t.IsFile)
-					t.FileType = L"ËùÓĞÎÄ¼ş\0 *.*\0\0";
-				else if (tmp == "bmp")
-					t.FileType = L"bmpÍ¼Æ¬ÎÄ¼ş(*.bmp)\0 * .bmp\0\0";
-				else if (tmp == "nameFile")
-					t.FileType = L"ĞÕÃûÎÄ¼ş(*.txt)\0 * .txt\0\0";
-				else if (tmp == "video")
-					t.FileType = L"ÊÓÆµÎÄ¼ş(*.avi; *.mpg; *.mpeg; *.m2v; *.vob; *.mp4; *.m4v; *.mp4v; *.3gp; *.3gp2; *.wmv; *.asf; *.mov; *.qt; *.rm; *.rmvb; *.flv; *.f4v)\0 *.avi; *.mpg; *.mpeg; *.m2v; *.vob; *.mp4; *.m4v; *.mp4v; *.3gp; *.3gp2; *.wmv; *.asf; *.mov; *.qt; *.rm; *.rmvb; *.flv; *.f4v\0\0";
-				else if (tmp == "picture")
-					t.FileType = L"Í¼Æ¬ÎÄ¼ş(*.jpg;*.jpeg;*.bmp;*.png;*.tif;*.tiff;*.gif;*.wmf;*.emf)\0*.jpg;*.jpeg;*.bmp;*.png;*.tif;*.tiff;*.gif;*.wmf;*.emf\0\0";
-				else t.FileType = L"";
-			}
-			if (t.Limit == BETWEENCOUNT) {
-				t.max = sItem.value("max", 0);
-				t.min = sItem.value("min", 0);
-				t.OutOfLimitOutPut = sth2sth::str2wstr(sItem.value("OutOfLimit", ""));
-			}
-			else if (t.Limit == ISFILE || t.Limit == ISBITMAP) {
-				t.IsEditBox = 1;
-				t.IsFile = 1;
-			}
-			pt.items.push_back(t);
-			in++;
-		}
-		pt.itemcount = in;
-		pages.push_back(pt);
-		sp++;
-	}
-	return;
+	MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), utf8.length(), pwBuf, nwLen);
+
+	int nLen = WideCharToMultiByte(CP_ACP, 0, pwBuf, -1, NULL, NULL, NULL, NULL);
+
+	char* pBuf = new char[nLen + 1];
+	memset(pBuf, 0, nLen + 1);
+	
+	WideCharToMultiByte(CP_ACP, 0, pwBuf, nwLen, pBuf, nLen, NULL, NULL);
+
+	std::string retStr = pBuf;
+
+	delete[]pBuf;
+	delete[]pwBuf;
+
+	pBuf = NULL;
+	pwBuf = NULL;
+
+	return retStr;
+}
+// GBKå­—ç¬¦ä¸²è½¬æˆjsonè¯†åˆ«çš„UTF8å­—ç¬¦ä¸²
+std::string set2::G2U(const std::string& gbk)
+{
+	int nwLen = ::MultiByteToWideChar(CP_ACP, 0, gbk.c_str(), -1, NULL, 0);
+
+	wchar_t* pwBuf = new wchar_t[nwLen + 1];//åŠ 1ç”¨äºæˆªæ–­å­—ç¬¦ä¸² 
+	ZeroMemory(pwBuf, nwLen * 2 + 2);
+
+	::MultiByteToWideChar(CP_ACP, 0, gbk.c_str(), gbk.length(), pwBuf, nwLen);
+
+	int nLen = ::WideCharToMultiByte(CP_UTF8, 0, pwBuf, -1, NULL, NULL, NULL, NULL);
+
+	char* pBuf = new char[nLen + 1];
+	ZeroMemory(pBuf, nLen + 1);
+
+	::WideCharToMultiByte(CP_UTF8, 0, pwBuf, nwLen, pBuf, nLen, NULL, NULL);
+
+	std::string retStr(pBuf);
+
+	delete[]pwBuf;
+	delete[]pBuf;
+
+	pwBuf = NULL;
+	pBuf = NULL;
+
+	return retStr;
+}
+set2::set2() {
+	string jsonpath = "files\\setting.json";
+	std::thread loading(std::bind(&set2::Load, this, jsonpath));
+	loading.detach();
+}
+set2::set2(std::string& jsonfile) {
+	std::thread loading(std::bind(&set2::Load, this, jsonfile));
+	loading.detach();
 }
 void set2::paint(HDC hdc, HDC hdcMem) {
 	if (firstpaint) {
@@ -216,17 +182,17 @@ void set2::paint(HDC hdc, HDC hdcMem) {
 		firstpaint = 0;
 	}
 	SelectObject(hdc, ui::text_mid);
-	wstring title = pages[settingpage].Title;
+	wstring title = pages[settingpage-1].Title;
 	int titlex, titley;
 	int stringWidth = 0.0272 * mywindows::windowWidth * title.length();
 	titlex= (mywindows::windowWidth - stringWidth) / 2;
-	titley = mywindows::windowHeight * 0.09;
+	titley = mywindows::windowHeight * 0.05;
 	TextOut_(hdc, titlex, titley, title.c_str());
 	SelectObject(hdcMem, hbitmaps[exitb]);
 	StretchBlt(hdc, ui::exitx, ui::exity, ui::exitxend - ui::exitx, ui::exityend - ui::exity, hdcMem, 0, 0, exitinfo.bmWidth, exitinfo.bmHeight, SRCAND);
 	SelectObject(hdcMem, hbitmaps[exiti]);
 	StretchBlt(hdc, ui::exitx, ui::exity, ui::exitxend - ui::exitx, ui::exityend - ui::exity, hdcMem, 0, 0, exitinfo.bmWidth, exitinfo.bmHeight, SRCPAINT);
-	for (const auto& item : pages[settingpage].items) {
+	for (const auto& item : pages[settingpage-1].items) {
 		showitem(item, hdc, hdcMem);
 	}
 	unsigned int totalp = static_cast<int>(pages.size());
@@ -239,191 +205,90 @@ void set2::paint(HDC hdc, HDC hdcMem) {
 
 }
 void set2::rollback(string jsonpath) {
-	json data;
-	data = {
-		{"Title","Í¼Æ¬",
-		{"item",{
-			"Name","¿¨³Ø1Í¼Æ¬",
-			"ConfigName","over1",
-			"FileChooseWindowName","Ñ¡Ôñ¿¨³Ø1Í¼Æ¬",
-			"FileType","bmp",
-			"Limit",ISBITMAP,
-			"Number",1,
-			"BitmapNumber",0
-			},{
-			"Name","¿¨³Ø2Í¼Æ¬",
-			"ConfigName","over2",
-			"FileChooseWindowName","Ñ¡Ôñ¿¨³Ø2Í¼Æ¬",
-			"FileType","bmp",
-			"Limit",ISBITMAP,
-			"Number",2,
-			"BitmapNumber",1
-			},{
-			"Name","¿¨³Ø3Í¼Æ¬",
-			"ConfigName","over3",
-			"FileChooseWindowName","Ñ¡Ôñ¿¨³Ø3Í¼Æ¬",
-			"FileType","bmp",
-			"Limit",ISBITMAP,
-			"Number",3,
-			"BitmapNumber",2
-			},{
-			"Name","¿¨³Ø4Í¼Æ¬",
-			"ConfigName","over4",
-			"FileChooseWindowName","Ñ¡Ôñ¿¨³Ø4Í¼Æ¬",
-			"FileType","bmp",
-			"Limit",ISBITMAP,
-			"Number",4,
-			"BitmapNumber",3
-			},{
-			"Name","¹Ø±ÕÒôÀÖ",
-			"ConfigName","off music",
-			"IsSwitch",1,
-			"Number",11
-			},{
-			"Name","¹Ø±ÕÊÓÆµ",
-			"ConfigName","off video",
-			"IsSwitch",1,
-			"Number",12
-			}
-		}},
-		{"Title","Ãûµ¥Óë¿¨³Ø",
-		{"item",{
-			"Name","¿¨³Ø1Ãûµ¥",
-			"ConfigName","namesfile1",
-			"FileChooseWindowName","Ñ¡Ôñ¿¨³Ø1Ãûµ¥",
-			"FileType","nameFile",
-			"Limit",ISFILE,
-			"Number",1
-			},{
-			"Name","¿¨³Ø2Ãûµ¥",
-			"ConfigName","namesfile2",
-			"FileChooseWindowName","Ñ¡Ôñ¿¨³Ø2Ãûµ¥",
-			"FileType","nameFile",
-			"Limit",ISFILE,
-			"Number",2
-			},{
-			"Name","¿¨³Ø3Ãûµ¥",
-			"ConfigName","namesfile3",
-			"FileChooseWindowName","Ñ¡Ôñ¿¨³Ø3Ãûµ¥",
-			"FileType","nameFile",
-			"Limit",ISFILE,
-			"Number",3
-			},{
-			"Name","¿¨³Ø4Ãûµ¥",
-			"ConfigName","namesfile4",
-			"FileChooseWindowName","Ñ¡Ôñ¿¨³Ø4Ãûµ¥",
-			"FileType","nameFile",
-			"Limit",ISFILE,
-			"Number",4
-			},{
-			"Name","³é±³¿¨³Ø",
-			"ConfigName","special",
-			"IsEditBox",1,
-			"Limit",BETWEENCOUNT,
-			"max",4,
-			"min",0,
-			"OutOfLimitOutPut","ÊäÈëÒ»¸ö0-4Ö®¼äµÄÊı×Ö£¨0±íÊ¾½ûÓÃ£©",
-			"Number",11
-			},{
-			"Name","¹Ø±ÕÒôÀÖ",
-			"ConfigName","off music",
-			"IsSwitch",1,
-			"Number",12
-			},{
-			"Name","¹Ø±ÕÊÓÆµ",
-			"ConfigName","off video",
-			"IsSwitch",1,
-			"Number",13
-			}
-		}},
-		{"Title","ÊÓÆµ",
-		"item",{{
-			"Name","µ¥·¢3ĞÇÊÓÆµ",
-			"ConfigName","signal 3star video",
-			"FileChooseWindowName","Ñ¡Ôñµ¥·¢3ĞÇÊÓÆµ",
-			"FileType","video",
-			"Limit",ISFILE,
-			"Number",1
-			},{
-			"Name","µ¥·¢4ĞÇÊÓÆµ",
-			"ConfigName","signal 4star video",
-			"FileChooseWindowName","Ñ¡Ôñµ¥·¢4ĞÇÊÓÆµ",
-			"FileType","video",
-			"Limit",ISFILE,
-			"Number",2
-			},{
-			"Name","µ¥·¢5ĞÇÊÓÆµ",
-			"ConfigName","signal 5star video",
-			"FileChooseWindowName","Ñ¡Ôñµ¥·¢5ĞÇÊÓÆµ",
-			"FileType","video",
-			"Limit",ISFILE,
-			"Number",3
-			},{
-			"Name","Ê®·¢4ĞÇÊÓÆµ",
-			"ConfigName","group 4star video",
-			"FileChooseWindowName","Ñ¡ÔñÊ®·¢4ĞÇÊÓÆµ",
-			"FileType","video",
-			"Limit",ISFILE,
-			"Number",5
-			},{
-			"Name","Ê®·¢5ĞÇÊÓÆµ",
-			"ConfigName","group 5star video",
-			"FileChooseWindowName","Ñ¡ÔñÊ®·¢5ĞÇÊÓÆµ",
-			"FileType","video",
-			"Limit",ISFILE,
-			"Number",6
-			},{
-			"Name","¹Ø±ÕÒôÀÖ",
-			"ConfigName","off music",
-			"IsSwitch",1,
-			"Number",11
-			},{
-			"Name","¹Ø±ÕÊÓÆµ",
-			"ConfigName","off video",
-			"IsSwitch",1,
-			"Number",12
-			}
-		}},
-		{"Title","ÔÓÏî",
-		{"item",{{
-			"Name","´°¿ÚÄ£Ê½",
-			"ConfigName","window mode(not full screen)",
-			"IsSwitch",1,
-			"Number",1,
-			},{
-			"Name","±êÌâ",
-			"ConfigName","title name",
-			"IsEditBox",1,
-			"Number",2
-			},{
-			"Name","¹Ø±ÕÒôÀÖ",
-			"ConfigName","off music",
-			"IsSwitch",1,
-			"Number",11
-			},{
-			"Name","¹Ø±ÕÊÓÆµ",
-			"ConfigName","off video",
-			"IsSwitch",1,
-			"Number",12
-			}
-		}}
-}
-	};
-	// Ğ´ÈëJSONÎÄ¼ş
-	std::ofstream file("files\\setting.json");
+	Log slog("set-json.log", 0);
+	slog << "try to rollback setting page" << endl;
+	// åˆ›å»ºJSONæ•°æ®
+	json j;
+	json p;
+	json i;
+	p[TITLE] = G2U("å›¾ç‰‡");
+	i[NAME] = G2U("å¡æ± 1å›¾ç‰‡"); i[CONFIGNAME] = "over1"; i[FILECHOOSE] = G2U("é€‰æ‹©å¡æ± 1å›¾ç‰‡"); i[FILETYPE] = "bmp"; i[LIMIT] = ISBITMAP; i[NUMBER] = 1; i[BITMAPC] = 0;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("å¡æ± 2å›¾ç‰‡"); i[CONFIGNAME] = "over2"; i[FILECHOOSE] = G2U("é€‰æ‹©å¡æ± 2å›¾ç‰‡"); i[FILETYPE] = "bmp"; i[LIMIT] = ISBITMAP; i[NUMBER] = 2; i[BITMAPC] = 1;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("å¡æ± 3å›¾ç‰‡"); i[CONFIGNAME] = "over3"; i[FILECHOOSE] = G2U("é€‰æ‹©å¡æ± 3å›¾ç‰‡"); i[FILETYPE] = "bmp"; i[LIMIT] = ISBITMAP; i[NUMBER] = 3; i[BITMAPC] = 2;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("å¡æ± 4å›¾ç‰‡"); i[CONFIGNAME] = "over4"; i[FILECHOOSE] = G2U("é€‰æ‹©å¡æ± 4å›¾ç‰‡"); i[FILETYPE] = "bmp"; i[LIMIT] = ISBITMAP; i[NUMBER] = 4; i[BITMAPC] = 3;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("å…³é—­éŸ³ä¹"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 11;
+	p["item"].push_back(i); i.clear();
+	j["pages"].push_back(p); p.clear();
+	p[TITLE] = G2U("åå•ä¸å¡æ± ");
+	i[NAME] = G2U("å¡æ± 1åå•"); i[CONFIGNAME] = "namesfile1"; i[FILECHOOSE] = G2U("é€‰æ‹©å¡æ± 1åå•"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 1;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("å¡æ± 2åå•"); i[CONFIGNAME] = "namesfile2"; i[FILECHOOSE] = G2U("é€‰æ‹©å¡æ± 2åå•"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 2;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("å¡æ± 3åå•"); i[CONFIGNAME] = "namesfile3"; i[FILECHOOSE] = G2U("é€‰æ‹©å¡æ± 3åå•"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 3;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("å¡æ± 4åå•"); i[CONFIGNAME] = "namesfile4"; i[FILECHOOSE] = G2U("é€‰æ‹©å¡æ± 4åå•"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 4;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("æŠ½èƒŒå¡æ± "); i[CONFIGNAME] = "special"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i["max"] = 4; i["min"] = 0;
+	i[OUTOFLIMIT] = G2U("è¾“å…¥ä¸€ä¸ª0-4ä¹‹é—´çš„æ•°å­—ï¼ˆ0è¡¨ç¤ºç¦ç”¨ï¼‰"); i[NUMBER] = 11;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("å…³é—­éŸ³ä¹"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 12;
+	p["item"].push_back(i); i.clear();
+	j["pages"].push_back(p); p.clear();
+	p[TITLE] = G2U("è§†é¢‘");
+	i[NAME] = G2U("å•å‘3æ˜Ÿè§†é¢‘"); i[CONFIGNAME] = "signal 3star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("é€‰æ‹©å•å‘3æ˜Ÿè§†é¢‘"); i[FILETYPE] = "video"; i[NUMBER] = 1;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("å•å‘4æ˜Ÿè§†é¢‘"); i[CONFIGNAME] = "signal 4star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("é€‰æ‹©å•å‘4æ˜Ÿè§†é¢‘"); i[FILETYPE] = "video"; i[NUMBER] = 2;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("å•å‘5æ˜Ÿè§†é¢‘"); i[CONFIGNAME] = "signal 5star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("é€‰æ‹©å•å‘5æ˜Ÿè§†é¢‘"); i[FILETYPE] = "video"; i[NUMBER] = 3;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("åå‘4æ˜Ÿè§†é¢‘"); i[CONFIGNAME] = "group 4star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("é€‰æ‹©åå‘4æ˜Ÿè§†é¢‘"); i[FILETYPE] = "video"; i[NUMBER] = 4;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("åå‘5æ˜Ÿè§†é¢‘"); i[CONFIGNAME] = "group 5star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("é€‰æ‹©åå‘5æ˜Ÿè§†é¢‘"); i[FILETYPE] = "video"; i[NUMBER] = 5;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("å…³é—­è§†é¢‘"); i[CONFIGNAME] = "off video"; i[ISSWITCH] = 1; i[NUMBER] = 11;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("å…³é—­éŸ³ä¹"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 12;
+	p["item"].push_back(i); i.clear();
+	j["pages"].push_back(p); p.clear();
+	p[TITLE] = G2U("æ‚é¡¹");
+	i[NAME] = G2U("çª—å£æ¨¡å¼"); i[CONFIGNAME] = "window mode(not full screen)"; i[ISSWITCH] = 1; i[NUMBER] = 1;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("æ ‡é¢˜"); i[CONFIGNAME] = "title name"; i[ISEDIT] = 1; i[NUMBER] = 2;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("æ‚¬æµ®çª—"); i[CONFIGNAME] = "open float window"; i[ISSWITCH] = 1; i[NUMBER] = 3;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("å…³é—­éŸ³ä¹"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 11;
+	p["item"].push_back(i); i.clear();
+	j["pages"].push_back(p); p.clear();
+	// å†™å…¥JSONæ–‡ä»¶
+	std::ofstream file(jsonpath);
 	if (file.is_open()) {
-		file << data.dump(4); // ½«JSONÊı¾İĞ´ÈëÎÄ¼ş£¬4±íÊ¾Ëõ½ø4¸ö¿Õ¸ñ
-		file.close();
-		setlog<<setlog.pt()<<"[INFO]" << "JSON data written to 'files\\setting.json'" << std::endl;
+		try
+		{
+			slog << slog.pt() << "[INFO]begin to write json items";
+			file << j.dump(4); // å°†JSONæ•°æ®å†™å…¥æ–‡ä»¶ï¼Œ4è¡¨ç¤ºç¼©è¿›4ä¸ªç©ºæ ¼
+			file.close();
+			slog << "[INFO]JSON data written to" << jsonpath << endl;
+		}
+		catch (const std::exception& e)
+		{
+			slog << slog.pt() << "[ERROR]meet an error when writing json item (rollback):" << e.what() << endl;
+			return;
+		}
 	}
 	else {
-		setlog << setlog.pt() << "[ERROR]" << "Failed to open file for writing" << std::endl;
+		slog << "[ERROR]Failed to open file for writing" << std::endl;
 	}
 }
 void set2::clicked(int x, int y)
 {
 	int totalp = pages.size();
 	int number = -1;
+	int half = 0;
 	if (x >= ui::exitx AND x <= ui::exitxend AND y >= ui::exity AND y <= ui::exityend)quit();
 	else if (x >= nextbmx AND x <= nextxend AND y >= nextbmy AND y <= nextyend) {
 		number = 0;
@@ -445,6 +310,9 @@ void set2::clicked(int x, int y)
 		sNode* current = shead;
 		while (current != NULL) {
 			if (x >= current->x AND x <= current->xend AND y >= current->y AND y <= current->yend) {
+				if (x >= current->x AND x <= current->x + (current->xend - current->x) / 2)
+					half = BEFORE;
+				else half = AFTER;
 				number = current->number;
 				break;
 			}
@@ -454,12 +322,18 @@ void set2::clicked(int x, int y)
 	if (number != -1) {
 		directshow::music(CLICK);
 		if (number > 0) {
-			for (const auto& item : pages[settingpage - 1].items) {
-				if (number = item.Number) {
-					if (item.IsSwitch)
+			for (const auto& item : pages[settingpage-1].items) {
+				if (number == item.Number) {
+					if (item.IsSwitch) {
 						config::turnUpSideDown(item.ConfigName);
+						rereadconfig();
+					}
 					else if (item.IsFile) {
-						ChooseFile(mywindows::hWnd, item);
+						if (half == BEFORE)
+							ChooseFile(item);
+						else {
+							OpenFile(item);
+						}
 						if (item.Limit == ISBITMAP) {
 							reloadbmp(item);
 						}
@@ -479,12 +353,31 @@ void set2::reloadbmp(sitem item)
 void set2::rereadconfig() {
 	offmusic = config::getint(OFFMUSIC);
 	fullscreen = !config::getint(INWINDOW);
+	offvideo = config::getint(OFF_VIDEO);
+	FloatWindow = config::getint(FLOATWINDOW);
+	if (offmusic)
+		mciSendString(L"stop bgm", NULL, 0, NULL);
+	else
+		mciSendString(L"play bgm repeat", NULL, 0, NULL);
+}
+void set2::release()
+{
+	for (int i = 0; i < BitmapCounts; i++) {
+		memset(bitmaps[i], 0, sizeof(BITMAP));
+		bitmaps[i] = nullptr;
+	}
+}
+void set2::reinit()
+{
+	init();
 }
 void set2::changepage()
 {
 	char n = 0;
-	while (textboxhwnd[n] != 0) {
-		DestroyWindow(textboxhwnd[n]);
+	while (n <= 20) {
+		if (textboxhwnd[n] != 0) {
+			DestroyWindow(textboxhwnd[n]);
+		}
 		n++;
 	}
 	for (n = 0; n < 40; n++)isused[n] = 0;
@@ -500,19 +393,18 @@ void set2::showitem(sitem item, HDC hdc, HDC hdcMem) {
 }
 void set2::seteditbox(LPARAM lParam, WPARAM wParam)
 {
-	// »ñÈ¡ÎÄ±¾¿òµÄ¾ä±ú,È·±£ËüÊÇÓĞĞ§µÄ
+	// è·å–æ–‡æœ¬æ¡†çš„å¥æŸ„,ç¡®ä¿å®ƒæ˜¯æœ‰æ•ˆçš„
 	HWND editBoxHwnd = (HWND)(lParam);
 	int numberoftextbox = LOWORD(wParam);
 	if (editBoxHwnd != NULL) {
-		// ·ÖÅä»º³åÇø´óĞ¡,ÕâÀï¼ÙÉèÎÄ±¾¿òÖĞµÄÎÄ±¾²»»á³¬¹ı256¸ö×Ö·û
+		// åˆ†é…ç¼“å†²åŒºå¤§å°,è¿™é‡Œå‡è®¾æ–‡æœ¬æ¡†ä¸­çš„æ–‡æœ¬ä¸ä¼šè¶…è¿‡256ä¸ªå­—ç¬¦
 		wchar_t sz[256];
 		Edit_GetText(editBoxHwnd, sz, 256);
-		// ÏÔÊ¾ÎÄ±¾¿òÖĞµÄÎÄ±¾
+		// æ˜¾ç¤ºæ–‡æœ¬æ¡†ä¸­çš„æ–‡æœ¬
 		if (wcslen(sz) != 0) {
 			std::wstring tmp(sz);
-			for (const auto& item : pages[settingpage].items) {
-				if (item.Number == numberoftextbox) editboxeditor(item,tmp);
-				else continue;
+			for (const auto& item : pages[settingpage-1].items) {
+				if (item.Number == numberoftextbox) EditBoxEditor(item,tmp);
 			}
 		}
 	}
@@ -526,12 +418,13 @@ void set2::textbox(sitem item, HDC hdc, HDC hdcMem)
 	int number = item.Number;
 	std::wstring wst = config::get(item.ConfigName).c_str();
 	if (isused[number] == 0) {
-		textboxhwnd[number] = CreateEditBox(mywindows::hWnd, number, sxy[number].bmx, sxy[number].bmy, sxy[number].bmw, sxy[number].bmh, wst.c_str());
+		textboxhwnd[number] = CreateEditBox(mywindows::main_hwnd, number, sxy[number].bmx, sxy[number].bmy, sxy[number].bmw, sxy[number].bmh, wst.c_str());
 	}
 	if (item.IsFile) {
 		if (!isused[number + 20]) {
 			StretchBlt(hdc, sxy[number].bmxend, sxy[number].bmy, sxy[number].bmw, sxy[number].bmh, hdcMem, 0, 0, setbu.bmWidth, setbu.bmHeight, SRCCOPY);
-			TextOut_(hdc, sxy[number].bmxend + mywindows::windowWidth * 0.02, sxy[number].y + mywindows::windowHeight * 0.01, L"Ñ¡ÔñÎÄ¼ş");
+			TextOut_(hdc, sxy[number].bmxend+sxy[number].bmw/2 + mywindows::windowWidth * 0.01, sxy[number].y + mywindows::windowHeight * 0.01, L"æ‰“å¼€");
+			TextOut_(hdc, sxy[number].bmxend+mywindows::windowWidth*0.01, sxy[number].y + mywindows::windowHeight * 0.01, L"é€‰æ‹©");
 
 			int x = sxy[number].bmxend, y = sxy[number].bmy, xend = sxy[number].bmxend + sxy[number].bmw, yend = sxy[number].bmh + sxy[number].bmy;
 			if (!isused[number]) {
@@ -551,17 +444,54 @@ void set2::textbox(sitem item, HDC hdc, HDC hdcMem)
 	}
 	isused[number] = 1;
 }
-void set2::editboxeditor(sitem item, wstring tmp)
+void set2::OpenFile(sitem item)
+{
+	wstring path = config::get(item.ConfigName);
+	if (path.find_first_of(L'\\') == 0) {
+		path =Log::wrunpath+path;
+	}
+	ShellExecute(NULL, L"open", path.c_str(), NULL, NULL, SW_SHOWNORMAL);
+}
+void set2::init()
+{
+	bitmaps[background] = &bm;
+	bitmaps[blue10b] = &ball;
+	bitmaps[blue10i] = &ball;
+	bitmaps[blue1b] = &ball;
+	bitmaps[blue1i] = &ball;
+	bitmaps[Buttom] = &buttom;
+	bitmaps[cardbackground] = &cardbg;
+	bitmaps[exitb] = &exitinfo;
+	bitmaps[exiti] = &exitinfo;
+	bitmaps[goldencardbg] = &goldenbg;
+	bitmaps[list3] = &liststar;
+	bitmaps[list4] = &liststar;
+	bitmaps[list5] = &liststar;
+	bitmaps[list6] = &liststar;
+	bitmaps[listbg] = &listbm;
+	bitmaps[over1] = &overlay1Bm;
+	bitmaps[over2] = &overlay2Bm;
+	bitmaps[over3] = &overlay3Bm;
+	bitmaps[over4] = &overlay4Bm;
+	bitmaps[pink10b] = &ball;
+	bitmaps[pink10i] = &ball;
+	bitmaps[pink1b] = &ball;
+	bitmaps[pink1i] = &ball;
+	bitmaps[SetBM] = &setbm;
+	bitmaps[setbutton] = &setbu;
+	rereadconfig();
+}
+void set2::EditBoxEditor(sitem item, wstring tmp)
 {
 	switch (item.Limit)
 	{
 	case S_WINDOWTITLE:
-		SetWindowTextW(mywindows::hWnd, tmp.c_str());
+		SetWindowTextW(mywindows::main_hwnd, tmp.c_str());
 		break;
 	case BETWEENCOUNT: {
 		int value = std::stoi(tmp);
 		if (value < item.min || value > item.max) {
-			MessageBoxW(NULL, item.OutOfLimitOutPut.c_str(), L"´íÎó", MB_ICONERROR);
+			MessageBoxW(NULL, item.OutOfLimitOutPut.c_str(), L"é”™è¯¯", MB_ICONERROR);
 			return;
 		}
 	}break;
@@ -573,10 +503,8 @@ void set2::editboxeditor(sitem item, wstring tmp)
 		break;
 	}
 	config::replace(item.ConfigName, tmp);
-	return;
 }
 set2::~set2() {
-	return;
 }
 void set2::switchbm(sitem item, HDC hdc, HDC hdcMem) {
 	SelectObject(hdc, ui::text_mid);
@@ -585,9 +513,9 @@ void set2::switchbm(sitem item, HDC hdc, HDC hdcMem) {
 	StretchBlt(hdc, sxy[item.Number].bmx, sxy[item.Number].bmy, sxy[item.Number].bmw, sxy[item.Number].bmh, hdcMem, 0, 0, setbu.bmWidth, setbu.bmHeight, SRCCOPY);
 	TextOut_(hdc, sxy[item.Number].x, sxy[item.Number].y + mywindows::windowHeight * 0.01, item.Name.c_str());
 	if (std::stoi(config::get(item.ConfigName)) == 1)
-		TextOut_(hdc, sxy[item.Number].bmx + mywindows::windowWidth * 0.04, sxy[item.Number].bmy + mywindows::windowHeight * 0.01, L"¿ª");
+		TextOut_(hdc, sxy[item.Number].bmx + mywindows::windowWidth * 0.04, sxy[item.Number].bmy + mywindows::windowHeight * 0.01, L"å¼€");
 	else
-		TextOut_(hdc, sxy[item.Number].bmx + mywindows::windowWidth * 0.04, sxy[item.Number].bmy + mywindows::windowHeight * 0.01, L"¹Ø");
+		TextOut_(hdc, sxy[item.Number].bmx + mywindows::windowWidth * 0.04, sxy[item.Number].bmy + mywindows::windowHeight * 0.01, L"å…³");
 	int x = sxy[item.Number].bmx, y = sxy[item.Number].bmy, xend = sxy[item.Number].bmxend, yend = sxy[item.Number].bmh + sxy[item.Number].bmy;
 	sNode* newnode = new sNode;
 	if (newnode == NULL) {
@@ -623,22 +551,39 @@ void set2::resetplace() {
 		sxy[i].bmw = mywindows::windowWidth * 0.1;
 		sxy[i].bmh = mywindows::windowWidth * 0.03;
 	}
+	nextbmx = mywindows::windowWidth * 0.73;
+	nextbmy = mywindows::windowHeight * 0.91;
+	nextxend = mywindows::windowWidth * 0.752;
+	nextyend = mywindows::windowHeight * 0.95;
+	lastbmx = mywindows::windowWidth * 0.8;
+	lastbmy = mywindows::windowHeight * 0.91;
+	lastxend = mywindows::windowWidth * 0.822;
+	lastyend = mywindows::windowHeight * 0.95;
 }
-void set2::ChooseFile(HWND hwnd, sitem item)
+void set2::ChooseFile(sitem item)
 {
 loop:
 	OPENFILENAMEW ofn = { 0 };
-	wchar_t strFilename[MAX_PATH] = { 0 }; // ÓÃÓÚ½ÓÊÕÎÄ¼şÃû
+	wchar_t strFilename[MAX_PATH] = { 0 }; // ç”¨äºæ¥æ”¶æ–‡ä»¶å
 
-	ofn.lStructSize = sizeof(OPENFILENAMEW); // ½á¹¹Ìå´óĞ¡
-	ofn.hwndOwner = mywindows::hWnd; // ÓµÓĞÕß´°¿Ú¾ä±ú,ÎªNULL±íÊ¾¶Ô»°¿òÊÇ·ÇÄ£Ì¬µÄ,Êµ¼ÊÓ¦ÓÃÖĞÒ»°ã¶¼ÒªÓĞÕâ¸ö¾ä±ú
-	ofn.lpstrFilter = item.FileType.c_str(); // ÉèÖÃ¹ıÂË
-	ofn.nFilterIndex = 1; // ¹ıÂËÆ÷Ë÷Òı
-	ofn.lpstrFile = strFilename; // ½ÓÊÕ·µ»ØµÄÎÄ¼şÃû,×¢ÒâµÚÒ»¸ö×Ö·ûĞèÒªÎªNULL
-	ofn.nMaxFile = sizeof(strFilename); // »º³åÇø³¤¶È
-	ofn.lpstrInitialDir = NULL; // ³õÊ¼Ä¿Â¼ÎªÄ¬ÈÏ
-	ofn.lpstrTitle = item.FileChooseWindowName.c_str(); // Ê¹ÓÃÏµÍ³Ä¬ÈÏ±êÌâÁô¿Õ¼´¿É
-	ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY; // ÎÄ¼ş¡¢Ä¿Â¼±ØĞë´æÔÚ,Òş²ØÖ»¶ÁÑ¡Ïî
+	ofn.lStructSize = sizeof(OPENFILENAMEW); // ç»“æ„ä½“å¤§å°
+	ofn.hwndOwner = mywindows::main_hwnd; // æ‹¥æœ‰è€…çª—å£å¥æŸ„,ä¸ºNULLè¡¨ç¤ºå¯¹è¯æ¡†æ˜¯éæ¨¡æ€çš„,å®é™…åº”ç”¨ä¸­ä¸€èˆ¬éƒ½è¦æœ‰è¿™ä¸ªå¥æŸ„
+	if (item.FileType == "All")
+		ofn.lpstrFilter = L"æ‰€æœ‰æ–‡ä»¶\0 *.*\0\0";
+	else if (item.FileType == "bmp")
+		ofn.lpstrFilter = L"bmpå›¾ç‰‡æ–‡ä»¶(*.bmp)\0 * .bmp\0\0";
+	else if (item.FileType == "nameFile")
+		ofn.lpstrFilter = L"å§“åæ–‡ä»¶(*.txt)\0 * .txt\0\0";
+	else if (item.FileType == "video")
+		ofn.lpstrFilter = L"è§†é¢‘æ–‡ä»¶(*.avi; *.mpg; *.mpeg; *.m2v; *.vob; *.mp4; *.m4v; *.mp4v; *.3gp; *.3gp2; *.wmv; *.asf; *.mov; *.qt; *.rm; *.rmvb; *.flv; *.f4v)\0 *.avi; *.mpg; *.mpeg; *.m2v; *.vob; *.mp4; *.m4v; *.mp4v; *.3gp; *.3gp2; *.wmv; *.asf; *.mov; *.qt; *.rm; *.rmvb; *.flv; *.f4v\0\0";
+	else if (item.FileType == "picture")
+		ofn.lpstrFilter = L"å›¾ç‰‡æ–‡ä»¶(*.jpg;*.jpeg;*.bmp;*.png;*.tif;*.tiff;*.gif;*.wmf;*.emf)\0*.jpg;*.jpeg;*.bmp;*.png;*.tif;*.tiff;*.gif;*.wmf;*.emf\0\0";
+	ofn.nFilterIndex = 1; // è¿‡æ»¤å™¨ç´¢å¼•
+	ofn.lpstrFile = strFilename; // æ¥æ”¶è¿”å›çš„æ–‡ä»¶å,æ³¨æ„ç¬¬ä¸€ä¸ªå­—ç¬¦éœ€è¦ä¸ºNULL
+	ofn.nMaxFile = sizeof(strFilename); // ç¼“å†²åŒºé•¿åº¦
+	ofn.lpstrInitialDir = NULL; // åˆå§‹ç›®å½•ä¸ºé»˜è®¤
+	ofn.lpstrTitle = item.FileChooseWindowName.c_str(); // ä½¿ç”¨ç³»ç»Ÿé»˜è®¤æ ‡é¢˜ç•™ç©ºå³å¯
+	ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY; // æ–‡ä»¶ã€ç›®å½•å¿…é¡»å­˜åœ¨,éšè—åªè¯»é€‰é¡¹
 
 	if (GetOpenFileNameW(&ofn))
 	{
@@ -648,14 +593,14 @@ loop:
 	}
 	else
 	{
-		MessageBoxW(NULL, L"ÇëÑ¡ÔñÒ»¸öÎÄ¼ş", NULL, MB_ICONERROR);
+		MessageBoxW(NULL, L"è¯·é€‰æ‹©ä¸€ä¸ªæ–‡ä»¶", NULL, MB_ICONERROR);
 		goto loop;
 	}
 }
 void set2::quit() {
 	directshow::music(ENTER);
 	char n = 0;
-	while (n <= 0) {
+	while (n <= 20) {
 		if (textboxhwnd[n] != NULL)
 			DestroyWindow(textboxhwnd[n]);
 		n++;
@@ -668,18 +613,18 @@ void set2::quit() {
 void set2::repaint()
 {
 	firstpaint = 1;
-	InvalidateRect(mywindows::hWnd, NULL, FALSE);
+	InvalidateRect(mywindows::main_hwnd, NULL, FALSE);
 }
-HWND set2::CreateEditBox(HWND hWndParent, int NUMBER, int x, int y, int w, int h, const wchar_t* words) {
-	// ´´½¨EDIT¿Ø¼şµÄÑùÊ½
-	DWORD editStyle = WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | ES_LEFT | WS_BORDER | ES_AUTOHSCROLL;
+HWND set2::CreateEditBox(HWND hWndParent, int number, int x, int y, int w, int h, const wchar_t* words) {
+	// åˆ›å»ºEDITæ§ä»¶çš„æ ·å¼
+	DWORD editStyle = ES_AUTOHSCROLL | (WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | ES_LEFT | WS_BORDER);
 
-	// ´´½¨EDIT¿Ø¼şµÄ¸½¼ÓÑùÊ½£¨¿ÉÑ¡£©
+	// åˆ›å»ºEDITæ§ä»¶çš„é™„åŠ æ ·å¼ï¼ˆå¯é€‰ï¼‰
 	DWORD editExStyle = WS_EX_CLIENTEDGE;
 
-	// ´´½¨ÎÄ±¾¿ò
-	HWND hEdit = CreateWindowExW(editExStyle, L"EDIT", words, editStyle, x, y, w, h, hWndParent, (HMENU)NUMBER, NULL, NULL);
+	// åˆ›å»ºæ–‡æœ¬æ¡†
+	HWND hEdit = CreateWindowExW(editExStyle, L"EDIT", words, editStyle, x, y, w, h, hWndParent, (HMENU)number, NULL, NULL);
 
-	// ·µ»ØÎÄ±¾¿ò¾ä±ú
+	// è¿”å›æ–‡æœ¬æ¡†å¥æŸ„
 	return hEdit;
 }

@@ -1,6 +1,5 @@
-#pragma once
+ï»¿#pragma once
 #include<Windows.h>
-#include"ui.h"
 #define STAR L"E"
 
 class paintname
@@ -18,9 +17,10 @@ public:
 	static void rerandom();
 	static DWORD WINAPI RandomNumberGenerator();
 	static void KillAllTimer();
+	static void paint(HDC hdc, HDC hdcMem);
 private:
-	static UINT_PTR g_StarTimerID; // ¶¨Ê±Æ÷ID
-	static UINT_PTR g_Case6TimerID[3], g_InitTimerID; // case 6 ¶¨Ê±Æ÷ ID
+	static UINT_PTR g_StarTimerID; // å®šæ—¶å™¨ID
+	static UINT_PTR g_Case6TimerID[3], g_InitTimerID; // case 6 å®šæ—¶å™¨ ID
 	static HWND InitTimerHwnd, Case6TimerHwnd, StarTimerHwnd;
 	static bool firsttimeCase6;
 	static int number;

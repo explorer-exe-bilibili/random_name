@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include <dshow.h>
 #include<string>
 
@@ -10,7 +10,6 @@
 #define ENTER "\\files\\mp3\\enter.mp3"
 class directshow
 {
-private:
 	static IGraphBuilder* pGraph;
 	static IMediaControl* pControl;
 	static IMediaEvent* pEvent;
@@ -22,5 +21,7 @@ public:
 	static void play(std::wstring path);
 	static void music(const char* path);
 	static void stopmusic();
+	static void startbgm();
+	static bool playingbgm;
 };
 

@@ -1,12 +1,10 @@
-#include "mywindows.h"
+ï»¿#include "mywindows.h"
 #include <mmsystem.h>
-#include<time.h>
 #include <cstdarg>
 #include <filesystem>
-#include<commctrl.h>
 #include"sth2sth.h"
 
-#pragma comment(lib, "winmm.lib") // Á´½Óµ½ Winmm.lib
+#pragma comment(lib, "winmm.lib") // é“¾æ¥åˆ° Winmm.lib
 
 std::mutex mywindows::logMutex, mywindows::randomlock;
 int mywindows::screenHeight = GetSystemMetrics(SM_CYSCREEN);
@@ -16,10 +14,14 @@ int mywindows::windowHeight = screenHeight;
 int mywindows::windowTop;
 int mywindows::windowLeft;
 int mywindows::indices[10];
-HWND mywindows::hWnd;
+HWND mywindows::main_hwnd;
+HWND mywindows::load_hwnd;
+HWND mywindows::float_hWnd;
+HWND mywindows::Quit_hwnd;
+HINSTANCE mywindows::hinstance = 0;
 Log infolog(LOGPATH, 0), errlogf(ERR_LOGPATH, 0);
 
-// ´´½¨¶à¼¶Ä¿Â¼
+// åˆ›å»ºå¤šçº§ç›®å½•
 bool mywindows::CreatedMultipleDirectory(const std::string& direct)
 {
     std::string Directoryname = direct;
@@ -49,40 +51,40 @@ bool mywindows::CreatedMultipleDirectory(const std::string& direct)
     }
     return bSuccess;
 }
-//ÒÆ³ıÎÄ¼şÂ·¾¶µÄÎÄ¼şÃû
+//ç§»é™¤æ–‡ä»¶è·¯å¾„çš„æ–‡ä»¶å
 void mywindows::removeFileNameFromPath(char* path) {
-    // »ñÈ¡×Ö·û´®³¤¶È
+    // è·å–å­—ç¬¦ä¸²é•¿åº¦
     size_t len = strlen(path);
-    // ÕÒµ½×îºóÒ»¸ö'\'µÄÎ»ÖÃ
+    // æ‰¾åˆ°æœ€åä¸€ä¸ª'\'çš„ä½ç½®
     char* lastSlash = strrchr(path, '\\');
-    // Èç¹ûÕÒµ½ÁË×îºóÒ»¸ö'\'£¬²¢ÇÒËüºóÃæ»¹ÓĞ×Ö·û
+    // å¦‚æœæ‰¾åˆ°äº†æœ€åä¸€ä¸ª'\'ï¼Œå¹¶ä¸”å®ƒåé¢è¿˜æœ‰å­—ç¬¦
     if (lastSlash != NULL && lastSlash < path + len - 1) {
-        // ½«×îºóÒ»¸ö'\'ºóÃæµÄËùÓĞ×Ö·û£¨°üÀ¨Ëü×Ô¼º£©Ìæ»»Îª×Ö·û´®½áÊø·û'\0'
+        // å°†æœ€åä¸€ä¸ª'\'åé¢çš„æ‰€æœ‰å­—ç¬¦ï¼ˆåŒ…æ‹¬å®ƒè‡ªå·±ï¼‰æ›¿æ¢ä¸ºå­—ç¬¦ä¸²ç»“æŸç¬¦'\0'
         *lastSlash = '\0';
     }
 }
 void mywindows::removeFileNameFromPath(wchar_t* path) {
-    // »ñÈ¡×Ö·û´®³¤¶È
+    // è·å–å­—ç¬¦ä¸²é•¿åº¦
     size_t len = wcslen(path);
-    // ÕÒµ½×îºóÒ»¸ö'\'µÄÎ»ÖÃ
+    // æ‰¾åˆ°æœ€åä¸€ä¸ª'\'çš„ä½ç½®
     wchar_t* lastSlash = wcsrchr(path, L'\\');
-    // Èç¹ûÕÒµ½ÁË×îºóÒ»¸ö'\'£¬²¢ÇÒËüºóÃæ»¹ÓĞ×Ö·û
+    // å¦‚æœæ‰¾åˆ°äº†æœ€åä¸€ä¸ª'\'ï¼Œå¹¶ä¸”å®ƒåé¢è¿˜æœ‰å­—ç¬¦
     if (lastSlash != NULL && lastSlash < path + len - 1) {
-        // ½«×îºóÒ»¸ö'\'ºóÃæµÄËùÓĞ×Ö·û£¨°üÀ¨Ëü×Ô¼º£©Ìæ»»Îª×Ö·û´®½áÊø·û'\0'
+        // å°†æœ€åä¸€ä¸ª'\'åé¢çš„æ‰€æœ‰å­—ç¬¦ï¼ˆåŒ…æ‹¬å®ƒè‡ªå·±ï¼‰æ›¿æ¢ä¸ºå­—ç¬¦ä¸²ç»“æŸç¬¦'\0'
         *lastSlash = '\0';
     }
 }
 void mywindows::removeFileNameFromPath(std::wstring& path) {
-    // ÕÒµ½×îºóÒ»¸ö'\\'µÄÎ»ÖÃ
+    // æ‰¾åˆ°æœ€åä¸€ä¸ª'\\'çš„ä½ç½®
     std::size_t lastSlashPos = path.find_last_of(L'\\');
 
-    // Èç¹ûÕÒµ½ÁË×îºóÒ»¸ö'\\'
+    // å¦‚æœæ‰¾åˆ°äº†æœ€åä¸€ä¸ª'\\'
     if (lastSlashPos != std::wstring::npos) {
-        // ½Ø¶Ï×Ö·û´®,½«×îºóÒ»¸ö'\\'ºóÃæµÄËùÓĞ×Ö·ûÉ¾³ı
-        path.erase(lastSlashPos + 1);
+        // æˆªæ–­å­—ç¬¦ä¸²,å°†æœ€åä¸€ä¸ª'\\'åé¢çš„æ‰€æœ‰å­—ç¬¦åˆ é™¤
+        path.erase(lastSlashPos );
     }
 }
-//INFOÊä³öÈÕÖ¾
+//INFOè¾“å‡ºæ—¥å¿—
 void mywindows::log(const char* format, ...) {
     if (format == NULL)errlog("meet a void string");
     else {
@@ -91,7 +93,7 @@ void mywindows::log(const char* format, ...) {
         int length = vsnprintf(0, 0, format, args) + 1;
         char* buffer = new char[length];
         if (buffer == NULL) {
-            // Èç¹ûÄÚ´æ·ÖÅäÊ§°Ü£¬Êä³ö´íÎóĞÅÏ¢
+            // å¦‚æœå†…å­˜åˆ†é…å¤±è´¥ï¼Œè¾“å‡ºé”™è¯¯ä¿¡æ¯
             errlog("memory error(log)");
             va_end(args);
             return;
@@ -107,10 +109,10 @@ void mywindows::log(const wchar_t* format, ...) {
     else {
         va_list args;
         va_start(args, format);
-        int length = _vscwprintf(format, args) + 1; // »ñÈ¡¸ñÊ½»¯×Ö·û´®³¤¶È
+        int length = _vscwprintf(format, args) + 1; // è·å–æ ¼å¼åŒ–å­—ç¬¦ä¸²é•¿åº¦
         std::wstring buffer;
-        buffer.resize(length); // ·ÖÅä×ã¹»µÄÄÚ´æ
-        int ret = vswprintf(&buffer[0], length, format, args); // ¸ñÊ½»¯×Ö·û´®
+        buffer.resize(length); // åˆ†é…è¶³å¤Ÿçš„å†…å­˜
+        int ret = vswprintf(&buffer[0], length, format, args); // æ ¼å¼åŒ–å­—ç¬¦ä¸²
         if (ret < 0) {
             errlog(L"Failed to format string");
             va_end(args);
@@ -120,7 +122,7 @@ void mywindows::log(const wchar_t* format, ...) {
         va_end(args);
     }
 }
-//ERRORÊä³öÈÕÖ¾
+//ERRORè¾“å‡ºæ—¥å¿—
 void mywindows::errlog(const char* format, ...) {
     if (format == NULL)errlog("meet a void string");
     if (format == NULL)return;
@@ -141,8 +143,8 @@ void mywindows::errlog(const wchar_t* format, ...) {
     va_start(args, format);
     int length = _vscwprintf(format, args) + 1;
     std::wstring buffer;
-    buffer.resize(length); // ·ÖÅä×ã¹»µÄÄÚ´æ
-    int ret = vswprintf(&buffer[0], length, format, args); // ¸ñÊ½»¯×Ö·û´®
+    buffer.resize(length); // åˆ†é…è¶³å¤Ÿçš„å†…å­˜
+    int ret = vswprintf(&buffer[0], length, format, args); // æ ¼å¼åŒ–å­—ç¬¦ä¸²
     if (ret < 0) {
         errlog(L"Failed to format string");
         va_end(args);
@@ -152,33 +154,33 @@ void mywindows::errlog(const wchar_t* format, ...) {
     errlogf << errlogf.pt() << "[ERROR]" << buffer << errlogf.nl();
     va_end(args);
 }
-// º¯ÊıÓÃÓÚ²éÕÒÊı×éÖĞÌØ¶¨ÖµµÄËùÓĞÎ»ÖÃ
+// å‡½æ•°ç”¨äºæŸ¥æ‰¾æ•°ç»„ä¸­ç‰¹å®šå€¼çš„æ‰€æœ‰ä½ç½®
 int* mywindows::find(int* array, int size, int valueToFind, int* count) {
-    // ·ÖÅäÒ»¸ö¶¯Ì¬Êı×éÀ´´æ´¢ÕÒµ½µÄË÷Òı
+    // åˆ†é…ä¸€ä¸ªåŠ¨æ€æ•°ç»„æ¥å­˜å‚¨æ‰¾åˆ°çš„ç´¢å¼•
     if (indices == NULL) {
-        // Èç¹ûÄÚ´æ·ÖÅäÊ§°Ü£¬·µ»Ø NULL
+        // å¦‚æœå†…å­˜åˆ†é…å¤±è´¥ï¼Œè¿”å› NULL
         return NULL;
     }
-    int indexCount = 0; // ÓÃÓÚ¼ÇÂ¼ÕÒµ½µÄË÷ÒıÊıÁ¿
+    int indexCount = 0; // ç”¨äºè®°å½•æ‰¾åˆ°çš„ç´¢å¼•æ•°é‡
 
-    // ±éÀúÊı×é£¬¼ì²éÃ¿¸öÔªËØÊÇ·ñÓë valueToFind ÏàµÈ
+    // éå†æ•°ç»„ï¼Œæ£€æŸ¥æ¯ä¸ªå…ƒç´ æ˜¯å¦ä¸ valueToFind ç›¸ç­‰
     for (int i = 0; i < size; ++i) {
         if (array[i] == valueToFind) {
-            indices[indexCount++] = i; // Èç¹ûÕÒµ½Æ¥ÅäµÄÖµ£¬½«ÆäË÷ÒıÌí¼Óµ½Êı×éÖĞ
+            indices[indexCount++] = i; // å¦‚æœæ‰¾åˆ°åŒ¹é…çš„å€¼ï¼Œå°†å…¶ç´¢å¼•æ·»åŠ åˆ°æ•°ç»„ä¸­
         }
     }
 
-    // ¸üĞÂ count ²ÎÊı£¬±íÊ¾ÕÒµ½µÄË÷ÒıÊıÁ¿
+    // æ›´æ–° count å‚æ•°ï¼Œè¡¨ç¤ºæ‰¾åˆ°çš„ç´¢å¼•æ•°é‡
     *count = indexCount;
 
-    // Èç¹ûÃ»ÓĞÕÒµ½ÈÎºÎÆ¥ÅäµÄÖµ£¬ÊÍ·Å·ÖÅäµÄÄÚ´æ²¢·µ»Ø NULL
+    // å¦‚æœæ²¡æœ‰æ‰¾åˆ°ä»»ä½•åŒ¹é…çš„å€¼ï¼Œé‡Šæ”¾åˆ†é…çš„å†…å­˜å¹¶è¿”å› NULL
     if (indexCount == 0) {
         return NULL;
     }
 
-    return indices; // ·µ»Ø°üº¬ËùÓĞÆ¥ÅäË÷ÒıµÄÊı×é
+    return indices; // è¿”å›åŒ…å«æ‰€æœ‰åŒ¹é…ç´¢å¼•çš„æ•°ç»„
 }
-// »ñÈ¡×Ö·û´®¿í¶È
+// è·å–å­—ç¬¦ä¸²å®½åº¦
 int mywindows::GetStringWidth(HDC hdc, const std::wstring& str, int height) {
     RECT rect = { 0, 0, 0, 0 };
     DrawText(hdc, str.c_str(), -1, &rect, DT_CALCRECT | DT_SINGLELINE);

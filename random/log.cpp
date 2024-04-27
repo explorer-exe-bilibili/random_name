@@ -1,4 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS
+ï»¿#define _CRT_SECURE_NO_WARNINGS
 #define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
 #include "Log.h"
 #include <ctime>
@@ -7,6 +7,8 @@
 #include <locale>
 #include <codecvt>
 #include"sth2sth.h"
+#include <ctime>
+
 
 std::wstring Log::wrunpath = L"";
 std::string Log::runpath = "";
@@ -71,13 +73,13 @@ Log& Log::operator<<(const std::wstring& str) {
     return *this;
 }
 Log& operator<<(Log& log, std::ostream& (*f)(std::ostream&)) {
-	// ÏÈ½«ÐÂÐÐ×Ö·ûÐ´ÈëÈÕÖ¾ÎÄ¼þ
+	// å…ˆå°†æ–°è¡Œå­—ç¬¦å†™å…¥æ—¥å¿—æ–‡ä»¶
 	log.writeToLog("\n");
 
-	// È»ºóË¢ÐÂÈÕÖ¾ÎÄ¼þµÄ»º³åÇø
+	// ç„¶åŽåˆ·æ–°æ—¥å¿—æ–‡ä»¶çš„ç¼“å†²åŒº
 	log.logFile.flush();
 
-	// ×îºó·µ»Ø log ¶ÔÏó,ÒÔÖ§³ÖÁ´Ê½µ÷ÓÃ
+	// æœ€åŽè¿”å›ž log å¯¹è±¡,ä»¥æ”¯æŒé“¾å¼è°ƒç”¨
 	return log;
 }
 Log& Log::operator<<(long double value) {

@@ -1,284 +1,286 @@
-#include "config.h"
+ï»¿#include "config.h"
 #include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 #include<string>
 #include"mywindows.h"
 #include <codecvt>
 
-// ¶¨ÒåÁ´±íÍ·½Úµã
+// å®šä¹‰é“¾è¡¨å¤´èŠ‚ç‚¹
 config::Node* config::head = NULL;
 const wchar_t* config::LogString;
 std::wstring config::configpath;
 using namespace std;
 
-//¶ÁÈ¡ºÍ²¹È«ÅäÖÃÏî
+//è¯»å–å’Œè¡¥å…¨é…ç½®é¡¹
 void config::init() {
-    mywindows::log("initing config start");
-    configpath = Log::wrunpath;
-    configpath += CONFIG_;
-    FILE* file = _wfopen(configpath.c_str(), L"r");
-    if (file == NULL) {
-        add(NAMES1, L".\\names1.txt");
-        add(NAMES2, L".\\names2.txt");
-        add(NAMES3, L".\\names3.txt");
-        add(NAMES4, L".\\names4.txt");
-        add(YUANSHI, L"10000");
-        add(BLUE_BALL_COUNT, L"10000");
-        add(PINK_BALL_COUNT, L"10000");
-        add(OFF_VIDEO, L"0");
-        add(SPECIAL, L"0");
-        add(MODE, L"1");
-        add(INWINDOW, L"0");
-        add(OFFMUSIC, L"0");
-        add(WINDOW_TITEL, L"ÆíÔ¸");
-        add(OVER4, L".\\files\\imgs\\over4.bmp");
-        add(OVER3,L".\\files\\imgs\\over3.bmp");
-        add(OVER2, L".\\files\\imgs\\over2.bmp");
-        add(OVER1, L".\\files\\imgs\\over1.bmp");
-        add(SIGNALSTAR3, L"\\files\\video\\3star-single.mp4");
-        add(SIGNALSTAR4, L"\\files\\video\\4star-single.mp4");
-        add(SIGNALSTAR5, L"\\files\\video\\5star-single.mp4");
-        add(GROUPSTAR4, L"\\files\\video\\4star-multi.mp4");
-        add(GROUPSTAR5, L"\\files\\video\\5star-multi.mp4");
-        saveFile();
-        readFile();
-        printAllConfigItems();
-    }
-    else
-    {
-        fclose(file);
-        readFile();
-        wstring LogString = get(MODE);
-        if (wcscmp(LogString.c_str(), L"err") == 0)add(MODE, L"1");
-        LogString = get(OFF_VIDEO);
-        if (wcscmp(LogString.c_str(), L"err") == 0)add(OFF_VIDEO, L"0");
-        LogString = get(WINDOW_TITEL);
-        if (wcscmp(LogString.c_str(), L"err") == 0)add(WINDOW_TITEL, L"Ô­Éñ");
-        LogString = get(NAMES1);
-        if (wcscmp(LogString.c_str(), L"err") == 0)add(NAMES1, L".\\names1.txt");
-        LogString = get(NAMES2);
-        if (wcscmp(LogString.c_str(), L"err") == 0)add(NAMES2, L".\\names2.txt");
-        LogString = get(NAMES3);
-        if (wcscmp(LogString.c_str(), L"err") == 0)add(NAMES3, L".\\names3.txt");
-        LogString = get(NAMES4);
-        if (wcscmp(LogString.c_str(), L"err") == 0)add(NAMES4, L".\\names4.txt");
-        LogString = get(BLUE_BALL_COUNT);
-        if (wcscmp(LogString.c_str(), L"err") == 0)add(BLUE_BALL_COUNT, L"10000");
-        LogString = get(PINK_BALL_COUNT);
-        if (wcscmp(LogString.c_str(), L"err") == 0)add(PINK_BALL_COUNT, L"10000");
-        LogString = get(YUANSHI);
-        if (wcscmp(LogString.c_str(), L"err") == 0)add(YUANSHI, L"10000");
-        LogString = get(SPECIAL);
-        if (wcscmp(LogString.c_str(), L"err") == 0)add(SPECIAL, L"0");
-        LogString = get(OFFMUSIC);
-        if (wcscmp(LogString.c_str(), L"err") == 0)add(OFFMUSIC, L"0");
-        LogString = get(INWINDOW);
-        if (wcscmp(LogString.c_str(), L"err") == 0)add(INWINDOW, L"0");
-        LogString = get(OVER1);
-        if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER1, L".\\files\\imgs\\over1.bmpL");
-        LogString = get(OVER2);
-        if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER2, L".\\files\\imgs\\over2.bmpL");
-        LogString = get(OVER3);
-        if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER3, L".\\files\\imgs\\over3.bmpL");
-        LogString = get(OVER4);
-        if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER4, L".\\files\\imgs\\over4.bmpL");
-        LogString = get(SIGNALSTAR3);
-        if (wcscmp(LogString.c_str(), L"err") == 0)add(SIGNALSTAR3, L"\\files\\video\\3star-single.mp4");
-        LogString = get(SIGNALSTAR4);
-        if (wcscmp(LogString.c_str(), L"err") == 0) add(SIGNALSTAR4, L"\\files\\video\\4star-single.mp4");
-        LogString = get(SIGNALSTAR5);
-        if (wcscmp(LogString.c_str(), L"err") == 0)add(SIGNALSTAR5, L"\\files\\video\\5star-single.mp4");
-        LogString = get(GROUPSTAR4);
-        if (wcscmp(LogString.c_str(), L"err") == 0)add(GROUPSTAR4, L"\\files\\video\\4star-multi.mp4");
-        LogString = get(GROUPSTAR5);
-        if (wcscmp(LogString.c_str(), L"err") == 0)add(GROUPSTAR5, L"\\files\\video\\5star-multi.mp4");
-        saveFile();
-        printAllConfigItems();
-        mywindows::log(L"config init successfully");
-    }
+	mywindows::log("initing config start");
+	configpath = Log::wrunpath;
+	configpath += CONFIG_;
+	FILE* file = _wfopen(configpath.c_str(), L"r");
+	if (file == NULL) {
+		add(NAMES1, L".\\names1.txt");
+		add(NAMES2, L".\\names2.txt");
+		add(NAMES3, L".\\names3.txt");
+		add(NAMES4, L".\\names4.txt");
+		add(YUANSHI, L"10000");
+		add(BLUE_BALL_COUNT, L"10000");
+		add(PINK_BALL_COUNT, L"10000");
+		add(OFF_VIDEO, L"0");
+		add(SPECIAL, L"0");
+		add(MODE, L"1");
+		add(INWINDOW, L"0");
+		add(OFFMUSIC, L"0");
+		add(FLOATWINDOW, L"1");
+		add(WINDOW_TITEL, L"ç¥ˆæ„¿");
+		add(OVER4, L".\\files\\imgs\\over4.bmp");
+		add(OVER3,L".\\files\\imgs\\over3.bmp");
+		add(OVER2, L".\\files\\imgs\\over2.bmp");
+		add(OVER1, L".\\files\\imgs\\over1.bmp");
+		add(SIGNALSTAR3, L"\\files\\video\\3star-single.mp4");
+		add(SIGNALSTAR4, L"\\files\\video\\4star-single.mp4");
+		add(SIGNALSTAR5, L"\\files\\video\\5star-single.mp4");
+		add(GROUPSTAR4, L"\\files\\video\\4star-multi.mp4");
+		add(GROUPSTAR5, L"\\files\\video\\5star-multi.mp4");
+		saveFile();
+		readFile();
+		printAllConfigItems();
+	}
+	else
+	{
+		fclose(file);
+		readFile();
+		wstring LogString = get(MODE);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(MODE, L"1");
+		LogString = get(OFF_VIDEO);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(OFF_VIDEO, L"0");
+		LogString = get(WINDOW_TITEL);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(WINDOW_TITEL, L"åŽŸç¥ž");
+		LogString = get(NAMES1);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(NAMES1, L".\\names1.txt");
+		LogString = get(NAMES2);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(NAMES2, L".\\names2.txt");
+		LogString = get(NAMES3);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(NAMES3, L".\\names3.txt");
+		LogString = get(NAMES4);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(NAMES4, L".\\names4.txt");
+		LogString = get(BLUE_BALL_COUNT);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(BLUE_BALL_COUNT, L"10000");
+		LogString = get(PINK_BALL_COUNT);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(PINK_BALL_COUNT, L"10000");
+		LogString = get(YUANSHI);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(YUANSHI, L"10000");
+		LogString = get(SPECIAL);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(SPECIAL, L"0");
+		LogString = get(OFFMUSIC);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(OFFMUSIC, L"0");
+		LogString = get(INWINDOW);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(INWINDOW, L"0");
+		LogString = get(FLOATWINDOW);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(FLOATWINDOW, L"1");
+		LogString = get(OVER1);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER1, L".\\files\\imgs\\over1.bmpL");
+		LogString = get(OVER2);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER2, L".\\files\\imgs\\over2.bmpL");
+		LogString = get(OVER3);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER3, L".\\files\\imgs\\over3.bmpL");
+		LogString = get(OVER4);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER4, L".\\files\\imgs\\over4.bmpL");
+		LogString = get(SIGNALSTAR3);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(SIGNALSTAR3, L"\\files\\video\\3star-single.mp4");
+		LogString = get(SIGNALSTAR4);
+		if (wcscmp(LogString.c_str(), L"err") == 0) add(SIGNALSTAR4, L"\\files\\video\\4star-single.mp4");
+		LogString = get(SIGNALSTAR5);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(SIGNALSTAR5, L"\\files\\video\\5star-single.mp4");
+		LogString = get(GROUPSTAR4);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(GROUPSTAR4, L"\\files\\video\\4star-multi.mp4");
+		LogString = get(GROUPSTAR5);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(GROUPSTAR5, L"\\files\\video\\5star-multi.mp4");
+		saveFile();
+		printAllConfigItems();
+		mywindows::log(L"config init successfully");
+	}
 }
-//»ñÈ¡ÅäÖÃÏîÄÚÈÝ
+//èŽ·å–é…ç½®é¡¹å†…å®¹
 std::wstring config::get(const std::wstring& name) {
-    Node* current = head;
+	Node* current = head;
 
-    // ±éÀúÁ´±í²éÕÒÆ¥ÅäµÄÅäÖÃÏî
-    while (current != NULL) {
-        if (current->item.name == name) {
-            // ÕÒµ½Æ¥ÅäµÄÅäÖÃÏî,·µ»ØÆä²ÎÊýÖµ
-            return current->item.value;
-        }
-        current = current->next;
-    }
+	// éåŽ†é“¾è¡¨æŸ¥æ‰¾åŒ¹é…çš„é…ç½®é¡¹
+	while (current != NULL) {
+		if (current->item.name == name) {
+			// æ‰¾åˆ°åŒ¹é…çš„é…ç½®é¡¹,è¿”å›žå…¶å‚æ•°å€¼
+			return current->item.value;
+		}
+		current = current->next;
+	}
 
-    // Èç¹ûÃ»ÓÐÕÒµ½Æ¥ÅäµÄÅäÖÃÏî,·µ»ØL"err"
-    return L"err";
+	// å¦‚æžœæ²¡æœ‰æ‰¾åˆ°åŒ¹é…çš„é…ç½®é¡¹,è¿”å›žL"err"
+	return L"err";
 }
 int config::getint(const std::wstring& name)
 {
-    Node* current = head;
+	Node* current = head;
 
-    // ±éÀúÁ´±í²éÕÒÆ¥ÅäµÄÅäÖÃÏî
-    while (current != NULL) {
-        if (current->item.name == name) {
-            // ÕÒµ½Æ¥ÅäµÄÅäÖÃÏî,·µ»ØÆä²ÎÊýÖµ
-            return stoi(current->item.value);
-        }
-        current = current->next;
-    }
+	// éåŽ†é“¾è¡¨æŸ¥æ‰¾åŒ¹é…çš„é…ç½®é¡¹
+	while (current != NULL) {
+		if (current->item.name == name) {
+			// æ‰¾åˆ°åŒ¹é…çš„é…ç½®é¡¹,è¿”å›žå…¶å‚æ•°å€¼
+			try
+			{
+				return stoi(current->item.value);
+			}
+			catch (const std::exception& e)
+			{
+				Log l("files\\log\\configERR.log");
+				l << l.pt() << "[ERROR]Meet a error when get int config item: " << e.what();
+				mywindows::errlog("Meet a error ,you can saw it in configERR.log");
+				return 0;
+			}
+		}
+		current = current->next;
+	}
 
-    // Èç¹ûÃ»ÓÐÕÒµ½Æ¥ÅäµÄÅäÖÃÏî,·µ»ØL"err"
-    return -1;
+	// å¦‚æžœæ²¡æœ‰æ‰¾åˆ°åŒ¹é…çš„é…ç½®é¡¹,è¿”å›žL"err"
+	return -1;
 }
 int config::turnUpSideDown(const std::wstring& name)
 {
-    wstring val = get(name);
-    try {
-        bool t = !stoi(val);
-        replace(name, to_wstring(t));
-        return t;
-    }
-    catch(invalid_argument& e)
-    {
-        string estr(e.what());
-        mywindows::errlog(estr.c_str());
-        return -1;
-    }
+	bool t = !getint(name);
+	replace(name, to_wstring(t));
+	return t;
 }
-// Ìí¼ÓÅäÖÃÏîµ½Á´±í
+// æ·»åŠ é…ç½®é¡¹åˆ°é“¾è¡¨
 void config::add(const std::wstring& name, const std::wstring& value) {
-    Node* current = head;
-    Node* prev = nullptr;
+	Node* current = head;
+	Node* prev = nullptr;
 
-    while (current != nullptr) {
-        if (current->item.name == name) {
-            current->item.value = value;
-            return;
-        }
-        prev = current;
-        current = current->next;
-    }
+	while (current != nullptr) {
+		if (current->item.name == name) {
+			current->item.value = value;
+			return;
+		}
+		prev = current;
+		current = current->next;
+	}
 
-    ConfigItem newItem;
-    newItem.name = name;
-    newItem.value = value;
+	ConfigItem newItem;
+	newItem.name = name;
+	newItem.value = value;
 
-    Node* newNode = new Node;
-    if (newNode == nullptr) {
-        mywindows::errlog(L"Memory allocation error(add)");
-        return;
-    }
+	Node* newNode = new Node;
+	if (newNode == nullptr) {
+		mywindows::errlog(L"Memory allocation error(add)");
+		return;
+	}
 
-    newNode->item = newItem;
-    newNode->next = head;
-    head = newNode;
+	newNode->item = newItem;
+	newNode->next = head;
+	head = newNode;
 }
-// ¶ÁÈ¡ÅäÖÃÎÄ¼þ²¢±£´æÅäÖÃÏîµ½Á´±í
+// è¯»å–é…ç½®æ–‡ä»¶å¹¶ä¿å­˜é…ç½®é¡¹åˆ°é“¾è¡¨
 void config::readFile() {
-    FILE* file = _wfopen(configpath.c_str(), L"r, ccs=UNICODE");
-    if (file == NULL) {
-        mywindows::errlog(L"Error opening file for reading");
-        return;
-    }
+	FILE* file = _wfopen(configpath.c_str(), L"r, ccs=UNICODE");
+	if (file == NULL) {
+		mywindows::errlog(L"Error opening file for reading");
+		return;
+	}
 
-    wchar_t line[256];
-    while (fgetws(line, sizeof(line) / sizeof(wchar_t), file) != NULL) {
-        wchar_t* trimLine = wcstok(line, L"\n"); // ÒÆ³ý»»ÐÐ·û
+	wchar_t line[256];
+	while (fgetws(line, sizeof(line) / sizeof(wchar_t), file) != NULL) {
+		wchar_t* trimLine = wcstok(line, L"\n"); // ç§»é™¤æ¢è¡Œç¬¦
 
-        wchar_t* currentOption = wcstok(trimLine, L"=");
-        if (currentOption != NULL) {
-            wchar_t* value = wcstok(NULL, L"=");
-            // Ìí¼ÓÅäÖÃÏîµ½Á´±í
-            add(std::wstring(currentOption), std::wstring(value));
-            mywindows::log(trimLine);
-        }
-    }
+		wchar_t* currentOption = wcstok(trimLine, L"=");
+		if (currentOption != NULL) {
+			wchar_t* value = wcstok(NULL, L"=");
+			// æ·»åŠ é…ç½®é¡¹åˆ°é“¾è¡¨
+			add(std::wstring(currentOption), std::wstring(value));
+			mywindows::log(trimLine);
+		}
+	}
 
-    fclose(file);
+	fclose(file);
 }
-// ±£´æÅäÖÃÏîµ½ÅäÖÃÎÄ¼þ
+// ä¿å­˜é…ç½®é¡¹åˆ°é…ç½®æ–‡ä»¶
 void config::saveFile() {
-    FILE* file = _wfopen(configpath.c_str(), L"w, ccs=UNICODE");
-    if (file == NULL) {
-        mywindows::errlog(L"Error opening file for writing");
-        return;
-    }
+	FILE* file = _wfopen(configpath.c_str(), L"w, ccs=UNICODE");
+	if (file == NULL) {
+		mywindows::errlog(L"Error opening file for writing");
+		return;
+	}
 
-    Node* current = head;
-    while (current != NULL) {
-        fwprintf(file, L"%s=%s\n", current->item.name.c_str(), current->item.value.c_str());
-        current = current->next;
-    }
+	Node* current = head;
+	while (current != NULL) {
+		fwprintf(file, L"%s=%s\n", current->item.name.c_str(), current->item.value.c_str());
+		current = current->next;
+	}
 
-    fclose(file);
+	fclose(file);
 }
-// ÊÍ·ÅÁ´±í½ÚµãµÄÄÚ´æ
+// é‡Šæ”¾é“¾è¡¨èŠ‚ç‚¹çš„å†…å­˜
 void config::cleanup() {
-    Node* current = head;
-    Node* next;
+	Node* current = head;
+	Node* next;
 
-    while (current != NULL) {
-        next = current->next;
-        // ²»ÐèÒªÊÖ¶¯ÊÍ·Å std::wstring ¶ÔÏóµÄÄÚ´æ
-        delete current;
-        current = next;
-    }
+	while (current != NULL) {
+		next = current->next;
+		// ä¸éœ€è¦æ‰‹åŠ¨é‡Šæ”¾ std::wstring å¯¹è±¡çš„å†…å­˜
+		delete current;
+		current = next;
+	}
 
-    head = NULL;
-    mywindows::log(L"Free ConfigList complete");
+	head = NULL;
+	mywindows::log(L"Free ConfigList complete");
 }
-// É¾³ýÅäÖÃÏî
+// åˆ é™¤é…ç½®é¡¹
 void config::deleteItem(const std::wstring& name) {
-    Node* prev = nullptr;
-    Node* current = head;
+	Node* prev = nullptr;
+	Node* current = head;
 
-    while (current != nullptr) {
-        if (current->item.name == name) {
-            // ÕÒµ½Æ¥ÅäµÄÅäÖÃÏî,É¾³ýËü
-            if (prev != nullptr) {
-                prev->next = current->next;
-            }
-            else {
-                head = current->next;
-            }
+	while (current != nullptr) {
+		if (current->item.name == name) {
+			// æ‰¾åˆ°åŒ¹é…çš„é…ç½®é¡¹,åˆ é™¤å®ƒ
+			if (prev != nullptr) {
+				prev->next = current->next;
+			}
+			else {
+				head = current->next;
+			}
 
-            delete current;
-            mywindows::log(L"del %s success", name.c_str());
-            return;
-        }
+			delete current;
+			mywindows::log(L"del %s success", name.c_str());
+			return;
+		}
 
-        prev = current;
-        current = current->next;
-    }
+		prev = current;
+		current = current->next;
+	}
 
-    mywindows::log(L"del %s failed, not found", name.c_str());
+	mywindows::log(L"del %s failed, not found", name.c_str());
 }
-//Ìæ»»ÅäÖÃÏî
+//æ›¿æ¢é…ç½®é¡¹
 void config::replace(const std::wstring& name, const std::wstring& value) {
-    Node* prev = nullptr;
-    Node* current = head;
+	Node* prev = nullptr;
+	Node* current = head;
 
-    while (current != nullptr) {
-        if (current->item.name == name) {
-            current->item.value = value;
-            saveFile();
-            return;
-        }
+	while (current != nullptr) {
+		if (current->item.name == name) {
+			current->item.value = value;
+			saveFile();
+			return;
+		}
 
-        prev = current;
-        current = current->next;
-    }
+		prev = current;
+		current = current->next;
+	}
 
-    // Èç¹ûÃ»ÓÐÕÒµ½Æ¥ÅäµÄÅäÖÃÏî,ÔòÌí¼ÓÐÂµÄÅäÖÃÏî
-    add(name, value);
-    saveFile();
+	// å¦‚æžœæ²¡æœ‰æ‰¾åˆ°åŒ¹é…çš„é…ç½®é¡¹,åˆ™æ·»åŠ æ–°çš„é…ç½®é¡¹
+	add(name, value);
+	saveFile();
 }
-//´òÓ¡ÅäÖÃ
+//æ‰“å°é…ç½®
 void config::printAllConfigItems() {
-    mywindows::log(L" Configuration:");
-    Node* current = head;
-    while (current != NULL) {
-        mywindows::log(L"%s: %s", current->item.name.c_str(), current->item.value.c_str());
-        current = current->next;
-    }
+	mywindows::log(L" Configuration:");
+	Node* current = head;
+	while (current != NULL) {
+		mywindows::log(L"%s: %s", current->item.name.c_str(), current->item.value.c_str());
+		current = current->next;
+	}
 }

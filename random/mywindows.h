@@ -1,9 +1,7 @@
-#define _CRT_SECURE_NO_WARNINGS
+﻿#define _CRT_SECURE_NO_WARNINGS
 #pragma once
 #include <mutex>
 #include "log.h"
-#include <wchar.h>
-#include <stdio.h>
 #include<Windows.h>
 
 #define TextOut_(hdc,x,y,string) TextOutW(hdc,static_cast<int>(x),static_cast<int>(y),string,static_cast<int>(wcslen(string)))
@@ -23,7 +21,8 @@ public:
 	static int windowTop;
 	static int windowLeft;
 	static int indices[10];
-	static HWND hWnd;
+	static HWND main_hwnd,load_hwnd;
+	static HWND float_hWnd,Quit_hwnd;
 	static void removeFileNameFromPath(char* path);
 	static void removeFileNameFromPath(wchar_t* path);
 	static void removeFileNameFromPath(std::wstring& path);
@@ -34,5 +33,6 @@ public:
 	static int* find(int* array, int size, int valueToFind, int* count);
 	static bool CreatedMultipleDirectory(const std::string& direct);
 	static int GetStringWidth(HDC hdc, const std::wstring& str, int height);
+	static HINSTANCE hinstance;
 };
 

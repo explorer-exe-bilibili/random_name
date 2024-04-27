@@ -1,4 +1,4 @@
-#include "ui.h"
+﻿#include "ui.h"
 #include "mywindows.h"
 #include "bitmaps.h"
 

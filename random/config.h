@@ -1,4 +1,4 @@
-#define _CRT_SECURE_NO_WARNINGS
+ï»¿#define _CRT_SECURE_NO_WARNINGS
 #define _SILENCE_ALL_CXX17_DEPRECATION_WARNINGS
 #define _CRT_NON_CONFORMING_WCSTOK
 #pragma once
@@ -26,22 +26,22 @@
 #define SIGNALSTAR5 L"signal 5star video"
 #define GROUPSTAR4 L"group 4star video"
 #define GROUPSTAR5 L"group 5star video"
-
+#define FLOATWINDOW L"open float window"
 
 class config
 {
 private:
-	// ¶¨ÒåÅäÖÃÏî½á¹¹
+	// å®šä¹‰é…ç½®é¡¹ç»“æ„
 	typedef struct ConfigItem {
 		std::wstring name;
 		std::wstring value;
 	} ConfigItem;
-	// ¶¨ÒåÁ´±í½Úµã
+	// å®šä¹‰é“¾è¡¨èŠ‚ç‚¹
 	typedef struct Node {
 	ConfigItem item;
 	struct Node* next=0;
 	} Node;
-	// ¶¨ÒåÁ´±íÍ·½Úµã
+	// å®šä¹‰é“¾è¡¨å¤´èŠ‚ç‚¹
 	static Node* head;
 	static const wchar_t* LogString;
 	static std::wstring configpath;

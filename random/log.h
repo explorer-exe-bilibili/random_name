@@ -1,11 +1,10 @@
-#define _CRT_SECURE_NO_WARNINGS
+ï»¿#define _CRT_SECURE_NO_WARNINGS
 #pragma once
 #include <iostream>
 #include <fstream>
 #include <string>
-#include <ctime>
 #define INSIDEINT 1143221
-// ¶¨ÒåÈÕÖ¾¼¶±ðÃ¶¾Ù
+// å®šä¹‰æ—¥å¿—çº§åˆ«æžšä¸¾
 
 class Log {
 private:
@@ -22,7 +21,7 @@ public:
     Log& operator<<(const std::wstring& str);
     Log& operator<<(long double value);
     friend Log& operator<<(Log& log, std::ostream& (*f)(std::ostream&));
-    // ¿ÉÒÔ¸ù¾ÝÐèÒªÖØÔØ¸ü¶àÆäËûÀàÐÍµÄ<<ÔËËã·ûº¯Êý
+    // å¯ä»¥æ ¹æ®éœ€è¦é‡è½½æ›´å¤šå…¶ä»–ç±»åž‹çš„<<è¿ç®—ç¬¦å‡½æ•°
     int nl();
     int pt();
 private:

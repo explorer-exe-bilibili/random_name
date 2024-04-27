@@ -1,9 +1,9 @@
-#include "directshow.h"
+ï»¿#include "directshow.h"
 #include "mywindows.h"
 #include "log.h"
 #include "config.h"
+#include "set-json.h"
 #include "sth2sth.h"
-#include "setting.h"
 
 #pragma comment(lib, "Quartz.lib")
 #pragma comment(lib, "Strmiids.lib")
@@ -17,6 +17,9 @@ IVideoWindow* directshow::pVideoWindow=0;
 IMediaEventEx* directshow::pMediaEvent=0;
 IDispatch* directshow::pDispatch=0;
 IBasicAudio* directshow::pBaicAudio=0;
+bool directshow::playingbgm=0;
+
+extern set2 setscreen;
 
 void directshow::play(wstring path) {
 	std::wstring path_;
@@ -53,11 +56,11 @@ void directshow::play(wstring path) {
 	pVideoWindow->put_Top(mywindows::windowTop);
 	if (SUCCEEDED(hr))
 	{
-		if (!setting::offmusic) {
-			mciSendString(L"stop bgm", NULL, 0, NULL); // Í£Ö¹²¥·Å
+		if (!setscreen.offmusic) {
+			mciSendString(L"stop bgm", NULL, 0, NULL); // åœæ­¢æ’­æ”¾
 			pBaicAudio->put_Volume(0);
 		}
-		if (setting::offmusic) pBaicAudio->put_Volume(-10000);
+		if (setscreen.offmusic) pBaicAudio->put_Volume(-10000);
 		mywindows::log("play begin");
 		pVideoWindow->SetWindowPosition(0, 0, mywindows::windowWidth, mywindows::windowHeight);
 		hr = pControl->Run();
@@ -74,26 +77,36 @@ void directshow::play(wstring path) {
 }
 
 void directshow::music(const char* path) {
-	if (!setting::offmusic) {
-		std::string p;
-		p = "close ";
-		p += "temp";
-		mciSendStringA(p.c_str(), NULL, 0, NULL); // ¹Ø±ÕÒôÀÖÎÄ¼ş
+	if (!setscreen.offmusic) {
+		std::wstring p;
+		p = L"close ";
+		p += L"temp";
+		mciSendString(p.c_str(), NULL, 0, NULL); // å…³é—­éŸ³ä¹æ–‡ä»¶
 		mywindows::log(p.c_str());
-		p = "open \"";
-		p += Log::runpath;
-		p += path;
-		p += "\" alias ";
-		p += "temp";
-		mciSendStringA(p.c_str(), NULL, 0, NULL);
-		mywindows::log("´ò¿ª%s,Ö¸ÁîÎª%s", path, p.c_str());
-		p = "play ";
-		p += "temp";
+		p = L"open \"";
+		p += Log::wrunpath;
+		p += sth2sth::str2wstr(path);
+		p += L"\" alias ";
+		p += L"temp";
+		mciSendString(p.c_str(), NULL, 0, NULL);
+		mywindows::log("æ‰“å¼€%s,æŒ‡ä»¤ä¸º%s", path, p.c_str());
+		p = L"play ";
+		p += L"temp";
 		mywindows::log(p.c_str());
-		mciSendStringA(p.c_str(), 0, 0, 0);
+		mciSendString(p.c_str(), 0, 0, 0);
 	}
 }
 
 void directshow::stopmusic() {
+	playingbgm = 0;
 	mciSendStringA("close temp", NULL, 0, 0);
+	mciSendString(L"stop bgm", 0, 0, 0);
+}
+
+void directshow::startbgm() {
+	if (!playingbgm) {
+		if(!setscreen.offmusic)
+		mciSendString(L"play bgm repeat", 0, 0, 0);
+		playingbgm = 1;
+	}
 }

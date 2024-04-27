@@ -1,10 +1,9 @@
-#include "getname.h"
+ï»¿#include "getname.h"
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <ctime>
 #include <cstdlib>
-#include <stdbool.h>
 #include"mywindows.h"
 #include"config.h"
 #include"sth2sth.h"
@@ -31,31 +30,39 @@ LPCWSTR getname::random(int m, int i) {
     return tmp3;
 }
 int getname::getstar(const std::string& input) {
-    // ÕÒµ½µÚÒ»¸ö "-"
+    // æ‰¾åˆ°ç¬¬ä¸€ä¸ª "-"
     std::cerr << input << "\n";
     size_t dashPos = input.find("-");
     std::cerr << input << "\n";
     if (dashPos != std::string::npos) {
-        // Èç¹ûÕÒµ½ÁË "-", »ñÈ¡ "-" ºóÃæµÄÊı×Ö
+        // å¦‚æœæ‰¾åˆ°äº† "-", è·å– "-" åé¢çš„æ•°å­—
         std::string numberStr = input.substr(dashPos + 1);
-        // ½«Êı×Ö×Ö·û´®×ª»»ÎªÕûÊı
-        int result = std::stoi(numberStr);
-        if (result > 6)result = 6;
-        if (result < 3)result = 3;
-        return result;
+        // å°†æ•°å­—å­—ç¬¦ä¸²è½¬æ¢ä¸ºæ•´æ•°
+        try
+        {
+            int result = std::stoi(numberStr);
+            if (result > 6)result = 6;
+            if (result < 3)result = 3;
+            return result;
+        }
+        catch (const std::exception& e)
+        {
+            Log err("files\\log\\RandomERR.log");
+            err<<err.pt() <<"[ERROR]Meet a error when get star:" << e.what()<<"the string is :"<<numberStr << endl;
+        }
     }
-    // Èç¹ûÎ´ÕÒµ½ "-" »ò×ª»»Ê§°Ü£¬·µ»ØÄ¬ÈÏÖµ£¨¿ÉÒÔ¸ù¾İĞèÒªĞŞ¸Ä£©
+    // å¦‚æœæœªæ‰¾åˆ° "-" æˆ–è½¬æ¢å¤±è´¥ï¼Œè¿”å›é»˜è®¤å€¼ï¼ˆå¯ä»¥æ ¹æ®éœ€è¦ä¿®æ”¹ï¼‰
     return 3;
 }
 std::string getname::removeAfterDash(const std::string& input) {
-    // ÕÒµ½µÚÒ»¸ö "-"
+    // æ‰¾åˆ°ç¬¬ä¸€ä¸ª "-"
     size_t dashPos = input.find("-");
     if (dashPos != std::string::npos) {
-        // Èç¹ûÕÒµ½ÁË "-", ²ÃÇĞµô "-" ºóÃæµÄÄÚÈİ
+        // å¦‚æœæ‰¾åˆ°äº† "-", è£åˆ‡æ‰ "-" åé¢çš„å†…å®¹
         return input.substr(0, dashPos);
     }
     else {
-        // Èç¹ûÎ´ÕÒµ½ "-", Ö±½Ó·µ»ØÔ­×Ö·û´®
+        // å¦‚æœæœªæ‰¾åˆ° "-", ç›´æ¥è¿”å›åŸå­—ç¬¦ä¸²
         return input;
     }
 }
@@ -65,10 +72,10 @@ std::string getname::RandomLineFromFile(const std::wstring& filename)
     std::ifstream file(filename);
     if (!file)
     {
-        mywindows::errlog("ÎÄ¼ş²»´æÔÚ");
+        mywindows::errlog("æ–‡ä»¶ä¸å­˜åœ¨");
         return "FOF";
     }
-    std::string line = "ÄãºÃÅ£°¡°¡°¡-3";
+    std::string line = "";
     while (std::getline(file, line))
     {
         lines.push_back(line);
@@ -78,7 +85,7 @@ std::string getname::RandomLineFromFile(const std::wstring& filename)
         mywindows::errlog("file is empty");
         return "File is empty";
     }
-    // Ëæ»úÑ¡ÔñÒ»ĞĞ
+    // éšæœºé€‰æ‹©ä¸€è¡Œ
     std::srand(static_cast<unsigned int>(std::time(nullptr)) * seed);
     int temp = rand();
     std::srand(((static_cast<unsigned int>(std::time(nullptr))) * seed + temp) * rand());
@@ -87,9 +94,9 @@ std::string getname::RandomLineFromFile(const std::wstring& filename)
     return lines[randomIndex];
 }
 int getname::randomIntegerBetween(int min, int max) {
-    // ³õÊ¼»¯Ëæ»úÊıÉú³ÉÆ÷
+    // åˆå§‹åŒ–éšæœºæ•°ç”Ÿæˆå™¨
     srand(static_cast<unsigned int>(time(0)) + seed2);
-    // ¼ÆËãËæ»úÊıµÄ·¶Î§£¬²¢Éú³ÉÒ»¸öÔÚÕâ¸ö·¶Î§ÄÚµÄËæ»úÊı
+    // è®¡ç®—éšæœºæ•°çš„èŒƒå›´ï¼Œå¹¶ç”Ÿæˆä¸€ä¸ªåœ¨è¿™ä¸ªèŒƒå›´å†…çš„éšæœºæ•°
     int range = max - min + 1;
     int randomNum = rand();
     srand(static_cast<unsigned int>(time(0)) + seed2 + randomNum);

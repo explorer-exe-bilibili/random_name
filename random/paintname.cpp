@@ -1,15 +1,16 @@
-#include "paintname.h"
+ï»¿#include "paintname.h"
 #include"mywindows.h"
-#include"setting.h"
 #include "directshow.h"
 #include"config.h"
 #include "getname.h"
 #include"bitmaps.h"
 #include "sth2sth.h"
+#include "set-json.h"
+#include"ui.h"
 
-UINT_PTR paintname::g_StarTimerID = 0; // ¶¨Ê±Æ÷ID
+UINT_PTR paintname::g_StarTimerID = 0; // å®šæ—¶å™¨ID
 UINT_PTR paintname::g_Case6TimerID[3] = { 0 };
-UINT_PTR paintname::g_InitTimerID = 0; // case 6 ¶¨Ê±Æ÷ ID
+UINT_PTR paintname::g_InitTimerID = 0; // case 6 å®šæ—¶å™¨ ID
 HFONT paintname::icon_star = 0;
 int paintname::g_Case6Count = 500;
 int paintname::paintstarcount = 0;
@@ -36,6 +37,7 @@ HWND paintname::StarTimerHwnd = 0;
 
 extern HBITMAP hbitmaps[BitmapCounts];
 extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg, exitinfo, goldenbg, listbm, liststar;
+extern set2 setscreen;
 
 void paintname::showname1() {
 	directshow::music(CLICK);
@@ -44,10 +46,10 @@ void paintname::showname1() {
 	if (number >= 245)rerandom();
 	temp[0] = names[ui::mode - 1][number];
 	star_[0] = getname::star[ui::mode - 1][number];
-	randomedlist << randomedlist.pt() << "[" << star_[0] << "ĞÇ]" << "[" << sth2sth::LWStostr(temp[0]) << "]" << randomedlist.nl();
+	randomedlist << randomedlist.pt() << "[" << star_[0] << "æ˜Ÿ]" << "[" << sth2sth::LWStostr(temp[0]) << "]" << randomedlist.nl();
 	if (star_[0] >= 5)is5star = 1;
 	if (star_[0] == 4)is4star = 1;
-	if (!setting::offvideo) {
+	if (!setscreen.offvideo) {
 		if (is4star == 0 AND is5star == 0)
 			directshow::play(config::get(SIGNALSTAR3));
 		if (is4star == 1 AND is5star == 0)
@@ -55,12 +57,12 @@ void paintname::showname1() {
 		if (is5star == 1)
 			directshow::play(config::get(SIGNALSTAR5));
 	}
-	if (!setting::offmusic)
+	if (!setscreen.offmusic)
 			mciSendString(L"stop bgm", NULL, 0, NULL);
 	ui::screenmode = SHOW_NAMES_ING;
 	ui::isball1 = 1;
 	ui::isball10 = 0;
-	//InvalidateRect(mywindows::hWnd, NULL, FALSE);
+	//InvalidateRect(mywindows::main_hwnd, NULL, FALSE);
 	is4star = 0;
 	is5star = 0;
 	step = 0;
@@ -78,26 +80,24 @@ void paintname::showname10() {
 		star_[10 - (tmp - number)] = getname::star[ui::mode - 1][number];
 		if (getname::star[ui::mode - 1][number] >= 5)is5star = 1;
 		mywindows::log("10balling number=%d,tmp=%d,star=%d", number, tmp, star_[10 - (tmp - number)]);
-		randomedlist << "[" << star_[10 - (tmp - number)] << "ĞÇ]" << "[" << sth2sth::LWStostr(temp[10 - (tmp - number)]) << "]" << randomedlist.nl();
+		randomedlist << "[" << star_[10 - (tmp - number)] << "æ˜Ÿ]" << "[" << sth2sth::LWStostr(temp[10 - (tmp - number)]) << "]" << randomedlist.nl();
 	}
 	randomedlist << "}" << randomedlist.nl();
-	if (!setting::offmusic)
+	if (!setscreen.offmusic)
 		mciSendString(L"stop bgm", NULL, 0, NULL);
-	if (!setting::offvideo) {
+	if (!setscreen.offvideo) {
 		if (is5star == 1)
 			directshow::play(config::get(GROUPSTAR5));
 		else if (is5star == 0)
 			directshow::play(config::get(GROUPSTAR4));
 	}
-	if (!setting::offmusic)
-		mciSendString(L"stop bgm", NULL, 0, NULL);
 	is5star = 0;
 	is4star = 0;
 	ui::screenmode = SHOW_NAMES_ING;
 	ui::isball1 = 0;
 	ui::isball10 = 1;
 	ui::ball10ing = 1;
-	//InvalidateRect(mywindows::hWnd, NULL, FALSE);
+	//InvalidateRect(mywindows::main_hwnd, NULL, FALSE);
 	mywindows::log("finish ball 10,number is %d", number);
 	step = 0;
 }
@@ -184,9 +184,9 @@ void paintname::printnames(HDC hdc, HDC hdcMem) {
 	SelectObject(hdc, ui::text_mid);
 	SetTextColor(hdc, RGB(255, 255, 255));
 	if (ui::ball10ing)
-		TextOut_(hdc, skipbmx, skipbmy, L"Ìø¹ı>>");
+		TextOut_(hdc, skipbmx, skipbmy, L"è·³è¿‡>>");
 	if (ui::mode == std::stoi(config::get(SPECIAL)))
-		TextOut_(hdc, ui::addnamex, ui::addnamey, L"Ôö¼Ó´ËÃû×Ö¼¸ÂÊ");
+		TextOut_(hdc, ui::addnamex, ui::addnamey, L"å¢åŠ æ­¤åå­—å‡ ç‡");
 }
 void paintname::printstars(HDC hdc, int number) {
 	TextOut_(hdc, -1201, -1234, STAR);
@@ -267,7 +267,7 @@ void paintname::listpainter(LPCWSTR tmp_, int i, HDC hdc) {
 		TextOut_(hdc, ui::listx[i] + mywindows::windowWidth * 0.01, ui::listy + mywindows::windowHeight * 0.65, tmp);
 		break;
 	default:
-		MessageBox(NULL, tmp_, L"ÕâÃû×ÖÒ²Ì«³¤ÁËqwq", MB_SYSTEMMODAL | MB_ICONMASK);
+		MessageBox(NULL, tmp_, L"è¿™åå­—ä¹Ÿå¤ªé•¿äº†qwq", MB_SYSTEMMODAL | MB_ICONMASK);
 		break;
 	}
 }
@@ -330,7 +330,7 @@ void paintname::rerandom() {
 		for (int i = 0; i < 256; i++)names[m][i] = 0;
 	CloseHandle(random_handle);
 	random_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)RandomNumberGenerator, NULL, 0, NULL);
-	setting::reran = 0;
+	setscreen.reran = 0;
 	number = 0;
 }
 void paintname::addaname() {
@@ -361,7 +361,7 @@ DWORD WINAPI paintname::RandomNumberGenerator() {
 	for (short m = 0; m <= 3; m++)
 		for (unsigned int i = 0; i <= 255; i++) {
 			names[m][i] = getname::random(m, i);
-			if (getname::fileerr) { MessageBoxA(NULL, "´ò¿ªÎÄ¼şÊ§°Ü£¬Çëµ½ÉèÖÃÖĞÖØĞÂÑ¡ÔñÃû×ÖÎÄ¼ş", "´íÎó", MB_SYSTEMMODAL | MB_ICONERROR); return -1; }
+			if (getname::fileerr) { MessageBoxA(NULL, "æ‰“å¼€æ–‡ä»¶å¤±è´¥ï¼Œè¯·åˆ°è®¾ç½®ä¸­é‡æ–°é€‰æ‹©åå­—æ–‡ä»¶", "é”™è¯¯", MB_SYSTEMMODAL | MB_ICONERROR); return -1; }
 		}
 	mywindows::log("random finish");
 	return 0;
@@ -369,10 +369,10 @@ DWORD WINAPI paintname::RandomNumberGenerator() {
 void CALLBACK paintname::InitTimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
 	InitTimerHwnd = hwnd;
-	KillTimer(hwnd, g_InitTimerID); // Í£Ö¹³õÊ¼ÑÓÊ±¶¨Ê±Æ÷
+	KillTimer(hwnd, g_InitTimerID); // åœæ­¢åˆå§‹å»¶æ—¶å®šæ—¶å™¨
 	g_InitTimerID = 0;
 	g_StarTimerID = SetTimer(NULL, 0, 200, TimerProc);
-	// ÆäËû case...
+	// å…¶ä»– case...
 }
 void CALLBACK paintname::Case6TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
@@ -386,7 +386,7 @@ void CALLBACK paintname::Case6TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, 
 		g_Case6TimerID[2] = SetTimer(hwnd, 0, 0.3, Case6TimerProc);
 		firsttimeCase6 = 0;
 	}
-	HDC hdc = GetDC(mywindows::hWnd);
+	HDC hdc = GetDC(mywindows::main_hwnd);
 	SelectObject(hdc, icon_star);
 	SetBkColor(hdc, RGB(53, 35, 27));
 	SetTextColor(hdc, RGB(220, 184, 14));
@@ -400,9 +400,9 @@ void CALLBACK paintname::Case6TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, 
 	else
 	{
 		firsttimeCase6 = 1;
-		KillTimer(hwnd, g_Case6TimerID[0]); // Í£Ö¹¶¨Ê±Æ÷
-		KillTimer(hwnd, g_Case6TimerID[1]); // Í£Ö¹¶¨Ê±Æ÷
-		KillTimer(hwnd, g_Case6TimerID[2]); // Í£Ö¹¶¨Ê±Æ÷
+		KillTimer(hwnd, g_Case6TimerID[0]); // åœæ­¢å®šæ—¶å™¨
+		KillTimer(hwnd, g_Case6TimerID[1]); // åœæ­¢å®šæ—¶å™¨
+		KillTimer(hwnd, g_Case6TimerID[2]); // åœæ­¢å®šæ—¶å™¨
 		g_Case6TimerID[0] = 0;
 		g_Case6TimerID[1] = 0;
 		g_Case6TimerID[2] = 0;
@@ -413,7 +413,7 @@ void CALLBACK paintname::Case6TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, 
 void CALLBACK paintname::TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
 	StarTimerHwnd = hwnd;
-	HDC hdc = GetDC(mywindows::hWnd);
+	HDC hdc = GetDC(mywindows::main_hwnd);
 	SelectObject(hdc, icon_star);
 	switch (paintstarcount)
 	{
@@ -430,8 +430,8 @@ void CALLBACK paintname::TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD
 			break;
 		case 2:
 			TextOut_(hdc, mywindows::windowWidth * 0.197, mywindows::windowHeight * 31 / 52, STAR);
-			KillTimer(hwnd, g_StarTimerID); // Í£Ö¹¶¨Ê±Æ÷
-			g_StarCount = -1; // ÖØÖÃ¼ÆÊıÆ÷
+			KillTimer(hwnd, g_StarTimerID); // åœæ­¢å®šæ—¶å™¨
+			g_StarCount = -1; // é‡ç½®è®¡æ•°å™¨
 			break;
 		default:
 			break;
@@ -453,8 +453,8 @@ void CALLBACK paintname::TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD
 			break;
 		case 3:
 			TextOut_(hdc, mywindows::windowWidth * 0.207, mywindows::windowHeight * 31 / 52, STAR);
-			KillTimer(hwnd, g_StarTimerID); // Í£Ö¹¶¨Ê±Æ÷
-			g_StarCount = -1; // ÖØÖÃ¼ÆÊıÆ÷
+			KillTimer(hwnd, g_StarTimerID); // åœæ­¢å®šæ—¶å™¨
+			g_StarCount = -1; // é‡ç½®è®¡æ•°å™¨
 			break;
 		default:
 			break;
@@ -479,8 +479,8 @@ void CALLBACK paintname::TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD
 			break;
 		case 4:
 			TextOut_(hdc, mywindows::windowWidth * 0.217, mywindows::windowHeight * 31 / 52, STAR);
-			KillTimer(hwnd, g_StarTimerID); // Í£Ö¹¶¨Ê±Æ÷
-			g_StarCount = -1; // ÖØÖÃ¼ÆÊıÆ÷
+			KillTimer(hwnd, g_StarTimerID); // åœæ­¢å®šæ—¶å™¨
+			g_StarCount = -1; // é‡ç½®è®¡æ•°å™¨
 			break;
 		default:
 			break;
@@ -503,4 +503,24 @@ void paintname::KillAllTimer()
 	g_InitTimerID = 0;
 	g_StarTimerID = 0;
 	g_StarCount = 0;
+}
+void paintname::paint(HDC hdc,HDC hdcMem)
+{
+	ui::ScreenModeChanged = 0;
+	if (ui::printing) {
+		if (ui::isball1) {
+			paintname::out1name(hdc, hdcMem);
+			ui::ing = 0;
+			ui::ScreenModeChanged = 1;
+		}
+		if (ui::isball10) {
+			if (ui::ft) {
+				if (!paintname::skipped)paintname::out10name(hdc, hdcMem);
+				ui::ft = 0;
+			}
+			else if (ui::clicked)
+				paintname::out10name(hdc, hdcMem);
+			ui::ing = 0;
+		}
+	}
 }

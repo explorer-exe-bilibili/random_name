@@ -1,10 +1,10 @@
-#include "paintfirstscreen.h"
-#include"setting.h"
+ï»¿#include "paintfirstscreen.h"
 #include "bitmaps.h"
 #include "ui.h"
 #include "mywindows.h"
 #include"sth2sth.h"
 #include"config.h"
+#include "set-json.h"
 
 #define QI_YUAN L"r"
 #define SETING L"'"
@@ -14,6 +14,7 @@ bool paintfirstscreen::firstpaint = 1;
 
 extern HBITMAP hbitmaps[BitmapCounts];
 extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg, exitinfo, goldenbg, listbm;
+extern set2 setscreen;
 
 void paintfirstscreen::printfirstmenu(HDC hdc, HDC hdcMem) {
 	if (ui::ScreenModeChanged)firstpaint = 1;
@@ -23,10 +24,10 @@ void paintfirstscreen::printfirstmenu(HDC hdc, HDC hdcMem) {
 		StretchBlt(hdc, 0, 0, mywindows::windowWidth, mywindows::windowHeight, hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
 		ui::ScreenModeChanged = 0;
 	}
-	if (setting::offvideo)
-		ui::creatbuttom(hdc, hdcMem, ui::bottom1x, ui::bottom1y, L"Ìø¹ýÊÓÆµ:¿ª");
-	if (!setting::offvideo)
-		ui::creatbuttom(hdc, hdcMem, ui::bottom1x, ui::bottom1y, L"Ìø¹ýÊÓÆµ:¹Ø");
+	if (setscreen.offvideo)
+		ui::creatbuttom(hdc, hdcMem, ui::bottom1x, ui::bottom1y, L"è·³è¿‡è§†é¢‘:å¼€");
+	if (!setscreen.offvideo)
+		ui::creatbuttom(hdc, hdcMem, ui::bottom1x, ui::bottom1y, L"è·³è¿‡è§†é¢‘:å…³");
 	SelectObject(hdcMem, hbitmaps[over1]);
 	StretchBlt(hdc, ui::overlay1X, ui::overlay1Y, ui::overlayW, ui::overlayH, hdcMem, 0, 0, overlay1Bm.bmWidth, overlay1Bm.bmHeight, SRCCOPY);
 	SelectObject(hdcMem, hbitmaps[over2]);
@@ -56,7 +57,7 @@ void paintfirstscreen::printfirstmenu(HDC hdc, HDC hdcMem) {
 void paintfirstscreen::repaint()
 {
 	firstpaint = 1;
-	InvalidateRect(mywindows::hWnd, 0, 0);
+	InvalidateRect(mywindows::main_hwnd, 0, 0);
 }
 void paintfirstscreen::paintoverlay(HDC hdc, HDC hdcMem) {
 	if (ui::mode == 1) {

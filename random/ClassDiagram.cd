@@ -71,12 +71,12 @@
   <Class Name="setting">
     <Position X="6.25" Y="0.75" Width="1.5" />
     <NestedTypes>
-      <Struct Name="setting::sNode">
+      <Struct Name="sNode">
         <TypeIdentifier>
           <NewMemberFileName>setting.h</NewMemberFileName>
         </TypeIdentifier>
       </Struct>
-      <Struct Name="setting::settingxy">
+      <Struct Name="settingxy">
         <TypeIdentifier>
           <NewMemberFileName>setting.h</NewMemberFileName>
         </TypeIdentifier>
