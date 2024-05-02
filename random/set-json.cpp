@@ -30,14 +30,14 @@
 
 using json = nlohmann::json;
 using namespace std;
-Log slog("set-json.log", 1);
+Log slog("files\\log\\set-json.log", 1);
 extern HBITMAP hbitmaps[BitmapCounts];
 extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg, exitinfo, goldenbg, listbm, liststar, buttom;
 
 
 void set2::Load(string jsonpath) {
 	init();
-	Log slog("set-json.log", 0);
+	Log slog("files\\log\\set-json.log", 0);
 	// 读取JSON文件
 openjsonfile:
 	std::ifstream fileStream(jsonpath);
@@ -80,7 +80,7 @@ openjsonfile:
 				if (t.Limit == BETWEENCOUNT) {
 					t.max = sItem.value("max", 0);
 					t.min = sItem.value("min", 0);
-					t.OutOfLimitOutPut = sth2sth::str2wstr(sItem.value("OutOfLimitOutPut", ""));
+					t.OutOfLimitOutPut = sItem.value("OutOfLimitOutPut", "");
 				}
 				else if (t.Limit == ISFILE || t.Limit == ISBITMAP) {
 					t.IsEditBox = 1;
@@ -101,7 +101,7 @@ openjsonfile:
 				t.FileType = "All";
 				t.max = 0;
 				t.min = 0;
-				t.OutOfLimitOutPut = L"";
+				t.OutOfLimitOutPut = "";
 			}
 			pt.items.push_back(t);
 			in++;
@@ -205,7 +205,7 @@ void set2::paint(HDC hdc, HDC hdcMem) {
 
 }
 void set2::rollback(string jsonpath) {
-	Log slog("set-json.log", 0);
+	Log slog("files\\log\\set-json.log", 0);
 	slog << "try to rollback setting page" << endl;
 	// 创建JSON数据
 	json j;
@@ -347,7 +347,7 @@ void set2::reloadbmp(sitem item)
 {
 	DeleteObject(hbitmaps[item.BitmapNumber]);
 	hbitmaps[item.BitmapNumber] =
-		(HBITMAP)LoadImage(NULL, config::get(item.ConfigName).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		(HBITMAP)LoadImage(NULL, config::getpath(item.ConfigName).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	GetObject(hbitmaps[item.BitmapNumber], sizeof(BITMAP), bitmaps[item.BitmapNumber]);
 }
 void set2::rereadconfig() {
@@ -416,7 +416,14 @@ void set2::textbox(sitem item, HDC hdc, HDC hdcMem)
 	SelectObject(hdcMem, hbitmaps[setbutton]);
 	TextOut_(hdc, sxy[item.Number].x, sxy[item.Number].y + mywindows::windowHeight * 0.01, item.Name.c_str());
 	int number = item.Number;
-	std::wstring wst = config::get(item.ConfigName).c_str();
+
+	std::wstring wst;
+	if (item.IsFile) {
+		wst = config::getpath(item.ConfigName);
+	}
+	else {
+		wst = config::get(item.ConfigName);
+	}
 	if (isused[number] == 0) {
 		textboxhwnd[number] = CreateEditBox(mywindows::main_hwnd, number, sxy[number].bmx, sxy[number].bmy, sxy[number].bmw, sxy[number].bmh, wst.c_str());
 	}
@@ -446,15 +453,12 @@ void set2::textbox(sitem item, HDC hdc, HDC hdcMem)
 }
 void set2::OpenFile(sitem item)
 {
-	wstring path = config::get(item.ConfigName);
-	if (path.find_first_of(L'\\') == 0) {
-		path =Log::wrunpath+path;
-	}
+	wstring path = config::getpath(item.ConfigName);
 	ShellExecute(NULL, L"open", path.c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
 void set2::init()
 {
-	bitmaps[background] = &bm;
+	bitmaps[BackGround] = &bm;
 	bitmaps[blue10b] = &ball;
 	bitmaps[blue10i] = &ball;
 	bitmaps[blue1b] = &ball;
@@ -489,15 +493,26 @@ void set2::EditBoxEditor(sitem item, wstring tmp)
 		SetWindowTextW(mywindows::main_hwnd, tmp.c_str());
 		break;
 	case BETWEENCOUNT: {
-		int value = std::stoi(tmp);
+		int value;
+		try
+		{
+			value = std::stoi(tmp);
+		}
+		catch (const std::exception&e)
+		{
+			slog << "[ERROR]meet a error :" << e.what() << endl;
+			MessageBox(NULL, L"请输入数字", L"错误", MB_ICONERROR);
+			return;
+		}
 		if (value < item.min || value > item.max) {
-			MessageBoxW(NULL, item.OutOfLimitOutPut.c_str(), L"错误", MB_ICONERROR);
+			MessageBoxA(NULL, U2G(item.OutOfLimitOutPut).c_str(), "错误", MB_ICONERROR);
 			return;
 		}
 	}break;
 	case ISFILE:
 	case ISBITMAP:
 		if (!std::filesystem::exists(tmp))return;
+		if (tmp == Log::wrunpath + config::get(item.ConfigName))return;
 		break;
 	default:
 		break;
@@ -512,7 +527,7 @@ void set2::switchbm(sitem item, HDC hdc, HDC hdcMem) {
 	SelectObject(hdcMem, hbitmaps[setbutton]);
 	StretchBlt(hdc, sxy[item.Number].bmx, sxy[item.Number].bmy, sxy[item.Number].bmw, sxy[item.Number].bmh, hdcMem, 0, 0, setbu.bmWidth, setbu.bmHeight, SRCCOPY);
 	TextOut_(hdc, sxy[item.Number].x, sxy[item.Number].y + mywindows::windowHeight * 0.01, item.Name.c_str());
-	if (std::stoi(config::get(item.ConfigName)) == 1)
+	if (config::getint(item.ConfigName) == 1)
 		TextOut_(hdc, sxy[item.Number].bmx + mywindows::windowWidth * 0.04, sxy[item.Number].bmy + mywindows::windowHeight * 0.01, L"开");
 	else
 		TextOut_(hdc, sxy[item.Number].bmx + mywindows::windowWidth * 0.04, sxy[item.Number].bmy + mywindows::windowHeight * 0.01, L"关");

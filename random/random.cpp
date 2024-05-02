@@ -9,6 +9,7 @@
 #include "init.h"
 #include"MSGback.h"
 #include "ui.h"
+#include<gdiplus.h>
 
 HBITMAP hbitmaps[BitmapCounts];
 BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg, exitinfo, goldenbg, listbm, liststar, buttom;
@@ -22,6 +23,7 @@ set2 setscreen;
 
 LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
 	mywindows::main_hwnd = hwnd;
+
 	if (setscreen.reran)paintname::rerandom();
 	switch (uMsg) {//通过判断消息进行消息响应
 	case WM_CREATE:MSGback::create(); break;
@@ -97,12 +99,16 @@ int WINAPI WinMain(
 	mywindows::hinstance = hInstance;
 	init::main(WinSunProc, FloatWindowProc, KillWindowProc);
 	init::MainWindow();
+	Gdiplus::GdiplusStartupInput gdiplusStartupInput;
+	ULONG_PTR gdiplusToken;
+	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
 	mywindows::log("INIT COMPETENTLY SUCCESSFULLY");
 	MSG msg;
 	while (GetMessageW(&msg, nullptr, NULL, NULL)) {
 		TranslateMessage(&msg);
 		DispatchMessageW(&msg);
 	}
+	Gdiplus::GdiplusShutdown(gdiplusToken);
 	mywindows::log("bye!");
 	return msg.wParam;
 }

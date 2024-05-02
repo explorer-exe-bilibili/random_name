@@ -87,7 +87,7 @@ void floatwindow::showQuitWindow()
 void floatwindow::create()
 {
 	BITMAP bmp;
-	bitmap= (HBITMAP)LoadImage(NULL, L"OIP-C.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	bitmap= (HBITMAP)LoadImage(NULL, L"files\\imgs\\OIP-C.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	GetObject(bitmap, sizeof(BITMAP), &bmp);
 	icon_w = bmp.bmWidth; icon_h = bmp.bmHeight;
 }

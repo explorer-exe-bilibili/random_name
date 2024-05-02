@@ -51,11 +51,11 @@ void paintname::showname1() {
 	if (star_[0] == 4)is4star = 1;
 	if (!setscreen.offvideo) {
 		if (is4star == 0 AND is5star == 0)
-			directshow::play(config::get(SIGNALSTAR3));
+			directshow::play(config::getpath(SIGNALSTAR3));
 		if (is4star == 1 AND is5star == 0)
-			directshow::play(config::get(SIGNALSTAR4));
+			directshow::play(config::getpath(SIGNALSTAR4));
 		if (is5star == 1)
-			directshow::play(config::get(SIGNALSTAR5));
+			directshow::play(config::getpath(SIGNALSTAR5));
 	}
 	if (!setscreen.offmusic)
 			mciSendString(L"stop bgm", NULL, 0, NULL);
@@ -87,9 +87,9 @@ void paintname::showname10() {
 		mciSendString(L"stop bgm", NULL, 0, NULL);
 	if (!setscreen.offvideo) {
 		if (is5star == 1)
-			directshow::play(config::get(GROUPSTAR5));
+			directshow::play(config::getpath(GROUPSTAR5));
 		else if (is5star == 0)
-			directshow::play(config::get(GROUPSTAR4));
+			directshow::play(config::getpath(GROUPSTAR4));
 	}
 	is5star = 0;
 	is4star = 0;
@@ -185,7 +185,7 @@ void paintname::printnames(HDC hdc, HDC hdcMem) {
 	SetTextColor(hdc, RGB(255, 255, 255));
 	if (ui::ball10ing)
 		TextOut_(hdc, skipbmx, skipbmy, L"跳过>>");
-	if (ui::mode == std::stoi(config::get(SPECIAL)))
+	if (ui::mode == config::getint(SPECIAL))
 		TextOut_(hdc, ui::addnamex, ui::addnamey, L"增加此名字几率");
 }
 void paintname::printstars(HDC hdc, int number) {
@@ -334,11 +334,11 @@ void paintname::rerandom() {
 	number = 0;
 }
 void paintname::addaname() {
-	std::wofstream File;
-	if (ui::ui::mode == 1)File.open(config::get(NAMES1), std::ios::app);
-	if (ui::ui::mode == 2)File.open(config::get(NAMES2), std::ios::app);
-	if (ui::ui::mode == 3)File.open(config::get(NAMES3), std::ios::app);
-	if (ui::ui::mode == 4)File.open(config::get(NAMES4), std::ios::app);
+	std::ofstream File;
+	if (ui::mode == 1)File.open(config::getpath(NAMES1), std::ios::app);
+	if (ui::mode == 2)File.open(config::getpath(NAMES2), std::ios::app);
+	if (ui::mode == 3)File.open(config::getpath(NAMES3), std::ios::app);
+	if (ui::mode == 4)File.open(config::getpath(NAMES4), std::ios::app);
 	LPCWSTR tmp = NULL;
 	int sr = 3;
 	if (ui::ball10ing) {
@@ -352,7 +352,8 @@ void paintname::addaname() {
 	std::wstring t = tmp;
 	t += L"-";
 	t += std::to_wstring(sr);
-	File << std::endl << t;
+	std::string a = sth2sth::wstr2stru(t);
+	File << std::endl << a;
 	MessageBoxW(NULL, t.c_str(), L"info", MB_OK);
 	File.close();
 }

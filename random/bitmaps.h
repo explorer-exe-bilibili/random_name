@@ -23,7 +23,7 @@
 #define pink1b 7
 #define pink1i 6
 #define cardbackground 5
-#define background 4
+#define BackGround 4
 #define over4 3
 #define over3 2
 #define over2 1

@@ -1,5 +1,6 @@
 #pragma once
 #include<Windows.h>
+#include"Gp.h"
 class MSGback
 {
 public:

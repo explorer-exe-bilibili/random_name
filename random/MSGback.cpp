@@ -9,11 +9,11 @@
 #include "click.h"
 #include "directshow.h"
 #include"floatwindow.h"
+#include"Gp.h"
 
 extern set2 setscreen;
 extern HBITMAP hbitmaps[BitmapCounts];
 extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg, exitinfo, goldenbg, listbm, liststar, buttom;
-
 
 void MSGback::create()
 {
@@ -29,6 +29,7 @@ void MSGback::create()
 
 void MSGback::paint()
 {
+	static Gp p;
 	if (mywindows::load_hwnd != 0) {
 		DestroyWindow(mywindows::load_hwnd);
 		mywindows::load_hwnd = 0;
@@ -38,13 +39,17 @@ void MSGback::paint()
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(mywindows::main_hwnd, &ps);
 	HDC hdcMem = CreateCompatibleDC(hdc);
+	p.Prepar(hdc);
 	SetStretchBltMode(hdc, HALFTONE);
 	switch (ui::screenmode)
 	{
-	case FIRST_MENU:paintfirstscreen::printfirstmenu(hdc, hdcMem); directshow::startbgm(); break;
+	case FIRST_MENU:paintfirstscreen::printfirstmenu(hdc, hdcMem,p); directshow::startbgm(); break;
 	case SHOW_NAMES_ING:paintname::paint(hdc, hdcMem);break;
 	case SETTING: setscreen.paint(hdc, hdcMem); break;
 	}
+	HDC hdct = CreateCompatibleDC(hdc);
+	p.pPaint(hdct, 0, 0, 2);
+	BitBlt(hdc, 0, 0, mywindows::windowWidth, mywindows::windowHeight, hdct, 0, 0, SRCCOPY);
 	mywindows::log("paint successfully");
 	DeleteDC(hdcMem);
 	DeleteDC(hdc);

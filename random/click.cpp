@@ -66,7 +66,7 @@ void click::showname(int x, int y)
 			paintname::skipbmyend)paintname::skipped = true;
 		ui::clicked = true;
 	}
-	if (ui::mode == std::stoi(config::get(SPECIAL))AND x >= ui::addnamex AND x <= ui::addnameendx AND y >= ui::addnamey
+	if (ui::mode == config::getint(SPECIAL)AND x >= ui::addnamex AND x <= ui::addnameendx AND y >= ui::addnamey
 		AND y <= ui::addnameendy)paintname::addaname();
 	if (!ui::ball10ing)
 	{

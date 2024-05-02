@@ -22,11 +22,11 @@ void init::picture()
 	// º”‘ÿ¡Ω∏ˆ±≥æ∞Õº∆¨
 	DWORD threadId;
 	HANDLE handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)LoadIMG, NULL, 0, &threadId);
-	hbitmaps[background] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\wish-background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[over1] = (HBITMAP)LoadImage(NULL, config::get(OVER1).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[over2] = (HBITMAP)LoadImage(NULL, config::get(OVER2).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[over3] = (HBITMAP)LoadImage(NULL, config::get(OVER3).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[over4] = (HBITMAP)LoadImage(NULL, config::get(OVER4).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	hbitmaps[BackGround] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\wish-background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	hbitmaps[over1] = (HBITMAP)LoadImage(NULL, config::getpath(OVER1).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	hbitmaps[over2] = (HBITMAP)LoadImage(NULL, config::getpath(OVER2).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	hbitmaps[over3] = (HBITMAP)LoadImage(NULL, config::getpath(OVER3).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	hbitmaps[over4] = (HBITMAP)LoadImage(NULL, config::getpath(OVER4).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	hbitmaps[pink1b] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\1pinkb.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	hbitmaps[pink1i] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\1pinki.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	hbitmaps[pink10i] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\10pinki.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
@@ -38,7 +38,7 @@ void init::picture()
 	hbitmaps[Buttom] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\buttom.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	hbitmaps[blue10i] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\10bluei.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 	hbitmaps[blue10b] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\10blueb.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	GetObject(hbitmaps[background], sizeof(BITMAP), &bm);
+	GetObject(hbitmaps[BackGround], sizeof(BITMAP), &bm);
 	GetObject(hbitmaps[Buttom], sizeof(BITMAP), &buttom);
 	GetObject(hbitmaps[exitb], sizeof(BITMAP), &exitinfo);
 	GetObject(hbitmaps[over1], sizeof(BITMAP), &overlay1Bm);
@@ -142,22 +142,22 @@ void init::resetxy()
 void init::resetpicture()
 {
 	if (setscreen.changebitmap[0]) {
-		hbitmaps[over1] = (HBITMAP)LoadImage(NULL, config::get(OVER1).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		hbitmaps[over1] = (HBITMAP)LoadImage(NULL, config::getpath(OVER1).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		GetObject(hbitmaps[over1], sizeof(BITMAP), &overlay1Bm);
 		setscreen.changebitmap[0] = 0;
 	}
 	if (setscreen.changebitmap[1]) {
-		hbitmaps[over2] = (HBITMAP)LoadImage(NULL, config::get(OVER2).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		hbitmaps[over2] = (HBITMAP)LoadImage(NULL, config::getpath(OVER2).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		GetObject(hbitmaps[over2], sizeof(BITMAP), &overlay2Bm);
 		setscreen.changebitmap[1] = 0;
 	}
 	if (setscreen.changebitmap[2]) {
-		hbitmaps[over3] = (HBITMAP)LoadImage(NULL, config::get(OVER3).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		hbitmaps[over3] = (HBITMAP)LoadImage(NULL, config::getpath(OVER3).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		GetObject(hbitmaps[over3], sizeof(BITMAP), &overlay3Bm);
 		setscreen.changebitmap[2] = 0;
 	}
 	if (setscreen.changebitmap[3]) {
-		hbitmaps[over4] = (HBITMAP)LoadImage(NULL, config::get(OVER4).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+		hbitmaps[over4] = (HBITMAP)LoadImage(NULL, config::getpath(OVER4).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 		GetObject(hbitmaps[over4], sizeof(BITMAP), &overlay4Bm);
 		setscreen.changebitmap[3] = 0;
 	}

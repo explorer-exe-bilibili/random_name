@@ -44,7 +44,7 @@ void directshow::play(wstring path) {
 	if (hr != S_OK) {
 		mywindows::errlog("read video unsuccessfully");
 	}
-	if (!(std::stoi(config::get(INWINDOW)))) {
+	if (!config::getint(INWINDOW)) {
 		pVideoWindow->put_WindowStyle(WS_POPUP|WS_CHILD);
 	}
 	else {

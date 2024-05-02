@@ -5,6 +5,7 @@
 #include"sth2sth.h"
 #include"config.h"
 #include "set-json.h"
+#include"Gp.h"
 
 #define QI_YUAN L"r"
 #define SETING L"'"
@@ -16,12 +17,13 @@ extern HBITMAP hbitmaps[BitmapCounts];
 extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg, exitinfo, goldenbg, listbm;
 extern set2 setscreen;
 
-void paintfirstscreen::printfirstmenu(HDC hdc, HDC hdcMem) {
+void paintfirstscreen::printfirstmenu(HDC hdc, HDC hdcMem,Gp p) {
 	if (ui::ScreenModeChanged)firstpaint = 1;
 	if (firstpaint) {
-		firstpaint = 0;
-		SelectObject(hdcMem, hbitmaps[background]);
-		StretchBlt(hdc, 0, 0, mywindows::windowWidth, mywindows::windowHeight, hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);
+		firstpaint = 0;/*
+		SelectObject(hdcMem, hbitmaps[BackGround]);
+		StretchBlt(hdc, 0, 0, mywindows::windowWidth, mywindows::windowHeight, hdcMem, 0, 0, bm.bmWidth, bm.bmHeight, SRCCOPY);*/
+		p.pPaint(hdc, 0, 0, mywindows::windowWidth, mywindows::windowHeight, 4);
 		ui::ScreenModeChanged = 0;
 	}
 	if (setscreen.offvideo)

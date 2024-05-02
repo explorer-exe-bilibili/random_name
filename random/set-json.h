@@ -24,7 +24,7 @@ private:
 		std::wstring ConfigName;
 		std::wstring FileChooseWindowName;
 		std::string FileType;
-		std::wstring OutOfLimitOutPut;
+		std::string OutOfLimitOutPut;
 	}sitem;
 
 	typedef struct sNode {
@@ -64,7 +64,6 @@ public:
 private:
 	BITMAP* bitmaps[BitmapCounts];
 	bool isused[40] = { 0 };
-	void Load(std::string jsonpath);
 	HWND CreateEditBox(HWND hWndParent, int NUMBER, int x, int y, int w, int h, const wchar_t* words);
 	HWND textboxhwnd[20] = { 0 };
 	int lastbmx=0, lastbmy=0, lastxend=0, lastyend=0;
@@ -79,10 +78,11 @@ private:
 	void ChooseFile(sitem item);
 	void EditBoxEditor(sitem item,std::wstring tmp);
 	void init();
+	void Load(std::string jsonpath);
+	void OpenFile(sitem item);
 	void reloadbmp(sitem item);
 	void rollback(std::string jsonpath);
 	void showitem(sitem item, HDC hdc, HDC hdcMem);
 	void switchbm(sitem item, HDC hdc, HDC hdcMem);
 	void textbox(sitem item, HDC hdc, HDC hdcMem);
-	void OpenFile(sitem item);
 };

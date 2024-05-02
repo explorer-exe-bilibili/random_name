@@ -16,5 +16,9 @@ public:
 	static char* TCHAR2CHAR(TCHAR* STR);
 	static char Lstrtosingal(LPCWSTR in);
 	static std::wstring str2wstr(std::string str);
+	static std::wstring str2wstru(std::string str);
+	static std::string wstr2str(std::wstring wstr);
+	static std::string wstr2stru(std::wstring wstr);
+	static std::string G2U(std::string& gbk);
 	static wchar_t signame[10];
 };

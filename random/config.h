@@ -56,6 +56,7 @@ public:
 	static void printAllConfigItems();
 	static void init();
 	static std::wstring get(const std::wstring& name);
+	static std::wstring getpath(const std::wstring& name);
 	static int getint(const std::wstring& name);
 };
 

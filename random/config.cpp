@@ -17,10 +17,10 @@ void config::init() {
 	configpath += CONFIG_;
 	FILE* file = _wfopen(configpath.c_str(), L"r");
 	if (file == NULL) {
-		add(NAMES1, L".\\names1.txt");
-		add(NAMES2, L".\\names2.txt");
-		add(NAMES3, L".\\names3.txt");
-		add(NAMES4, L".\\names4.txt");
+		add(NAMES1, L"\\names1.txt");
+		add(NAMES2, L"\\names2.txt");
+		add(NAMES3, L"\\names3.txt");
+		add(NAMES4, L"\\names4.txt");
 		add(YUANSHI, L"10000");
 		add(BLUE_BALL_COUNT, L"10000");
 		add(PINK_BALL_COUNT, L"10000");
@@ -31,10 +31,10 @@ void config::init() {
 		add(OFFMUSIC, L"0");
 		add(FLOATWINDOW, L"1");
 		add(WINDOW_TITEL, L"祈愿");
-		add(OVER4, L".\\files\\imgs\\over4.bmp");
-		add(OVER3,L".\\files\\imgs\\over3.bmp");
-		add(OVER2, L".\\files\\imgs\\over2.bmp");
-		add(OVER1, L".\\files\\imgs\\over1.bmp");
+		add(OVER4, L"\\files\\imgs\\over4.bmp");
+		add(OVER3,L"\\files\\imgs\\over3.bmp");
+		add(OVER2, L"\\files\\imgs\\over2.bmp");
+		add(OVER1, L"\\files\\imgs\\over1.bmp");
 		add(SIGNALSTAR3, L"\\files\\video\\3star-single.mp4");
 		add(SIGNALSTAR4, L"\\files\\video\\4star-single.mp4");
 		add(SIGNALSTAR5, L"\\files\\video\\5star-single.mp4");
@@ -55,13 +55,13 @@ void config::init() {
 		LogString = get(WINDOW_TITEL);
 		if (wcscmp(LogString.c_str(), L"err") == 0)add(WINDOW_TITEL, L"原神");
 		LogString = get(NAMES1);
-		if (wcscmp(LogString.c_str(), L"err") == 0)add(NAMES1, L".\\names1.txt");
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(NAMES1, L"\\names1.txt");
 		LogString = get(NAMES2);
-		if (wcscmp(LogString.c_str(), L"err") == 0)add(NAMES2, L".\\names2.txt");
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(NAMES2, L"\\names2.txt");
 		LogString = get(NAMES3);
-		if (wcscmp(LogString.c_str(), L"err") == 0)add(NAMES3, L".\\names3.txt");
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(NAMES3, L"\\names3.txt");
 		LogString = get(NAMES4);
-		if (wcscmp(LogString.c_str(), L"err") == 0)add(NAMES4, L".\\names4.txt");
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(NAMES4, L"\\names4.txt");
 		LogString = get(BLUE_BALL_COUNT);
 		if (wcscmp(LogString.c_str(), L"err") == 0)add(BLUE_BALL_COUNT, L"10000");
 		LogString = get(PINK_BALL_COUNT);
@@ -77,13 +77,13 @@ void config::init() {
 		LogString = get(FLOATWINDOW);
 		if (wcscmp(LogString.c_str(), L"err") == 0)add(FLOATWINDOW, L"1");
 		LogString = get(OVER1);
-		if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER1, L".\\files\\imgs\\over1.bmpL");
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER1, L"\\files\\imgs\\over1.bmp");
 		LogString = get(OVER2);
-		if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER2, L".\\files\\imgs\\over2.bmpL");
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER2, L"\\files\\imgs\\over2.bmp");
 		LogString = get(OVER3);
-		if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER3, L".\\files\\imgs\\over3.bmpL");
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER3, L"\\files\\imgs\\over3.bmp");
 		LogString = get(OVER4);
-		if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER4, L".\\files\\imgs\\over4.bmpL");
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER4, L"\\files\\imgs\\over4.bmp");
 		LogString = get(SIGNALSTAR3);
 		if (wcscmp(LogString.c_str(), L"err") == 0)add(SIGNALSTAR3, L"\\files\\video\\3star-single.mp4");
 		LogString = get(SIGNALSTAR4);
@@ -114,6 +114,14 @@ std::wstring config::get(const std::wstring& name) {
 
 	// 如果没有找到匹配的配置项,返回L"err"
 	return L"err";
+}
+std::wstring config::getpath(const std::wstring& name)
+{
+	wstring path = get(name);
+	if (path.find_first_of(L"\\") == 0) {
+		path = Log::wrunpath + path;
+	}
+	return path;
 }
 int config::getint(const std::wstring& name)
 {

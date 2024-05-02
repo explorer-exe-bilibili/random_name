@@ -11,8 +11,8 @@ public:
 	static void main(WNDPROC w1, WNDPROC w2, WNDPROC w3);
 	static void MainWindow();
 	static void regwindow(WNDPROC w1, WNDPROC w2, WNDPROC w3);
-	static DWORD Regwindows();
-	static DWORD LoadIMG();
-	static DWORD Upgrade();
+	static DWORD WINAPI Regwindows(); // 修改这里
+	static DWORD WINAPI LoadIMG();    // 修改这里
+	static DWORD WINAPI Upgrade();    // 修改这里
 	static void music();
 };
