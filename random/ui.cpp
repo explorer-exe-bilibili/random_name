@@ -23,7 +23,7 @@ void ui::creatbuttom(Gp *p, int x, int y, LPCWSTR text_out)
 	HDC hdc = p->GetDC();
 	SelectObject(hdc, ui::text);
 	SetTextColor(hdc, RGB(0, 0, 0));
-	SetBkColor(hdc, RGB(225, 222, 213));
+	SetBkMode(hdc, TRANSPARENT);
 	TextOut_(hdc, x + mywindows::windowWidth * 0.0073, y + mywindows::windowHeight * 0.0065, text_out);
 	p->ReleaseDC(hdc);
 }

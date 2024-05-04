@@ -49,7 +49,7 @@ LRESULT CALLBACK FloatWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	case WM_PAINT:floatwindow::paint(); break;
 	case WM_NCHITTEST:return floatwindow::nchittest(wParam); floatwindow::showQuitWindow(); break;
 	case WM_LBUTTONDOWN:floatwindow::lbuttondown(wParam); break;
-	case WM_MOUSEMOVE:floatwindow::mousemove(); break;
+	case WM_MOUSEMOVE:floatwindow::mousemove(lParam); break;
 	case WM_LBUTTONUP:floatwindow::lbuttonup();break;
 	case WM_LBUTTONDBLCLK:floatwindow::lbuttonclick(wParam); break;
 	default:

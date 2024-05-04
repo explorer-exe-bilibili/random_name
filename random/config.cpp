@@ -288,7 +288,6 @@ void config::readFile() {
 			wchar_t* value = wcstok(NULL, L"=");
 			// 添加配置项到链表
 			add(std::wstring(currentOption), std::wstring(value));
-			mywindows::log(trimLine);
 		}
 	}
 

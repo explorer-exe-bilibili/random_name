@@ -43,7 +43,7 @@ void MSGback::paint()
 	switch (ui::screenmode)
 	{
 	case FIRST_MENU:paintfirstscreen::printfirstmenu(&p); directshow::startbgm(); break;
-	case SHOW_NAMES_ING:paintname::paint(p);break;
+	case SHOW_NAMES_ING:paintname::paint(&p);break;
 	case SETTING: setscreen.paint(&p); break;
 	}
 	mywindows::log("paint successfully");
@@ -54,8 +54,8 @@ void MSGback::paint()
 
 void MSGback::click(LPARAM lParam)
 {
-	int x = LOWORD(lParam);
-	int y = HIWORD(lParam);
+	int x = GET_X_LPARAM(lParam);
+	int y = GET_Y_LPARAM(lParam);
 	click::doclick(x, y);
 }
 
@@ -82,7 +82,6 @@ void MSGback::commond(LPARAM lParam, WPARAM wParam)
 }
 void MSGback::destroy()
 {
-	destroyall();
 	PostQuitMessage(0);
 }
 
@@ -124,6 +123,5 @@ void MSGback::showwindow(WPARAM wParam)
 }
 void MSGback::destroyall()
 {
-	setscreen.release();
 	mciSendString(L"close bgm", 0, 0, 0);
 }

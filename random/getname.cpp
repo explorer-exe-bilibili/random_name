@@ -10,6 +10,7 @@
 
 int getname::seed = 2434, getname::seed2 = 32435;
 int getname::star[4][256] = {3};
+int getname::type[4][256] = {0};
 bool getname::fileerr = 0;
 
 using namespace std;
@@ -41,8 +42,10 @@ int getname::getstar(const std::string& input) {
 		try
 		{
 			int result = std::stoi(numberStr);
-			if (result > 6)result = 6;
-			if (result < 3)result = 3;
+			int star = result % 10;
+			int type = result % 100 / 10;
+			if (star > 6)result = 6;
+			if (star < 3)result = 3;
 			return result;
 		}
 		catch (const std::exception& e)
@@ -86,11 +89,14 @@ std::string getname::RandomLineFromFile(const std::wstring& filename)
 		return "File is empty";
 	}
 	// 随机选择一行
-	std::srand(static_cast<unsigned int>(std::time(nullptr)) * seed);
-	int temp = rand();
-	std::srand(((static_cast<unsigned int>(std::time(nullptr))) * seed + temp) * rand());
-	int randomIndex = std::rand() % lines.size();
-	seed++;
+	int randomIndex;
+	do {
+		std::srand(static_cast<unsigned int>(std::time(nullptr)) * seed);
+		int temp = rand();
+		std::srand(((static_cast<unsigned int>(std::time(nullptr))) * seed + temp) * rand());
+		randomIndex = std::rand() % lines.size();
+		seed++;
+	} while (lines[randomIndex].empty());
 	return lines[randomIndex];
 }
 int getname::randomIntegerBetween(int min, int max) {

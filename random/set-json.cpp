@@ -83,13 +83,7 @@ void set2::repaint()
 	firstpaint = 1;
 	InvalidateRect(mywindows::main_hwnd, NULL, FALSE);
 }
-void set2::release()
-{
-	for (int i = 0; i < BitmapCounts; i++) {
-		memset(bitmaps[i], 0, sizeof(BITMAP));
-		bitmaps[i] = nullptr;
-	}
-}
+
 void set2::changepage()
 {
 	char n = 0;
@@ -144,7 +138,6 @@ void set2::rereadconfig() {
 		mciSendString(L"play bgm repeat", NULL, 0, NULL);
 }
 void set2::paint(Gp* p) {
-	p_ = p;
 	if (firstpaint) {
 		p->Paint(0, 0, mywindows::windowWidth, mywindows::windowHeight, SetBM);
 		firstpaint = 0;
@@ -161,6 +154,8 @@ void set2::paint(Gp* p) {
 	unsigned int totalp = static_cast<int>(pages.size());
 	wstring t = to_wstring(settingpage) + L"/" + to_wstring(totalp);
 	HDC hdc = p->GetDC();
+	SetBkMode(hdc, TRANSPARENT);
+	SetTextColor(hdc, RGB(236, 229, 216));
 	SelectObject(hdc, ui::text_mid);
 	TextOut_(hdc, titlex, titley, title.c_str());
 	SelectObject(hdc, ui::icon_mid);
@@ -349,16 +344,16 @@ void set2::rollback(string jsonpath) {
 	i[NAME] = G2U("悬浮窗"); i[CONFIGNAME] = "open float window"; i[ISSWITCH] = 1; i[NUMBER] = 1;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("初始x坐标"); i[CONFIGNAME] = "float window x"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
-	i[OUTOFLIMIT] = G2U("输入一个整数"); i[NUMBER] = 2;
+	i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 2;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("初始y坐标"); i[CONFIGNAME] = "float window y"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
-	i[OUTOFLIMIT] = G2U("输入一个整数"); i[NUMBER] = 3;
+	i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 3;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("宽度"); i[CONFIGNAME] = "float window width"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
-	i[OUTOFLIMIT] = G2U("输入一个整数"); i[NUMBER] = 4;
+	i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 4;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("高度"); i[CONFIGNAME] = "float window height"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
-	i[OUTOFLIMIT] = G2U("输入一个整数"); i[NUMBER] = 5;
+	i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 5;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("悬浮窗图片"); i[CONFIGNAME] = "float window picture"; i[FILECHOOSE] = G2U("选择悬浮窗图片");
 	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP; i[NUMBER] = 11; i[BITMAPC] = FLOATPIC;
@@ -473,7 +468,8 @@ void set2::textbox(sitem item,Gp *p)
 	}
 	HDC hdc = p->GetDC();
 	SelectObject(hdc, ui::text_mid);
-	SetBkColor(hdc, RGB(236, 229, 216));
+	SetBkMode(hdc, TRANSPARENT);
+	SetTextColor(hdc, RGB(236, 229, 216));
 	TextOut_(hdc, sxy[item.Number].x, sxy[item.Number].y + mywindows::windowHeight * 0.01, item.Name.c_str());
 	p->ReleaseDC(hdc);
 	if (isused[number] == 0) {
@@ -484,7 +480,7 @@ void set2::textbox(sitem item,Gp *p)
 			p->Paint(sxy[number].bmxend, sxy[number].bmy, sxy[number].bmw, sxy[number].bmh, setbutton);
 			HDC hdc = p->GetDC();
 			SelectObject(hdc, ui::text_mid);
-			SetBkColor(hdc, RGB(236, 229, 216));
+			SetBkMode(hdc, TRANSPARENT);
 			TextOut_(hdc, sxy[number].bmxend+sxy[number].bmw/2 + mywindows::windowWidth * 0.01, sxy[number].y + mywindows::windowHeight * 0.01, L"打开");
 			TextOut_(hdc, sxy[number].bmxend+mywindows::windowWidth*0.01, sxy[number].y + mywindows::windowHeight * 0.01, L"选择");
 			p->ReleaseDC(hdc);
@@ -510,8 +506,12 @@ void set2::switchbm(sitem item,Gp *p) {
 	p->Paint(sxy[item.Number].bmx, sxy[item.Number].bmy, sxy[item.Number].bmw, sxy[item.Number].bmh, setbutton);
 	HDC hdc = p->GetDC();
 	SelectObject(hdc, ui::text_mid);
-	SetBkColor(hdc, RGB(236, 229, 216));
+	SetBkMode(hdc, TRANSPARENT);
+	SetTextColor(hdc, RGB(236, 229, 216));
 	TextOut_(hdc, sxy[item.Number].x, sxy[item.Number].y + mywindows::windowHeight * 0.01, item.Name.c_str());
+	SetBkMode(hdc, OPAQUE);
+	SetBkColor(hdc, RGB(236, 229, 216));
+	SetTextColor(hdc, RGB(0, 0, 0));
 	if (config::getint(item.ConfigName) == 1)
 		TextOut_(hdc, sxy[item.Number].bmx + mywindows::windowWidth * 0.04, sxy[item.Number].bmy + mywindows::windowHeight * 0.01, L"开");
 	else
@@ -554,7 +554,9 @@ loop:
 	ofn.lpstrInitialDir = NULL; // 初始目录为默认
 	ofn.lpstrTitle = item.FileChooseWindowName.c_str(); // 使用系统默认标题留空即可
 	ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY; // 文件、目录必须存在,隐藏只读选项
-
+	if (item.FileType == "nameFile") {
+		reran = 1;
+	}
 	if (GetOpenFileNameW(&ofn))
 	{
 		std::wstring filename(strFilename);

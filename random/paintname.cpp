@@ -19,6 +19,7 @@ int paintname::skipbmy=0;
 int paintname::skipbmxend=0;
 int paintname::skipbmyend=0;
 int paintname::step=0;
+int paintname::type[10] = { 0 };
 int paintname::star_[10] = { 0 };
 int paintname::g_StarCount=0;
 bool paintname::is5star = 0;
@@ -44,6 +45,7 @@ void paintname::showname1() {
 	if (number >= 245)rerandom();
 	temp[0] = names[ui::mode - 1][number];
 	star_[0] = getname::star[ui::mode - 1][number];
+	type[0] = getname::type[ui::mode - 1][number];
 	randomedlist << randomedlist.pt() << "[" << star_[0] << "星]" << "[" << sth2sth::LWStostr(temp[0]) << "]" << randomedlist.nl();
 	if (star_[0] >= 5)is5star = 1;
 	if (star_[0] == 4)is4star = 1;
@@ -75,9 +77,11 @@ void paintname::showname10() {
 	for (int tmp = number + 10; number < tmp; number++) {
 		temp[10 - (tmp - number)] = names[ui::mode - 1][number];
 		star_[10 - (tmp - number)] = getname::star[ui::mode - 1][number];
+		type[10 - (tmp - number)] = getname::type[ui::mode - 1][number];
 		if (getname::star[ui::mode - 1][number] >= 5)is5star = 1;
 		mywindows::log("10balling number=%d,tmp=%d,star=%d", number, tmp, star_[10 - (tmp - number)]);
-		randomedlist << "[" << star_[10 - (tmp - number)] << "星]" << "[" << sth2sth::LWStostr(temp[10 - (tmp - number)]) << "]" << randomedlist.nl();
+		randomedlist << "[" << star_[10 - (tmp - number)] << "星]" << "[" << sth2sth::LWStostr(temp[10 - (tmp - number)]) << "]" 
+			<< "[" << type[10 - (tmp - number)] << "类型]" << std::endl;
 	}
 	randomedlist << "}" << randomedlist.nl();
 	if (!setscreen.offmusic)
@@ -97,14 +101,17 @@ void paintname::showname10() {
 	mywindows::log("finish ball 10,number is %d", number);
 	step = 0;
 }
-void paintname::out1name(Gp p) {
+void paintname::out1name(Gp* p) {
 	if (ui::printing) {
 		printnames(p);
+		if (star_[step] == 0) {
+			star_[step] = 3;
+		}
 		printstars(p, star_[0]);
 		ui::printing = !ui::printing;
 	}
 }
-void paintname::out10name(Gp p) {
+void paintname::out10name(Gp* p) {
 	if (skipped) {
 		menu(p);
 		step = 0;
@@ -116,25 +123,32 @@ void paintname::out10name(Gp p) {
 			return;
 		}
 		printnames(p);
+		if (star_[step] == 0) {
+			star_[step] = 3;
+		}
 		printstars(p, star_[step]);
 	}
 	step++;
 }
-void paintname::printnames(Gp p) {
+void paintname::printnames(Gp* p) {
 	HDC hdc;
 	if (star_[step] < 5) {
-		p.Paint(0, 0, mywindows::windowWidth, mywindows::windowHeight, cardbackground);
-		hdc = p.GetDC();
+		p->Paint(0, 0, mywindows::windowWidth, mywindows::windowHeight, cardbackground);
+		p->Paint(mywindows::windowWidth * 0.45, mywindows::windowHeight * 0.45, mywindows::windowWidth * 0.1, mywindows::windowHeight * 0.1, type[step] + 21);
+		hdc = p->GetDC();
 		SetTextColor(hdc, RGB(240, 240, 240));
-		SetBkColor(hdc, RGB(21, 26, 38));
 	}
 	else {
-		p.Paint(0, 0, mywindows::windowWidth, mywindows::windowHeight, goldencardbg);
-		hdc = p.GetDC();
+		p->Paint(0, 0, mywindows::windowWidth, mywindows::windowHeight, goldencardbg);
+		p->Paint(mywindows::windowWidth * 0.45, mywindows::windowHeight * 0.45, mywindows::windowWidth * 0.1, mywindows::windowHeight * 0.1, type[step] + 21);
+		hdc = p->GetDC();
 		SetTextColor(hdc, RGB(240, 240, 240));
-		SetBkColor(hdc, RGB(69, 47, 29));
 	}
+	SetBkMode(hdc, TRANSPARENT);
 	SelectObject(hdc, ui::text_mid);
+	if (temp[step] == NULL) {
+		temp[step] = L"";
+	}
 	TextOut_(hdc, mywindows::windowWidth * 0.175, mywindows::windowHeight * 8 / 13, temp[step]);
 	SelectObject(hdc, ui::text_big);
 	wchar_t a[2];
@@ -185,10 +199,10 @@ void paintname::printnames(Gp p) {
 		TextOut_(hdc, skipbmx, skipbmy, L"跳过>>");
 	if (ui::mode == config::getint(SPECIAL))
 		TextOut_(hdc, ui::addnamex, ui::addnamey, L"增加此名字几率");
-	p.ReleaseDC(hdc);
+	p->ReleaseDC(hdc);
 }
-void paintname::menu(Gp p) {
-	p.Paint(0, 0, mywindows::windowWidth, mywindows::windowHeight, listbg);
+void paintname::menu(Gp* p) {
+	p->Paint(0, 0, mywindows::windowWidth, mywindows::windowHeight, listbg);
 	LPCWSTR tmp_[10] = { 0 };
 	int count, count1, count2, count3;
 	int* itmp = mywindows::find(star_, sizeof(star_) / sizeof(getname::star[ui::mode - 1][0]), 6, &count);
@@ -201,43 +215,47 @@ void paintname::menu(Gp p) {
 	if (itmp != NULL) for (int i = 0; i < count3; ++i) tmp_[i + count + count1 + count2] = temp[itmp[i]];
 	for (int i = 0; i < count; ++i) {
 		Sleep(20);
-		p.Paint(ui::listx[i], ui::listy, ui::listxend, ui::listyend, list6);
-		HDC hdc = p.GetDC();
+		p->Paint(ui::listx[i], ui::listy, ui::listxend, ui::listyend, list6);
+		HDC hdc = p->GetDC();
 		SetTextColor(hdc, RGB(255, 255, 255));
 		SelectObject(hdc, ui::text_list);
-		SetBkColor(hdc, RGB(223, 228, 158));
+		SetBkMode(hdc, TRANSPARENT);
+
 		listpainter(tmp_[i], i, hdc);
-		p.ReleaseDC(hdc);
+		p->ReleaseDC(hdc);
 	}
 	for (int i = count; i < count + count1; ++i) {
 		Sleep(20);
-		p.Paint(ui::listx[i], ui::listy, ui::listxend, ui::listyend, list5);
-		HDC hdc = p.GetDC();
+		p->Paint(ui::listx[i], ui::listy, ui::listxend, ui::listyend, list5);
+		HDC hdc = p->GetDC();
 		SetTextColor(hdc, RGB(255, 255, 255));
 		SelectObject(hdc, ui::text_list);
-		SetBkColor(hdc, RGB(223, 228, 158));
+		SetBkMode(hdc, TRANSPARENT);
+
 		listpainter(tmp_[i], i, hdc);
-		p.ReleaseDC(hdc);
+		p->ReleaseDC(hdc);
 	}
 	for (int i = count + count1; i < count + count1 + count2; ++i) {
 		Sleep(20);
-		p.Paint(ui::listx[i], ui::listy, ui::listxend, ui::listyend, list4);
-		HDC hdc = p.GetDC();
+		p->Paint(ui::listx[i], ui::listy, ui::listxend, ui::listyend, list4);
+		HDC hdc = p->GetDC();
 		SetTextColor(hdc, RGB(255, 255, 255));
 		SelectObject(hdc, ui::text_list);
-		SetBkColor(hdc, RGB(154, 130, 220));
+		SetBkMode(hdc, TRANSPARENT);
+
 		listpainter(tmp_[i], i, hdc);
-		p.ReleaseDC(hdc);
+		p->ReleaseDC(hdc);
 	}
 	for (int i = count + count1 + count2; i < count + count1 + count2 + count3; ++i) {
 		Sleep(20);
-		p.Paint(ui::listx[i], ui::listy, ui::listxend, ui::listyend, list3);
-		HDC hdc = p.GetDC();
+		p->Paint(ui::listx[i], ui::listy, ui::listxend, ui::listyend, list3);
+		HDC hdc = p->GetDC();
 		SetTextColor(hdc, RGB(255, 255, 255));
 		SelectObject(hdc, ui::text_list);
-		SetBkColor(hdc, RGB(149, 157, 136));
+		SetBkMode(hdc, TRANSPARENT);
+
 		listpainter(tmp_[i], i, hdc);
-		p.ReleaseDC(hdc);
+		p->ReleaseDC(hdc);
 	}
 	skipped = 0;
 	ui::ScreenModeChanged = 1;
@@ -247,7 +265,7 @@ void paintname::menu(Gp p) {
 	ui::ball10ing = 0;
 	step = 0;
 }
-void paintname::paint(Gp p)
+void paintname::paint(Gp* p)
 {
 	ui::ScreenModeChanged = 0;
 	if (ui::printing) {
@@ -311,16 +329,16 @@ void paintname::listpainter(LPCWSTR tmp_, int i, HDC hdc) {
 		break;
 	}
 }
-void paintname::printstars(Gp p, int number) {
-	HDC hdc = p.GetDC();
+void paintname::printstars(Gp* p, int number) {
+	HDC hdc = p->GetDC();
+	SetBkMode(hdc, TRANSPARENT);
+
 	TextOut_(hdc, -1201, -1234, STAR);
 	if (number <= 4) {
-		SetBkColor(hdc, RGB(21, 26, 38));
 		SelectObject(hdc, icon_star);
 		SetTextColor(hdc, RGB(220, 184, 14));
 	}
 	else {
-		SetBkColor(hdc, RGB(53, 35, 27));
 		SelectObject(hdc, icon_star);
 		SetTextColor(hdc, RGB(220, 184, 14));
 	}
@@ -350,7 +368,7 @@ void paintname::printstars(Gp p, int number) {
 		break;
 	}
 	}
-	p.ReleaseDC(hdc);
+	p->ReleaseDC(hdc);
 }
 void paintname::rerandom() {
 	for (short m = 0; m <= 3; m++)
@@ -418,6 +436,8 @@ void CALLBACK paintname::Case6TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, 
 	SelectObject(hdc, icon_star);
 	SetBkColor(hdc, RGB(53, 35, 27));
 	SetTextColor(hdc, RGB(220, 184, 14));
+	SetBkMode(hdc, TRANSPARENT);
+
 	if (g_Case6Count > 0)
 	{
 		int x = getname::randomIntegerBetween(0, mywindows::windowWidth * 0.99);
@@ -446,8 +466,9 @@ void CALLBACK paintname::TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD
 	switch (paintstarcount)
 	{
 	case 3:
-		SetBkColor(hdc, RGB(21, 26, 38));
 		SetTextColor(hdc, RGB(220, 184, 14));
+		SetBkMode(hdc, TRANSPARENT);
+
 		switch (g_StarCount)
 		{
 		case 0:
@@ -466,8 +487,9 @@ void CALLBACK paintname::TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD
 		}
 		break;
 	case 4:
-		SetBkColor(hdc, RGB(21, 26, 38));
 		SetTextColor(hdc, RGB(220, 184, 14));
+		SetBkMode(hdc, TRANSPARENT);
+
 		switch (g_StarCount)
 		{
 		case 0:
@@ -489,8 +511,9 @@ void CALLBACK paintname::TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD
 		}
 		break;
 	case 5:
-		SetBkColor(hdc, RGB(53, 35, 27));
 		SetTextColor(hdc, RGB(220, 184, 14));
+		SetBkMode(hdc, TRANSPARENT);
+
 		switch (g_StarCount)
 		{
 		case 0:

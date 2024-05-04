@@ -57,7 +57,6 @@ public:
 	void paint(Gp *p);
 	void quit();
 	void reinit();
-	void release();
 	void repaint();
 	void rereadconfig();
 	void resetplace();
@@ -73,7 +72,6 @@ private:
 	sitem PictureNeedReload;
 	settingxy sxy[20] = {};
 	sNode* shead = nullptr;
-	Gp *p_;
 	std::string G2U(const std::string& gbk);
 	std::string U2G(const std::string& utf8);
 	std::vector<spage> pages;

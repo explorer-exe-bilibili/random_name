@@ -9,7 +9,7 @@ public:
 	static void stop();
 	static LRESULT nchittest(WPARAM wParam);
 	static void lbuttondown(WPARAM wParam);
-	static void mousemove();
+	static void mousemove(LPARAM lParam);
 	static void lbuttonup();
 	static void lbuttonclick(WPARAM wParam);
 	static void hideQuitWindow();

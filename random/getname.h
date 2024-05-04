@@ -1,12 +1,26 @@
 ﻿#pragma once
 #include <windows.h>
 #include<string>
+
+#define BOW 0
+#define SWORD 1
+#define MAGIC 2
+#define CLAYMORE 3
+#define POLEARM 4
+
 class getname
 {
 private:
 	static int seed, seed2;
 public:
+	static struct Item
+	{
+		int star;
+		int type;
+		int elemant;
+	}Item;
 	static int star[4][256];
+	static int type[4][256];
 	static bool fileerr;
 	static LPCWSTR random(int m, int i);
 	static int getstar(const std::string& input);

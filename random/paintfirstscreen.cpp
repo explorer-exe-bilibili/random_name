@@ -33,7 +33,7 @@ void paintfirstscreen::printfirstmenu(Gp *p) {
 	p->Paint(ui::exitx, ui::exity, ui::exitxend - ui::exitx, ui::exityend - ui::exity, exiti);
 	HDC hdc = p->GetDC();
 	SelectObject(hdc, ui::icon);
-	SetBkColor(hdc, RGB(255, 255, 255));
+	SetBkMode(hdc, TRANSPARENT);
 	SetTextColor(hdc, RGB(211, 188, 142));
 	TextOut_(hdc, mywindows::windowWidth * 0.045, mywindows::windowHeight * 0.04, QI_YUAN);
 	SelectObject(hdc, ui::text);
@@ -41,7 +41,6 @@ void paintfirstscreen::printfirstmenu(Gp *p) {
 	TextOut_(hdc, mywindows::windowWidth * 0.075, mywindows::windowHeight * 0.05, config::get(WINDOW_TITEL).c_str());
 	SelectObject(hdc, ui::icon_mid);
 	SetTextColor(hdc, RGB(0, 0, 0));
-	SetBkColor(hdc, RGB(225, 222, 213));
 	TextOut_(hdc, ui::settingx, ui::settingy, SETING);
 	firsttime = !firsttime;
 	p->ReleaseDC(hdc);
@@ -56,26 +55,26 @@ void paintfirstscreen::repaint()
 void paintfirstscreen::paintoverlay(Gp *p) {
 	if (ui::mode == 1) {
 		p->Paint(ui::overX, ui::overlayY, (mywindows::windowWidth * 0.6), (mywindows::windowHeight * 0.6), over1);
-		p->Paint(ui::ball1x, ui::bally, ui::ballW, ui::ballH, pink1b);
-		p->Paint(ui::ball10x, ui::bally, ui::ballW, ui::ballH, pink10b);
+		p->Paint(ui::ball1x, ui::bally, ui::ballW, ui::ballH, pink1);
+		p->Paint(ui::ball10x, ui::bally, ui::ballW, ui::ballH, pink10);
 		mywindows::log("set mode1 successfully");
 	}
 	else if (ui::mode == 2) {
 		p->Paint(ui::overX, ui::overlayY, (mywindows::windowWidth * 0.6), (mywindows::windowHeight * 0.6), over2);
-		p->Paint(ui::ball1x, ui::bally, ui::ballW, ui::ballH, pink1b);
-		p->Paint(ui::ball10x, ui::bally, ui::ballW, ui::ballH, pink10b);
+		p->Paint(ui::ball1x, ui::bally, ui::ballW, ui::ballH, pink1);
+		p->Paint(ui::ball10x, ui::bally, ui::ballW, ui::ballH, pink10);
 		mywindows::log("set mode2 successfully");
 	}
 	else if (ui::mode == 3) {
 		p->Paint(ui::overX, ui::overlayY, (mywindows::windowWidth * 0.6), (mywindows::windowHeight * 0.6), over3);
-		p->Paint(ui::ball1x, ui::bally, ui::ballW, ui::ballH, pink1b);
-		p->Paint(ui::ball10x, ui::bally, ui::ballW, ui::ballH, pink10b);
+		p->Paint(ui::ball1x, ui::bally, ui::ballW, ui::ballH, pink1);
+		p->Paint(ui::ball10x, ui::bally, ui::ballW, ui::ballH, pink10);
 		mywindows::log("set mode3 successfully");
 	}
 	else if (ui::mode == 4) {
 		p->Paint(ui::overX, ui::overlayY, (mywindows::windowWidth * 0.6), (mywindows::windowHeight * 0.6), over4);
-		p->Paint(ui::ball1x, ui::bally, ui::ballW, ui::ballH, blue1b);
-		p->Paint(ui::ball10x, ui::bally, ui::ballW, ui::ballH, blue10b);
+		p->Paint(ui::ball1x, ui::bally, ui::ballW, ui::ballH, blue1);
+		p->Paint(ui::ball10x, ui::bally, ui::ballW, ui::ballH, blue10);
 		mywindows::log("set mode4 successfully");
 	}
 	mywindows::log("paint overlay bitmap");
