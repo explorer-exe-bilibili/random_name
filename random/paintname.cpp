@@ -62,7 +62,6 @@ void paintname::showname1() {
 	ui::screenmode = SHOW_NAMES_ING;
 	ui::isball1 = 1;
 	ui::isball10 = 0;
-	//InvalidateRect(mywindows::main_hwnd, NULL, FALSE);
 	is4star = 0;
 	is5star = 0;
 	step = 0;
@@ -97,42 +96,43 @@ void paintname::showname10() {
 	ui::isball1 = 0;
 	ui::isball10 = 1;
 	ui::ball10ing = 1;
-	//InvalidateRect(mywindows::main_hwnd, NULL, FALSE);
 	mywindows::log("finish ball 10,number is %d", number);
 	step = 0;
 }
-void paintname::out1name(HDC hdc, HDC hdcMem) {
+void paintname::out1name(Gp p) {
 	if (ui::printing) {
-		printnames(hdc, hdcMem);
-		printstars(hdc, star_[0]);
+		printnames(p);
+		printstars(p, star_[0]);
 		ui::printing = !ui::printing;
 	}
 }
-void paintname::out10name(HDC hdc, HDC hdcMem) {
+void paintname::out10name(Gp p) {
 	if (skipped) {
-		menu(hdc, hdcMem);
+		menu(p);
+		step = 0;
 	}
 	else if (ui::printing) {
 		if (step == 10) {
-			menu(hdc, hdcMem);
+			menu(p);
 			step = 0;
 			return;
 		}
-		printnames(hdc, hdcMem);
-		printstars(hdc, star_[step]);
+		printnames(p);
+		printstars(p, star_[step]);
 	}
 	step++;
 }
-void paintname::printnames(HDC hdc, HDC hdcMem) {
+void paintname::printnames(Gp p) {
+	HDC hdc;
 	if (star_[step] < 5) {
-		SelectObject(hdcMem, hbitmaps[cardbackground]);
-		StretchBlt(hdc, 0, 0, mywindows::windowWidth, mywindows::windowHeight, hdcMem, 0, 0, cardbg.bmWidth, cardbg.bmHeight, SRCCOPY);
+		p.Paint(0, 0, mywindows::windowWidth, mywindows::windowHeight, cardbackground);
+		hdc = p.GetDC();
 		SetTextColor(hdc, RGB(240, 240, 240));
 		SetBkColor(hdc, RGB(21, 26, 38));
 	}
 	else {
-		SelectObject(hdcMem, hbitmaps[goldencardbg]);
-		StretchBlt(hdc, 0, 0, mywindows::windowWidth, mywindows::windowHeight, hdcMem, 0, 0, goldenbg.bmWidth, goldenbg.bmHeight, SRCCOPY);
+		p.Paint(0, 0, mywindows::windowWidth, mywindows::windowHeight, goldencardbg);
+		hdc = p.GetDC();
 		SetTextColor(hdc, RGB(240, 240, 240));
 		SetBkColor(hdc, RGB(69, 47, 29));
 	}
@@ -187,44 +187,86 @@ void paintname::printnames(HDC hdc, HDC hdcMem) {
 		TextOut_(hdc, skipbmx, skipbmy, L"跳过>>");
 	if (ui::mode == config::getint(SPECIAL))
 		TextOut_(hdc, ui::addnamex, ui::addnamey, L"增加此名字几率");
+	p.ReleaseDC(hdc);
 }
-void paintname::printstars(HDC hdc, int number) {
-	TextOut_(hdc, -1201, -1234, STAR);
-	if (number <= 4) {
-		SetBkColor(hdc, RGB(21, 26, 38));
-		SelectObject(hdc, icon_star);
-		SetTextColor(hdc, RGB(220, 184, 14));
+void paintname::menu(Gp p) {
+	p.Paint(0, 0, mywindows::windowWidth, mywindows::windowHeight, listbg);
+	LPCWSTR tmp_[10] = { 0 };
+	int count, count1, count2, count3;
+	int* itmp = mywindows::find(star_, sizeof(star_) / sizeof(getname::star[ui::mode - 1][0]), 6, &count);
+	if (itmp != NULL) for (int i = 0; i < count; ++i) tmp_[i] = temp[itmp[i]];
+	itmp = mywindows::find(star_, sizeof(star_) / sizeof(getname::star[ui::mode - 1][0]), 5, &count1);
+	if (itmp != NULL) for (int i = 0; i < count1; ++i) tmp_[i + count] = temp[itmp[i]];
+	itmp = mywindows::find(star_, sizeof(star_) / sizeof(getname::star[ui::mode - 1][0]), 4, &count2);
+	if (itmp != NULL) for (int i = 0; i < count2; ++i) tmp_[i + count + count1] = temp[itmp[i]];
+	itmp = mywindows::find(star_, sizeof(star_) / sizeof(getname::star[ui::mode - 1][0]), 3, &count3);
+	if (itmp != NULL) for (int i = 0; i < count3; ++i) tmp_[i + count + count1 + count2] = temp[itmp[i]];
+	for (int i = 0; i < count; ++i) {
+		Sleep(20);
+		p.Paint(ui::listx[i], ui::listy, ui::listxend, ui::listyend, list6);
+		HDC hdc = p.GetDC();
+		SetTextColor(hdc, RGB(255, 255, 255));
+		SelectObject(hdc, ui::text_list);
+		SetBkColor(hdc, RGB(223, 228, 158));
+		listpainter(tmp_[i], i, hdc);
+		p.ReleaseDC(hdc);
 	}
-	else {
-		SetBkColor(hdc, RGB(53, 35, 27));
-		SelectObject(hdc, icon_star);
-		SetTextColor(hdc, RGB(220, 184, 14));
+	for (int i = count; i < count + count1; ++i) {
+		Sleep(20);
+		p.Paint(ui::listx[i], ui::listy, ui::listxend, ui::listyend, list5);
+		HDC hdc = p.GetDC();
+		SetTextColor(hdc, RGB(255, 255, 255));
+		SelectObject(hdc, ui::text_list);
+		SetBkColor(hdc, RGB(223, 228, 158));
+		listpainter(tmp_[i], i, hdc);
+		p.ReleaseDC(hdc);
 	}
-	switch (number)
-	{
-	case 3: {
-		directshow::music(_1_3);
-		paintstarcount = 3;
-		g_InitTimerID = SetTimer(NULL, 0, 2000, InitTimerProc);
-	}break;
-	case 4: {
-		directshow::music(_1_4);
-		paintstarcount = 4;
-		g_InitTimerID = SetTimer(NULL, 0, 2000, InitTimerProc);
-	}break;
-	case 5: {
-		directshow::music(_1_5);
-		paintstarcount = 5;
-		g_InitTimerID = SetTimer(NULL, 0, 2000, InitTimerProc);
-	}break;
-	case 6: {
-		directshow::music(_1_6);
-		firsttimeCase6 = 1;
-		g_Case6Count = 500;
-		g_Case6TimerID[0] = SetTimer(NULL, 0, 2150, Case6TimerProc);
-	default:
-		break;
+	for (int i = count + count1; i < count + count1 + count2; ++i) {
+		Sleep(20);
+		p.Paint(ui::listx[i], ui::listy, ui::listxend, ui::listyend, list4);
+		HDC hdc = p.GetDC();
+		SetTextColor(hdc, RGB(255, 255, 255));
+		SelectObject(hdc, ui::text_list);
+		SetBkColor(hdc, RGB(154, 130, 220));
+		listpainter(tmp_[i], i, hdc);
+		p.ReleaseDC(hdc);
 	}
+	for (int i = count + count1 + count2; i < count + count1 + count2 + count3; ++i) {
+		Sleep(20);
+		p.Paint(ui::listx[i], ui::listy, ui::listxend, ui::listyend, list3);
+		HDC hdc = p.GetDC();
+		SetTextColor(hdc, RGB(255, 255, 255));
+		SelectObject(hdc, ui::text_list);
+		SetBkColor(hdc, RGB(149, 157, 136));
+		listpainter(tmp_[i], i, hdc);
+		p.ReleaseDC(hdc);
+	}
+	skipped = 0;
+	ui::ScreenModeChanged = 1;
+	ui::printing = 0;
+	ui::ing = 0;
+	ui::isball10 = 0;
+	ui::ball10ing = 0;
+	step = 0;
+}
+void paintname::paint(Gp p)
+{
+	ui::ScreenModeChanged = 0;
+	if (ui::printing) {
+		if (ui::isball1) {
+			out1name(p);
+			ui::ing = 0;
+			ui::ScreenModeChanged = 1;
+		}
+		if (ui::isball10) {
+			if (ui::ft) {
+				if (!skipped)out10name(p);
+				ui::ft = 0;
+			}
+			else if (ui::clicked)
+				out10name(p);
+			ui::ing = 0;
+		}
 	}
 }
 void paintname::listpainter(LPCWSTR tmp_, int i, HDC hdc) {
@@ -271,59 +313,46 @@ void paintname::listpainter(LPCWSTR tmp_, int i, HDC hdc) {
 		break;
 	}
 }
-void paintname::menu(HDC hdc, HDC hdcMem) {
-	SelectObject(hdcMem, hbitmaps[listbg]);
-	StretchBlt(hdc, 0, 0, mywindows::windowWidth, mywindows::windowHeight, hdcMem, 0, 0, listbm.bmWidth, listbm.bmHeight, SRCCOPY);
-	LPCWSTR tmp_[10] = { 0 };
-	int count, count1, count2, count3;
-	int* itmp = mywindows::find(star_, sizeof(star_) / sizeof(getname::star[ui::mode - 1][0]), 6, &count);
-	if (itmp != NULL) for (int i = 0; i < count; ++i) tmp_[i] = temp[itmp[i]];
-	itmp = mywindows::find(star_, sizeof(star_) / sizeof(getname::star[ui::mode - 1][0]), 5, &count1);
-	if (itmp != NULL) for (int i = 0; i < count1; ++i) tmp_[i + count] = temp[itmp[i]];
-	itmp = mywindows::find(star_, sizeof(star_) / sizeof(getname::star[ui::mode - 1][0]), 4, &count2);
-	if (itmp != NULL) for (int i = 0; i < count2; ++i) tmp_[i + count + count1] = temp[itmp[i]];
-	itmp = mywindows::find(star_, sizeof(star_) / sizeof(getname::star[ui::mode - 1][0]), 3, &count3);
-	if (itmp != NULL) for (int i = 0; i < count3; ++i) tmp_[i + count + count1 + count2] = temp[itmp[i]];
-	SetTextColor(hdc, RGB(255, 255, 255));
-	for (int i = 0; i < count; ++i) {
-		Sleep(20);
-		SelectObject(hdcMem, hbitmaps[list6]);
-		StretchBlt(hdc, ui::listx[i], ui::listy, ui::listxend, ui::listyend, hdcMem, 0, 0, liststar.bmWidth, liststar.bmHeight, SRCCOPY);
-		SelectObject(hdc, ui::text_list);
-		SetBkColor(hdc, RGB(223, 228, 158));
-		listpainter(tmp_[i], i, hdc);
+void paintname::printstars(Gp p, int number) {
+	HDC hdc = p.GetDC();
+	TextOut_(hdc, -1201, -1234, STAR);
+	if (number <= 4) {
+		SetBkColor(hdc, RGB(21, 26, 38));
+		SelectObject(hdc, icon_star);
+		SetTextColor(hdc, RGB(220, 184, 14));
 	}
-	for (int i = count; i < count + count1; ++i) {
-		Sleep(20);
-		SelectObject(hdcMem, hbitmaps[list5]);
-		StretchBlt(hdc, ui::listx[i], ui::listy, ui::listxend, ui::listyend, hdcMem, 0, 0, liststar.bmWidth, liststar.bmHeight, SRCCOPY);
-		SelectObject(hdc, ui::text_list);
-		SetBkColor(hdc, RGB(223, 228, 158));
-		listpainter(tmp_[i], i, hdc);
+	else {
+		SetBkColor(hdc, RGB(53, 35, 27));
+		SelectObject(hdc, icon_star);
+		SetTextColor(hdc, RGB(220, 184, 14));
 	}
-	for (int i = count + count1; i < count + count1 + count2; ++i) {
-		Sleep(20);
-		SelectObject(hdcMem, hbitmaps[list4]);
-		StretchBlt(hdc, ui::listx[i], ui::listy, ui::listxend, ui::listyend, hdcMem, 0, 0, liststar.bmWidth, liststar.bmHeight, SRCCOPY);
-		SelectObject(hdc, ui::text_list);
-		SetBkColor(hdc, RGB(154, 130, 220));
-		listpainter(tmp_[i], i, hdc);
+	switch (number)
+	{
+	case 3: {
+		directshow::music(_1_3);
+		paintstarcount = 3;
+		g_InitTimerID = SetTimer(NULL, 0, 2000, InitTimerProc);
+	}break;
+	case 4: {
+		directshow::music(_1_4);
+		paintstarcount = 4;
+		g_InitTimerID = SetTimer(NULL, 0, 2000, InitTimerProc);
+	}break;
+	case 5: {
+		directshow::music(_1_5);
+		paintstarcount = 5;
+		g_InitTimerID = SetTimer(NULL, 0, 2000, InitTimerProc);
+	}break;
+	case 6: {
+		directshow::music(_1_6);
+		firsttimeCase6 = 1;
+		g_Case6Count = 500;
+		g_Case6TimerID[0] = SetTimer(NULL, 0, 2150, Case6TimerProc);
+	default:
+		break;
 	}
-	for (int i = count + count1 + count2; i < count + count1 + count2 + count3; ++i) {
-		Sleep(20);
-		SelectObject(hdcMem, hbitmaps[list3]);
-		StretchBlt(hdc, ui::listx[i], ui::listy, ui::listxend, ui::listyend, hdcMem, 0, 0, liststar.bmWidth, liststar.bmHeight, SRCCOPY);
-		SelectObject(hdc, ui::text_list);
-		SetBkColor(hdc, RGB(149, 157, 136));
-		listpainter(tmp_[i], i, hdc);
 	}
-	skipped = 0;
-	ui::ScreenModeChanged = 1;
-	ui::printing = 0;
-	ui::ing = 0;
-	ui::isball10 = 0;
-	ui::ball10ing = 0;
-	step = 0;
+	p.ReleaseDC(hdc);
 }
 void paintname::rerandom() {
 	for (short m = 0; m <= 3; m++)
@@ -505,23 +534,4 @@ void paintname::KillAllTimer()
 	g_StarTimerID = 0;
 	g_StarCount = 0;
 }
-void paintname::paint(HDC hdc,HDC hdcMem)
-{
-	ui::ScreenModeChanged = 0;
-	if (ui::printing) {
-		if (ui::isball1) {
-			paintname::out1name(hdc, hdcMem);
-			ui::ing = 0;
-			ui::ScreenModeChanged = 1;
-		}
-		if (ui::isball10) {
-			if (ui::ft) {
-				if (!paintname::skipped)paintname::out10name(hdc, hdcMem);
-				ui::ft = 0;
-			}
-			else if (ui::clicked)
-				paintname::out10name(hdc, hdcMem);
-			ui::ing = 0;
-		}
-	}
-}
+

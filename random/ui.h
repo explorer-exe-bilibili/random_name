@@ -1,5 +1,6 @@
 ﻿#pragma once
 #include<Windows.h>
+#include "Gp.h"
 #define FIRST_MENU 1
 #define SETTING 2
 #define SHOW_NAMES_ING 3
@@ -7,7 +8,7 @@
 class ui
 {
 public:
-	static void creatbuttom(HDC hdc, HDC hdcMem, int x, int y, LPCWSTR text_out);
+	static void creatbuttom(Gp *p,int x, int y, LPCWSTR text_out);
 	static int listx[11], listy, listxend, listyend;
 	static bool ing, printing, isball10, isball1, ball10ing, clicked, ft;
 	static int mode, bottom1x, bottom1y,screenmode;

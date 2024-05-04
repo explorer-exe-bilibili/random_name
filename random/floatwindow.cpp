@@ -99,69 +99,6 @@ void floatwindow::hideQuitWindow()
 		showing = 0;
 	}
 }
-
-BOOL floatwindow::IsEntirelyCovered(HWND hWnd)
-{
-	RECT rectWnd, rectDesktop;
-	HRGN hRgnWindow, hRgnDesktop;
-
-	// 获取窗口矩形区域
-	GetWindowRect(hWnd, &rectWnd);
-
-	// 获取桌面窗口句柄
-	HWND hDesktopWnd = GetDesktopWindow();
-
-	// 获取桌面窗口矩形区域
-	GetWindowRect(hDesktopWnd, &rectDesktop);
-
-	// 创建窗口区域
-	hRgnWindow = CreateRectRgnIndirect(&rectWnd);
-
-	// 创建桌面区域
-	hRgnDesktop = CreateRectRgnIndirect(&rectDesktop);
-
-	// 将窗口区域与桌面区域相减
-	CombineRgn(hRgnDesktop, hRgnDesktop, hRgnWindow, RGN_DIFF);
-
-	// 遍历剩余区域中的窗口
-	HWND hWndCover = NULL;
-	while ((hWndCover = GetWindow(mywindows::main_hwnd, GW_HWNDNEXT)) != NULL)
-	{
-		if (IsWindowVisible(hWndCover) && hWndCover != hWnd && hWndCover != hDesktopWnd)
-		{
-			HRGN hRgnCover{};
-			GetWindowRgn(hWndCover, hRgnCover);
-
-			// 将覆盖窗口区域从桌面区域中减去
-			CombineRgn(hRgnDesktop, hRgnDesktop, hRgnCover, RGN_DIFF);
-			DeleteObject(hRgnCover);
-		}
-	}
-
-	// 如果剩余区域为空,说明窗口被完全遮挡
-	const BOOL bCovered = (GetRgnBox(hRgnDesktop, &rectDesktop) == NULLREGION);
-
-	DeleteObject(hRgnWindow);
-	DeleteObject(hRgnDesktop);
-
-	return bCovered;
-}
-
-BOOL floatwindow::IsFullScreen(HWND hWnd)
-{
-	RECT rectWnd, rectDesktop;
-
-	// 获取窗口矩形区域
-	GetWindowRect(hWnd, &rectWnd);
-
-	// 获取桌面窗口矩形区域
-	HWND hDesktopWnd = GetDesktopWindow();
-	GetWindowRect(hDesktopWnd, &rectDesktop);
-
-	// 如果窗口区域与桌面区域完全重合,则认为是全屏
-	return (EqualRect(&rectWnd, &rectDesktop));
-}
-
 LRESULT floatwindow::nchittest(WPARAM wParam)
 {
 	if (wParam == HTLEFT)

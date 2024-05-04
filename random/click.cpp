@@ -52,12 +52,10 @@ void click::firstscreen(int x, int y)
 		directshow::music(ENTER);
 	}
 }
-
 void click::setting(int x, int y)
 {
 	setscreen.clicked(x, y);
 }
-
 void click::showname(int x, int y)
 {
 	if (ui::ball10ing)
@@ -77,7 +75,6 @@ void click::showname(int x, int y)
 	}
 	directshow::stopmusic();
 }
-
 void click::doclick(int x, int y)
 {
 	if (!ui::ing)

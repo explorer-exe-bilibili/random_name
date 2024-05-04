@@ -9,22 +9,17 @@
 
 class Gp
 {
+	std::shared_ptr<Gdiplus::Graphics> graphic;
 public:
-	std::vector<std::shared_ptr<Gdiplus::Bitmap>> bitmaps;
-	std::vector<std::shared_ptr<Gdiplus::CachedBitmap>> Cbitmaps;
-	void Load();
-	void Paint(HDC hdc, int xDest, int yDest, int wDest, int hDest,Gdiplus::Image* image);
-	void Paint(HDC hdc, int xDest, int yDest,Gdiplus::Image* image);
-	void Paint_trans(HDC hdc, int xDest, int yDest, int wDest, int hDest, Gdiplus::Image* image);
-	void Paint_trans(HDC hdc, int xDest, int yDest, Gdiplus::Image* image);
-	void Paint(HDC hdc, int xDest, int yDest, int wDest, int hDest,int number);
-	void Paint(HDC hdc, int xDest, int yDest,int number);
-	void pPaint(HDC hdc, int xDest, int yDest, int number);
-	void pPaint(HDC hdc, int xDest, int yDest, int wDest, int hDest, int number);
-	void Paint_trans(HDC hdc, int xDest, int yDest, int wDest, int hDest, int number);
-	void Paint_trans(HDC hdc, int xDest, int yDest, int number);
-	void Prepar(HDC hdc);
 	~Gp();
-	Gp();
+	Gp(HWND hwnd);
+	std::vector<std::shared_ptr<Gdiplus::Bitmap>> bitmaps;
+	void Load();
+	void Paint(int xDest, int yDest, Gdiplus::Bitmap* image);
+	void Paint(int xDest, int yDest, Gdiplus::Bitmap* image, int wDest, int hDest);
+	void Paint(int xDest, int yDest, int wDest, int hDest,int number);
+	void Paint(int xDest, int yDest,int number);
+	HDC GetDC();
+	void ReleaseDC(HDC hdc);
 };
 

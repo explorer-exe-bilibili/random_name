@@ -7,10 +7,10 @@
 #define SetBM 23
 #define exiti 22
 #define exitb 21
-#define list3 20
-#define list6 19
-#define list5 18
-#define list4 17
+#define list6 20
+#define list5 19
+#define list4 18
+#define list3 17
 #define listbg 16
 #define goldencardbg 15
 #define Buttom 14

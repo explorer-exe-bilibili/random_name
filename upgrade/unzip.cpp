@@ -97,7 +97,7 @@ void unzip::UnzipFile(const std::string& strFilePath, const std::string& strTemp
 	char szCommName[MAX_PATH] = { 0 };
 
 	// 存放从zip中解析出来的内部文件名
-	for (int i = 0; i < pGlobalInfo->number_entry; i++)
+	for (unsigned int i = 0; i < pGlobalInfo->number_entry; i++)
 	{
 		// 解析得到zip中的文件信息
 		nReturnValue = unzGetCurrentFileInfo(unzfile, pFileInfo, szZipFName, MAX_PATH, szExtraName, MAX_PATH, szCommName, MAX_PATH);

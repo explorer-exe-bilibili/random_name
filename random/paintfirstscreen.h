@@ -5,8 +5,8 @@ class paintfirstscreen
 {
 public:
 	static bool firsttime;
-	static void paintoverlay(HDC hdc, HDC hdcMem);
-	static void printfirstmenu(HDC hdc, HDC hdcMem,Gp p);
+	static void paintoverlay(Gp *p);
+	static void printfirstmenu(Gp *p);
 	static void repaint();
 private:
 	static bool firstpaint;

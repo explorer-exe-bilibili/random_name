@@ -7,8 +7,6 @@ public:
 	static WNDPROC g_OrigFloatWndProc;
 	static void open();
 	static void stop();
-	static BOOL IsEntirelyCovered(HWND hWnd);
-	static BOOL IsFullScreen(HWND hWnd);
 	static LRESULT nchittest(WPARAM wParam);
 	static void lbuttondown(WPARAM wParam);
 	static void mousemove();

@@ -4,6 +4,7 @@
 #include<vector>
 #include"log.h"
 #include"bitmaps.h"
+#include"Gp.h"
 
 #define LASTBM L"b"
 #define NEXTBM L"c"
@@ -25,8 +26,8 @@ private:
 		std::wstring FileChooseWindowName;
 		std::string FileType;
 		std::string OutOfLimitOutPut;
+		bool neetreload=0;
 	}sitem;
-
 	typedef struct sNode {
 		int number;
 		int x;
@@ -53,7 +54,7 @@ public:
 	set2(std::string& jsonfile);
 	spage getpage(int settingpage) { return pages[settingpage]; }
 	void clicked(int x, int y);
-	void paint(HDC hdc, HDC hdcMem);
+	void paint(Gp *p);
 	void quit();
 	void reinit();
 	void release();
@@ -69,8 +70,10 @@ private:
 	int lastbmx=0, lastbmy=0, lastxend=0, lastyend=0;
 	int nextbmx=0, nextbmy=0, nextxend=0, nextyend=0;
 	int textboxnumber = 0;
+	sitem PictureNeedReload;
 	settingxy sxy[20] = {};
 	sNode* shead = nullptr;
+	Gp *p_;
 	std::string G2U(const std::string& gbk);
 	std::string U2G(const std::string& utf8);
 	std::vector<spage> pages;
@@ -82,7 +85,7 @@ private:
 	void OpenFile(sitem item);
 	void reloadbmp(sitem item);
 	void rollback(std::string jsonpath);
-	void showitem(sitem item, HDC hdc, HDC hdcMem);
-	void switchbm(sitem item, HDC hdc, HDC hdcMem);
-	void textbox(sitem item, HDC hdc, HDC hdcMem);
+	void showitem(sitem item, Gp *p);
+	void switchbm(sitem item,Gp *p);
+	void textbox(sitem item,Gp *p);
 };

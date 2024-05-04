@@ -9,32 +9,205 @@
 #include<thread>
 
 
-#define BETWEENCOUNT 100
-#define S_WINDOWTITLE 200
-#define ISFILE 300
-#define ISBITMAP 400
-#define NOLIMIT 0
-#define NAME "Name"
-#define CONFIGNAME "ConfigName"
-#define ISSWITCH "IsSwitch"
-#define ISEDIT "IsEditBox"
-#define NUMBER "Number"
-#define FILETYPE "FileType"
-#define FILECHOOSE "FileChooseWindowName"
-#define OUTOFLIMIT "OutOfLimitOutPut"
-#define LIMIT "Limit"
-#define TITLE "Title"
-#define BITMAPC "BitmapNumber"
-#define BEFORE 1
 #define AFTER 2
+#define BEFORE 1
+#define BETWEENCOUNT 100
+#define BITMAPC "BitmapNumber"
+#define CONFIGNAME "ConfigName"
+#define FILECHOOSE "FileChooseWindowName"
+#define FILETYPE "FileType"
+#define ISBITMAP 400
+#define ISEDIT "IsEditBox"
+#define ISFILE 300
+#define ISSWITCH "IsSwitch"
+#define LIMIT "Limit"
+#define NAME "Name"
+#define NOLIMIT 0
+#define NUMBER "Number"
+#define OUTOFLIMIT "OutOfLimitOutPut"
+#define S_WINDOWTITLE 200
+#define TITLE "Title"
 
+extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg, exitinfo, goldenbg, listbm, liststar, buttom;
+extern HBITMAP hbitmaps[BitmapCounts];
+Log slog("files\\log\\set-json.log", 1);
 using json = nlohmann::json;
 using namespace std;
-Log slog("files\\log\\set-json.log", 1);
-extern HBITMAP hbitmaps[BitmapCounts];
-extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg, exitinfo, goldenbg, listbm, liststar, buttom;
 
-
+set2::set2() {
+	string jsonpath = "files\\setting.json";
+	std::thread loading(std::bind(&set2::Load, this, jsonpath));
+	loading.detach();
+	PictureNeedReload.BitmapNumber = 0;
+	PictureNeedReload.ConfigName = L"";
+	PictureNeedReload.FileChooseWindowName = L"";
+	PictureNeedReload.FileType = "";
+	PictureNeedReload.IsEditBox = 0;
+	PictureNeedReload.IsFile = 0;
+	PictureNeedReload.IsSwitch = 0;
+	PictureNeedReload.Limit = 0;
+	PictureNeedReload.max = 0;
+	PictureNeedReload.min = 0;
+	PictureNeedReload.Name = L"";
+	PictureNeedReload.neetreload = 0;
+	PictureNeedReload.Number = 0;
+	PictureNeedReload.OutOfLimitOutPut = "";
+}
+set2::~set2() {
+}
+void set2::quit() {
+	directshow::music(ENTER);
+	char n = 0;
+	while (n <= 20) {
+		if (textboxhwnd[n] != NULL)
+			DestroyWindow(textboxhwnd[n]);
+		n++;
+	}
+	ui::screenmode = FIRST_MENU;
+	ui::ScreenModeChanged = 1;
+	for (n = 0; n < 40; n++)isused[n] = 0;
+	firstpaint = 1;
+}
+void set2::init()
+{
+	bitmaps[BackGround] = &bm;
+	bitmaps[blue10b] = &ball;
+	bitmaps[blue10i] = &ball;
+	bitmaps[blue1b] = &ball;
+	bitmaps[blue1i] = &ball;
+	bitmaps[Buttom] = &buttom;
+	bitmaps[cardbackground] = &cardbg;
+	bitmaps[exitb] = &exitinfo;
+	bitmaps[exiti] = &exitinfo;
+	bitmaps[goldencardbg] = &goldenbg;
+	bitmaps[list3] = &liststar;
+	bitmaps[list4] = &liststar;
+	bitmaps[list5] = &liststar;
+	bitmaps[list6] = &liststar;
+	bitmaps[listbg] = &listbm;
+	bitmaps[over1] = &overlay1Bm;
+	bitmaps[over2] = &overlay2Bm;
+	bitmaps[over3] = &overlay3Bm;
+	bitmaps[over4] = &overlay4Bm;
+	bitmaps[pink10b] = &ball;
+	bitmaps[pink10i] = &ball;
+	bitmaps[pink1b] = &ball;
+	bitmaps[pink1i] = &ball;
+	bitmaps[SetBM] = &setbm;
+	bitmaps[setbutton] = &setbu;
+	rereadconfig();
+}
+void set2::reinit()
+{
+	init();
+}
+void set2::repaint()
+{
+	firstpaint = 1;
+	InvalidateRect(mywindows::main_hwnd, NULL, FALSE);
+}
+void set2::release()
+{
+	for (int i = 0; i < BitmapCounts; i++) {
+		memset(bitmaps[i], 0, sizeof(BITMAP));
+		bitmaps[i] = nullptr;
+	}
+}
+void set2::changepage()
+{
+	char n = 0;
+	while (n <= 20) {
+		if (textboxhwnd[n] != 0) {
+			DestroyWindow(textboxhwnd[n]);
+		}
+		n++;
+	}
+	for (n = 0; n < 40; n++)isused[n] = 0;
+	firstpaint = 1;
+}
+void set2::resetplace() {
+	mywindows::log(L"Free Setting List complete");
+	for (char i = 1; i <= 10; i++) {
+		sxy[i].x = mywindows::windowWidth * 0.05;
+		sxy[i].y = mywindows::windowHeight * (i) * 0.09;
+		sxy[i].bmx = mywindows::windowWidth * 0.25;
+		sxy[i].bmxend = mywindows::windowWidth * 0.35;
+		sxy[i].bmy = sxy[i].y;
+		sxy[i].bmyend = sxy[i].y + mywindows::windowHeight * 0.07;
+		sxy[i].bmw = mywindows::windowWidth * 0.1;
+		sxy[i].bmh = mywindows::windowWidth * 0.03;
+	}
+	for (char i = 11; i <= 19; i++) {
+		sxy[i].x = mywindows::windowWidth * 0.55;
+		sxy[i].y = mywindows::windowHeight * (i - 9) * 0.09;
+		sxy[i].bmx = mywindows::windowWidth * 0.75;
+		sxy[i].bmxend = mywindows::windowWidth * 0.85;
+		sxy[i].bmy = sxy[i].y;
+		sxy[i].bmyend = sxy[i].y + mywindows::windowHeight * 0.07;
+		sxy[i].bmw = mywindows::windowWidth * 0.1;
+		sxy[i].bmh = mywindows::windowWidth * 0.03;
+	}
+	nextbmx = mywindows::windowWidth * 0.73;
+	nextbmy = mywindows::windowHeight * 0.91;
+	nextxend = mywindows::windowWidth * 0.752;
+	nextyend = mywindows::windowHeight * 0.95;
+	lastbmx = mywindows::windowWidth * 0.8;
+	lastbmy = mywindows::windowHeight * 0.91;
+	lastxend = mywindows::windowWidth * 0.822;
+	lastyend = mywindows::windowHeight * 0.95;
+}
+void set2::rereadconfig() {
+	offmusic = config::getint(OFFMUSIC);
+	fullscreen = !config::getint(INWINDOW);
+	offvideo = config::getint(OFF_VIDEO);
+	FloatWindow = config::getint(FLOATWINDOW);
+	if (offmusic)
+		mciSendString(L"stop bgm", NULL, 0, NULL);
+	else
+		mciSendString(L"play bgm repeat", NULL, 0, NULL);
+}
+void set2::paint(Gp* p) {
+	p_ = p;
+	if (firstpaint) {
+		p->Paint(0, 0, mywindows::windowWidth, mywindows::windowHeight, SetBM);
+		firstpaint = 0;
+	}
+	p->Paint(ui::exitx, ui::exity, ui::exitxend - ui::exitx, ui::exityend - ui::exity, exiti);
+	wstring title = pages[settingpage - 1].Title;
+	int titlex, titley;
+	int stringWidth = 0.0272 * mywindows::windowWidth * title.length();
+	titlex = (mywindows::windowWidth - stringWidth) / 2;
+	titley = mywindows::windowHeight * 0.05;
+	for (const auto& item : pages[settingpage - 1].items) {
+		showitem(item, p);
+	}
+	unsigned int totalp = static_cast<int>(pages.size());
+	wstring t = to_wstring(settingpage) + L"/" + to_wstring(totalp);
+	HDC hdc = p->GetDC();
+	SelectObject(hdc, ui::text_mid);
+	TextOut_(hdc, titlex, titley, title.c_str());
+	SelectObject(hdc, ui::icon_mid);
+	TextOut_(hdc, nextbmx, nextbmy, L"b");
+	TextOut_(hdc, lastbmx, lastbmy, L"c");
+	SelectObject(hdc, ui::text_mid);
+	TextOut_(hdc, mywindows::windowWidth * 0.765, mywindows::windowHeight * 0.91, t.c_str());
+	p->ReleaseDC(hdc);
+	if (PictureNeedReload.neetreload) {
+		Gdiplus::Bitmap* newBitmap = new Gdiplus::Bitmap(config::getpath(PictureNeedReload.ConfigName).c_str());
+		if (newBitmap->GetLastStatus() == Gdiplus::Ok) {
+			p->bitmaps[PictureNeedReload.BitmapNumber].reset(newBitmap);
+		}
+		else {
+			slog << slog.pt() << "[ERROR]Fail to reste bitmap" << PictureNeedReload.BitmapNumber << endl;
+		}
+		PictureNeedReload.neetreload = 0;
+	}
+}
+void set2::OpenFile(sitem item)
+{
+	wstring path = config::getpath(item.ConfigName);
+	ShellExecute(NULL, L"open", path.c_str(), NULL, NULL, SW_SHOWNORMAL);
+}
 void set2::Load(string jsonpath) {
 	init();
 	Log slog("files\\log\\set-json.log", 0);
@@ -113,96 +286,32 @@ openjsonfile:
 	settingpage = 1;
 	return;
 }
-// UTF8字符串转成GBK字符串
-std::string set2::U2G(const std::string& utf8)
-{
-	int nwLen = MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), -1, NULL, 0);
-	wchar_t* pwBuf = new wchar_t[nwLen + 1];//加1用于截断字符串 
-	memset(pwBuf, 0, nwLen * 2 + 2);
-
-	MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), utf8.length(), pwBuf, nwLen);
-
-	int nLen = WideCharToMultiByte(CP_ACP, 0, pwBuf, -1, NULL, NULL, NULL, NULL);
-
-	char* pBuf = new char[nLen + 1];
-	memset(pBuf, 0, nLen + 1);
-	
-	WideCharToMultiByte(CP_ACP, 0, pwBuf, nwLen, pBuf, nLen, NULL, NULL);
-
-	std::string retStr = pBuf;
-
-	delete[]pBuf;
-	delete[]pwBuf;
-
-	pBuf = NULL;
-	pwBuf = NULL;
-
-	return retStr;
-}
-// GBK字符串转成json识别的UTF8字符串
-std::string set2::G2U(const std::string& gbk)
-{
-	int nwLen = ::MultiByteToWideChar(CP_ACP, 0, gbk.c_str(), -1, NULL, 0);
-
-	wchar_t* pwBuf = new wchar_t[nwLen + 1];//加1用于截断字符串 
-	ZeroMemory(pwBuf, nwLen * 2 + 2);
-
-	::MultiByteToWideChar(CP_ACP, 0, gbk.c_str(), gbk.length(), pwBuf, nwLen);
-
-	int nLen = ::WideCharToMultiByte(CP_UTF8, 0, pwBuf, -1, NULL, NULL, NULL, NULL);
-
-	char* pBuf = new char[nLen + 1];
-	ZeroMemory(pBuf, nLen + 1);
-
-	::WideCharToMultiByte(CP_UTF8, 0, pwBuf, nwLen, pBuf, nLen, NULL, NULL);
-
-	std::string retStr(pBuf);
-
-	delete[]pwBuf;
-	delete[]pBuf;
-
-	pwBuf = NULL;
-	pBuf = NULL;
-
-	return retStr;
-}
-set2::set2() {
-	string jsonpath = "files\\setting.json";
-	std::thread loading(std::bind(&set2::Load, this, jsonpath));
-	loading.detach();
-}
 set2::set2(std::string& jsonfile) {
 	std::thread loading(std::bind(&set2::Load, this, jsonfile));
 	loading.detach();
+	PictureNeedReload.BitmapNumber = 0;
+	PictureNeedReload.ConfigName = L"";
+	PictureNeedReload.FileChooseWindowName = L"";
+	PictureNeedReload.FileType = "";
+	PictureNeedReload.IsEditBox = 0;
+	PictureNeedReload.IsFile = 0;
+	PictureNeedReload.IsSwitch = 0;
+	PictureNeedReload.Limit = 0;
+	PictureNeedReload.max = 0;
+	PictureNeedReload.min = 0;
+	PictureNeedReload.Name = L"";
+	PictureNeedReload.neetreload = 0;
+	PictureNeedReload.Number = 0;
+	PictureNeedReload.OutOfLimitOutPut = "";
 }
-void set2::paint(HDC hdc, HDC hdcMem) {
-	if (firstpaint) {
-		SelectObject(hdcMem, hbitmaps[SetBM]);
-		StretchBlt(hdc, 0, 0, mywindows::windowWidth, mywindows::windowHeight, hdcMem, 0, 0, setbm.bmWidth, setbm.bmHeight, SRCCOPY);
-		firstpaint = 0;
-	}
-	SelectObject(hdc, ui::text_mid);
-	wstring title = pages[settingpage-1].Title;
-	int titlex, titley;
-	int stringWidth = 0.0272 * mywindows::windowWidth * title.length();
-	titlex= (mywindows::windowWidth - stringWidth) / 2;
-	titley = mywindows::windowHeight * 0.05;
-	TextOut_(hdc, titlex, titley, title.c_str());
-	SelectObject(hdcMem, hbitmaps[exitb]);
-	StretchBlt(hdc, ui::exitx, ui::exity, ui::exitxend - ui::exitx, ui::exityend - ui::exity, hdcMem, 0, 0, exitinfo.bmWidth, exitinfo.bmHeight, SRCAND);
-	SelectObject(hdcMem, hbitmaps[exiti]);
-	StretchBlt(hdc, ui::exitx, ui::exity, ui::exitxend - ui::exitx, ui::exityend - ui::exity, hdcMem, 0, 0, exitinfo.bmWidth, exitinfo.bmHeight, SRCPAINT);
-	for (const auto& item : pages[settingpage-1].items) {
-		showitem(item, hdc, hdcMem);
-	}
-	unsigned int totalp = static_cast<int>(pages.size());
-	wstring t = to_wstring(settingpage) + L"/" + to_wstring(totalp);
-	SelectObject(hdc, ui::icon_mid);
-	TextOut_(hdc, nextbmx, nextbmy, L"b");
-	TextOut_(hdc, lastbmx, lastbmy, L"c");
-	SelectObject(hdc, ui::text_mid);
-	TextOut_(hdc, mywindows::windowWidth * 0.765, mywindows::windowHeight * 0.91, t.c_str());
-
+void set2::reloadbmp(sitem item)
+{
+	DeleteObject(hbitmaps[item.BitmapNumber]);
+	hbitmaps[item.BitmapNumber] =
+		(HBITMAP)LoadImage(NULL, config::getpath(item.ConfigName).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
+	GetObject(hbitmaps[item.BitmapNumber], sizeof(BITMAP), bitmaps[item.BitmapNumber]);
+	PictureNeedReload = item;
+	PictureNeedReload.neetreload = 1;
 }
 void set2::rollback(string jsonpath) {
 	Log slog("files\\log\\set-json.log", 0);
@@ -212,13 +321,17 @@ void set2::rollback(string jsonpath) {
 	json p;
 	json i;
 	p[TITLE] = G2U("图片");
-	i[NAME] = G2U("卡池1图片"); i[CONFIGNAME] = "over1"; i[FILECHOOSE] = G2U("选择卡池1图片"); i[FILETYPE] = "bmp"; i[LIMIT] = ISBITMAP; i[NUMBER] = 1; i[BITMAPC] = 0;
+	i[NAME] = G2U("卡池1图片"); i[CONFIGNAME] = "over1"; i[FILECHOOSE] = G2U("选择卡池1图片");
+	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP; i[NUMBER] = 1; i[BITMAPC] = 0;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("卡池2图片"); i[CONFIGNAME] = "over2"; i[FILECHOOSE] = G2U("选择卡池2图片"); i[FILETYPE] = "bmp"; i[LIMIT] = ISBITMAP; i[NUMBER] = 2; i[BITMAPC] = 1;
+	i[NAME] = G2U("卡池2图片"); i[CONFIGNAME] = "over2"; i[FILECHOOSE] = G2U("选择卡池2图片");
+	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP; i[NUMBER] = 2; i[BITMAPC] = 1;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("卡池3图片"); i[CONFIGNAME] = "over3"; i[FILECHOOSE] = G2U("选择卡池3图片"); i[FILETYPE] = "bmp"; i[LIMIT] = ISBITMAP; i[NUMBER] = 3; i[BITMAPC] = 2;
+	i[NAME] = G2U("卡池3图片"); i[CONFIGNAME] = "over3"; i[FILECHOOSE] = G2U("选择卡池3图片");
+	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP; i[NUMBER] = 3; i[BITMAPC] = 2;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("卡池4图片"); i[CONFIGNAME] = "over4"; i[FILECHOOSE] = G2U("选择卡池4图片"); i[FILETYPE] = "bmp"; i[LIMIT] = ISBITMAP; i[NUMBER] = 4; i[BITMAPC] = 3;
+	i[NAME] = G2U("卡池4图片"); i[CONFIGNAME] = "over4"; i[FILECHOOSE] = G2U("选择卡池4图片");
+	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP; i[NUMBER] = 4; i[BITMAPC] = 3;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 11;
 	p["item"].push_back(i); i.clear();
@@ -322,7 +435,7 @@ void set2::clicked(int x, int y)
 	if (number != -1) {
 		directshow::music(CLICK);
 		if (number > 0) {
-			for (const auto& item : pages[settingpage-1].items) {
+			for (const auto& item : pages[settingpage - 1].items) {
 				if (number == item.Number) {
 					if (item.IsSwitch) {
 						config::turnUpSideDown(item.ConfigName);
@@ -343,80 +456,17 @@ void set2::clicked(int x, int y)
 		}
 	}
 }
-void set2::reloadbmp(sitem item)
-{
-	DeleteObject(hbitmaps[item.BitmapNumber]);
-	hbitmaps[item.BitmapNumber] =
-		(HBITMAP)LoadImage(NULL, config::getpath(item.ConfigName).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	GetObject(hbitmaps[item.BitmapNumber], sizeof(BITMAP), bitmaps[item.BitmapNumber]);
-}
-void set2::rereadconfig() {
-	offmusic = config::getint(OFFMUSIC);
-	fullscreen = !config::getint(INWINDOW);
-	offvideo = config::getint(OFF_VIDEO);
-	FloatWindow = config::getint(FLOATWINDOW);
-	if (offmusic)
-		mciSendString(L"stop bgm", NULL, 0, NULL);
-	else
-		mciSendString(L"play bgm repeat", NULL, 0, NULL);
-}
-void set2::release()
-{
-	for (int i = 0; i < BitmapCounts; i++) {
-		memset(bitmaps[i], 0, sizeof(BITMAP));
-		bitmaps[i] = nullptr;
-	}
-}
-void set2::reinit()
-{
-	init();
-}
-void set2::changepage()
-{
-	char n = 0;
-	while (n <= 20) {
-		if (textboxhwnd[n] != 0) {
-			DestroyWindow(textboxhwnd[n]);
-		}
-		n++;
-	}
-	for (n = 0; n < 40; n++)isused[n] = 0;
-	firstpaint = 1;
-}
-void set2::showitem(sitem item, HDC hdc, HDC hdcMem) {
+void set2::showitem(sitem item, Gp *p) {
 	if (item.IsSwitch) {
-		switchbm(item, hdc, hdcMem);
+		switchbm(item,p);
 	}
 	else if (item.IsEditBox) {
-		textbox(item, hdc, hdcMem);
+		textbox(item,p);
 	}
 }
-void set2::seteditbox(LPARAM lParam, WPARAM wParam)
+void set2::textbox(sitem item,Gp *p)
 {
-	// 获取文本框的句柄,确保它是有效的
-	HWND editBoxHwnd = (HWND)(lParam);
-	int numberoftextbox = LOWORD(wParam);
-	if (editBoxHwnd != NULL) {
-		// 分配缓冲区大小,这里假设文本框中的文本不会超过256个字符
-		wchar_t sz[256];
-		Edit_GetText(editBoxHwnd, sz, 256);
-		// 显示文本框中的文本
-		if (wcslen(sz) != 0) {
-			std::wstring tmp(sz);
-			for (const auto& item : pages[settingpage-1].items) {
-				if (item.Number == numberoftextbox) EditBoxEditor(item,tmp);
-			}
-		}
-	}
-}
-void set2::textbox(sitem item, HDC hdc, HDC hdcMem)
-{
-	SelectObject(hdc, ui::text_mid);
-	SetBkColor(hdc, RGB(236, 229, 216));
-	SelectObject(hdcMem, hbitmaps[setbutton]);
-	TextOut_(hdc, sxy[item.Number].x, sxy[item.Number].y + mywindows::windowHeight * 0.01, item.Name.c_str());
 	int number = item.Number;
-
 	std::wstring wst;
 	if (item.IsFile) {
 		wst = config::getpath(item.ConfigName);
@@ -424,15 +474,23 @@ void set2::textbox(sitem item, HDC hdc, HDC hdcMem)
 	else {
 		wst = config::get(item.ConfigName);
 	}
+	HDC hdc = p->GetDC();
+	SelectObject(hdc, ui::text_mid);
+	SetBkColor(hdc, RGB(236, 229, 216));
+	TextOut_(hdc, sxy[item.Number].x, sxy[item.Number].y + mywindows::windowHeight * 0.01, item.Name.c_str());
+	p->ReleaseDC(hdc);
 	if (isused[number] == 0) {
 		textboxhwnd[number] = CreateEditBox(mywindows::main_hwnd, number, sxy[number].bmx, sxy[number].bmy, sxy[number].bmw, sxy[number].bmh, wst.c_str());
 	}
 	if (item.IsFile) {
 		if (!isused[number + 20]) {
-			StretchBlt(hdc, sxy[number].bmxend, sxy[number].bmy, sxy[number].bmw, sxy[number].bmh, hdcMem, 0, 0, setbu.bmWidth, setbu.bmHeight, SRCCOPY);
+			p->Paint(sxy[number].bmxend, sxy[number].bmy, sxy[number].bmw, sxy[number].bmh, setbutton);
+			HDC hdc = p->GetDC();
+			SelectObject(hdc, ui::text_mid);
+			SetBkColor(hdc, RGB(236, 229, 216));
 			TextOut_(hdc, sxy[number].bmxend+sxy[number].bmw/2 + mywindows::windowWidth * 0.01, sxy[number].y + mywindows::windowHeight * 0.01, L"打开");
 			TextOut_(hdc, sxy[number].bmxend+mywindows::windowWidth*0.01, sxy[number].y + mywindows::windowHeight * 0.01, L"选择");
-
+			p->ReleaseDC(hdc);
 			int x = sxy[number].bmxend, y = sxy[number].bmy, xend = sxy[number].bmxend + sxy[number].bmw, yend = sxy[number].bmh + sxy[number].bmy;
 			if (!isused[number]) {
 				sNode* newnode = new sNode;
@@ -451,86 +509,17 @@ void set2::textbox(sitem item, HDC hdc, HDC hdcMem)
 	}
 	isused[number] = 1;
 }
-void set2::OpenFile(sitem item)
-{
-	wstring path = config::getpath(item.ConfigName);
-	ShellExecute(NULL, L"open", path.c_str(), NULL, NULL, SW_SHOWNORMAL);
-}
-void set2::init()
-{
-	bitmaps[BackGround] = &bm;
-	bitmaps[blue10b] = &ball;
-	bitmaps[blue10i] = &ball;
-	bitmaps[blue1b] = &ball;
-	bitmaps[blue1i] = &ball;
-	bitmaps[Buttom] = &buttom;
-	bitmaps[cardbackground] = &cardbg;
-	bitmaps[exitb] = &exitinfo;
-	bitmaps[exiti] = &exitinfo;
-	bitmaps[goldencardbg] = &goldenbg;
-	bitmaps[list3] = &liststar;
-	bitmaps[list4] = &liststar;
-	bitmaps[list5] = &liststar;
-	bitmaps[list6] = &liststar;
-	bitmaps[listbg] = &listbm;
-	bitmaps[over1] = &overlay1Bm;
-	bitmaps[over2] = &overlay2Bm;
-	bitmaps[over3] = &overlay3Bm;
-	bitmaps[over4] = &overlay4Bm;
-	bitmaps[pink10b] = &ball;
-	bitmaps[pink10i] = &ball;
-	bitmaps[pink1b] = &ball;
-	bitmaps[pink1i] = &ball;
-	bitmaps[SetBM] = &setbm;
-	bitmaps[setbutton] = &setbu;
-	rereadconfig();
-}
-void set2::EditBoxEditor(sitem item, wstring tmp)
-{
-	switch (item.Limit)
-	{
-	case S_WINDOWTITLE:
-		SetWindowTextW(mywindows::main_hwnd, tmp.c_str());
-		break;
-	case BETWEENCOUNT: {
-		int value;
-		try
-		{
-			value = std::stoi(tmp);
-		}
-		catch (const std::exception&e)
-		{
-			slog << "[ERROR]meet a error :" << e.what() << endl;
-			MessageBox(NULL, L"请输入数字", L"错误", MB_ICONERROR);
-			return;
-		}
-		if (value < item.min || value > item.max) {
-			MessageBoxA(NULL, U2G(item.OutOfLimitOutPut).c_str(), "错误", MB_ICONERROR);
-			return;
-		}
-	}break;
-	case ISFILE:
-	case ISBITMAP:
-		if (!std::filesystem::exists(tmp))return;
-		if (tmp == Log::wrunpath + config::get(item.ConfigName))return;
-		break;
-	default:
-		break;
-	}
-	config::replace(item.ConfigName, tmp);
-}
-set2::~set2() {
-}
-void set2::switchbm(sitem item, HDC hdc, HDC hdcMem) {
+void set2::switchbm(sitem item,Gp *p) {
+	p->Paint(sxy[item.Number].bmx, sxy[item.Number].bmy, sxy[item.Number].bmw, sxy[item.Number].bmh, setbutton);
+	HDC hdc = p->GetDC();
 	SelectObject(hdc, ui::text_mid);
 	SetBkColor(hdc, RGB(236, 229, 216));
-	SelectObject(hdcMem, hbitmaps[setbutton]);
-	StretchBlt(hdc, sxy[item.Number].bmx, sxy[item.Number].bmy, sxy[item.Number].bmw, sxy[item.Number].bmh, hdcMem, 0, 0, setbu.bmWidth, setbu.bmHeight, SRCCOPY);
 	TextOut_(hdc, sxy[item.Number].x, sxy[item.Number].y + mywindows::windowHeight * 0.01, item.Name.c_str());
 	if (config::getint(item.ConfigName) == 1)
 		TextOut_(hdc, sxy[item.Number].bmx + mywindows::windowWidth * 0.04, sxy[item.Number].bmy + mywindows::windowHeight * 0.01, L"开");
 	else
 		TextOut_(hdc, sxy[item.Number].bmx + mywindows::windowWidth * 0.04, sxy[item.Number].bmy + mywindows::windowHeight * 0.01, L"关");
+	p->ReleaseDC(hdc);
 	int x = sxy[item.Number].bmx, y = sxy[item.Number].bmy, xend = sxy[item.Number].bmxend, yend = sxy[item.Number].bmh + sxy[item.Number].bmy;
 	sNode* newnode = new sNode;
 	if (newnode == NULL) {
@@ -543,37 +532,6 @@ void set2::switchbm(sitem item, HDC hdc, HDC hdcMem) {
 	newnode->next = shead;
 	newnode->number = item.Number;
 	shead = newnode;
-}
-void set2::resetplace() {
-	mywindows::log(L"Free Setting List complete");
-	for (char i = 1; i <= 10; i++) {
-		sxy[i].x = mywindows::windowWidth * 0.05;
-		sxy[i].y = mywindows::windowHeight * (i) * 0.09;
-		sxy[i].bmx = mywindows::windowWidth * 0.25;
-		sxy[i].bmxend = mywindows::windowWidth * 0.35;
-		sxy[i].bmy = sxy[i].y;
-		sxy[i].bmyend = sxy[i].y + mywindows::windowHeight * 0.07;
-		sxy[i].bmw = mywindows::windowWidth * 0.1;
-		sxy[i].bmh = mywindows::windowWidth * 0.03;
-	}
-	for (char i = 11; i <= 19; i++) {
-		sxy[i].x = mywindows::windowWidth * 0.55;
-		sxy[i].y = mywindows::windowHeight * (i - 9) * 0.09;
-		sxy[i].bmx = mywindows::windowWidth * 0.75;
-		sxy[i].bmxend = mywindows::windowWidth * 0.85;
-		sxy[i].bmy = sxy[i].y;
-		sxy[i].bmyend = sxy[i].y + mywindows::windowHeight * 0.07;
-		sxy[i].bmw = mywindows::windowWidth * 0.1;
-		sxy[i].bmh = mywindows::windowWidth * 0.03;
-	}
-	nextbmx = mywindows::windowWidth * 0.73;
-	nextbmy = mywindows::windowHeight * 0.91;
-	nextxend = mywindows::windowWidth * 0.752;
-	nextyend = mywindows::windowHeight * 0.95;
-	lastbmx = mywindows::windowWidth * 0.8;
-	lastbmy = mywindows::windowHeight * 0.91;
-	lastxend = mywindows::windowWidth * 0.822;
-	lastyend = mywindows::windowHeight * 0.95;
 }
 void set2::ChooseFile(sitem item)
 {
@@ -612,23 +570,57 @@ loop:
 		goto loop;
 	}
 }
-void set2::quit() {
-	directshow::music(ENTER);
-	char n = 0;
-	while (n <= 20) {
-		if (textboxhwnd[n] != NULL)
-			DestroyWindow(textboxhwnd[n]);
-		n++;
-	}
-	ui::screenmode = FIRST_MENU;
-	ui::ScreenModeChanged = 1;
-	for (n = 0; n < 40; n++)isused[n] = 0;
-	firstpaint = 1;
-}
-void set2::repaint()
+void set2::EditBoxEditor(sitem item, wstring tmp)
 {
-	firstpaint = 1;
-	InvalidateRect(mywindows::main_hwnd, NULL, FALSE);
+	switch (item.Limit)
+	{
+	case S_WINDOWTITLE:
+		SetWindowTextW(mywindows::main_hwnd, tmp.c_str());
+		break;
+	case BETWEENCOUNT: {
+		int value;
+		try
+		{
+			value = std::stoi(tmp);
+		}
+		catch (const std::exception& e)
+		{
+			slog << "[ERROR]meet a error :" << e.what() << endl;
+			MessageBox(NULL, L"请输入数字", L"错误", MB_ICONERROR);
+			return;
+		}
+		if (value < item.min || value > item.max) {
+			MessageBoxA(NULL, U2G(item.OutOfLimitOutPut).c_str(), "错误", MB_ICONERROR);
+			return;
+		}
+	}break;
+	case ISFILE:
+	case ISBITMAP:
+		if (!std::filesystem::exists(tmp))return;
+		if (tmp == Log::wrunpath + config::get(item.ConfigName))return;
+		break;
+	default:
+		break;
+	}
+	config::replace(item.ConfigName, tmp);
+}
+void set2::seteditbox(LPARAM lParam, WPARAM wParam)
+{
+	// 获取文本框的句柄,确保它是有效的
+	HWND editBoxHwnd = (HWND)(lParam);
+	int numberoftextbox = LOWORD(wParam);
+	if (editBoxHwnd != NULL) {
+		// 分配缓冲区大小,这里假设文本框中的文本不会超过256个字符
+		wchar_t sz[256];
+		Edit_GetText(editBoxHwnd, sz, 256);
+		// 显示文本框中的文本
+		if (wcslen(sz) != 0) {
+			std::wstring tmp(sz);
+			for (const auto& item : pages[settingpage - 1].items) {
+				if (item.Number == numberoftextbox) EditBoxEditor(item, tmp);
+			}
+		}
+	}
 }
 HWND set2::CreateEditBox(HWND hWndParent, int number, int x, int y, int w, int h, const wchar_t* words) {
 	// 创建EDIT控件的样式
@@ -642,4 +634,57 @@ HWND set2::CreateEditBox(HWND hWndParent, int number, int x, int y, int w, int h
 
 	// 返回文本框句柄
 	return hEdit;
+}
+// UTF8字符串转成GBK字符串
+std::string set2::U2G(const std::string& utf8)
+{
+	int nwLen = MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), -1, NULL, 0);
+	wchar_t* pwBuf = new wchar_t[nwLen + 1];//加1用于截断字符串 
+	memset(pwBuf, 0, nwLen * 2 + 2);
+
+	MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), utf8.length(), pwBuf, nwLen);
+
+	int nLen = WideCharToMultiByte(CP_ACP, 0, pwBuf, -1, NULL, NULL, NULL, NULL);
+
+	char* pBuf = new char[nLen + 1];
+	memset(pBuf, 0, nLen + 1);
+
+	WideCharToMultiByte(CP_ACP, 0, pwBuf, nwLen, pBuf, nLen, NULL, NULL);
+
+	std::string retStr = pBuf;
+
+	delete[]pBuf;
+	delete[]pwBuf;
+
+	pBuf = NULL;
+	pwBuf = NULL;
+
+	return retStr;
+}
+// GBK字符串转成json识别的UTF8字符串
+std::string set2::G2U(const std::string& gbk)
+{
+	int nwLen = ::MultiByteToWideChar(CP_ACP, 0, gbk.c_str(), -1, NULL, 0);
+
+	wchar_t* pwBuf = new wchar_t[nwLen + 1];//加1用于截断字符串 
+	ZeroMemory(pwBuf, nwLen * 2 + 2);
+
+	::MultiByteToWideChar(CP_ACP, 0, gbk.c_str(), gbk.length(), pwBuf, nwLen);
+
+	int nLen = ::WideCharToMultiByte(CP_UTF8, 0, pwBuf, -1, NULL, NULL, NULL, NULL);
+
+	char* pBuf = new char[nLen + 1];
+	ZeroMemory(pBuf, nLen + 1);
+
+	::WideCharToMultiByte(CP_UTF8, 0, pwBuf, nwLen, pBuf, nLen, NULL, NULL);
+
+	std::string retStr(pBuf);
+
+	delete[]pwBuf;
+	delete[]pBuf;
+
+	pwBuf = NULL;
+	pBuf = NULL;
+
+	return retStr;
 }

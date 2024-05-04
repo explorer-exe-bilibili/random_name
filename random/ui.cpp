@@ -19,11 +19,13 @@ int ui::addnameendy=0, ui::addnameW=0, ui::addnameH = 0;
 int ui::exitx = 0, ui::exitxend = 0, ui::exity = 0, ui::exityend = 0;
 bool ui::ScreenModeChanged = 1;
 
-void ui::creatbuttom(HDC hdc, HDC hdcMem, int x, int y, LPCWSTR text_out) {
-	SelectObject(hdcMem, hbitmaps[Buttom]);
-	StretchBlt(hdc, x, y, mywindows::windowWidth * 0.073, mywindows::windowHeight * 0.039, hdcMem, 0, 0, buttom.bmWidth, buttom.bmHeight, SRCCOPY);
+void ui::creatbuttom(Gp *p, int x, int y, LPCWSTR text_out)
+{
+	p->Paint(x, y, mywindows::windowWidth * 0.073, mywindows::windowHeight * 0.039, Buttom);
+	HDC hdc = p->GetDC();
 	SelectObject(hdc, ui::text);
 	SetTextColor(hdc, RGB(0, 0, 0));
 	SetBkColor(hdc, RGB(225, 222, 213));
 	TextOut_(hdc, x + mywindows::windowWidth * 0.0073, y + mywindows::windowHeight * 0.0065, text_out);
+	p->ReleaseDC(hdc);
 }
