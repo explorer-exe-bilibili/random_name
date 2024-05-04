@@ -13,8 +13,6 @@
 bool paintfirstscreen::firsttime = 1;
 bool paintfirstscreen::firstpaint = 1;
 
-extern HBITMAP hbitmaps[BitmapCounts];
-extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg, exitinfo, goldenbg, listbm;
 extern set2 setscreen;
 
 void paintfirstscreen::printfirstmenu(Gp *p) {

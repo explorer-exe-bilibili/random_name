@@ -45,9 +45,7 @@ bool upgrade(string url) {
 			// 调用解压函数
 			unzip::UnzipFile(srcFilePath, tempdir);
 			if (unzip::upgraderfile != "") {
-				string commond = "start ";
-				commond += unzip::upgraderfile;
-				system(commond.c_str());
+				ShellExecuteA(NULL, "open", unzip::upgraderfile.c_str(), NULL, NULL, SW_SHOWNORMAL);
 			}
 			if (std::filesystem::exists(srcFilePath))
 				remove(srcFilePath.c_str());

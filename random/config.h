@@ -27,6 +27,11 @@
 #define GROUPSTAR4 L"group 4star video"
 #define GROUPSTAR5 L"group 5star video"
 #define FLOATWINDOW L"open float window"
+#define FLOATPHOTO L"float window picture"
+#define FLOATX L"float window x"
+#define FLOATY L"float window y"
+#define FLOATW L"float window width"
+#define FLOATH L"float window height"
 
 class config
 {
@@ -48,15 +53,19 @@ private:
 public:
 	static int turnUpSideDown(const std::wstring& name);
 	static void add(const std::wstring& name, const std::wstring& value);
+	static void add(const std::wstring& name, const int value);
 	static void readFile();
 	static void saveFile();
 	static void cleanup();
 	static void deleteItem(const std::wstring& name);
-	static void replace(const std::wstring& option, const std::wstring& value);
+	static void replace(const std::wstring& name, const std::wstring& value);
+	static void replace(const std::wstring& name, const int value);
 	static void printAllConfigItems();
 	static void init();
 	static std::wstring get(const std::wstring& name);
 	static std::wstring getpath(const std::wstring& name);
 	static int getint(const std::wstring& name);
+	static long long getscreen(const std::wstring& name);
+	static long long getwindow(const std::wstring& name);
 };
 

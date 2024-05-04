@@ -13,40 +13,8 @@
 #include<thread>
 
 extern set2 setscreen;
-extern HBITMAP hbitmaps[BitmapCounts];
-extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg, exitinfo, goldenbg, listbm, liststar, buttom;
 WNDPROC w2_, w3_;
 
-void init::picture()
-{
-	// 加载两个背景图片
-	DWORD threadId;
-	HANDLE handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)LoadIMG, NULL, 0, &threadId);
-	hbitmaps[BackGround] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\wish-background.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[over1] = (HBITMAP)LoadImage(NULL, config::getpath(OVER1).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[over2] = (HBITMAP)LoadImage(NULL, config::getpath(OVER2).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[over3] = (HBITMAP)LoadImage(NULL, config::getpath(OVER3).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[over4] = (HBITMAP)LoadImage(NULL, config::getpath(OVER4).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[pink1b] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\1pinkb.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[pink1i] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\1pinki.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[pink10i] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\10pinki.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[pink10b] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\10pinkb.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[blue1b] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\1blueb.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[blue1i] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\1bluei.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[exiti] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\exiti.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[exitb] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\exitb.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[Buttom] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\buttom.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[blue10i] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\10bluei.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[blue10b] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\10blueb.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	GetObject(hbitmaps[BackGround], sizeof(BITMAP), &bm);
-	GetObject(hbitmaps[Buttom], sizeof(BITMAP), &buttom);
-	GetObject(hbitmaps[exitb], sizeof(BITMAP), &exitinfo);
-	GetObject(hbitmaps[over1], sizeof(BITMAP), &overlay1Bm);
-	GetObject(hbitmaps[over2], sizeof(BITMAP), &overlay2Bm);
-	GetObject(hbitmaps[over3], sizeof(BITMAP), &overlay3Bm);
-	GetObject(hbitmaps[over4], sizeof(BITMAP), &overlay4Bm);
-	GetObject(hbitmaps[pink1b], sizeof(BITMAP), &ball);
-}
 void init::font()
 {
 	int desiredPixelHeight = mywindows::windowWidth * 0.17;
@@ -139,29 +107,7 @@ void init::resetxy()
 		font();
 	}
 }
-void init::resetpicture()
-{
-	if (setscreen.changebitmap[0]) {
-		hbitmaps[over1] = (HBITMAP)LoadImage(NULL, config::getpath(OVER1).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-		GetObject(hbitmaps[over1], sizeof(BITMAP), &overlay1Bm);
-		setscreen.changebitmap[0] = 0;
-	}
-	if (setscreen.changebitmap[1]) {
-		hbitmaps[over2] = (HBITMAP)LoadImage(NULL, config::getpath(OVER2).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-		GetObject(hbitmaps[over2], sizeof(BITMAP), &overlay2Bm);
-		setscreen.changebitmap[1] = 0;
-	}
-	if (setscreen.changebitmap[2]) {
-		hbitmaps[over3] = (HBITMAP)LoadImage(NULL, config::getpath(OVER3).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-		GetObject(hbitmaps[over3], sizeof(BITMAP), &overlay3Bm);
-		setscreen.changebitmap[2] = 0;
-	}
-	if (setscreen.changebitmap[3]) {
-		hbitmaps[over4] = (HBITMAP)LoadImage(NULL, config::getpath(OVER4).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-		GetObject(hbitmaps[over4], sizeof(BITMAP), &overlay4Bm);
-		setscreen.changebitmap[3] = 0;
-	}
-}
+
 void init::main(WNDPROC w1, WNDPROC w2, WNDPROC w3)
 {
 	std::thread loading(std::bind(&init::regwindow, w1, w2, w3));
@@ -217,8 +163,8 @@ void init::MainWindow()
 	if (setscreen.fullscreen)mywindows::main_hwnd = CreateWindowW(L"main", config::get(WINDOW_TITEL).c_str(), WS_POPUP | WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN,
 		0, 0, mywindows::windowWidth, mywindows::windowHeight, NULL, NULL, GetModuleHandle(NULL), NULL);
 	else {
-		mywindows::windowWidth = mywindows::screenWidth * 0.6;
-		mywindows::windowHeight = mywindows::screenHeight * 0.6;
+		mywindows::windowWidth = mywindows::screenWidth;
+		mywindows::windowHeight = mywindows::screenHeight;
 		mywindows::main_hwnd = CreateWindowW(L"main", config::get(WINDOW_TITEL).c_str(), WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN | WS_THICKFRAME,
 			0, 0, mywindows::windowWidth, mywindows::windowHeight, NULL, NULL, GetModuleHandle(NULL), NULL);
 	}
@@ -269,31 +215,13 @@ DWORD WINAPI init::Regwindows() {
 	RegisterClass(&Fwndcls);//向操作系统注册窗体
 	return 0;
 }
-DWORD WINAPI init::LoadIMG() {
-	hbitmaps[goldencardbg] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\goldenbg.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[listbg] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\list.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[list3] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\3list.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[list4] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\4list.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[list5] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\5list.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[list6] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\fulllist.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[SetBM] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\setting.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[setbutton] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\settingbuttom.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	hbitmaps[cardbackground] = (HBITMAP)LoadImage(NULL, L".\\files\\imgs\\cardbg.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
 
-	GetObject(hbitmaps[SetBM], sizeof(BITMAP), &setscreen.setbm);
-	GetObject(hbitmaps[setbutton], sizeof(BITMAP), &setscreen.setbu);
-	GetObject(hbitmaps[goldencardbg], sizeof(BITMAP), &goldenbg);
-	GetObject(hbitmaps[list3], sizeof(BITMAP), &liststar);
-	GetObject(hbitmaps[listbg], sizeof(BITMAP), &listbm);
-	GetObject(hbitmaps[cardbackground], sizeof(BITMAP), &cardbg);
-	return 0;
-}
 DWORD WINAPI init::Upgrade(){
 	mywindows::log("writes version");
 	FILE* t;
 	fopen_s(&t, ".\\version", "w");
 	if (t != 0) {
-		fprintf(t, "1.0.0");
+		fprintf(t, "1.1.0");
 		fclose(t);
 		t = 0;
 	}

@@ -32,7 +32,7 @@ bool mywindows::CreatedMultipleDirectory(const std::string& direct)
     std::vector< std::string> vpath;
     std::string strtemp;
     BOOL  bSuccess = FALSE;
-    for (int i = 0; i < Directoryname.length(); i++)
+    for (unsigned int i = 0; i < Directoryname.length(); i++)
     {
         if (Directoryname[i] != '\\')
         {

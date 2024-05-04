@@ -2,8 +2,6 @@
 #include "mywindows.h"
 #include "bitmaps.h"
 
-extern HBITMAP hbitmaps[BitmapCounts];
-extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg, exitinfo, goldenbg, listbm, liststar, liststar, liststar, liststar, buttom;
 
 int ui::listx[11]={0}, ui::listy=0, ui::listxend=0, ui::listyend=0;
 bool ui::ing=0, ui::printing=0, ui::isball10=0, ui::isball1=0, ui::ball10ing=0, ui::clicked=0, ui::ft=0;

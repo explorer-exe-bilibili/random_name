@@ -3,6 +3,7 @@
 #include "mywindows.h"
 #include "resource.h"
 #include "set-json.h"
+#include "config.h"
 
 extern set2 setscreen;
 bool showfloatwindow = 1,showQuitwindow=1;
@@ -13,7 +14,6 @@ POINT floatwindow::last_mouse_pos;
 bool showing = 0;
 HBITMAP floatwindow::bitmap;
 int floatwindow::icon_w, floatwindow::icon_h;
-HBITMAP black;
 
 void floatwindow::open()
 {
@@ -31,17 +31,14 @@ void floatwindow::stop()
 
 void floatwindow::paint()
 {
+	static Gp p(mywindows::float_hWnd);
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(mywindows::float_hWnd, &ps);
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	RECT rect;
 	GetWindowRect(mywindows::float_hWnd, &rect);
 	int w = rect.right - rect.left, h = rect.bottom - rect.top;
-	SelectObject(hdcMem, black);
-	StretchBlt(hdc, 0, 0, w, h, hdcMem, 0, 0, icon_w, icon_h, SRCCOPY);
-	SelectObject(hdcMem, bitmap);
-	SetBkColor(hdc, RGB(0, 0, 0));
-	StretchBlt(hdc, 0, 0, w, h, hdcMem, 0, 0,icon_w , icon_h, SRCCOPY);
+	p.Paint(0, 0, w, h, 0);
 	DeleteDC(hdcMem);
 	DeleteDC(hdc);
 	EndPaint(mywindows::float_hWnd, &ps);
@@ -51,10 +48,10 @@ void floatwindow::createWindow() {
 	// 计算悬浮窗口的位置和大小
 	const int screenWidth = GetSystemMetrics(SM_CXSCREEN);
 	const int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-	constexpr int floatWndWidth = 50;
-	constexpr int floatWndHeight = 50;
-	const int floatWndX = screenWidth - floatWndWidth - 10;
-	const int floatWndY = screenHeight - floatWndHeight - 10;
+	int floatWndWidth = config::getscreen(FLOATW);
+	int floatWndHeight = config::getscreen(FLOATH);
+	const int floatWndX = config::getscreen(FLOATX);
+	const int floatWndY = config::getscreen(FLOATY);
 
 	// 创建悬浮窗口
 	mywindows::float_hWnd = CreateWindowEx(
@@ -86,10 +83,6 @@ void floatwindow::showQuitWindow()
 
 void floatwindow::create()
 {
-	BITMAP bmp;
-	bitmap= (HBITMAP)LoadImage(NULL, L"files\\imgs\\OIP-C.bmp", IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	GetObject(bitmap, sizeof(BITMAP), &bmp);
-	icon_w = bmp.bmWidth; icon_h = bmp.bmHeight;
 }
 
 void floatwindow::hideQuitWindow()
@@ -157,6 +150,8 @@ void floatwindow::lbuttonup()
 	POINT currentMousePos;
 	GetCursorPos(&currentMousePos);
 	if (currentMousePos.y <= mywindows::screenHeight * 0.3) {
+		ShowWindow(mywindows::float_hWnd,SW_HIDE);
+		ShowWindow(mywindows::Quit_hwnd,SW_HIDE);
 		PostQuitMessage(0);
 	}
 }

@@ -11,8 +11,6 @@
 #include "ui.h"
 #include<gdiplus.h>
 
-HBITMAP hbitmaps[BitmapCounts];
-BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg, exitinfo, goldenbg, listbm, liststar, buttom;
 #define BALL1 100
 #define BALL10 101
 #define mode1 200
@@ -108,7 +106,6 @@ int WINAPI WinMain(
 		TranslateMessage(&msg);
 		DispatchMessageW(&msg);
 	}
-	Gdiplus::GdiplusShutdown(gdiplusToken);
 	mywindows::log("bye!");
 	return msg.wParam;
 }

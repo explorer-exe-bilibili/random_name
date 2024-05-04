@@ -4,6 +4,15 @@
 using namespace Gdiplus;
 using namespace std;
 
+void Gp::Load_() {
+	bitmaps.clear();
+	bitmaps.push_back(std::make_shared<Bitmap>(config::getpath(FLOATPHOTO).c_str()));
+	for (const auto& i : bitmaps) {
+		if (i.get()->GetLastStatus() != Ok) {
+			mywindows::errlog("´ò¿ªÍ¼Æ¬Ê§°Ü");
+		}
+	}
+}
 void Gp::Load()
 {
 	bitmaps.clear();
@@ -44,7 +53,10 @@ Gp::~Gp()
 Gp::Gp(HWND hwnd)
 {
 	graphic = make_shared<Graphics>(hwnd);
-	Load();
+	if (hwnd == mywindows::main_hwnd)
+		Load();
+	else if (hwnd == mywindows::float_hWnd)
+		Load_();
 }
 void Gp::Paint(int xDest, int yDest, Bitmap* image, int wDest = 0, int hDest = 0)
 {

@@ -3,6 +3,7 @@
 #include<string>
 #include"mywindows.h"
 #include <codecvt>
+#include"sth2sth.h"
 
 // 定义链表头节点
 config::Node* config::head = NULL;
@@ -24,6 +25,10 @@ void config::init() {
 		add(YUANSHI, L"10000");
 		add(BLUE_BALL_COUNT, L"10000");
 		add(PINK_BALL_COUNT, L"10000");
+		add(FLOATX, sth2sth::str2wstr(to_string(mywindows::screenWidth * 0.8)));
+		add(FLOATY, sth2sth::str2wstr(to_string(mywindows::screenHeight * 0.8)));
+		add(FLOATW, sth2sth::str2wstr(to_string(mywindows::screenWidth * 0.05)));
+		add(FLOATH, sth2sth::str2wstr(to_string(mywindows::screenWidth * 0.05)));
 		add(OFF_VIDEO, L"0");
 		add(SPECIAL, L"0");
 		add(MODE, L"1");
@@ -35,6 +40,7 @@ void config::init() {
 		add(OVER3,L"\\files\\imgs\\over3.jpg");
 		add(OVER2, L"\\files\\imgs\\over2.jpg");
 		add(OVER1, L"\\files\\imgs\\over1.jpg");
+		add(FLOATPHOTO, L"\\files\\imgs\\float.jpg");
 		add(SIGNALSTAR3, L"\\files\\video\\3star-single.mp4");
 		add(SIGNALSTAR4, L"\\files\\video\\4star-single.mp4");
 		add(SIGNALSTAR5, L"\\files\\video\\5star-single.mp4");
@@ -76,6 +82,14 @@ void config::init() {
 		if (wcscmp(LogString.c_str(), L"err") == 0)add(INWINDOW, L"0");
 		LogString = get(FLOATWINDOW);
 		if (wcscmp(LogString.c_str(), L"err") == 0)add(FLOATWINDOW, L"1");
+		LogString = get(FLOATX);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(FLOATX, sth2sth::str2wstr(to_string(mywindows::screenWidth * 0.8)));
+		LogString = get(FLOATY);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(FLOATY, sth2sth::str2wstr(to_string(mywindows::screenHeight * 0.8)));
+		LogString = get(FLOATW);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(FLOATW, sth2sth::str2wstr(to_string(mywindows::screenWidth * 0.05)));
+		LogString = get(FLOATH);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(FLOATH, sth2sth::str2wstr(to_string(mywindows::screenWidth * 0.05)));
 		LogString = get(OVER1);
 		if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER1, L"\\files\\imgs\\over1.jpg");
 		LogString = get(OVER2);
@@ -84,6 +98,8 @@ void config::init() {
 		if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER3, L"\\files\\imgs\\over3.jpg");
 		LogString = get(OVER4);
 		if (wcscmp(LogString.c_str(), L"err") == 0)add(OVER4, L"\\files\\imgs\\over4.jpg");
+		LogString = get(FLOATPHOTO);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(FLOATPHOTO, L"\\files\\imgs\\float.jpg");
 		LogString = get(SIGNALSTAR3);
 		if (wcscmp(LogString.c_str(), L"err") == 0)add(SIGNALSTAR3, L"\\files\\video\\3star-single.mp4");
 		LogString = get(SIGNALSTAR4);
@@ -149,6 +165,50 @@ int config::getint(const std::wstring& name)
 	// 如果没有找到匹配的配置项,返回L"err"
 	return -1;
 }
+bool endsWith(const std::wstring& str, const std::wstring& suffix) {
+	if (suffix.length() > str.length()) {
+		return false;
+	}
+	return str.compare(str.length() - suffix.length(), suffix.length(), suffix) == 0;
+}
+long long config::getscreen(const std::wstring& name)
+{
+	wstring strv = get(name);
+	long double douv = stold(strv);
+	if (douv> 1) {
+		long long llv = douv;
+		return llv;
+	}
+	else {
+		if (name.back()=='x' || endsWith(name,L"width")) {
+			long long llv = douv * mywindows::screenWidth;
+			return llv;
+		}
+		else if (name.back()=='y' || endsWith(name,L"height")) {
+			long long llv = douv * mywindows::screenHeight;
+			return llv;
+		}
+	}
+}
+long long config::getwindow(const std::wstring& name)
+{
+	wstring strv = get(name);
+	long double douv = stold(strv);
+	if (douv> 1) {
+		long long llv = douv;
+		return llv;
+	}
+	else {
+		if (name.back()=='x' || endsWith(name,L"width")) {
+			long long llv = douv * mywindows::windowWidth;
+			return llv;
+		}
+		else if (name.back()=='y' || endsWith(name,L"height")) {
+			long long llv = douv * mywindows::windowHeight;
+			return llv;
+		}
+	}
+}
 int config::turnUpSideDown(const std::wstring& name)
 {
 	bool t = !getint(name);
@@ -163,6 +223,34 @@ void config::add(const std::wstring& name, const std::wstring& value) {
 	while (current != nullptr) {
 		if (current->item.name == name) {
 			current->item.value = value;
+			return;
+		}
+		prev = current;
+		current = current->next;
+	}
+
+	ConfigItem newItem;
+	newItem.name = name;
+	newItem.value = value;
+
+	Node* newNode = new Node;
+	if (newNode == nullptr) {
+		mywindows::errlog(L"Memory allocation error(add)");
+		return;
+	}
+
+	newNode->item = newItem;
+	newNode->next = head;
+	head = newNode;
+}
+void config::add(const std::wstring& name, const int value)
+{
+	Node* current = head;
+	Node* prev = nullptr;
+
+	while (current != nullptr) {
+		if (current->item.name == name) {
+			current->item.value = to_wstring(value);
 			return;
 		}
 		prev = current;
@@ -271,6 +359,26 @@ void config::replace(const std::wstring& name, const std::wstring& value) {
 	while (current != nullptr) {
 		if (current->item.name == name) {
 			current->item.value = value;
+			saveFile();
+			return;
+		}
+
+		prev = current;
+		current = current->next;
+	}
+
+	// 如果没有找到匹配的配置项,则添加新的配置项
+	add(name, value);
+	saveFile();
+}
+void config::replace(const std::wstring& name, const int value)
+{
+	Node* prev = nullptr;
+	Node* current = head;
+
+	while (current != nullptr) {
+		if (current->item.name == name) {
+			current->item.value = sth2sth::str2wstr(to_string(value));
 			saveFile();
 			return;
 		}

@@ -26,10 +26,12 @@
 #define NUMBER "Number"
 #define OUTOFLIMIT "OutOfLimitOutPut"
 #define S_WINDOWTITLE 200
+#define MAXWINDOWSIZE 1145141919
+#define FLOATPIC 5000
 #define TITLE "Title"
+#define MAX "max"
+#define MIN "min"
 
-extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg, exitinfo, goldenbg, listbm, liststar, buttom;
-extern HBITMAP hbitmaps[BitmapCounts];
 Log slog("files\\log\\set-json.log", 1);
 using json = nlohmann::json;
 using namespace std;
@@ -70,31 +72,6 @@ void set2::quit() {
 }
 void set2::init()
 {
-	bitmaps[BackGround] = &bm;
-	bitmaps[blue10b] = &ball;
-	bitmaps[blue10i] = &ball;
-	bitmaps[blue1b] = &ball;
-	bitmaps[blue1i] = &ball;
-	bitmaps[Buttom] = &buttom;
-	bitmaps[cardbackground] = &cardbg;
-	bitmaps[exitb] = &exitinfo;
-	bitmaps[exiti] = &exitinfo;
-	bitmaps[goldencardbg] = &goldenbg;
-	bitmaps[list3] = &liststar;
-	bitmaps[list4] = &liststar;
-	bitmaps[list5] = &liststar;
-	bitmaps[list6] = &liststar;
-	bitmaps[listbg] = &listbm;
-	bitmaps[over1] = &overlay1Bm;
-	bitmaps[over2] = &overlay2Bm;
-	bitmaps[over3] = &overlay3Bm;
-	bitmaps[over4] = &overlay4Bm;
-	bitmaps[pink10b] = &ball;
-	bitmaps[pink10i] = &ball;
-	bitmaps[pink1b] = &ball;
-	bitmaps[pink1i] = &ball;
-	bitmaps[SetBM] = &setbm;
-	bitmaps[setbutton] = &setbu;
 	rereadconfig();
 }
 void set2::reinit()
@@ -192,7 +169,7 @@ void set2::paint(Gp* p) {
 	SelectObject(hdc, ui::text_mid);
 	TextOut_(hdc, mywindows::windowWidth * 0.765, mywindows::windowHeight * 0.91, t.c_str());
 	p->ReleaseDC(hdc);
-	if (PictureNeedReload.neetreload) {
+	if (PictureNeedReload.neetreload AND PictureNeedReload.BitmapNumber<=p->bitmaps.size()) {
 		Gdiplus::Bitmap* newBitmap = new Gdiplus::Bitmap(config::getpath(PictureNeedReload.ConfigName).c_str());
 		if (newBitmap->GetLastStatus() == Gdiplus::Ok) {
 			p->bitmaps[PictureNeedReload.BitmapNumber].reset(newBitmap);
@@ -200,8 +177,8 @@ void set2::paint(Gp* p) {
 		else {
 			slog << slog.pt() << "[ERROR]Fail to reste bitmap" << PictureNeedReload.BitmapNumber << endl;
 		}
-		PictureNeedReload.neetreload = 0;
 	}
+	PictureNeedReload.neetreload = 0;
 }
 void set2::OpenFile(sitem item)
 {
@@ -254,6 +231,9 @@ openjsonfile:
 					t.max = sItem.value("max", 0);
 					t.min = sItem.value("min", 0);
 					t.OutOfLimitOutPut = sItem.value("OutOfLimitOutPut", "");
+					if (t.max == MAXWINDOWSIZE) {
+						t.max = mywindows::screenWidth;
+					}
 				}
 				else if (t.Limit == ISFILE || t.Limit == ISBITMAP) {
 					t.IsEditBox = 1;
@@ -306,12 +286,10 @@ set2::set2(std::string& jsonfile) {
 }
 void set2::reloadbmp(sitem item)
 {
-	DeleteObject(hbitmaps[item.BitmapNumber]);
-	hbitmaps[item.BitmapNumber] =
-		(HBITMAP)LoadImage(NULL, config::getpath(item.ConfigName).c_str(), IMAGE_BITMAP, 0, 0, LR_LOADFROMFILE);
-	GetObject(hbitmaps[item.BitmapNumber], sizeof(BITMAP), bitmaps[item.BitmapNumber]);
-	PictureNeedReload = item;
-	PictureNeedReload.neetreload = 1;
+	if (item.BitmapNumber != FLOATPIC) {
+		PictureNeedReload = item;
+		PictureNeedReload.neetreload = 1;
+	}
 }
 void set2::rollback(string jsonpath) {
 	Log slog("files\\log\\set-json.log", 0);
@@ -345,7 +323,7 @@ void set2::rollback(string jsonpath) {
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("卡池4名单"); i[CONFIGNAME] = "namesfile4"; i[FILECHOOSE] = G2U("选择卡池4名单"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 4;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("抽背卡池"); i[CONFIGNAME] = "special"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i["max"] = 4; i["min"] = 0;
+	i[NAME] = G2U("抽背卡池"); i[CONFIGNAME] = "special"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 4; i[MIN] = 0;
 	i[OUTOFLIMIT] = G2U("输入一个0-4之间的数字（0表示禁用）"); i[NUMBER] = 11;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 12;
@@ -367,12 +345,31 @@ void set2::rollback(string jsonpath) {
 	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 12;
 	p["item"].push_back(i); i.clear();
 	j["pages"].push_back(p); p.clear();
+	p[TITLE] = G2U("悬浮窗(重启生效)");
+	i[NAME] = G2U("悬浮窗"); i[CONFIGNAME] = "open float window"; i[ISSWITCH] = 1; i[NUMBER] = 1;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("初始x坐标"); i[CONFIGNAME] = "float window x"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
+	i[OUTOFLIMIT] = G2U("输入一个整数"); i[NUMBER] = 2;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("初始y坐标"); i[CONFIGNAME] = "float window y"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
+	i[OUTOFLIMIT] = G2U("输入一个整数"); i[NUMBER] = 3;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("宽度"); i[CONFIGNAME] = "float window width"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
+	i[OUTOFLIMIT] = G2U("输入一个整数"); i[NUMBER] = 4;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("高度"); i[CONFIGNAME] = "float window height"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
+	i[OUTOFLIMIT] = G2U("输入一个整数"); i[NUMBER] = 5;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("悬浮窗图片"); i[CONFIGNAME] = "float window picture"; i[FILECHOOSE] = G2U("选择悬浮窗图片");
+	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP; i[NUMBER] = 11; i[BITMAPC] = FLOATPIC;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 12;
+	p["item"].push_back(i); i.clear();
+	j["pages"].push_back(p); p.clear();
 	p[TITLE] = G2U("杂项");
 	i[NAME] = G2U("窗口模式"); i[CONFIGNAME] = "window mode(not full screen)"; i[ISSWITCH] = 1; i[NUMBER] = 1;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("标题"); i[CONFIGNAME] = "title name"; i[ISEDIT] = 1; i[NUMBER] = 2;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("悬浮窗"); i[CONFIGNAME] = "open float window"; i[ISSWITCH] = 1; i[NUMBER] = 3;
+	i[NAME] = G2U("标题"); i[CONFIGNAME] = "title name"; i[ISEDIT] = 1; i[LIMIT] = S_WINDOWTITLE; i[NUMBER] = 2;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 11;
 	p["item"].push_back(i); i.clear();

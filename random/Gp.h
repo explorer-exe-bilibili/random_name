@@ -10,11 +10,12 @@
 class Gp
 {
 	std::shared_ptr<Gdiplus::Graphics> graphic;
+	void Load_();
+	void Load();
 public:
 	~Gp();
 	Gp(HWND hwnd);
 	std::vector<std::shared_ptr<Gdiplus::Bitmap>> bitmaps;
-	void Load();
 	void Paint(int xDest, int yDest, Gdiplus::Bitmap* image);
 	void Paint(int xDest, int yDest, Gdiplus::Bitmap* image, int wDest, int hDest);
 	void Paint(int xDest, int yDest, int wDest, int hDest,int number);
@@ -22,4 +23,3 @@ public:
 	HDC GetDC();
 	void ReleaseDC(HDC hdc);
 };
-

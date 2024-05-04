@@ -35,8 +35,6 @@ HWND paintname::InitTimerHwnd = 0;
 HWND paintname::Case6TimerHwnd = 0;
 HWND paintname::StarTimerHwnd = 0;
 
-extern HBITMAP hbitmaps[BitmapCounts];
-extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg, exitinfo, goldenbg, listbm, liststar;
 extern set2 setscreen;
 
 void paintname::showname1() {

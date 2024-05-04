@@ -12,30 +12,30 @@
 #include"Gp.h"
 
 extern set2 setscreen;
-extern HBITMAP hbitmaps[BitmapCounts];
-extern BITMAP overlay1Bm, bm, ball, overlay2Bm, overlay3Bm, overlay4Bm, cardbg, exitinfo, goldenbg, listbm, liststar, buttom;
 
 void MSGback::create()
 {
 	setscreen.reinit();
 	HDC hdc = GetDC(NULL);
-	init::picture();
 	init::music();
 	if (mywindows::float_hWnd != 0)
 		ShowWindow(mywindows::float_hWnd, SW_HIDE);
 	SetWindowPos(mywindows::main_hwnd, HWND_TOP, 0, 0, mywindows::windowWidth, mywindows::windowHeight, SWP_NOZORDER | SWP_FRAMECHANGED);
 	ReleaseDC(0,hdc);
 }
-
+bool _____ = 1;
 void MSGback::paint()
 {
 	static Gp p(mywindows::main_hwnd);
+	if (!setscreen.fullscreen&&_____) {
+		SetWindowPos(mywindows::main_hwnd, NULL, 0, 0, mywindows::screenWidth * 0.6, mywindows::screenHeight * 0.6, SWP_NOMOVE | SWP_NOZORDER);
+	}
+	_____ = 0;
 	if (mywindows::load_hwnd != 0) {
 		DestroyWindow(mywindows::load_hwnd);
 		mywindows::load_hwnd = 0;
 	}
 	init::resetxy();
-	init::resetpicture();
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(mywindows::main_hwnd, &ps);
 	HDC hdcMem = CreateCompatibleDC(hdc);
@@ -63,7 +63,11 @@ void MSGback::keyDown(WPARAM wParam)
 {
 	switch (wParam) {
 	case VK_ESCAPE:
-		PostQuitMessage(0); break;
+		if (setscreen.FloatWindow) {
+			ShowWindow(mywindows::main_hwnd, SW_HIDE);
+			floatwindow::open();
+		}
+		else DestroyWindow(mywindows::main_hwnd); break;
 	}
 }
 
@@ -121,14 +125,5 @@ void MSGback::showwindow(WPARAM wParam)
 void MSGback::destroyall()
 {
 	setscreen.release();
-	for (auto& hbitmap : hbitmaps)
-	{
-		if (hbitmap != NULL)
-		{
-			DeleteObject(hbitmap);
-			hbitmap = NULL; // 将已释放的句柄置为NULL,避免重复释放
-			
-		}
-	}
 	mciSendString(L"close bgm", 0, 0, 0);
 }
