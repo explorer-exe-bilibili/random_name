@@ -110,9 +110,6 @@
     <ClCompile Include="MSGback.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="floatwindow.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Gp.cpp">
       <Filter>源文件</Filter>
     </ClCompile>

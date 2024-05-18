@@ -46,6 +46,7 @@ void config::init() {
 		add(SIGNALSTAR5, L"\\files\\video\\5star-single.mp4");
 		add(GROUPSTAR4, L"\\files\\video\\4star-multi.mp4");
 		add(GROUPSTAR5, L"\\files\\video\\5star-multi.mp4");
+		add(MU, L"0.9");
 		saveFile();
 		readFile();
 		printAllConfigItems();
@@ -110,6 +111,8 @@ void config::init() {
 		if (wcscmp(LogString.c_str(), L"err") == 0)add(GROUPSTAR4, L"\\files\\video\\4star-multi.mp4");
 		LogString = get(GROUPSTAR5);
 		if (wcscmp(LogString.c_str(), L"err") == 0)add(GROUPSTAR5, L"\\files\\video\\5star-multi.mp4");
+		LogString = get(MU);
+		if (wcscmp(LogString.c_str(), L"err") == 0)add(MU, L"0.9");
 		saveFile();
 		printAllConfigItems();
 		mywindows::log(L"config init successfully");
@@ -138,6 +141,32 @@ std::wstring config::getpath(const std::wstring& name)
 		path = Log::wrunpath + path;
 	}
 	return path;
+}
+double config::getd(const std::wstring& name)
+{
+	Node* current = head;
+
+	// 遍历链表查找匹配的配置项
+	while (current != NULL) {
+		if (current->item.name == name) {
+			// 找到匹配的配置项,返回其参数值
+			try
+			{
+				return stod(current->item.value);
+			}
+			catch (const std::exception& e)
+			{
+				Log l("files\\log\\configERR.log");
+				l << l.pt() << "[ERROR]Meet a error when get int config item: " << e.what();
+				mywindows::errlog("Meet a error ,you can saw it in configERR.log");
+				return 0;
+			}
+		}
+		current = current->next;
+	}
+
+	// 如果没有找到匹配的配置项,返回L"err"
+	return -1;
 }
 int config::getint(const std::wstring& name)
 {

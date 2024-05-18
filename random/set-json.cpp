@@ -355,6 +355,9 @@ void set2::rollback(string jsonpath) {
 	i[NAME] = G2U("高度"); i[CONFIGNAME] = "float window height"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
 	i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 5;
 	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("滑动系数"); i[CONFIGNAME] = "float window Mu"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 1; i[MIN] = 0;
+	i[OUTOFLIMIT] = G2U("大小不能超过1或小于0"); i[NUMBER] = 6;
+	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("悬浮窗图片"); i[CONFIGNAME] = "float window picture"; i[FILECHOOSE] = G2U("选择悬浮窗图片");
 	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP; i[NUMBER] = 11; i[BITMAPC] = FLOATPIC;
 	p["item"].push_back(i); i.clear();

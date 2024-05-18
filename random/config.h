@@ -32,6 +32,7 @@
 #define FLOATY L"float window y"
 #define FLOATW L"float window width"
 #define FLOATH L"float window height"
+#define MU L"float window Mu"
 
 class config
 {
@@ -64,6 +65,7 @@ public:
 	static void init();
 	static std::wstring get(const std::wstring& name);
 	static std::wstring getpath(const std::wstring& name);
+	static double getd(const std::wstring& name);
 	static int getint(const std::wstring& name);
 	static long long getscreen(const std::wstring& name);
 	static long long getwindow(const std::wstring& name);

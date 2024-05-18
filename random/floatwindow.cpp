@@ -20,6 +20,7 @@ int floatwindow::icon_w, floatwindow::icon_h;
 POINT lastxy, nowxy;
 UINT_PTR TimerID;
 double speedx, speedy;
+std::chrono::time_point start = std::chrono::high_resolution_clock::now();
 
 void floatwindow::open()
 {
@@ -113,6 +114,8 @@ void CALLBACK TimerProc() {
 		Sleep(1);
 	}
 }
+POINT prevPos;
+
 void floatwindow::lbuttondown(WPARAM wParam)
 {
 	if (wParam == HTCLIENT)
@@ -121,7 +124,10 @@ void floatwindow::lbuttondown(WPARAM wParam)
 		GetCursorPos(&p); //获取鼠标位置
 		is_mouse_dragging = true;
 		GetCursorPos(&last_mouse_pos);
+		start = std::chrono::high_resolution_clock::now();
 		SetCapture(mywindows::float_hWnd);
+		prevPos = last_mouse_pos;
+
 	}
 	GetCursorPos(&lastxy);
 	TimerID = 1;
@@ -129,39 +135,35 @@ void floatwindow::lbuttondown(WPARAM wParam)
 	//std::thread getspeed(TimerProc);
 	//getspeed.detach();
 }
-POINT prevPos;
-DWORD prevTime;
-std::chrono::time_point end = std::chrono::high_resolution_clock::now();
 void floatwindow::mousemove(LPARAM lParam)
 {
-	POINT currentPos = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-	DWORD currentTime = GetTickCount64();
-	double speed=0;
-	if (prevPos.x != 0 && prevPos.y != 0 && prevTime != 0) {
-		int deltaX = currentPos.x - prevPos.x;
-		int deltaY = currentPos.y - prevPos.y;
-		double distance = std::sqrt(deltaX * deltaX + deltaY * deltaY);
-		double elapsedTime = (currentTime - prevTime) / 1000.0;
-		std::chrono::time_point start = std::chrono::high_resolution_clock::now();
-
-		std::chrono::duration<double, std::milli> elapsed =start-end;
-		end = start;
-		speed = distance / elapsed.count();
-		speedx = deltaX / elapsed.count();
-		speedy = deltaY / elapsed.count();
-		static Log l("files/log/move.log",0);
-		l << "time:"<< elapsedTime<<","<<elapsed.count() << "  " << speed << std::endl;
-	}
-	prevPos = currentPos;
-	prevTime = currentTime;
 	if (is_mouse_dragging)
 	{
+		//POINT currentPos = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
+		//DWORD currentTime = GetTickCount64();
+		//double speed = 0;
+		//if (prevPos.x != 0 && prevPos.y != 0 && prevTime != 0) {
+		//	int deltaX = currentPos.x - prevPos.x;
+		//	int deltaY = currentPos.y - prevPos.y;
+		//	double distance = std::sqrt(deltaX * deltaX + deltaY * deltaY);
+		//	double elapsedTime = (currentTime - prevTime) / 1000.0;
+		//	std::chrono::time_point end = std::chrono::high_resolution_clock::now();
+
+		//	std::chrono::duration<double, std::milli> elapsed = end - start;
+		//	start = end;
+		//	speed = distance / elapsed.count();
+		//	speedx = deltaX / elapsed.count();
+		//	speedy = deltaY / elapsed.count();
+		//	static Log l("files/log/move.log", 0);
+		//	l << "time:" << elapsedTime << "," << elapsed.count() << "  x:" << speedx<<"y:"<<speedy<<"	"<<speed << std::endl;
+		//}
+		//prevPos = currentPos;
+		//prevTime = currentTime;
 		POINT currentMousePos;
 		GetCursorPos(&currentMousePos);
 
 		RECT rect;
 		GetWindowRect(mywindows::float_hWnd, &rect);
-
 		int dx = currentMousePos.x - last_mouse_pos.x;
 		int dy = currentMousePos.y - last_mouse_pos.y;
 
@@ -173,41 +175,43 @@ void floatwindow::mousemove(LPARAM lParam)
 bool uplbutton = 0;
 void movewindow() {
 	int x, y, w, h;
-	double speedx_;
-	double speedy_;
+	static double speedx_;
+	static double speedy_;
 	if (uplbutton) {
-		speedx_ = speedx * 0.01;
-		speedy_ = speedy * 0.01;
+		speedx_ = speedx*16.6;
+		speedy_ = speedy*16.6;
 		uplbutton = 0;
-	}while (speedx_ > 0 || speedy_ > 0) {
+	}while (speedx_ > 1 || speedy_ > 1||speedx_<-1||speedy_<-1) {
 		RECT WindowRect;
 		GetWindowRect(mywindows::float_hWnd, &WindowRect);
-		x = WindowRect.left + speedx_;
-		y = WindowRect.top + speedy_;
+		x = WindowRect.left + (int)speedx_;
+		y = WindowRect.top + (int)speedy_;
 		w = WindowRect.right - WindowRect.left;
 		h = WindowRect.bottom - WindowRect.top;
 		MoveWindow(mywindows::float_hWnd, x, y, w, h, 0);
 		GetWindowRect(mywindows::float_hWnd, &WindowRect);
 		if (WindowRect.left + speedx_ < 0) {
+			speedx_ = -speedx_;
 			MoveWindow(mywindows::float_hWnd, 0, WindowRect.top, w, h, 0);
-			speedx_ = -speedx_;
 		}
-		else if (WindowRect.left + speedx_ > mywindows::screenWidth) {
-			MoveWindow(mywindows::float_hWnd,mywindows::screenWidth-w,WindowRect.top, w, h, 0);
+		else if (WindowRect.right > mywindows::screenWidth) {
 			speedx_ = -speedx_;
+			MoveWindow(mywindows::float_hWnd,mywindows::screenWidth-w,WindowRect.top, w, h, 0);
 		}
 		if (WindowRect.top + speedy_ < 0) {
+			speedy_ = -speedy_;
 			MoveWindow(mywindows::float_hWnd, WindowRect.left, 0, w, h, 0);
-			speedy_ = -speedy_;
 		}
-		else if (WindowRect.top + speedy_ > mywindows::screenHeight) {
+		else if (WindowRect.bottom > mywindows::screenHeight) {
+			speedy_ = -speedy_;
 			MoveWindow(mywindows::float_hWnd, WindowRect.left, mywindows::screenHeight - h, w, h, 0);
-			speedy_ = -speedy_;
 		}
-		Sleep(1);
-		speedx_ = speedx_ * 0.9;
-		speedy_ = speedy_ * 0.9;
-
+		Sleep(16.6);
+		double Mu = config::getd(MU);
+		speedx_ = speedx_ * Mu;
+		speedy_ = speedy_ * Mu;
+		Log l("l.log");
+		l << "x:" << speedx_ << "y:" << speedy_ << "Mu" << Mu << std::endl;
 		if (TimerID) {
 			break;
 		}
@@ -230,6 +234,10 @@ void floatwindow::lbuttonup()
 	}
 	POINT currentMousePos;
 	GetCursorPos(&currentMousePos);
+	std::chrono::time_point end = std::chrono::high_resolution_clock::now();
+	std::chrono::duration<double, std::milli> elapsed = end - start;
+	speedx =(currentMousePos.x - prevPos.x)/elapsed.count();
+	speedy = (currentMousePos.y - prevPos.y) / elapsed.count();
 	if (currentMousePos.y <= mywindows::screenHeight * 0.3) {
 		ShowWindow(mywindows::float_hWnd,SW_HIDE);
 		ShowWindow(mywindows::Quit_hwnd,SW_HIDE);

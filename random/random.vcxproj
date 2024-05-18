@@ -173,7 +173,6 @@
     <ClCompile Include="click.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="directshow.cpp" />
-    <ClCompile Include="floatwindow.cpp" />
     <ClCompile Include="getname.cpp" />
     <ClCompile Include="Gp.cpp" />
     <ClCompile Include="init.cpp" />
