@@ -126,12 +126,12 @@ void floatwindow::lbuttondown(WPARAM wParam)
 	GetCursorPos(&lastxy);
 	TimerID = 1;
 	buttomdown = 1;
-	std::thread getspeed(TimerProc);
-	getspeed.detach();
+	//std::thread getspeed(TimerProc);
+	//getspeed.detach();
 }
 POINT prevPos;
 DWORD prevTime;
-std::chrono::time_point end;
+std::chrono::time_point end = std::chrono::high_resolution_clock::now();
 void floatwindow::mousemove(LPARAM lParam)
 {
 	POINT currentPos = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
@@ -144,12 +144,14 @@ void floatwindow::mousemove(LPARAM lParam)
 		double elapsedTime = (currentTime - prevTime) / 1000.0;
 		std::chrono::time_point start = std::chrono::high_resolution_clock::now();
 
-		std::chrono::duration<double, std::milli> elapsed = end - start;
+		std::chrono::duration<double, std::milli> elapsed =start-end;
 		end = start;
 		speed = distance / elapsed.count();
+		speedx = deltaX / elapsed.count();
+		speedy = deltaY / elapsed.count();
+		static Log l("files/log/move.log",0);
+		l << "time:"<< elapsedTime<<","<<elapsed.count() << "  " << speed << std::endl;
 	}
-	Log l("files/log/move.log");
-	l << speed << std::endl;
 	prevPos = currentPos;
 	prevTime = currentTime;
 	if (is_mouse_dragging)
@@ -168,36 +170,43 @@ void floatwindow::mousemove(LPARAM lParam)
 		last_mouse_pos = currentMousePos;
 	}
 }
+bool uplbutton = 0;
 void movewindow() {
 	int x, y, w, h;
-	while (speedx > 0 || speedy > 0) {
+	double speedx_;
+	double speedy_;
+	if (uplbutton) {
+		speedx_ = speedx * 0.01;
+		speedy_ = speedy * 0.01;
+		uplbutton = 0;
+	}while (speedx_ > 0 || speedy_ > 0) {
 		RECT WindowRect;
 		GetWindowRect(mywindows::float_hWnd, &WindowRect);
-		x = WindowRect.left + speedx;
-		y = WindowRect.top + speedy;
+		x = WindowRect.left + speedx_;
+		y = WindowRect.top + speedy_;
 		w = WindowRect.right - WindowRect.left;
 		h = WindowRect.bottom - WindowRect.top;
 		MoveWindow(mywindows::float_hWnd, x, y, w, h, 0);
 		GetWindowRect(mywindows::float_hWnd, &WindowRect);
-		if (WindowRect.left + speedx < 0) {
+		if (WindowRect.left + speedx_ < 0) {
 			MoveWindow(mywindows::float_hWnd, 0, WindowRect.top, w, h, 0);
-			speedx = -speedx;
+			speedx_ = -speedx_;
 		}
-		else if (WindowRect.left + speedx > mywindows::screenWidth) {
+		else if (WindowRect.left + speedx_ > mywindows::screenWidth) {
 			MoveWindow(mywindows::float_hWnd,mywindows::screenWidth-w,WindowRect.top, w, h, 0);
-			speedx = -speedx;
+			speedx_ = -speedx_;
 		}
-		if (WindowRect.top + speedy < 0) {
+		if (WindowRect.top + speedy_ < 0) {
 			MoveWindow(mywindows::float_hWnd, WindowRect.left, 0, w, h, 0);
-			speedy = -speedy;
+			speedy_ = -speedy_;
 		}
-		else if (WindowRect.top + speedy > mywindows::screenHeight) {
+		else if (WindowRect.top + speedy_ > mywindows::screenHeight) {
 			MoveWindow(mywindows::float_hWnd, WindowRect.left, mywindows::screenHeight - h, w, h, 0);
-			speedy = -speedy;
+			speedy_ = -speedy_;
 		}
 		Sleep(1);
-		speedx = speedx * 0.99;
-		speedy = speedy * 0.99;
+		speedx_ = speedx_ * 0.9;
+		speedy_ = speedy_ * 0.9;
 
 		if (TimerID) {
 			break;
@@ -228,6 +237,7 @@ void floatwindow::lbuttonup()
 	}
 	KillTimer(NULL, TimerID);
 	TimerID = NULL;
+	uplbutton = 1;
 	std::thread m(movewindow);
 	m.detach();
 }

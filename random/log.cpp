@@ -85,7 +85,8 @@ Log& operator<<(Log& log, std::ostream& (*f)(std::ostream&)) {
 Log& Log::operator<<(long double value) {
 	if (value != INSIDEINT) {
 		long int v;
-		if (value - value / 1 == 0)
+		long long t = value / 1;
+		if (value - t == 0)
 		{
 			v = value;
 			writeToLog(std::to_string(v));
