@@ -3,6 +3,7 @@
 // π© random.rc  π”√
 //
 #define IDI_ICON1                       101
+#define VERSION			1.3.0
 
 // Next default values for new objects
 // 

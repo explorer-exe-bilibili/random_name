@@ -13,6 +13,7 @@
 class mywindows
 {
 public:
+	static Log logf, errlogf;
 	static std::mutex logMutex, randomlock;
 	static int screenHeight;
 	static int screenWidth;
@@ -34,5 +35,7 @@ public:
 	static bool CreatedMultipleDirectory(const std::string& direct);
 	static int GetStringWidth(HDC hdc, const std::wstring& str, int height);
 	static HINSTANCE hinstance;
+	static void reboot();
+	static bool debug;
 };
 

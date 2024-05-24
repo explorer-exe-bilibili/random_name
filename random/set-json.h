@@ -5,6 +5,7 @@
 #include"log.h"
 #include"bitmaps.h"
 #include"Gp.h"
+#include<nlohmann/json.hpp>
 
 #define LASTBM L"b"
 #define NEXTBM L"c"
@@ -66,8 +67,9 @@ private:
 	bool isused[40] = { 0 };
 	HWND CreateEditBox(HWND hWndParent, int NUMBER, int x, int y, int w, int h, const wchar_t* words);
 	HWND textboxhwnd[20] = { 0 };
-	int lastbmx=0, lastbmy=0, lastxend=0, lastyend=0;
-	int nextbmx=0, nextbmy=0, nextxend=0, nextyend=0;
+	int lastbmx = 0, lastbmy = 0, lastxend = 0, lastyend = 0;
+	int nextbmx = 0, nextbmy = 0, nextxend = 0, nextyend = 0;
+	int applybmx = 0, applybmy = 0, applyxend = 0, applyyend = 0;
 	int textboxnumber = 0;
 	sitem PictureNeedReload;
 	settingxy sxy[20] = {};
@@ -82,7 +84,7 @@ private:
 	void Load(std::string jsonpath);
 	void OpenFile(sitem item);
 	void reloadbmp(sitem item);
-	void rollback(std::string jsonpath);
+	nlohmann::json rollback(std::string jsonpath);
 	void showitem(sitem item, Gp *p);
 	void switchbm(sitem item,Gp *p);
 	void textbox(sitem item,Gp *p);

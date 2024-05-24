@@ -23,6 +23,11 @@ extern set2 setscreen;
 
 void directshow::play(wstring path) {
 	std::wstring path_;
+	if (!std::filesystem::exists(path)) {
+		mywindows::errlog("file not found");
+		MessageBox(NULL, L"文件不存在，请重新选择", L"error", MB_ICONERROR);
+		return;
+	}
 	if (path.find_first_of(L'\\') == 0) {
 		path_ = Log::wrunpath;
 		path_ += path;
@@ -32,17 +37,30 @@ void directshow::play(wstring path) {
 	}
 	// Initialize the COM library.
 	HRESULT hr = CoInitialize(NULL);
-	if (FAILED(hr))return;
 	// Create the filter graph manager and query for interfaces.
 	hr = CoCreateInstance(CLSID_FilterGraph, NULL, CLSCTX_INPROC_SERVER, IID_IGraphBuilder, (void**)&pGraph);
-	if (FAILED(hr))return;
+	HANDLE hFile=NULL;
+	if (mywindows::debug) {
+		std::wstring logfile = mywindows::logf.FileNamew + L".directshow.log";
+		hFile = CreateFile(logfile.c_str(), GENERIC_WRITE, FILE_SHARE_READ, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+
+		pGraph->SetLogFile((DWORD_PTR)hFile);
+	}
 	hr = pGraph->QueryInterface(IID_IMediaControl, (void**)&pControl);
 	hr = pGraph->QueryInterface(IID_IMediaEvent, (void**)&pEvent);
 	pGraph->QueryInterface(IID_IVideoWindow, (void**)&pVideoWindow);
 	pGraph->QueryInterface(IID_IBasicAudio, (void**)&pBaicAudio);
 	hr = pGraph->RenderFile(path_.c_str(), NULL);
 	if (hr != S_OK) {
-		mywindows::errlog("read video unsuccessfully");
+		mywindows::errlog("the file exists but read video unsuccessfully");
+		int mbox=MessageBox(NULL,L"如果播放失败请安装K-Lite_Codec, 是否打开官网下载页面？", L"error", MB_ICONERROR|MB_YESNO);
+		if(mbox==IDYES)ShellExecute(NULL, L"open", L"https://codecguide.com/download_k-lite_codec_pack_basic.htm", NULL, NULL, SW_SHOWNORMAL);
+		wstring p = Log::wrunpath + L"\\files\\imgs\\tips.png";
+		if(std::filesystem::exists(p))
+		{
+			Sleep(500);
+			ShellExecuteW(NULL, L"open", p.c_str(), NULL, NULL, SW_SHOWNORMAL);
+		}
 	}
 	if (!config::getint(INWINDOW)) {
 		pVideoWindow->put_WindowStyle(WS_POPUP|WS_CHILD);
@@ -72,6 +90,7 @@ void directshow::play(wstring path) {
 	pEvent->Release();
 	pBaicAudio->Release();
 	pGraph->Release();
+	if(hFile!=NULL)CloseHandle(hFile);
 	CoUninitialize();
 	mywindows::log("play end");
 }
@@ -89,7 +108,8 @@ void directshow::music(const char* path) {
 		p += L"\" alias ";
 		p += L"temp";
 		mciSendString(p.c_str(), NULL, 0, NULL);
-		mywindows::log("打开%s,指令为%s", path, p.c_str());
+		if(mywindows::debug)
+		mywindows::logf << "打开" << path << "指令为" << p;
 		p = L"play ";
 		p += L"temp";
 		mywindows::log(p.c_str());

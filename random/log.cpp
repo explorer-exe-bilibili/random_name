@@ -55,6 +55,8 @@ Log::Log(const std::string& fileName, bool add) {
 	filepath = runpath;
 	filepath += fileName;
 	CreatedMultipleDirectory(".\\files\\log");
+	FileName = fileName;
+	FileNamew = sth2sth::str2wstr(fileName);
 	if (add)
 		logFile.open(fileName, std::ios::app /*std::ios::app*/);
 	else logFile.open(fileName, std::ios::ate /*std::ios::app*/);

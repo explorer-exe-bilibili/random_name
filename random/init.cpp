@@ -8,9 +8,12 @@
 #include<filesystem>
 #include <functional>
 
+#include <gdiplus.h>
+
 #include"resource.h"
 #include"log.h"
 #include<thread>
+#include <dshow.h>
 
 extern set2 setscreen;
 WNDPROC w2_, w3_;
@@ -24,17 +27,47 @@ void init::font()
 	// 计算逻辑单位高度
 	int logicalHeight = MulDiv(desiredPixelHeight, 72, dpi);
 	int logicalweidth = logicalHeight * 0.77;
-	paintname::icon_star = CreateFontW(logicalHeight * 0.0862, logicalweidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
-	ui::icon_mid = CreateFontW(logicalHeight * 0.16, logicalweidth * 0.22, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
-	ui::icon = CreateFontW(logicalHeight * 0.2299, logicalweidth * 0.3008, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
-	ui::text = CreateFontW(logicalHeight * 0.1149, logicalweidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
-	ui::text_mid = CreateFontW(logicalHeight * 0.1724, logicalweidth * 0.1729, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
-	ui::text_big = CreateFontW(logicalHeight, logicalweidth, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"Aa漆书");
-	ui::text_list = CreateFontW(logicalHeight * 0.7, logicalweidth * 0.7, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
+	bool isInstall;
+	isInstall= cheakIsFontInstalled(L"genshin-icon");
+	if (isInstall) {
+		paintname::icon_star = CreateFontW(logicalHeight * 0.0862, logicalweidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
+		ui::icon_mid = CreateFontW(logicalHeight * 0.16, logicalweidth * 0.22, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
+		ui::icon = CreateFontW(logicalHeight * 0.2299, logicalweidth * 0.3008, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
+	}
+	else {
+		MessageBox(NULL, L"请安装字体", L"错误", MB_ICONERROR);
+		mywindows::errlogf << "\"genshin - icon\"字体未安装" << std::endl;
+		system("files\\ttfs\\icon.ttf");
+		mywindows::reboot();
+	}
+	isInstall = cheakIsFontInstalled(L"SDK_SC_Web");
+	if(isInstall){
+		ui::text = CreateFontW(logicalHeight * 0.1149, logicalweidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
+		ui::text_mid = CreateFontW(logicalHeight * 0.1724, logicalweidth * 0.1729, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
+		ui::text_list = CreateFontW(logicalHeight * 0.7, logicalweidth * 0.7, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
+	}
+	else {
+		MessageBox(NULL, L"请安装字体", L"错误", MB_ICONERROR);
+		mywindows::errlogf << "SDK_SC_Web字体未安装" << std::endl;
+		system("files\\ttfs\\text.ttf");
+		mywindows::reboot();
+	}
+	if (!config::getint(UNSUITFONT)) {
+		isInstall = cheakIsFontInstalled(L"Aa漆书");
+		if (isInstall) {
+			ui::text_big = CreateFontW(logicalHeight, logicalweidth, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"Aa漆书");
+		}
+		else {
+			MessageBox(NULL, L"请安装字体", L"错误", MB_ICONERROR);
+			mywindows::errlogf << "Aa漆书字体未安装" << std::endl;
+			system("files\\ttfs\\QS.ttf");
+			mywindows::reboot();
+		}
+	}
+	else {
+		ui::text_big = CreateFontW(logicalHeight, logicalweidth, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
+	}
 	ReleaseDC(NULL, hdc);
-	if (ui::text == NULL)mywindows::errlog("text font load error");
-	if (ui::icon == NULL)mywindows::errlog("icon font load error");
-	if (ui::text_big == NULL)mywindows::errlog("icon font load error");
 }
 void init::resetxy()
 {
@@ -107,7 +140,6 @@ void init::resetxy()
 		font();
 	}
 }
-
 void init::main(WNDPROC w1, WNDPROC w2, WNDPROC w3)
 {
 	std::thread loading(std::bind(&init::regwindow, w1, w2, w3));
@@ -136,6 +168,7 @@ void init::main(WNDPROC w1, WNDPROC w2, WNDPROC w3)
 	paintname::random_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)paintname::RandomNumberGenerator, NULL, 0,&threadId);
 	setscreen.offvideo = config::getint(OFF_VIDEO);
 	ui::mode = config::getint(MODE);
+	mywindows::debug=config::getint(DEBUG);
 	setscreen.offmusic = config::getint(OFFMUSIC);
 	DWORD threadId2;
 	// 创建线程
@@ -215,15 +248,27 @@ DWORD WINAPI init::Regwindows() {
 	RegisterClass(&Fwndcls);//向操作系统注册窗体
 	return 0;
 }
-
 DWORD WINAPI init::Upgrade(){
 	mywindows::log("writes version");
-	FILE* t;
-	fopen_s(&t, ".\\version", "w");
-	if (t != 0) {
-		fprintf(t, "1.1.0");
-		fclose(t);
-		t = 0;
+	if (!std::filesystem::exists("version")) {
+		std::string file_version;
+		std::ifstream file("version");
+		if (file.is_open()) {
+			std::getline(file, file_version);
+		}
+
+		const std::string CURRENT_VERSION = "1.3.0"; // 假设当前版本号是 "1.2.3"
+
+		if (file_version.empty() || file_version != CURRENT_VERSION) {
+			mywindows::logf << "版本号不同" << file_version << "->" << CURRENT_VERSION << std::endl;
+			remove("files\\setting.json");
+			file.clear();
+			std::ofstream output_file("version", std::ios::trunc);
+			if (output_file.is_open()) {
+				output_file << CURRENT_VERSION;
+				output_file.close();
+			}
+		}
 	}
 	if (std::filesystem::exists("upgrade_temp.exe"))
 	{
@@ -232,4 +277,44 @@ DWORD WINAPI init::Upgrade(){
 	}
 	ShellExecute(NULL, L"open", L"upgrade.exe", NULL, NULL, SW_SHOWNORMAL);
 	return 0;
+}
+
+bool init::cheakIsFontInstalled(const std::wstring fontName) {
+	using namespace Gdiplus;
+	// 要检查的字体名称
+	bool isFontInstalled = false;
+	InstalledFontCollection installedFontCollection;
+	INT          count = 0;
+	INT          found = 0;
+	WCHAR        familyName[LF_FACESIZE];  // enough space for one family name
+	WCHAR* familyList = NULL;
+	FontFamily* pFontFamily = NULL;
+
+	// How many font families are installed?
+	count = installedFontCollection.GetFamilyCount();
+
+	// Allocate a buffer to hold the array of FontFamily
+	// objects returned by GetFamilies.
+	pFontFamily = new FontFamily[count];
+
+	// Get the array of FontFamily objects.
+	installedFontCollection.GetFamilies(count, pFontFamily, &found);
+
+	// The loop below creates a large string that is a comma-separated
+	// list of all font family names.
+	// Allocate a buffer large enough to hold that string.
+	familyList = new WCHAR[count * (sizeof(familyName) + 3)];
+	StringCchCopy(familyList, 1, L"");
+
+	for (INT j = 0; j < count; ++j)
+	{
+		pFontFamily[j].GetFamilyName(familyName);
+		if (fontName == familyName) {
+			isFontInstalled = 1;
+		}
+	}
+	delete[] pFontFamily;
+	delete[] familyList;
+
+	return isFontInstalled;
 }

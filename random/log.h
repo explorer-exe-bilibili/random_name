@@ -16,7 +16,8 @@ public:
     Log(const std::string& fileName, bool add);
     Log(const std::string& fileName);
     ~Log();
-
+    std::wstring FileNamew;
+    std::string FileName;
     Log& operator<<(const std::string& str);
     Log& operator<<(const std::wstring& str);
     Log& operator<<(long double value);

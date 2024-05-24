@@ -132,27 +132,29 @@ void paintname::out10name(Gp* p) {
 }
 void paintname::printnames(Gp* p) {
 	HDC hdc;
-	if (star_[step] < 5) {
-		p->Paint(0, 0, mywindows::windowWidth, mywindows::windowHeight, cardbackground);
-		p->Paint(mywindows::windowWidth * 0.45, mywindows::windowHeight * 0.45, mywindows::windowWidth * 0.1, mywindows::windowHeight * 0.1, type[step] + 21);
-		hdc = p->GetDC();
-		SetTextColor(hdc, RGB(240, 240, 240));
-	}
-	else {
-		p->Paint(0, 0, mywindows::windowWidth, mywindows::windowHeight, goldencardbg);
-		p->Paint(mywindows::windowWidth * 0.45, mywindows::windowHeight * 0.45, mywindows::windowWidth * 0.1, mywindows::windowHeight * 0.1, type[step] + 21);
-		hdc = p->GetDC();
-		SetTextColor(hdc, RGB(240, 240, 240));
-	}
+	p->Paint(0, 0, mywindows::windowWidth, mywindows::windowHeight, cardbackground);
+	int x, y, w, h;
+	x = mywindows::windowWidth * 0.25;
+	w = mywindows::windowWidth * 0.5;
+	y = mywindows::windowHeight - w;
+	y /= 2;
+	h = w;
+	p->Paint(x,y,w,h, type[step] + 21);
+	hdc = p->GetDC();
 	SetBkMode(hdc, TRANSPARENT);
 	SelectObject(hdc, ui::text_mid);
 	if (temp[step] == NULL) {
 		temp[step] = L"";
 	}
+	SetTextColor(hdc, RGB(250, 250, 250));
 	TextOut_(hdc, mywindows::windowWidth * 0.175, mywindows::windowHeight * 8 / 13, temp[step]);
 	SelectObject(hdc, ui::text_big);
 	wchar_t a[2];
 	a[1] = '\0';
+	static int r = config::getint(TEXTR);
+	static int g = config::getint(TEXTG);
+	static int b = config::getint(TEXTB);
+	SetTextColor(hdc, RGB(r,g,b));
 	switch (sth2sth::Lstrtosingal(temp[step])) {
 	case 1:break;
 	case 0:break;
@@ -213,6 +215,7 @@ void paintname::menu(Gp* p) {
 	if (itmp != NULL) for (int i = 0; i < count2; ++i) tmp_[i + count + count1] = temp[itmp[i]];
 	itmp = mywindows::find(star_, sizeof(star_) / sizeof(getname::star[ui::mode - 1][0]), 3, &count3);
 	if (itmp != NULL) for (int i = 0; i < count3; ++i) tmp_[i + count + count1 + count2] = temp[itmp[i]];
+
 	for (int i = 0; i < count; ++i) {
 		Sleep(20);
 		p->Paint(ui::listx[i], ui::listy, ui::listxend, ui::listyend, list6);

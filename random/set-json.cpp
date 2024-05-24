@@ -9,25 +9,26 @@
 #include<thread>
 
 
+#define NOLIMIT 0
 #define AFTER 2
 #define BEFORE 1
 #define BETWEENCOUNT 100
+#define RESTART 10
+#define S_WINDOWTITLE 200
+#define ISFILE 300
+#define ISBITMAP 400
+#define FLOATPIC 5000
+#define MAXWINDOWSIZE 1145141919
 #define BITMAPC "BitmapNumber"
 #define CONFIGNAME "ConfigName"
 #define FILECHOOSE "FileChooseWindowName"
 #define FILETYPE "FileType"
-#define ISBITMAP 400
 #define ISEDIT "IsEditBox"
-#define ISFILE 300
 #define ISSWITCH "IsSwitch"
 #define LIMIT "Limit"
 #define NAME "Name"
-#define NOLIMIT 0
 #define NUMBER "Number"
 #define OUTOFLIMIT "OutOfLimitOutPut"
-#define S_WINDOWTITLE 200
-#define MAXWINDOWSIZE 1145141919
-#define FLOATPIC 5000
 #define TITLE "Title"
 #define MAX "max"
 #define MIN "min"
@@ -184,23 +185,28 @@ void set2::Load(string jsonpath) {
 	init();
 	Log slog("files\\log\\set-json.log", 0);
 	// 读取JSON文件
-openjsonfile:
-	std::ifstream fileStream(jsonpath);
-	if (!fileStream.is_open()) {
-		slog << "Failed to open file" << std::endl;
-		if (!std::filesystem::exists(jsonpath))
-			rollback(jsonpath);
-		goto openjsonfile;
-	}
-	// 将文件内容解析为JSON对象
 	json data{};
-	try {
-		fileStream >> data;
+	if (!config::getint(NOSETTINGFILE)) {
+	openjsonfile:
+		std::ifstream fileStream(jsonpath);
+		if (!fileStream.is_open()) {
+			slog << "Failed to open file" << std::endl;
+			if (!std::filesystem::exists(jsonpath))
+				rollback(jsonpath);
+			goto openjsonfile;
+		}
+		// 将文件内容解析为JSON对象
+		try {
+			fileStream >> data;
+		}
+		catch (const std::exception& e) {
+			slog << "[ERROR]Failed to parse JSON: " << e.what() << std::endl;
+			rollback(jsonpath);
+			return;
+		}
 	}
-	catch (const std::exception& e) {
-		slog << "[ERROR]Failed to parse JSON: " << e.what() << std::endl;
-		rollback(jsonpath);
-		return;
+	else {
+		data = rollback(jsonpath);
 	}
 	int sp = 0;//setting page
 	int in = 0;//ItemNumber
@@ -286,8 +292,9 @@ void set2::reloadbmp(sitem item)
 		PictureNeedReload.neetreload = 1;
 	}
 }
-void set2::rollback(string jsonpath) {
+json set2::rollback(string jsonpath) {
 	Log slog("files\\log\\set-json.log", 0);
+	if(mywindows::debug)
 	slog << "try to rollback setting page" << endl;
 	// 创建JSON数据
 	json j;
@@ -318,6 +325,15 @@ void set2::rollback(string jsonpath) {
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("卡池4名单"); i[CONFIGNAME] = "namesfile4"; i[FILECHOOSE] = G2U("选择卡池4名单"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 4;
 	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("抽卡时名字的R值(RGB)"); i[CONFIGNAME] = "text red"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 255; i[MIN] = 0;
+	i[OUTOFLIMIT] = G2U("输入一个0-255之间的数字"); i[NUMBER] = 5;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("抽卡时名字的G值(RGB)"); i[CONFIGNAME] = "text green"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 255; i[MIN] = 0;
+	i[OUTOFLIMIT] = G2U("输入一个0-255之间的数字"); i[NUMBER] = 6;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("抽卡时名字的B值(RGB)"); i[CONFIGNAME] = "text blue"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 255; i[MIN] = 0;
+	i[OUTOFLIMIT] = G2U("输入一个0-255之间的数字"); i[NUMBER] = 7;
+	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("抽背卡池"); i[CONFIGNAME] = "special"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 4; i[MIN] = 0;
 	i[OUTOFLIMIT] = G2U("输入一个0-4之间的数字（0表示禁用）"); i[NUMBER] = 11;
 	p["item"].push_back(i); i.clear();
@@ -343,54 +359,65 @@ void set2::rollback(string jsonpath) {
 	p[TITLE] = G2U("悬浮窗(重启生效)");
 	i[NAME] = G2U("悬浮窗"); i[CONFIGNAME] = "open float window"; i[ISSWITCH] = 1; i[NUMBER] = 1;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("初始x坐标"); i[CONFIGNAME] = "float window x"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
-	i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 2;
+	i[NAME] = G2U("初始x坐标"); i[CONFIGNAME] = "float window x"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT + RESTART; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
+	i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 2; 
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("初始y坐标"); i[CONFIGNAME] = "float window y"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
-	i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 3;
+	i[NAME] = G2U("初始y坐标"); i[CONFIGNAME] = "float window y"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT + RESTART; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
+	i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 3; 
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("宽度"); i[CONFIGNAME] = "float window width"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
-	i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 4;
+	i[NAME] = G2U("宽度"); i[CONFIGNAME] = "float window width"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT + RESTART; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
+	i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 4; 
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("高度"); i[CONFIGNAME] = "float window height"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
-	i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 5;
+	i[NAME] = G2U("高度"); i[CONFIGNAME] = "float window height"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT + RESTART; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
+	i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 5; 
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("滑动系数"); i[CONFIGNAME] = "float window Mu"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 1; i[MIN] = 0;
+	i[NAME] = G2U("滑动系数"); i[CONFIGNAME] = "float window Mu"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT+RESTART; i[MAX] = 1; i[MIN] = 0;
 	i[OUTOFLIMIT] = G2U("大小不能超过1或小于0"); i[NUMBER] = 6;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("悬浮窗图片"); i[CONFIGNAME] = "float window picture"; i[FILECHOOSE] = G2U("选择悬浮窗图片");
-	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP; i[NUMBER] = 11; i[BITMAPC] = FLOATPIC;
+	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP + RESTART; i[NUMBER] = 11; i[BITMAPC] = FLOATPIC;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 12;
 	p["item"].push_back(i); i.clear();
 	j["pages"].push_back(p); p.clear();
 	p[TITLE] = G2U("杂项");
-	i[NAME] = G2U("窗口模式"); i[CONFIGNAME] = "window mode(not full screen)"; i[ISSWITCH] = 1; i[NUMBER] = 1;
+	i[NAME] = G2U("窗口模式"); i[CONFIGNAME] = "window mode(not full screen)"; i[ISSWITCH] = 1; i[NUMBER] = 1; i[LIMIT] = RESTART;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("标题"); i[CONFIGNAME] = "title name"; i[ISEDIT] = 1; i[LIMIT] = S_WINDOWTITLE; i[NUMBER] = 2;
 	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("设置页面json文件开关"); i[CONFIGNAME] = "cancel setting json file"; i[ISSWITCH] = 1; i[NUMBER] = 3;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("字体兼容模式(出现字体错误再开)"); i[CONFIGNAME] = "the new font is unsuit"; i[ISSWITCH] = 1; i[NUMBER] = 4;i[LIMIT]=RESTART;
+	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 11;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("调试模式"); i[ISSWITCH] = 1; i[NUMBER] = 5;i[CONFIGNAME] = "debug mode";i[LIMIT]=RESTART;
 	p["item"].push_back(i); i.clear();
 	j["pages"].push_back(p); p.clear();
 	// 写入JSON文件
-	std::ofstream file(jsonpath);
-	if (file.is_open()) {
-		try
-		{
-			slog << slog.pt() << "[INFO]begin to write json items";
-			file << j.dump(4); // 将JSON数据写入文件，4表示缩进4个空格
-			file.close();
-			slog << "[INFO]JSON data written to" << jsonpath << endl;
+	if (!config::getint(NOSETTINGFILE)) {
+		std::ofstream file(jsonpath);
+		if (file.is_open()) {
+			try
+			{
+				if (mywindows::debug) {
+					slog << slog.pt() << "[INFO]begin to write json items";
+					file << j.dump(4); // 将JSON数据写入文件，4表示缩进4个空格
+					file.close();
+					slog << "[INFO]JSON data written to" << jsonpath << endl;
+				}
+			}
+			catch (const std::exception& e)
+			{
+				slog << slog.pt() << "[ERROR]meet an error when writing json item (rollback):" << e.what() << endl;
+				return j;
+			}
 		}
-		catch (const std::exception& e)
-		{
-			slog << slog.pt() << "[ERROR]meet an error when writing json item (rollback):" << e.what() << endl;
-			return;
+		else {
+			slog << "[ERROR]Failed to open file for writing" << std::endl;
 		}
 	}
-	else {
-		slog << "[ERROR]Failed to open file for writing" << std::endl;
-	}
+	return j;
 }
 void set2::clicked(int x, int y)
 {

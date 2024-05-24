@@ -33,6 +33,12 @@
 #define FLOATW L"float window width"
 #define FLOATH L"float window height"
 #define MU L"float window Mu"
+#define TEXTR L"text red"
+#define TEXTG L"text green"
+#define TEXTB L"text blue"
+#define NOSETTINGFILE L"cancel setting json file"
+#define UNSUITFONT L"the new font is unsuit"
+#define DEBUG L"debug mode"
 
 class config
 {

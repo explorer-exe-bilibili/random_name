@@ -102,18 +102,7 @@ LRESULT floatwindow::nchittest(WPARAM wParam)
 	}
 	return HTCLIENT;
 }
-void CALLBACK TimerProc() {
-	while (buttomdown)
-	{
-		GetCursorPos(&nowxy);
-		int movex = nowxy.x - lastxy.x;
-		int movey = nowxy.y - lastxy.y;
-		speedx = movex;
-		speedy = movey;
-		GetCursorPos(&lastxy);
-		Sleep(1);
-	}
-}
+
 POINT prevPos;
 
 void floatwindow::lbuttondown(WPARAM wParam)
@@ -132,33 +121,11 @@ void floatwindow::lbuttondown(WPARAM wParam)
 	GetCursorPos(&lastxy);
 	TimerID = 1;
 	buttomdown = 1;
-	//std::thread getspeed(TimerProc);
-	//getspeed.detach();
 }
 void floatwindow::mousemove(LPARAM lParam)
 {
 	if (is_mouse_dragging)
 	{
-		//POINT currentPos = { GET_X_LPARAM(lParam), GET_Y_LPARAM(lParam) };
-		//DWORD currentTime = GetTickCount64();
-		//double speed = 0;
-		//if (prevPos.x != 0 && prevPos.y != 0 && prevTime != 0) {
-		//	int deltaX = currentPos.x - prevPos.x;
-		//	int deltaY = currentPos.y - prevPos.y;
-		//	double distance = std::sqrt(deltaX * deltaX + deltaY * deltaY);
-		//	double elapsedTime = (currentTime - prevTime) / 1000.0;
-		//	std::chrono::time_point end = std::chrono::high_resolution_clock::now();
-
-		//	std::chrono::duration<double, std::milli> elapsed = end - start;
-		//	start = end;
-		//	speed = distance / elapsed.count();
-		//	speedx = deltaX / elapsed.count();
-		//	speedy = deltaY / elapsed.count();
-		//	static Log l("files/log/move.log", 0);
-		//	l << "time:" << elapsedTime << "," << elapsed.count() << "  x:" << speedx<<"y:"<<speedy<<"	"<<speed << std::endl;
-		//}
-		//prevPos = currentPos;
-		//prevTime = currentTime;
 		POINT currentMousePos;
 		GetCursorPos(&currentMousePos);
 
@@ -210,8 +177,6 @@ void movewindow() {
 		double Mu = config::getd(MU);
 		speedx_ = speedx_ * Mu;
 		speedy_ = speedy_ * Mu;
-		Log l("l.log");
-		l << "x:" << speedx_ << "y:" << speedy_ << "Mu" << Mu << std::endl;
 		if (TimerID) {
 			break;
 		}
