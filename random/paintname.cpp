@@ -45,7 +45,7 @@ void paintname::showname1() {
 	if (number >= 245)rerandom();
 	temp[0] = names[ui::mode - 1][number];
 	star_[0] = getname::star[ui::mode - 1][number];
-	type[0] = getname::type[ui::mode - 1][number];
+	type[0] = getname::type_[ui::mode - 1][number];
 	randomedlist << randomedlist.pt() << "[" << star_[0] << "星]" << "[" << sth2sth::LWStostr(temp[0]) << "]" << randomedlist.nl();
 	if (star_[0] >= 5)is5star = 1;
 	if (star_[0] == 4)is4star = 1;
@@ -77,7 +77,7 @@ void paintname::showname10() {
 	for (int tmp = number + 10; number < tmp; number++) {
 		temp[10 - (tmp - number)] = names[ui::mode - 1][number];
 		star_[10 - (tmp - number)] = getname::star[ui::mode - 1][number];
-		type[10 - (tmp - number)] = getname::type[ui::mode - 1][number];
+		type[10 - (tmp - number)] = getname::type_[ui::mode - 1][number];
 		if (getname::star[ui::mode - 1][number] >= 5)is5star = 1;
 		mywindows::log("10balling number=%d,tmp=%d,star=%d", number, tmp, star_[10 - (tmp - number)]);
 		randomedlist << "[" << star_[10 - (tmp - number)] << "星]" << "[" << sth2sth::LWStostr(temp[10 - (tmp - number)]) << "]" 

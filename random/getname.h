@@ -20,10 +20,10 @@ public:
 		int elemant;
 	}Item;
 	static int star[4][256];
-	static int type[4][256];
+	static int type_[4][256];
 	static bool fileerr;
 	static LPCWSTR random(int m, int i);
-	static int getstar(const std::string& input);
+	static int getattrib(const std::string& input);
 	static std::string removeAfterDash(const std::string& input);
 	static std::string RandomLineFromFile(const std::wstring& filename);
 	static int randomIntegerBetween(int min, int max);

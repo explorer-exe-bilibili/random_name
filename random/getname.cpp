@@ -10,7 +10,7 @@
 
 int getname::seed = 2434, getname::seed2 = 32435;
 int getname::star[4][256] = {3};
-int getname::type[4][256] = {0};
+int getname::type_[4][256] = {0};
 bool getname::fileerr = 0;
 
 using namespace std;
@@ -25,12 +25,14 @@ LPCWSTR getname::random(int m, int i) {
 	else if (m == 3) path = config::getpath(NAMES4);
 	tmp1 = RandomLineFromFile(path);
 	if (strcmp(tmp1.c_str(), "FOF") == 0)fileerr = 1;
-	star[m][i] = getstar(tmp1);
+	int attrib = getattrib(tmp1);
+	star[m][i] = attrib%10;
+	type_[m][i] = attrib%100/10;
 	tmp1 = removeAfterDash(tmp1);
 	tmp3 = sth2sth::UTF8To16(tmp1.c_str());
 	return tmp3;
 }
-int getname::getstar(const std::string& input) {
+int getname::getattrib(const std::string& input) {
 	// 找到第一个 "-"
 	std::cerr << input << "\n";
 	size_t dashPos = input.find("-");
@@ -41,12 +43,7 @@ int getname::getstar(const std::string& input) {
 		// 将数字字符串转换为整数
 		try
 		{
-			int result = std::stoi(numberStr);
-			int star = result % 10;
-			int type = result % 100 / 10;
-			if (star > 6)result = 6;
-			if (star < 3)result = 3;
-			return result;
+			return std::stoi(numberStr);
 		}
 		catch (const std::exception& e)
 		{

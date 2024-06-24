@@ -54,12 +54,15 @@ void directshow::play(wstring path) {
 	if (hr != S_OK) {
 		mywindows::errlog("the file exists but read video unsuccessfully");
 		int mbox=MessageBox(NULL,L"如果播放失败请安装K-Lite_Codec, 是否打开官网下载页面？", L"error", MB_ICONERROR|MB_YESNO);
-		if(mbox==IDYES)ShellExecute(NULL, L"open", L"https://codecguide.com/download_k-lite_codec_pack_basic.htm", NULL, NULL, SW_SHOWNORMAL);
-		wstring p = Log::wrunpath + L"\\files\\imgs\\tips.png";
-		if(std::filesystem::exists(p))
+		if (mbox == IDYES)
 		{
-			Sleep(500);
-			ShellExecuteW(NULL, L"open", p.c_str(), NULL, NULL, SW_SHOWNORMAL);
+			ShellExecute(NULL, L"open", L"https://codecguide.com/download_k-lite_codec_pack_basic.htm", NULL, NULL, SW_SHOWNORMAL);
+			wstring p = Log::wrunpath + L"\\files\\imgs\\tips.png";
+			if (std::filesystem::exists(p))
+			{
+				Sleep(500);
+				ShellExecuteW(NULL, L"open", p.c_str(), NULL, NULL, SW_SHOWNORMAL);
+			}
 		}
 	}
 	if (!config::getint(INWINDOW)) {

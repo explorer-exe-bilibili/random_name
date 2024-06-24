@@ -198,7 +198,7 @@ void init::MainWindow()
 	else {
 		mywindows::windowWidth = mywindows::screenWidth;
 		mywindows::windowHeight = mywindows::screenHeight;
-		mywindows::main_hwnd = CreateWindowW(L"main", config::get(WINDOW_TITEL).c_str(), WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN | WS_THICKFRAME,
+		mywindows::main_hwnd = CreateWindowW(L"main", config::get(WINDOW_TITEL).c_str(), WS_CLIPSIBLINGS | WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_THICKFRAME,
 			0, 0, mywindows::windowWidth, mywindows::windowHeight, NULL, NULL, GetModuleHandle(NULL), NULL);
 	}
 	ShowWindow(mywindows::main_hwnd, SW_SHOWNORMAL);//把窗体显示出来
