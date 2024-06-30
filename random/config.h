@@ -39,6 +39,7 @@
 #define NOSETTINGFILE L"cancel setting json file"
 #define UNSUITFONT L"the new font is unsuit"
 #define DEBUG L"debug mode"
+#define TYPICAL L"typical mode"
 
 class config
 {

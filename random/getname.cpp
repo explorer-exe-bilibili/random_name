@@ -4,6 +4,8 @@
 #include <vector>
 #include <ctime>
 #include <cstdlib>
+#include <random>
+
 #include"mywindows.h"
 #include"config.h"
 #include"sth2sth.h"
@@ -17,7 +19,6 @@ using namespace std;
 
 LPCWSTR getname::random(int m, int i) {
 	std::string tmp1;
-	LPCWSTR tmp3;
 	wstring path;
 	if (m == 0) path = config::getpath(NAMES1);
 	else if (m == 1) path = config::getpath(NAMES2);
@@ -26,11 +27,16 @@ LPCWSTR getname::random(int m, int i) {
 	tmp1 = RandomLineFromFile(path);
 	if (strcmp(tmp1.c_str(), "FOF") == 0)fileerr = 1;
 	int attrib = getattrib(tmp1);
-	star[m][i] = attrib%10;
-	type_[m][i] = attrib%100/10;
+	if(config::getint(TYPICAL)==(m+1))
+	{
+		star[m][i] = random_star();
+	}
+	else {
+		star[m][i] = attrib % 10;
+	}
+	type_[m][i] = attrib % 100 / 10;
 	tmp1 = removeAfterDash(tmp1);
-	tmp3 = sth2sth::UTF8To16(tmp1.c_str());
-	return tmp3;
+	return sth2sth::UTF8To16(tmp1.c_str());
 }
 int getname::getattrib(const std::string& input) {
 	// 找到第一个 "-"
@@ -106,4 +112,58 @@ int getname::randomIntegerBetween(int min, int max) {
 	randomNum = min + rand() % range;
 	seed2 += randomNum;
 	return randomNum;
+}
+
+long long randi() {
+	// 创建随机设备
+	std::random_device rd;
+	// 使用随机设备作为种子，创建一个随机数引擎
+	std::mt19937_64 eng(rd());
+	// 定义随机数分布范围
+	std::uniform_int_distribution<long long> distr;
+
+	// 生成并返回随机数
+	return distr(eng);
+}
+int counter = 0;
+int fourcounter = 0;
+int getname::random_star()
+{
+
+	// 基础概率
+	double fiveStarRate = 0.6; // 五星物品基础概率	
+	const double fourStarRate = 5.1; // 四星物品基础概率
+
+	// 检查是否达到提升概率的抽数
+	if (counter >= 73) {
+		// 从第74抽开始，每次提升6%，直到第90抽时为100%
+		fiveStarRate += (counter - 73) * 6;
+		if (fiveStarRate > 100) fiveStarRate = 100; // 保证概率不超过100%
+	}
+
+	// 生成随机数
+	double randNum;
+	randNum = (randi() / 100)% 100;
+	counter++; // 增加计数器
+	fourcounter++;
+	// 检查是否达到五星保底
+	if (counter >= 90) {
+		counter = 0; // 重置计数器
+		return 5;
+	}
+	if (fourcounter >= 10){
+		fourcounter = 0;
+		return 4;
+	}
+	// 根据概率抽取物品
+	if (randNum <= fiveStarRate) {
+		counter = 0; // 重置计数器
+		return 5;
+	}
+	else if (randNum <= fourStarRate) {
+		return 4;
+	}
+	else {
+		return 3;
+	}
 }
