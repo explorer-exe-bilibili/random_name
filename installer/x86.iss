@@ -22,7 +22,7 @@ DisableProgramGroupPage=yes
 ;PrivilegesRequired=lowest
 OutputDir=C:\Users\Administrator\Desktop
 OutputBaseFilename=random_namex86_setup
-SetupIconFile=C:\Users\Administrator\source\repos\explorer-exe-bilibili\random_name\random\OIP-C.ico
+SetupIconFile=C:\Users\Administrator\source\repos\random_name\random\OIP-C.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -59,7 +59,7 @@ Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\Administrator\Desktop\out\x86\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\Administrator\source\repos\random_name\Win32\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\Administrator\Desktop\out\x86\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
@@ -75,6 +75,5 @@ Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\files\fontinstall.bat"; Description: "安装字体（首次安装）"; Flags: postinstall
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 

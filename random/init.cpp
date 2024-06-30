@@ -257,7 +257,7 @@ DWORD WINAPI init::Upgrade(){
 			std::getline(file, file_version);
 		}
 
-		const std::string CURRENT_VERSION = "1.3.0"; // 假设当前版本号是 "1.2.3"
+		const std::string CURRENT_VERSION = "1.5.0"; // 假设当前版本号是 "1.2.3"
 
 		if (file_version.empty() || file_version != CURRENT_VERSION) {
 			mywindows::logf << "版本号不同" << file_version << "->" << CURRENT_VERSION << std::endl;
