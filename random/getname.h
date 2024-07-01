@@ -12,6 +12,10 @@ class getname
 {
 private:
 	static int seed, seed2;
+	static int getattrib(const std::string& input);
+	static std::string removeAfterDash(const std::string& input);
+	static std::string RandomLineFromFile(const std::wstring& filename);
+	static int random_star();
 public:
 	static struct Item
 	{
@@ -23,8 +27,5 @@ public:
 	static int type_[4][256];
 	static bool fileerr;
 	static LPCWSTR random(int m, int i);
-	static int getattrib(const std::string& input);
-	static std::string removeAfterDash(const std::string& input);
-	static std::string RandomLineFromFile(const std::wstring& filename);
 	static int randomIntegerBetween(int min, int max);
 };

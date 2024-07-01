@@ -64,7 +64,7 @@ public:
 	void seteditbox(LPARAM lParam, WPARAM wParam);
 private:
 	BITMAP* bitmaps[BitmapCounts];
-	bool isused[40] = { 0 };
+	bool isused[40] = { 0 },needReboot=0;
 	HWND CreateEditBox(HWND hWndParent, int NUMBER, int x, int y, int w, int h, const wchar_t* words);
 	HWND textboxhwnd[20] = { 0 };
 	int lastbmx = 0, lastbmy = 0, lastxend = 0, lastyend = 0;
@@ -88,4 +88,5 @@ private:
 	void showitem(sitem item, Gp *p);
 	void switchbm(sitem item,Gp *p);
 	void textbox(sitem item,Gp *p);
+	void cheakLimit(sitem item);
 };

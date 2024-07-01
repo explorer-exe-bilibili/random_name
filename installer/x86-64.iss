@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Random Name"
-#define MyAppVersion "1.2.0"
+#define MyAppVersion "1.5.0"
 #define MyAppURL "https://my-alist.me/"
 #define MyAppExeName "random.exe"
 #define MyAppAssocName MyAppName + " File"
@@ -28,7 +28,7 @@ DisableProgramGroupPage=yes
 PrivilegesRequiredOverridesAllowed=dialog
 OutputDir=C:\Users\Administrator\Desktop\out
 OutputBaseFilename=Random Name setupx86-64
-SetupIconFile=C:\Users\Administrator\source\repos\explorer-exe-bilibili\random_name\random\OIP-C.ico
+SetupIconFile=C:\Users\Administrator\source\repos\random_name\random\OIP-C.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -65,7 +65,7 @@ Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\Administrator\source\repos\explorer-exe-bilibili\random_name\x64\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\Administrator\source\repos\random_name\x64\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Users\Administrator\Desktop\out\x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 

@@ -194,12 +194,27 @@ int mywindows::GetStringWidth(HDC hdc, const std::wstring& str, int height) {
 
 void mywindows::reboot()
 {
-	TCHAR szPath[MAX_PATH];
-	GetModuleFileName(NULL, szPath, MAX_PATH);
-	STARTUPINFO StartInfo;
-	PROCESS_INFORMATION procStruct;
-	memset(&StartInfo, 0, sizeof(STARTUPINFO));
-	StartInfo.cb = sizeof(STARTUPINFO);
-	PostQuitMessage(0);
-	exit(0);
+	TCHAR szFileName[MAX_PATH];
+	GetModuleFileName(NULL, szFileName, MAX_PATH); // 获取当前执行文件的路径
+
+	STARTUPINFO si = { sizeof(STARTUPINFO) };
+	PROCESS_INFORMATION pi;
+
+	// 创建一个新的进程来运行当前程序
+	if (CreateProcess(szFileName,   // 程序路径
+		NULL,         // 命令行参数
+		NULL,         // 进程安全属性
+		NULL,         // 线程安全属性
+		FALSE,        // 句柄继承选项
+		0,            // 创建标志
+		NULL,         // 使用父进程的环境块
+		NULL,         // 使用父进程的起始目录
+		&si,          // 指向STARTUPINFO结构的指针
+		&pi))         // 指向PROCESS_INFORMATION结构的指针
+	{
+		// 成功创建进程，关闭当前进程
+		CloseHandle(pi.hProcess);
+		CloseHandle(pi.hThread);
+		exit(0); // 结束当前进程
+	}
 }

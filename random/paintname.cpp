@@ -207,13 +207,13 @@ void paintname::menu(Gp* p) {
 	p->Paint(0, 0, mywindows::windowWidth, mywindows::windowHeight, listbg);
 	LPCWSTR tmp_[10] = { 0 };
 	int count, count1, count2, count3;
-	int* itmp = mywindows::find(star_, sizeof(star_) / sizeof(getname::star[ui::mode - 1][0]), 6, &count);
+	int* itmp = mywindows::find(star_, std::size(star_), 6, &count);
 	if (itmp != NULL) for (int i = 0; i < count; ++i) tmp_[i] = temp[itmp[i]];
-	itmp = mywindows::find(star_, sizeof(star_) / sizeof(getname::star[ui::mode - 1][0]), 5, &count1);
+	itmp = mywindows::find(star_, std::size(star_), 5, &count1);
 	if (itmp != NULL) for (int i = 0; i < count1; ++i) tmp_[i + count] = temp[itmp[i]];
-	itmp = mywindows::find(star_, sizeof(star_) / sizeof(getname::star[ui::mode - 1][0]), 4, &count2);
+	itmp = mywindows::find(star_, std::size(star_), 4, &count2);
 	if (itmp != NULL) for (int i = 0; i < count2; ++i) tmp_[i + count + count1] = temp[itmp[i]];
-	itmp = mywindows::find(star_, sizeof(star_) / sizeof(getname::star[ui::mode - 1][0]), 3, &count3);
+	itmp = mywindows::find(star_, std::size(star_), 3, &count3);
 	if (itmp != NULL) for (int i = 0; i < count3; ++i) tmp_[i + count + count1 + count2] = temp[itmp[i]];
 
 	for (int i = 0; i < count; ++i) {
