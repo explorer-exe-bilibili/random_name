@@ -158,6 +158,7 @@
     <ClInclude Include="floatwindow.h" />
     <ClInclude Include="getname.h" />
     <ClInclude Include="Gp.h" />
+    <ClInclude Include="HistoryScreen.h" />
     <ClInclude Include="init.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="MSGback.h" />
@@ -176,6 +177,7 @@
     <ClCompile Include="floatwindow.cpp" />
     <ClCompile Include="getname.cpp" />
     <ClCompile Include="Gp.cpp" />
+    <ClCompile Include="HistoryScreen.cpp" />
     <ClCompile Include="init.cpp" />
     <ClCompile Include="log.cpp" />
     <ClCompile Include="MSGback.cpp" />
