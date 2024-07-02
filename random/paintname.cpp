@@ -46,7 +46,9 @@ void paintname::showname1() {
 	temp[0] = names[ui::mode - 1][number];
 	star_[0] = getname::star[ui::mode - 1][number];
 	type[0] = getname::type_[ui::mode - 1][number];
-	randomedlist << randomedlist.pt() << "[" << star_[0] << "星]" << "[" << sth2sth::LWStostr(temp[0]) << "]" << randomedlist.nl();
+	randomedlist << randomedlist.pt()<<"["<<type[0]<<"类型]" << 
+		"[" << star_[0] << "星]" << "[" << sth2sth::LWStostr(temp[0]) << "]"
+	<< randomedlist.nl();
 	if (star_[0] >= 5)is5star = 1;
 	if (star_[0] == 4)is4star = 1;
 	if (!setscreen.offvideo) {
@@ -80,8 +82,10 @@ void paintname::showname10() {
 		type[10 - (tmp - number)] = getname::type_[ui::mode - 1][number];
 		if (getname::star[ui::mode - 1][number] >= 5)is5star = 1;
 		mywindows::log("10balling number=%d,tmp=%d,star=%d", number, tmp, star_[10 - (tmp - number)]);
-		randomedlist << "[" << star_[10 - (tmp - number)] << "星]" << "[" << sth2sth::LWStostr(temp[10 - (tmp - number)]) << "]" 
-			<< "[" << type[10 - (tmp - number)] << "类型]" << std::endl;
+		randomedlist << "[" << type[10-(tmp-number)] << "类型]" <<
+			"[" << star_[10 - (tmp - number)] << "星]" << "[" << 
+			sth2sth::LWStostr(temp[10 - (tmp - number)]) << "]"
+		<< std::endl;
 	}
 	randomedlist << "}" << randomedlist.nl();
 	if (!setscreen.offmusic)

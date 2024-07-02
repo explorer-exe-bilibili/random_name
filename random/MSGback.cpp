@@ -10,6 +10,7 @@
 #include "directshow.h"
 #include"floatwindow.h"
 #include"Gp.h"
+#include "HistoryScreen.h"
 
 extern set2 setscreen;
 
@@ -27,6 +28,7 @@ bool _____ = 1;
 void MSGback::paint()
 {
 	static Gp p(mywindows::main_hwnd);
+	static HistoryScreen hs(&p,L"name.txt");
 	if (!setscreen.fullscreen&&_____) {
 		SetWindowPos(mywindows::main_hwnd, NULL, 0, 0, mywindows::screenWidth * 0.6, mywindows::screenHeight * 0.6, SWP_NOMOVE | SWP_NOZORDER);
 	}
@@ -40,11 +42,13 @@ void MSGback::paint()
 	HDC hdc = BeginPaint(mywindows::main_hwnd, &ps);
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	SetStretchBltMode(hdc, HALFTONE);
+	//ui::screenmode = HISTORY;
 	switch (ui::screenmode)
 	{
 	case FIRST_MENU:paintfirstscreen::printfirstmenu(&p); directshow::startbgm(); break;
 	case SHOW_NAMES_ING:paintname::paint(&p);break;
 	case SETTING: setscreen.paint(&p); break;
+	case HISTORY:hs.paint(); break;
 	}
 	mywindows::log("paint successfully");
 	DeleteDC(hdcMem);

@@ -4,6 +4,7 @@
 #define FIRST_MENU 1
 #define SETTING 2
 #define SHOW_NAMES_ING 3
+#define HISTORY 4
 
 class ui
 {
