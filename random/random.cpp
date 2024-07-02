@@ -2,9 +2,8 @@
 #include "directshow.h"
 #include"mywindows.h"
 #include <filesystem>
-#include"bitmaps.h"
 #include "floatwindow.h"
-#include "paintname.h"
+#include "NameScreen.h"
 #include"set-json.h"
 #include "init.h"
 #include"MSGback.h"
@@ -17,12 +16,11 @@
 #define EXIT 444
 
 using namespace std;
-set2 setscreen;
 
-LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
+LRESULT CALLBACK WinSunProc(const HWND hwnd, const UINT uMsg, const WPARAM wParam, const LPARAM lParam) {
 	mywindows::main_hwnd = hwnd;
 
-	if (setscreen.reran)paintname::rerandom();
+	if (ui::SS.reran)ui::NS.rerandom();
 	switch (uMsg) {//通过判断消息进行消息响应
 	case WM_CREATE:MSGback::create(); break;
 	case WM_PAINT:MSGback::paint(); break;
@@ -41,7 +39,7 @@ LRESULT CALLBACK WinSunProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam) 
 
 
 
-LRESULT CALLBACK FloatWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK FloatWindowProc(const HWND hWnd, const UINT message, const WPARAM wParam, const LPARAM lParam)
 {
 	switch (message)
 	{
@@ -58,18 +56,18 @@ LRESULT CALLBACK FloatWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM 
 	return 0;
 }
 
-HFONT QuitFont=0;
+HFONT QuitFont=nullptr;
 
-LRESULT CALLBACK KillWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+LRESULT CALLBACK KillWindowProc(const HWND hWnd, const UINT message, const WPARAM wParam, const LPARAM lParam)
 {
 	switch (message) {
 	case WM_PAINT: {
 		PAINTSTRUCT ps;
 		HDC hdc = BeginPaint(mywindows::Quit_hwnd, &ps);
-		if (QuitFont == NULL) {
+		if (QuitFont == nullptr) {
 			int desiredPixelHeight = mywindows::screenWidth * 0.17;
 			// 获取设备上下文的 DPI
-			HDC hdc = GetDC(NULL); // 获取桌面设备上下文
+			HDC hdc = GetDC(nullptr); // 获取桌面设备上下文
 			int dpi = GetDeviceCaps(hdc, LOGPIXELSY);
 			// 计算逻辑单位高度
 			int logicalHeight = MulDiv(desiredPixelHeight, 72, dpi);
@@ -89,7 +87,7 @@ LRESULT CALLBACK KillWindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 }
 
 int WINAPI WinMain(
-	_In_ HINSTANCE hInstance,      // handle to current instance
+	_In_ const HINSTANCE hInstance,      // handle to current instance
 	_In_opt_ HINSTANCE hPrevInstance,  // handle to previous instance
 	_In_ LPSTR lpCmdLine,          // command line
 	_In_ int nCmdShow              // show state
@@ -99,7 +97,7 @@ int WINAPI WinMain(
 	init::MainWindow();
 	Gdiplus::GdiplusStartupInput gdiplusStartupInput;
 	ULONG_PTR gdiplusToken;
-	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, NULL);
+	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
 	mywindows::log("INIT COMPETENTLY SUCCESSFULLY");
 	MSG msg;
 	while (GetMessageW(&msg, nullptr, NULL, NULL)) {

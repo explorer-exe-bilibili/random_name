@@ -52,7 +52,7 @@ private:
 	// 定义链表节点
 	typedef struct Node {
 	ConfigItem item;
-	struct Node* next=0;
+	struct Node* next=nullptr;
 	} Node;
 	// 定义链表头节点
 	static Node* head;

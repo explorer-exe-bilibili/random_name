@@ -29,13 +29,13 @@ bool Log::CreatedMultipleDirectory(const std::string& direct)
 	std::vector< std::string>::iterator vIter = vpath.begin();
 	for (; vIter != vpath.end(); vIter++)
 	{
-		bSuccess = CreateDirectoryA(vIter->c_str(), NULL) ? TRUE : FALSE;
+		bSuccess = CreateDirectoryA(vIter->c_str(), nullptr) ? TRUE : FALSE;
 	}
 	return bSuccess;
     return false;
 }
 
-Log::Log(const std::string& fileName, bool add) {
+Log::Log(const std::string& fileName, const bool add) {
     if (!::PathFileExistsA("files\\log")) {
 		CreatedMultipleDirectory("files\\log");
     }
@@ -52,7 +52,7 @@ Log& Log::operator<<(const std::string& str) {
     writeToLog(str);
     return *this;
 }
-Log& Log::operator<<(long double value) {
+Log& Log::operator<<(const long double value) {
 	if (value != INSIDEINT) {
 		long int v;
 		if (value - value / 1 == 0)
@@ -71,7 +71,7 @@ int Log::nl() {
     return INSIDEINT;
 }
 int Log::pt() {
-    time_t now = time(0);
+    time_t now = time(nullptr);
     struct tm* localTime = localtime(&now);
     char timeStr[32];
     sprintf(timeStr, "%04d-%02d-%02d %02d:%02d:%02d", localTime->tm_year + 1900, localTime->tm_mon + 1, localTime->tm_mday, localTime->tm_hour, localTime->tm_min, localTime->tm_sec);

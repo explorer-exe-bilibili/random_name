@@ -17,7 +17,7 @@ bool getname::fileerr = 0;
 
 using namespace std;
 
-LPCWSTR getname::random(int m, int i) {
+LPCWSTR getname::random(const int m, const int i) {
 	std::string tmp1;
 	wstring path;
 	if (m == 0) path = config::getpath(NAMES1);
@@ -102,13 +102,13 @@ std::string getname::RandomLineFromFile(const std::wstring& filename)
 	} while (lines[randomIndex].empty());
 	return lines[randomIndex];
 }
-int getname::randomIntegerBetween(int min, int max) {
+int getname::randomIntegerBetween(const int min, const int max) {
 	// 初始化随机数生成器
-	srand(static_cast<unsigned int>(time(0)) + seed2);
+	srand(static_cast<unsigned int>(time(nullptr)) + seed2);
 	// 计算随机数的范围，并生成一个在这个范围内的随机数
 	int range = max - min + 1;
 	int randomNum = rand();
-	srand(static_cast<unsigned int>(time(0)) + seed2 + randomNum);
+	srand(static_cast<unsigned int>(time(nullptr)) + seed2 + randomNum);
 	randomNum = min + rand() % range;
 	seed2 += randomNum;
 	return randomNum;

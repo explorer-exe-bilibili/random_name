@@ -1,7 +1,7 @@
 #include "init.h"
 #include "ui.h"
 #include<Windows.h>
-#include"paintname.h"
+#include"NameScreen.h"
 #include"mywindows.h"
 #include"set-json.h"
 #include"config.h"
@@ -15,14 +15,13 @@
 #include<thread>
 #include <dshow.h>
 
-extern set2 setscreen;
 WNDPROC w2_, w3_;
 
 void init::font()
 {
-	int desiredPixelHeight = mywindows::windowWidth * 0.17;
+	int desiredPixelHeight = mywindows::WW * 0.17;
 	// 获取设备上下文的 DPI
-	HDC hdc = GetDC(NULL); // 获取桌面设备上下文
+	HDC hdc = GetDC(nullptr); // 获取桌面设备上下文
 	int dpi = GetDeviceCaps(hdc, LOGPIXELSY);
 	// 计算逻辑单位高度
 	int logicalHeight = MulDiv(desiredPixelHeight, 72, dpi);
@@ -30,12 +29,12 @@ void init::font()
 	bool isInstall;
 	isInstall= cheakIsFontInstalled(L"genshin-icon");
 	if (isInstall) {
-		paintname::icon_star = CreateFontW(logicalHeight * 0.0862, logicalweidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
+		ui::NS.icon_star = CreateFontW(logicalHeight * 0.0862, logicalweidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
 		ui::icon_mid = CreateFontW(logicalHeight * 0.16, logicalweidth * 0.22, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
 		ui::icon = CreateFontW(logicalHeight * 0.2299, logicalweidth * 0.3008, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
 	}
 	else {
-		MessageBox(NULL, L"请安装字体", L"错误", MB_ICONERROR);
+		MessageBox(nullptr, L"请安装字体", L"错误", MB_ICONERROR);
 		mywindows::errlogf << "\"genshin - icon\"字体未安装" << std::endl;
 		system("files\\ttfs\\icon.ttf");
 		mywindows::reboot();
@@ -47,7 +46,7 @@ void init::font()
 		ui::text_list = CreateFontW(logicalHeight * 0.7, logicalweidth * 0.7, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
 	}
 	else {
-		MessageBox(NULL, L"请安装字体", L"错误", MB_ICONERROR);
+		MessageBox(nullptr, L"请安装字体", L"错误", MB_ICONERROR);
 		mywindows::errlogf << "SDK_SC_Web字体未安装" << std::endl;
 		system("files\\ttfs\\text.ttf");
 		mywindows::reboot();
@@ -58,7 +57,7 @@ void init::font()
 			ui::text_big = CreateFontW(logicalHeight, logicalweidth, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"Aa漆书");
 		}
 		else {
-			MessageBox(NULL, L"请安装字体", L"错误", MB_ICONERROR);
+			MessageBox(nullptr, L"请安装字体", L"错误", MB_ICONERROR);
 			mywindows::errlogf << "Aa漆书字体未安装" << std::endl;
 			system("files\\ttfs\\QS.ttf");
 			mywindows::reboot();
@@ -67,7 +66,7 @@ void init::font()
 	else {
 		ui::text_big = CreateFontW(logicalHeight, logicalweidth, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
 	}
-	ReleaseDC(NULL, hdc);
+	ReleaseDC(nullptr, hdc);
 }
 void init::resetxy()
 {
@@ -77,60 +76,46 @@ void init::resetxy()
 	mywindows::windowTop = rect.left;
 	mywindows::windowLeft = rect.top;
 	int tempint = rect.right - rect.left;
-	if (tempint != mywindows::windowWidth)ui::ScreenModeChanged = 1;
-	mywindows::windowWidth = tempint;
+	if (tempint != mywindows::WW)ui::ScreenModeChanged = 1;
+	mywindows::WW = tempint;
 	tempint = rect.bottom - rect.top;
-	if (tempint != mywindows::windowHeight)ui::ScreenModeChanged = 1;
-	mywindows::windowHeight = tempint;
+	if (tempint != mywindows::WH)ui::ScreenModeChanged = 1;
+	mywindows::WH = tempint;
 	if (ui::ScreenModeChanged) {
-		ui::ballW = 0.18 * mywindows::windowWidth;
-		ui::ballH = 0.075 * mywindows::windowHeight;
-		ui::ball10x = mywindows::windowWidth - ui::ballW * 1.3;
-		ui::bally = mywindows::windowHeight - ui::ballH * 2;
-		ui::ball1x = mywindows::windowWidth - ui::ballW * 2.4;
-		ui::ball1end = ui::ball1x + ui::ballW;
-		ui::ball10end = ui::ball10x + ui::ballW;
-		ui::ballyend = ui::bally + ui::ballH;
-		ui::overlay1X = mywindows::windowWidth * 3 / 9 - mywindows::windowWidth / 17;
-		ui::overlay2X = mywindows::windowWidth * 4 / 9 - mywindows::windowWidth / 17;
-		ui::overlay3X = mywindows::windowWidth * 5 / 9 - mywindows::windowWidth / 17;
-		ui::overlay4X = mywindows::windowWidth * 6 / 9 - mywindows::windowWidth / 17;
-		ui::overlay1Y = mywindows::windowHeight * 3 / 40;
-		ui::overlayW = mywindows::windowWidth * 3 / 40;
-		ui::overlayH = mywindows::windowHeight * 3 / 40;
-		ui::button1x = ui::overlay1X + ui::overlayW;
-		ui::button2x = ui::overlay2X + ui::overlayW;
-		ui::button3x = ui::overlay3X + ui::overlayW;
-		ui::button4x = ui::overlay4X + ui::overlayW;
-		ui::buttony = ui::overlay1Y + ui::overlayH;
-		ui::overX = mywindows::windowWidth / 10 * 2;
-		ui::overlayY = mywindows::windowHeight / 10 * 2;
-		ui::bottom1x = mywindows::windowWidth * 0.1;
-		ui::bottom1y = mywindows::windowHeight * 0.85;
-		ui::listyend = mywindows::windowHeight;
-		paintname::skipbmx = mywindows::windowWidth * 0.8;
-		paintname::skipbmy = mywindows::windowHeight * 0.045;
-		paintname::skipbmxend = paintname::skipbmx + mywindows::windowWidth * 0.1;
-		paintname::skipbmyend = paintname::skipbmy + 100;
-		ui::settingx = mywindows::windowWidth * 0.05;
-		ui::settingy = mywindows::windowHeight * 0.85;
-		ui::settingxend = ui::settingx + mywindows::windowWidth * 0.023;
-		ui::settingyend = ui::settingy + mywindows::windowHeight * 0.036;
-		ui::exitx = mywindows::windowWidth * 0.9;
-		ui::exitxend = mywindows::windowWidth * 0.93;
-		ui::exity = mywindows::windowHeight * 0.045;
-		ui::exityend = mywindows::windowHeight * 0.045 + mywindows::windowWidth * 0.03;
-		ui::listx[0] = mywindows::windowWidth * 0.107;
-		ui::listxend = mywindows::windowWidth * 0.078;
-		ui::addnamex = mywindows::windowWidth * 0.4;
-		ui::addnameendx = ui::addnamex + mywindows::windowWidth * 0.12;
-		ui::addnamey = mywindows::windowHeight * 0.8;
-		ui::addnameendy = ui::addnamey + mywindows::windowHeight * 0.036;
-		setscreen.resetplace();
+		ui::overX = mywindows::WW / 10 * 2;
+		ui::overlayY = mywindows::WH / 10 * 2;
+		ui::bottom1x = mywindows::WW * 0.1;
+		ui::bottom1y = mywindows::WH * 0.85;
+		ui::listyend = mywindows::WH;
+		ui::NS.skipbmx = mywindows::WW * 0.8;
+		ui::NS.skipbmy = mywindows::WH * 0.045;
+		ui::NS.skipbmxend = ui::NS.skipbmx + mywindows::WW * 0.1;
+		ui::NS.skipbmyend = ui::NS.skipbmy + 100;
+		ui::settingx = mywindows::WW * 0.05;
+		ui::settingy = mywindows::WH * 0.85;
+		ui::settingxend = ui::settingx + mywindows::WW * 0.023;
+		ui::settingyend = ui::settingy + mywindows::WH * 0.036;
+		ui::exitx = mywindows::WW * 0.9;
+		ui::exitxend = mywindows::WW * 0.93;
+		ui::exity = mywindows::WH * 0.045;
+		ui::exityend = mywindows::WH * 0.045 + mywindows::WW * 0.03;
+		ui::listx[0] = mywindows::WW * 0.107;
+		ui::listxend = mywindows::WW * 0.078;
+		ui::addnamex = mywindows::WW * 0.4;
+		ui::addnameendx = ui::addnamex + mywindows::WW * 0.12;
+		ui::addnamey = mywindows::WH * 0.8;
+		ui::addnameendy = ui::addnamey + mywindows::WH * 0.036;
+		ui::his.x = ui::bottom1x + mywindows::WW * 0.08;
+		ui::his.y = ui::bottom1y;
+		ui::his.xE = ui::his.x + mywindows::WW * 0.073;
+		ui::his.yE = ui::bottom1y + mywindows::WH * 0.039;
+		ui::FS.resetPoint();
+		ui::SS.resetplace();
+		ui::NS.resetPoint();
 		for (char i = 0; i <= 9; i++) {
 			ui::listx[i + 1] = ui::listx[i] + ui::listxend;
 		}
-		DeleteObject(paintname::icon_star);
+		DeleteObject(ui::NS.icon_star);
 		DeleteObject(ui::text_mid);
 		DeleteObject(ui::text_big);
 		DeleteObject(ui::text);
@@ -160,50 +145,62 @@ void init::main(WNDPROC w1, WNDPROC w2, WNDPROC w3)
 	mywindows::log("initiating run path(string) %s", Log::runpath.c_str());
 	mywindows::log(L"initiating run path(wstring) %ws", Log::wrunpath.c_str());
 	config::init();
-	setscreen.offmusic = config::getint(OFFMUSIC);
-	setscreen.FloatWindow = config::getint(FLOATWINDOW);
-	DWORD threadId;
-	// 创建线程
-	mywindows::log("start thread");
-	paintname::random_handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)paintname::RandomNumberGenerator, NULL, 0,&threadId);
-	setscreen.offvideo = config::getint(OFF_VIDEO);
-	ui::mode = config::getint(MODE);
-	mywindows::debug=config::getint(DEBUG);
-	setscreen.offmusic = config::getint(OFFMUSIC);
+	ui::SS.offmusic = config::getint(OFFMUSIC);
+	ui::SS.FloatWindow = config::getint(FLOATWINDOW);
+	config();
 	DWORD threadId2;
-	// 创建线程
-	mywindows::log("start thread");
 	HANDLE handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)Upgrade, NULL, 0, &threadId2);
-	mciSendString(L"open .\\files\\mp3\\backsound.mp3 alias bgm", NULL, 0, NULL); // 打开 MP3 文件并创建一个别名 'bgm'
+	mciSendString(L"open .\\files\\mp3\\backsound.mp3 alias bgm", NULL, 0, NULL);
+	// 打开 MP3 文件并创建一个别名 'bgm'
 }
 void init::music()
 {
 	static bool once = 1;
 	if (once) {
 		std::wstring str = L"open \"";
+		std::wstring cmd;
 		str += Log::wrunpath;
+		cmd = str;
 		str += L"\\files\\mp3\\backsound.mp3\" alias bgm";
 		mywindows::log(L"load bgm,command is :%ws", str.c_str());
-		mciSendString(str.c_str(), 0, 0, 0);
+		mciSendString(str.c_str(), NULL, 0, NULL);
+		int a;
+		a=mciSendString((cmd + L"\\files\\mp3\\reveal-3star.mp3\" alias star3").c_str(), 0, 0, 0);
+		a=mciSendString((cmd + L"\\files\\mp3\\reveal-4star.mp3\" alias star4").c_str(), 0, 0, 0);
+		a=mciSendString((cmd + L"\\files\\mp3\\reveal-5star.mp3\" alias star5").c_str(), 0, 0, 0);
+		a=mciSendString((cmd + L"\\files\\mp3\\reveal-fullstar.mp3\" alias starfull").c_str(), 0, 0, 0);
 		once = 0;
 	}// 打开并播放背景音乐
-	if (!setscreen.offmusic)
+	if (!ui::SS.offmusic)
 		mciSendString(L"play bgm repeat", NULL, 0, NULL); // 使用别名 'bgm' 播放音乐，并设置为循环播放
 }
+
+void init::config()
+{
+	config::init();
+	ui::NS.rerandom();
+	ui::SS.offvideo = config::getint(OFF_VIDEO);
+	ui::SS.offmusic= config::getint(OFFMUSIC);
+	mywindows::debug = config::getint(DEBUG);
+	ui::mode = config::getint(MODE);
+	ui::SS.FloatWindow= config::getint(FLOATWINDOW);
+	ui::SS.fullscreen= config::getint(INWINDOW);
+}
+
 void init::MainWindow()
 {
-	setscreen.fullscreen = !config::getint(INWINDOW);
-	if (setscreen.fullscreen)mywindows::main_hwnd = CreateWindowW(L"main", config::get(WINDOW_TITEL).c_str(), WS_POPUP | WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN,
-		0, 0, mywindows::windowWidth, mywindows::windowHeight, NULL, NULL, GetModuleHandle(NULL), NULL);
+	ui::SS.fullscreen = !config::getint(INWINDOW);
+	if (ui::SS.fullscreen)mywindows::main_hwnd = CreateWindowW(L"main", config::get(WINDOW_TITEL).c_str(), WS_POPUP | WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN,
+		0, 0, mywindows::WW, mywindows::WH, NULL, NULL, GetModuleHandle(NULL), NULL);
 	else {
-		mywindows::windowWidth = mywindows::screenWidth;
-		mywindows::windowHeight = mywindows::screenHeight;
+		mywindows::WW = mywindows::screenWidth;
+		mywindows::WH = mywindows::screenHeight;
 		mywindows::main_hwnd = CreateWindowW(L"main", config::get(WINDOW_TITEL).c_str(), WS_CLIPSIBLINGS | WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_THICKFRAME,
-			0, 0, mywindows::windowWidth, mywindows::windowHeight, NULL, NULL, GetModuleHandle(NULL), NULL);
+			0, 0, mywindows::WW, mywindows::WH, NULL, NULL, GetModuleHandle(NULL), NULL);
 	}
 	ShowWindow(mywindows::main_hwnd, SW_SHOWNORMAL);//把窗体显示出来
 }
-void init::regwindow(WNDPROC w1,WNDPROC w2,WNDPROC w3)
+void init::regwindow(const WNDPROC w1, const WNDPROC w2, const WNDPROC w3)
 {
 	w2_ = w2; w3_ = w3;
 	WNDCLASS wndcls{}; //创建一个窗体类
@@ -287,8 +284,8 @@ bool init::cheakIsFontInstalled(const std::wstring fontName) {
 	INT          count = 0;
 	INT          found = 0;
 	WCHAR        familyName[LF_FACESIZE];  // enough space for one family name
-	WCHAR* familyList = NULL;
-	FontFamily* pFontFamily = NULL;
+	WCHAR* familyList = nullptr;
+	FontFamily* pFontFamily = nullptr;
 
 	// How many font families are installed?
 	count = installedFontCollection.GetFamilyCount();

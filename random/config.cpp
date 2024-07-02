@@ -6,7 +6,7 @@
 #include"sth2sth.h"
 
 // 定义链表头节点
-config::Node* config::head = NULL;
+config::Node* config::head = nullptr;
 const wchar_t* config::LogString;
 std::wstring config::configpath;
 using namespace std;
@@ -17,7 +17,7 @@ void config::init() {
 	configpath = Log::wrunpath;
 	configpath += CONFIG_;
 	FILE* file = _wfopen(configpath.c_str(), L"r");
-	if (file == NULL) {
+	if (file == nullptr) {
 		add(NAMES1, L"\\names1.txt");
 		add(NAMES2, L"\\names2.txt");
 		add(NAMES3, L"\\names3.txt");
@@ -141,7 +141,7 @@ std::wstring config::get(const std::wstring& name) {
 	Node* current = head;
 
 	// 遍历链表查找匹配的配置项
-	while (current != NULL) {
+	while (current != nullptr) {
 		if (current->item.name == name) {
 			// 找到匹配的配置项,返回其参数值
 			return current->item.value;
@@ -165,7 +165,7 @@ double config::getd(const std::wstring& name)
 	Node* current = head;
 
 	// 遍历链表查找匹配的配置项
-	while (current != NULL) {
+	while (current != nullptr) {
 		if (current->item.name == name) {
 			// 找到匹配的配置项,返回其参数值
 			try
@@ -191,7 +191,7 @@ int config::getint(const std::wstring& name)
 	Node* current = head;
 
 	// 遍历链表查找匹配的配置项
-	while (current != NULL) {
+	while (current != nullptr) {
 		if (current->item.name == name) {
 			// 找到匹配的配置项,返回其参数值
 			try
@@ -247,11 +247,11 @@ long long config::getwindow(const std::wstring& name)
 	}
 	else {
 		if (name.back()=='x' || endsWith(name,L"width")) {
-			long long llv = douv * mywindows::windowWidth;
+			long long llv = douv * mywindows::WW;
 			return llv;
 		}
 		else if (name.back()=='y' || endsWith(name,L"height")) {
-			long long llv = douv * mywindows::windowHeight;
+			long long llv = douv * mywindows::WH;
 			return llv;
 		}
 	}
@@ -321,18 +321,18 @@ void config::add(const std::wstring& name, const int value)
 // 读取配置文件并保存配置项到链表
 void config::readFile() {
 	FILE* file = _wfopen(configpath.c_str(), L"r, ccs=UNICODE");
-	if (file == NULL) {
+	if (file == nullptr) {
 		mywindows::errlog(L"Error opening file for reading");
 		return;
 	}
 
 	wchar_t line[256];
-	while (fgetws(line, sizeof(line) / sizeof(wchar_t), file) != NULL) {
+	while (fgetws(line, sizeof(line) / sizeof(wchar_t), file) != nullptr) {
 		wchar_t* trimLine = wcstok(line, L"\n"); // 移除换行符
 
 		wchar_t* currentOption = wcstok(trimLine, L"=");
-		if (currentOption != NULL) {
-			wchar_t* value = wcstok(NULL, L"=");
+		if (currentOption != nullptr) {
+			wchar_t* value = wcstok(nullptr, L"=");
 			// 添加配置项到链表
 			add(std::wstring(currentOption), std::wstring(value));
 		}
@@ -343,13 +343,13 @@ void config::readFile() {
 // 保存配置项到配置文件
 void config::saveFile() {
 	FILE* file = _wfopen(configpath.c_str(), L"w, ccs=UNICODE");
-	if (file == NULL) {
+	if (file == nullptr) {
 		mywindows::errlog(L"Error opening file for writing");
 		return;
 	}
 
 	Node* current = head;
-	while (current != NULL) {
+	while (current != nullptr) {
 		fwprintf(file, L"%s=%s\n", current->item.name.c_str(), current->item.value.c_str());
 		current = current->next;
 	}
@@ -361,14 +361,14 @@ void config::cleanup() {
 	Node* current = head;
 	Node* next;
 
-	while (current != NULL) {
+	while (current != nullptr) {
 		next = current->next;
 		// 不需要手动释放 std::wstring 对象的内存
 		delete current;
 		current = next;
 	}
 
-	head = NULL;
+	head = nullptr;
 	mywindows::log(L"Free ConfigList complete");
 }
 // 删除配置项
@@ -441,7 +441,7 @@ void config::replace(const std::wstring& name, const int value)
 void config::printAllConfigItems() {
 	mywindows::log(L" Configuration:");
 	Node* current = head;
-	while (current != NULL) {
+	while (current != nullptr) {
 		mywindows::log(L"%s: %s", current->item.name.c_str(), current->item.value.c_str());
 		current = current->next;
 	}

@@ -9,8 +9,8 @@
 std::mutex mywindows::logMutex, mywindows::randomlock;
 int mywindows::screenHeight = GetSystemMetrics(SM_CYSCREEN);
 int mywindows::screenWidth = GetSystemMetrics(SM_CXSCREEN);
-int mywindows::windowWidth = screenWidth;
-int mywindows::windowHeight = screenHeight;
+int mywindows::WW = screenWidth;
+int mywindows::WH = screenHeight;
 int mywindows::windowTop;
 int mywindows::windowLeft;
 int mywindows::indices[10];
@@ -18,7 +18,7 @@ HWND mywindows::main_hwnd;
 HWND mywindows::load_hwnd;
 HWND mywindows::float_hWnd;
 HWND mywindows::Quit_hwnd;
-HINSTANCE mywindows::hinstance = 0;
+HINSTANCE mywindows::hinstance = nullptr;
 Log mywindows::logf(LOGPATH, 0), mywindows::errlogf(ERR_LOGPATH, 0);
 bool mywindows::debug = false;
 
@@ -48,7 +48,7 @@ bool mywindows::CreatedMultipleDirectory(const std::string& direct)
 	std::vector< std::string>::iterator vIter = vpath.begin();
 	for (; vIter != vpath.end(); vIter++)
 	{
-		bSuccess = CreateDirectoryA(vIter->c_str(), NULL) ? TRUE : FALSE;
+		bSuccess = CreateDirectoryA(vIter->c_str(), nullptr) ? TRUE : FALSE;
 	}
 	return bSuccess;
 }
@@ -59,7 +59,7 @@ void mywindows::removeFileNameFromPath(char* path) {
 	// 找到最后一个'\'的位置
 	char* lastSlash = strrchr(path, '\\');
 	// 如果找到了最后一个'\'，并且它后面还有字符
-	if (lastSlash != NULL && lastSlash < path + len - 1) {
+	if (lastSlash != nullptr && lastSlash < path + len - 1) {
 		// 将最后一个'\'后面的所有字符（包括它自己）替换为字符串结束符'\0'
 		*lastSlash = '\0';
 	}
@@ -70,7 +70,7 @@ void mywindows::removeFileNameFromPath(wchar_t* path) {
 	// 找到最后一个'\'的位置
 	wchar_t* lastSlash = wcsrchr(path, L'\\');
 	// 如果找到了最后一个'\'，并且它后面还有字符
-	if (lastSlash != NULL && lastSlash < path + len - 1) {
+	if (lastSlash != nullptr && lastSlash < path + len - 1) {
 		// 将最后一个'\'后面的所有字符（包括它自己）替换为字符串结束符'\0'
 		*lastSlash = '\0';
 	}
@@ -88,13 +88,13 @@ void mywindows::removeFileNameFromPath(std::wstring& path) {
 //INFO输出日志
 void mywindows::log(const char* format, ...) {
 	if (!debug) {
-		if (format == NULL)errlog("meet a void string");
+		if (format == nullptr)errlog("meet a void string");
 		else {
 			va_list args;
 			va_start(args, format);
-			int length = vsnprintf(0, 0, format, args) + 1;
+			int length = vsnprintf(nullptr, 0, format, args) + 1;
 			char* buffer = new char[length];
-			if (buffer == NULL) {
+			if (buffer == nullptr) {
 				// 如果内存分配失败，输出错误信息
 				errlog("memory error(log)");
 				va_end(args);
@@ -109,7 +109,7 @@ void mywindows::log(const char* format, ...) {
 }
 void mywindows::log(const wchar_t* format, ...) {
 	if (!debug) {
-		if (format == NULL) errlog(L"meet a void string");
+		if (format == nullptr) errlog(L"meet a void string");
 		else {
 			va_list args;
 			va_start(args, format);
@@ -129,8 +129,8 @@ void mywindows::log(const wchar_t* format, ...) {
 }
 //ERROR输出日志
 void mywindows::errlog(const char* format, ...) {
-	if (format == NULL)errlog("meet a void string");
-	if (format == NULL)return;
+	if (format == nullptr)errlog("meet a void string");
+	if (format == nullptr)return;
 	va_list args;
 	va_start(args, format);
 	int length = _vscprintf(format, args) + 1;
@@ -142,8 +142,8 @@ void mywindows::errlog(const char* format, ...) {
 	va_end(args);
 }
 void mywindows::errlog(const wchar_t* format, ...) {
-	if (format == NULL)errlog(L"meet a void string");
-	if (format == NULL)return;
+	if (format == nullptr)errlog(L"meet a void string");
+	if (format == nullptr)return;
 	va_list args;
 	va_start(args, format);
 	int length = _vscwprintf(format, args) + 1;
@@ -160,11 +160,11 @@ void mywindows::errlog(const wchar_t* format, ...) {
 	va_end(args);
 }
 // 函数用于查找数组中特定值的所有位置
-int* mywindows::find(int* array, int size, int valueToFind, int* count) {
+int* mywindows::find(int* array, const int size, const int valueToFind, int* count) {
 	// 分配一个动态数组来存储找到的索引
-	if (indices == NULL) {
+	if (indices == nullptr) {
 		// 如果内存分配失败，返回 NULL
-		return NULL;
+		return nullptr;
 	}
 	int indexCount = 0; // 用于记录找到的索引数量
 
@@ -180,13 +180,13 @@ int* mywindows::find(int* array, int size, int valueToFind, int* count) {
 
 	// 如果没有找到任何匹配的值，释放分配的内存并返回 NULL
 	if (indexCount == 0) {
-		return NULL;
+		return nullptr;
 	}
 
 	return indices; // 返回包含所有匹配索引的数组
 }
 // 获取字符串宽度
-int mywindows::GetStringWidth(HDC hdc, const std::wstring& str, int height) {
+int mywindows::GetStringWidth(const HDC hdc, const std::wstring& str, int height) {
 	RECT rect = { 0, 0, 0, 0 };
 	DrawText(hdc, str.c_str(), -1, &rect, DT_CALCRECT | DT_SINGLELINE);
 	return rect.right - rect.left;
@@ -195,20 +195,20 @@ int mywindows::GetStringWidth(HDC hdc, const std::wstring& str, int height) {
 void mywindows::reboot()
 {
 	TCHAR szFileName[MAX_PATH];
-	GetModuleFileName(NULL, szFileName, MAX_PATH); // 获取当前执行文件的路径
+	GetModuleFileName(nullptr, szFileName, MAX_PATH); // 获取当前执行文件的路径
 
 	STARTUPINFO si = { sizeof(STARTUPINFO) };
 	PROCESS_INFORMATION pi;
 
 	// 创建一个新的进程来运行当前程序
 	if (CreateProcess(szFileName,   // 程序路径
-		NULL,         // 命令行参数
-		NULL,         // 进程安全属性
-		NULL,         // 线程安全属性
+	                  nullptr,         // 命令行参数
+	                  nullptr,         // 进程安全属性
+	                  nullptr,         // 线程安全属性
 		FALSE,        // 句柄继承选项
 		0,            // 创建标志
-		NULL,         // 使用父进程的环境块
-		NULL,         // 使用父进程的起始目录
+	                  nullptr,         // 使用父进程的环境块
+	                  nullptr,         // 使用父进程的起始目录
 		&si,          // 指向STARTUPINFO结构的指针
 		&pi))         // 指向PROCESS_INFORMATION结构的指针
 	{

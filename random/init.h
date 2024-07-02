@@ -14,4 +14,5 @@ public:
 	static DWORD WINAPI Upgrade();    // –ﬁ∏ƒ’‚¿Ô
 	static bool cheakIsFontInstalled(const std::wstring fontName);
 	static void music();
+	static void config();
 };

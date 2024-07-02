@@ -1,16 +1,14 @@
 #include "floatwindow.h"
 #include<Windows.h>
 #include "mywindows.h"
-#include "resource.h"
 #include "set-json.h"
 #include "config.h"
 #include<thread>
 #include <dshow.h>
 #include <chrono>
 
-extern set2 setscreen;
 bool showfloatwindow = 1,showQuitwindow=1;
-WNDPROC floatwindow::g_OrigFloatWndProc = NULL;
+WNDPROC floatwindow::g_OrigFloatWndProc = nullptr;
 bool floatwindow::is_mouse_dragging;
 POINT floatwindow::p, floatwindow::p1;
 POINT floatwindow::last_mouse_pos;
@@ -62,7 +60,7 @@ void floatwindow::createWindow() {
 		WS_EX_LAYERED | WS_EX_TOPMOST| WS_EX_TOOLWINDOW,
 		L"FLOAT",L"Float Window", WS_POPUPWINDOW,
 		floatWndX, floatWndY, floatWndWidth, floatWndHeight,
-		NULL, NULL, mywindows::hinstance, NULL);
+		nullptr, nullptr, mywindows::hinstance, nullptr);
 
 	// 设置悬浮窗口的初始透明度
 	SetLayeredWindowAttributes(mywindows::float_hWnd, 0, 128, LWA_ALPHA);
@@ -72,7 +70,7 @@ void floatwindow::createWindow() {
 	int x, y, w, h;
 	x = 0; y = 0; w = mywindows::screenWidth; h = mywindows::screenHeight * 0.3;
 	mywindows::Quit_hwnd = CreateWindowEx(WS_EX_LAYERED | WS_EX_TOPMOST|WS_EX_TOOLWINDOW,
-		L"QUIT", L"", WS_VISIBLE | WS_POPUP, x, y, w, h, NULL, NULL, mywindows::hinstance, 0);
+		L"QUIT", L"", WS_VISIBLE | WS_POPUP, x, y, w, h, nullptr, nullptr, mywindows::hinstance, nullptr);
 	SetLayeredWindowAttributes(mywindows::Quit_hwnd, 0, 200, LWA_ALPHA);
 	ShowWindow(mywindows::Quit_hwnd, SW_HIDE);
 }
@@ -93,7 +91,7 @@ void floatwindow::hideQuitWindow()
 		showing = 0;
 	}
 }
-LRESULT floatwindow::nchittest(WPARAM wParam)
+LRESULT floatwindow::nchittest(const WPARAM wParam)
 {
 	if (wParam == HTLEFT)
 	{
@@ -105,7 +103,7 @@ LRESULT floatwindow::nchittest(WPARAM wParam)
 
 POINT prevPos;
 
-void floatwindow::lbuttondown(WPARAM wParam)
+void floatwindow::lbuttondown(const WPARAM wParam)
 {
 	if (wParam == HTCLIENT)
 	{
@@ -208,14 +206,14 @@ void floatwindow::lbuttonup()
 		ShowWindow(mywindows::Quit_hwnd,SW_HIDE);
 		PostQuitMessage(0);
 	}
-	KillTimer(NULL, TimerID);
+	KillTimer(nullptr, TimerID);
 	TimerID = NULL;
 	uplbutton = 1;
 	std::thread m(movewindow);
 	m.detach();
 }
 
-void floatwindow::lbuttonclick(WPARAM wParam)
+void floatwindow::lbuttonclick(const WPARAM wParam)
 {
 	if (wParam == HTCLIENT)
 	{

@@ -55,14 +55,17 @@ public:
 	set2(std::string& jsonfile);
 	spage getpage(int settingpage) { return pages[settingpage]; }
 	void clicked(int x, int y);
-	void paint(Gp *p);
+	void paint();
 	void quit();
 	void reinit();
 	void repaint();
 	void rereadconfig();
 	void resetplace();
+	void enter();
 	void seteditbox(LPARAM lParam, WPARAM wParam);
+	void setGp(Gp* p);
 private:
+	Gp* p;
 	BITMAP* bitmaps[BitmapCounts];
 	bool isused[40] = { 0 },needReboot=0;
 	HWND CreateEditBox(HWND hWndParent, int NUMBER, int x, int y, int w, int h, const wchar_t* words);
@@ -85,8 +88,8 @@ private:
 	void OpenFile(sitem item);
 	void reloadbmp(sitem item);
 	nlohmann::json rollback(std::string jsonpath);
-	void showitem(sitem item, Gp *p);
-	void switchbm(sitem item,Gp *p);
-	void textbox(sitem item,Gp *p);
+	void showitem(sitem item);
+	void switchbm(sitem item);
+	void textbox(sitem item);
 	void cheakLimit(sitem item);
 };

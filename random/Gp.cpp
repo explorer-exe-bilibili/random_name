@@ -4,6 +4,8 @@
 using namespace Gdiplus;
 using namespace std;
 
+#pragma comment(lib, "Msimg32.lib")
+
 void Gp::Load_() {
 	bitmaps.clear();
 	bitmaps.push_back(std::make_shared<Bitmap>(config::getpath(FLOATPHOTO).c_str()));
@@ -11,7 +13,17 @@ void Gp::Load_() {
 		if (i.get()->GetLastStatus() != Ok) {
 			mywindows::errlog("打开图片失败");
 		}
+		else
+		{
+			HBITMAP tmp;
+			BITMAP tmp_b;
+			i->GetHBITMAP(Gdiplus::Color(0, 0, 0, 0), &tmp);
+			GetObject(tmp, sizeof(BITMAP), &tmp_b);
+			HBitmaps.push_back(tmp);
+			BITMAPs.push_back(tmp_b);
+		}
 	}
+	//bitmaps.clear();
 }
 void Gp::Load()
 {
@@ -46,7 +58,17 @@ void Gp::Load()
 		if (i.get()->GetLastStatus() != Ok) {
 			mywindows::errlog("打开图片失败");
 		}
+		else
+		{
+			HBITMAP tmp;
+			BITMAP tmp_B;
+			i->GetHBITMAP(Gdiplus::Color(0, 0, 0, 0), &tmp);
+			GetObject(tmp, sizeof(BITMAP), &tmp_B);
+			HBitmaps.push_back(tmp);
+			BITMAPs.push_back(tmp_B);
+		}
 	}
+	//bitmaps.clear();
 }
 Gp::~Gp()
 {
@@ -59,7 +81,7 @@ Gp::Gp(HWND hwnd)
 	else if (hwnd == mywindows::float_hWnd)
 		Load_();
 }
-void Gp::Paint(int xDest, int yDest, Bitmap* image, int wDest = 0, int hDest = 0)
+void Gp::Paint(const int xDest, const int yDest, Bitmap* image, const int wDest = 0, const int hDest = 0)
 {
 	if (wDest != 0 && hDest != 0) {
 		graphic.get()->DrawImage(image, xDest, yDest, wDest, hDest);
@@ -68,17 +90,65 @@ void Gp::Paint(int xDest, int yDest, Bitmap* image, int wDest = 0, int hDest = 0
 		graphic.get()->DrawImage(image, xDest, yDest);
 	}
 }
-void Gp::Paint(int xDest, int yDest, Bitmap* image)
+void Gp::Paint(const int xDest, const int yDest, Bitmap* image)
 {
 	graphic.get()->DrawImage(image, xDest, yDest);
 }
-void Gp::Paint(int xDest, int yDest, int wDest, int hDest, int number)
+void Gp::Paint(const int xDest, const int yDest, const int wDest, const int hDest, const int number)
 {
 	graphic.get()->DrawImage(bitmaps[number].get(), xDest, yDest, wDest, hDest);
+	//HDC hdc = GetDC();
+	//HDC hdcMem = CreateCompatibleDC(hdc);
+	//SelectObject(hdcMem, HBitmaps[number]);
+	//int w = BITMAPs[number].bmWidth;
+	//int h = BITMAPs[number].bmHeight;
+	//// 设置混合函数
+	//BLENDFUNCTION blendFunc;
+	//blendFunc.BlendOp = AC_SRC_OVER;
+	//blendFunc.BlendFlags = 0;
+	//blendFunc.SourceConstantAlpha = 255; // 255 = 不透明，0 = 完全透明
+	//blendFunc.AlphaFormat = AC_SRC_ALPHA; // 使用源图像的Alpha通道
+
+	//AlphaBlend(hdc, xDest, yDest, wDest, hDest, hdcMem, 0, 0, w, h, blendFunc);
 }
-void Gp::Paint(int xDest, int yDest, int number)
+void Gp::Paint(const int xDest, const int yDest, const int number)
 {
 	graphic.get()->DrawImage(bitmaps[number].get(), xDest, yDest);
+	//HDC hdc = GetDC();
+	//HDC hdcMem = CreateCompatibleDC(hdc);
+	//SelectObject(hdcMem, HBitmaps[number]);
+	//int w = BITMAPs[number].bmWidth;
+	//int h = BITMAPs[number].bmHeight;
+	//// 设置混合函数
+	//BLENDFUNCTION blendFunc;
+	//blendFunc.BlendOp = AC_SRC_OVER;
+	//blendFunc.BlendFlags = 0;
+	//blendFunc.SourceConstantAlpha = 255; // 255 = 不透明，0 = 完全透明
+	//blendFunc.AlphaFormat = AC_SRC_ALPHA; // 使用源图像的Alpha通道
+
+	//AlphaBlend(hdc, xDest, yDest, w, h, hdcMem, 0, 0, w, h, blendFunc);
+}
+
+void Gp::DrawString(std::wstring str, const HFONT font, const int x, const int y, const int R, const int G, const int B)
+{
+	HDC hdc;
+	hdc= GetDC();
+	SetBkMode(hdc, TRANSPARENT);
+	SelectObject(hdc, font);
+	SetTextColor(hdc, RGB(R, G, B));
+	TextOut_(hdc, x, y, str.c_str());
+	ReleaseDC(hdc);
+}
+
+void Gp::DrawString(std::string str, const HFONT font, const int x, const int y, const int R, const int G, const int B)
+{
+	HDC hdc;
+	hdc = GetDC();
+	SetBkMode(hdc, TRANSPARENT);
+	SelectObject(hdc, font);
+	SetTextColor(hdc, RGB(R, G, B));
+	TextOutA(hdc, x, y, str.c_str(), str.size());
+	ReleaseDC(hdc);
 }
 
 HDC Gp::GetDC()
@@ -86,7 +156,7 @@ HDC Gp::GetDC()
 	return graphic.get()->GetHDC();
 }
 
-void Gp::ReleaseDC(HDC hdc)
+void Gp::ReleaseDC(const HDC hdc)
 {
 	graphic.get()->ReleaseHDC(hdc);
 }

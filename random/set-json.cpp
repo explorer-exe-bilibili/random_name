@@ -8,17 +8,15 @@
 #include<nlohmann\json.hpp>
 #include<thread>
 
-//限制项
-#define NOLIMIT 0
-#define BETWEENCOUNT 1<<0
-#define RESTART 1<<1
-#define S_WINDOWTITLE 1<<2
-#define ISFILE 1<<3
-#define ISBITMAP 1<<4
-#define RERAN 1<<5
 
+#define NOLIMIT 0
 #define AFTER 2
 #define BEFORE 1
+#define BETWEENCOUNT 100
+#define RESTART 10
+#define S_WINDOWTITLE 200
+#define ISFILE 300
+#define ISBITMAP 400
 #define FLOATPIC 5000
 #define MAXWINDOWSIZE 1145141919
 #define BITMAPC "BitmapNumber"
@@ -61,12 +59,6 @@ set2::set2() {
 set2::~set2() {
 }
 void set2::quit() {
-	if(needReboot)
-	{
-		int s = MessageBox(NULL, L"重启生效，是否重启？", L"提示", MB_YESNO | MB_ICONQUESTION);
-		if (s == IDYES)
-			mywindows::reboot();
-	}
 	directshow::music(ENTER);
 	char n = 0;
 	while (n <= 20) {
@@ -74,7 +66,7 @@ void set2::quit() {
 			DestroyWindow(textboxhwnd[n]);
 		n++;
 	}
-	ui::screenmode = FIRST_MENU;
+	ui::screenmode = FIRST_SCREEN;
 	ui::ScreenModeChanged = 1;
 	for (n = 0; n < 40; n++)isused[n] = 0;
 	firstpaint = 1;
@@ -87,246 +79,12 @@ void set2::reinit()
 {
 	init();
 }
-json set2::rollback(string jsonpath) {
-	Log slog("files\\log\\set-json.log", 0);
-	if(mywindows::debug)
-	slog << "try to rollback setting page" << endl;
-	// 创建JSON数据
-	json j;
-	json p;
-	json i;
-	p[TITLE] = G2U("图片");
-	i[NAME] = G2U("卡池1图片"); i[CONFIGNAME] = "over1"; i[FILECHOOSE] = G2U("选择卡池1图片");
-	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP; i[NUMBER] = 1; i[BITMAPC] = 0;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("卡池2图片"); i[CONFIGNAME] = "over2"; i[FILECHOOSE] = G2U("选择卡池2图片");
-	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP; i[NUMBER] = 2; i[BITMAPC] = 1;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("卡池3图片"); i[CONFIGNAME] = "over3"; i[FILECHOOSE] = G2U("选择卡池3图片");
-	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP; i[NUMBER] = 3; i[BITMAPC] = 2;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("卡池4图片"); i[CONFIGNAME] = "over4"; i[FILECHOOSE] = G2U("选择卡池4图片");
-	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP; i[NUMBER] = 4; i[BITMAPC] = 3;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 11;
-	p["item"].push_back(i); i.clear();
-	j["pages"].push_back(p); p.clear();
-	p[TITLE] = G2U("名单与卡池");
-	i[NAME] = G2U("卡池1名单"); i[CONFIGNAME] = "namesfile1"; i[FILECHOOSE] = G2U("选择卡池1名单"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 1;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("卡池2名单"); i[CONFIGNAME] = "namesfile2"; i[FILECHOOSE] = G2U("选择卡池2名单"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 2;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("卡池3名单"); i[CONFIGNAME] = "namesfile3"; i[FILECHOOSE] = G2U("选择卡池3名单"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 3;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("卡池4名单"); i[CONFIGNAME] = "namesfile4"; i[FILECHOOSE] = G2U("选择卡池4名单"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 4;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("抽卡时名字的R值(RGB)"); i[CONFIGNAME] = "text red"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 255; i[MIN] = 0;
-	i[OUTOFLIMIT] = G2U("输入一个0-255之间的数字"); i[NUMBER] = 5;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("抽卡时名字的G值(RGB)"); i[CONFIGNAME] = "text green"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 255; i[MIN] = 0;
-	i[OUTOFLIMIT] = G2U("输入一个0-255之间的数字"); i[NUMBER] = 6;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("抽卡时名字的B值(RGB)"); i[CONFIGNAME] = "text blue"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 255; i[MIN] = 0;
-	i[OUTOFLIMIT] = G2U("输入一个0-255之间的数字"); i[NUMBER] = 7;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("抽背卡池"); i[CONFIGNAME] = "special"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT|RERAN; i[MAX] = 4; i[MIN] = 0;
-	i[OUTOFLIMIT] = G2U("输入一个0-4之间的数字（0表示禁用）"); i[NUMBER] = 11;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("模拟抽卡概率卡池"); i[CONFIGNAME] = "typical mode"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT|RERAN; i[MAX] = 4; i[MIN] = 0;
-	i[OUTOFLIMIT] = G2U("输入一个0-4之间的数字（0表示禁用）"); i[NUMBER] = 12;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 13;
-	p["item"].push_back(i); i.clear();
-	j["pages"].push_back(p); p.clear();
-	p[TITLE] = G2U("视频");
-	i[NAME] = G2U("单发3星视频"); i[CONFIGNAME] = "signal 3star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("选择单发3星视频"); i[FILETYPE] = "video"; i[NUMBER] = 1;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("单发4星视频"); i[CONFIGNAME] = "signal 4star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("选择单发4星视频"); i[FILETYPE] = "video"; i[NUMBER] = 2;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("单发5星视频"); i[CONFIGNAME] = "signal 5star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("选择单发5星视频"); i[FILETYPE] = "video"; i[NUMBER] = 3;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("十发4星视频"); i[CONFIGNAME] = "group 4star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("选择十发4星视频"); i[FILETYPE] = "video"; i[NUMBER] = 4;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("十发5星视频"); i[CONFIGNAME] = "group 5star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("选择十发5星视频"); i[FILETYPE] = "video"; i[NUMBER] = 5;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("关闭视频"); i[CONFIGNAME] = "off video"; i[ISSWITCH] = 1; i[NUMBER] = 11;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 12;
-	p["item"].push_back(i); i.clear();
-	j["pages"].push_back(p); p.clear();
-	p[TITLE] = G2U("悬浮窗(重启生效)");
-	i[NAME] = G2U("悬浮窗"); i[CONFIGNAME] = "open float window"; i[ISSWITCH] = 1; i[NUMBER] = 1;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("初始x坐标"); i[CONFIGNAME] = "float window x"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = MAXWINDOWSIZE;
-	i[MIN] = 1;i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 2; 
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("初始y坐标"); i[CONFIGNAME] = "float window y"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = MAXWINDOWSIZE;
-	i[MIN] = 1;i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 3; 
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("宽度"); i[CONFIGNAME] = "float window width"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT | RESTART; i[MAX] = MAXWINDOWSIZE;
-	i[MIN] = 1;i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 4; 
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("高度"); i[CONFIGNAME] = "float window height"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT | RESTART; i[MAX] = MAXWINDOWSIZE;
-	i[MIN] = 1;i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 5; 
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("滑动系数"); i[CONFIGNAME] = "float window Mu"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 1; i[MIN] = 0;
-	i[OUTOFLIMIT] = G2U("大小不能超过1或小于0"); i[NUMBER] = 6;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("悬浮窗图片"); i[CONFIGNAME] = "float window picture"; i[FILECHOOSE] = G2U("选择悬浮窗图片");
-	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP|RESTART; i[NUMBER] = 11; i[BITMAPC] = FLOATPIC;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 12;
-	p["item"].push_back(i); i.clear();
-	j["pages"].push_back(p); p.clear();
-	p[TITLE] = G2U("杂项");
-	i[NAME] = G2U("窗口模式"); i[CONFIGNAME] = "window mode(not full screen)"; i[ISSWITCH] = 1; i[NUMBER] = 1; i[LIMIT] = RESTART;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("标题"); i[CONFIGNAME] = "title name"; i[ISEDIT] = 1; i[LIMIT] = S_WINDOWTITLE; i[NUMBER] = 2;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("设置页面json文件开关"); i[CONFIGNAME] = "cancel setting json file"; i[ISSWITCH] = 1; i[NUMBER] = 3;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("字体兼容模式(出现字体错误再开)"); i[CONFIGNAME] = "the new font is unsuit"; i[ISSWITCH] = 1; i[NUMBER] = 4;i[LIMIT]=RESTART;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 11;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("调试模式"); i[ISSWITCH] = 1; i[NUMBER] = 5;i[CONFIGNAME] = "debug mode";i[LIMIT]=RESTART;
-	p["item"].push_back(i); i.clear();
-	j["pages"].push_back(p); p.clear();
-	// 写入JSON文件
-	if (!config::getint(NOSETTINGFILE)) {
-		std::ofstream file(jsonpath);
-		if (file.is_open()) {
-			try
-			{
-				if (mywindows::debug) {
-					slog << slog.pt() << "[INFO]begin to write json items";
-					file << j.dump(4); // 将JSON数据写入文件，4表示缩进4个空格
-					file.close();
-					slog << "[INFO]JSON data written to" << jsonpath << endl;
-				}
-			}
-			catch (const std::exception& e)
-			{
-				slog << slog.pt() << "[ERROR]meet an error when writing json item (rollback):" << e.what() << endl;
-				return j;
-			}
-		}
-		else {
-			slog << "[ERROR]Failed to open file for writing" << std::endl;
-		}
-	}
-	return j;
-}
-void set2::clicked(int x, int y)
-{
-	int totalp = pages.size();
-	int number = -1;
-	int half = 0;
-	if (x >= ui::exitx AND x <= ui::exitxend AND y >= ui::exity AND y <= ui::exityend)quit();
-	else if (x >= nextbmx AND x <= nextxend AND y >= nextbmy AND y <= nextyend) {
-		number = 0;
-		settingpage--;
-		if (settingpage < 1) {
-			settingpage = totalp;
-		}
-		changepage();
-	}
-	else if (x >= lastbmx AND x <= lastxend AND y >= lastbmy AND y <= lastyend) {
-		number = 0;
-		settingpage++;
-		if (settingpage > totalp) {
-			settingpage = 1;
-		}
-		changepage();
-	}
-	else {
-		sNode* current = shead;
-		while (current != NULL) {
-			if (x >= current->x AND x <= current->xend AND y >= current->y AND y <= current->yend) {
-				if (x >= current->x AND x <= current->x + (current->xend - current->x) / 2)
-					half = BEFORE;
-				else half = AFTER;
-				number = current->number;
-				break;
-			}
-			current = current->next;
-		}
-	}
-	if (number != -1) {
-		directshow::music(CLICK);
-		if (number > 0) {
-			for (const auto& item : pages[settingpage - 1].items) {
-				if (number == item.Number) {
-					if (item.IsSwitch) {
-						config::turnUpSideDown(item.ConfigName);
-						rereadconfig();
-					}
-					else if (item.IsFile) {
-						if (half == BEFORE)
-							ChooseFile(item);
-						else {
-							OpenFile(item);
-						}
-						if (item.Limit & ISBITMAP) {
-							reloadbmp(item);
-						}
-						cheakLimit(item);
-					}
-				}
-			}
-		}
-	}
-}
-void set2::cheakLimit(sitem item)
-{
-	if (item.Limit & RESTART)
-	{
-		needReboot = 1;
-	}
-	if (item.Limit & RERAN)
-	{
-		reran = 1;
-	}
-}
-void set2::EditBoxEditor(sitem item, wstring tmp)
-{
-	if(item.Limit&S_WINDOWTITLE)
-	{
-		SetWindowTextW(mywindows::main_hwnd, tmp.c_str());
-	}
-	if(item.Limit&BETWEENCOUNT)
-	{
-		int value;
-		try
-		{
-			value = std::stoi(tmp);
-		}
-		catch (const std::exception& e)
-		{
-			slog << "[ERROR]meet a error :" << e.what() << endl;
-			MessageBox(NULL, L"请输入数字", L"错误", MB_ICONERROR);
-			return;
-		}
-		if (value < item.min || value > item.max) {
-			MessageBoxA(NULL, U2G(item.OutOfLimitOutPut).c_str(), "错误", MB_ICONERROR);
-			return;
-		}
-	}
-	if(item.Limit&ISFILE||item.Limit&ISBITMAP)
-	{
-		if (!std::filesystem::exists(tmp))return;
-		if (tmp == Log::wrunpath + config::get(item.ConfigName))return;
-	}
-	cheakLimit(item);
-	config::replace(item.ConfigName, tmp);
-}
-
-
 void set2::repaint()
 {
 	firstpaint = 1;
 	InvalidateRect(mywindows::main_hwnd, NULL, FALSE);
 }
+
 void set2::changepage()
 {
 	char n = 0;
@@ -342,33 +100,34 @@ void set2::changepage()
 void set2::resetplace() {
 	mywindows::log(L"Free Setting List complete");
 	for (char i = 1; i <= 10; i++) {
-		sxy[i].x = mywindows::windowWidth * 0.05;
-		sxy[i].y = mywindows::windowHeight * (i) * 0.09;
-		sxy[i].bmx = mywindows::windowWidth * 0.25;
-		sxy[i].bmxend = mywindows::windowWidth * 0.35;
+		sxy[i].x = mywindows::WW * 0.05;
+		sxy[i].y = mywindows::WH * (i) * 0.09;
+		sxy[i].bmx = mywindows::WW * 0.25;
+		sxy[i].bmxend = mywindows::WW * 0.35;
 		sxy[i].bmy = sxy[i].y;
-		sxy[i].bmyend = sxy[i].y + mywindows::windowHeight * 0.07;
-		sxy[i].bmw = mywindows::windowWidth * 0.1;
-		sxy[i].bmh = mywindows::windowWidth * 0.03;
+		sxy[i].bmyend = sxy[i].y + mywindows::WH * 0.07;
+		sxy[i].bmw = mywindows::WW * 0.1;
+		sxy[i].bmh = mywindows::WW * 0.03;
 	}
 	for (char i = 11; i <= 19; i++) {
-		sxy[i].x = mywindows::windowWidth * 0.55;
-		sxy[i].y = mywindows::windowHeight * (i - 9) * 0.09;
-		sxy[i].bmx = mywindows::windowWidth * 0.75;
-		sxy[i].bmxend = mywindows::windowWidth * 0.85;
+		sxy[i].x = mywindows::WW * 0.55;
+		sxy[i].y = mywindows::WH * (i - 9) * 0.09;
+		sxy[i].bmx = mywindows::WW * 0.75;
+		sxy[i].bmxend = mywindows::WW * 0.85;
 		sxy[i].bmy = sxy[i].y;
-		sxy[i].bmyend = sxy[i].y + mywindows::windowHeight * 0.07;
-		sxy[i].bmw = mywindows::windowWidth * 0.1;
-		sxy[i].bmh = mywindows::windowWidth * 0.03;
+		sxy[i].bmyend = sxy[i].y + mywindows::WH * 0.07;
+		sxy[i].bmw = mywindows::WW * 0.1;
+		sxy[i].bmh = mywindows::WW * 0.03;
 	}
-	nextbmx = mywindows::windowWidth * 0.73;
-	nextbmy = mywindows::windowHeight * 0.91;
-	nextxend = mywindows::windowWidth * 0.752;
-	nextyend = mywindows::windowHeight * 0.95;
-	lastbmx = mywindows::windowWidth * 0.8;
-	lastbmy = mywindows::windowHeight * 0.91;
-	lastxend = mywindows::windowWidth * 0.822;
-	lastyend = mywindows::windowHeight * 0.95;
+	nextbmx = mywindows::WW * 0.73;
+	nextbmy = mywindows::WH * 0.91;
+	nextxend = mywindows::WW * 0.752;
+	nextyend = mywindows::WH * 0.95;
+	lastbmx = mywindows::WW * 0.8;
+	lastbmy = mywindows::WH * 0.91;
+	lastxend = mywindows::WW * 0.822;
+	lastyend = mywindows::WH * 0.95;
+	firstpaint = 1;
 }
 void set2::rereadconfig() {
 	offmusic = config::getint(OFFMUSIC);
@@ -380,19 +139,19 @@ void set2::rereadconfig() {
 	else
 		mciSendString(L"play bgm repeat", NULL, 0, NULL);
 }
-void set2::paint(Gp* p) {
+void set2::paint() {
 	if (firstpaint) {
-		p->Paint(0, 0, mywindows::windowWidth, mywindows::windowHeight, SetBM);
+		p->Paint(0, 0, mywindows::WW, mywindows::WH, SetBM);
 		firstpaint = 0;
 	}
 	p->Paint(ui::exitx, ui::exity, ui::exitxend - ui::exitx, ui::exityend - ui::exity, exiti);
 	wstring title = pages[settingpage - 1].Title;
 	int titlex, titley;
-	int stringWidth = 0.0272 * mywindows::windowWidth * title.length();
-	titlex = (mywindows::windowWidth - stringWidth) / 2;
-	titley = mywindows::windowHeight * 0.05;
+	int stringWidth = 0.0272 * mywindows::WW * title.length();
+	titlex = (mywindows::WW - stringWidth) / 2;
+	titley = mywindows::WH * 0.05;
 	for (const auto& item : pages[settingpage - 1].items) {
-		showitem(item, p);
+		showitem(item);
 	}
 	unsigned int totalp = static_cast<int>(pages.size());
 	wstring t = to_wstring(settingpage) + L"/" + to_wstring(totalp);
@@ -405,7 +164,7 @@ void set2::paint(Gp* p) {
 	TextOut_(hdc, nextbmx, nextbmy, L"b");
 	TextOut_(hdc, lastbmx, lastbmy, L"c");
 	SelectObject(hdc, ui::text_mid);
-	TextOut_(hdc, mywindows::windowWidth * 0.765, mywindows::windowHeight * 0.91, t.c_str());
+	TextOut_(hdc, mywindows::WW * 0.765, mywindows::WH * 0.91, t.c_str());
 	p->ReleaseDC(hdc);
 	if (PictureNeedReload.neetreload AND PictureNeedReload.BitmapNumber <= p->bitmaps.size()) {
 		Gdiplus::Bitmap* newBitmap = new Gdiplus::Bitmap(config::getpath(PictureNeedReload.ConfigName).c_str());
@@ -418,6 +177,21 @@ void set2::paint(Gp* p) {
 	}
 	PictureNeedReload.neetreload = 0;
 }
+
+void set2::setGp(Gp *p)
+{
+	this->p = p;
+}
+
+void set2::enter()
+{
+	directshow::music(ENTER);
+	ui::screenmode = SETTING;
+	firstpaint = 1;
+	InvalidateRect(mywindows::main_hwnd, nullptr, FALSE);
+}
+
+
 void set2::OpenFile(sitem item)
 {
 	wstring path = config::getpath(item.ConfigName);
@@ -470,7 +244,7 @@ void set2::Load(string jsonpath) {
 				t.ConfigName = sth2sth::str2wstr(sItem.value("ConfigName", ""));
 				t.FileChooseWindowName = sth2sth::str2wstr(U2G(sItem.value("FileChooseWindowName", "")));
 				t.FileType = sItem.value("FileType", "All");
-				if (t.Limit & BETWEENCOUNT) {
+				if (t.Limit == BETWEENCOUNT) {
 					t.max = sItem.value("max", 0);
 					t.min = sItem.value("min", 0);
 					t.OutOfLimitOutPut = sItem.value("OutOfLimitOutPut", "");
@@ -478,7 +252,7 @@ void set2::Load(string jsonpath) {
 						t.max = mywindows::screenWidth;
 					}
 				}
-				else if (t.Limit & ISFILE || t.Limit & ISBITMAP) {
+				else if (t.Limit == ISFILE || t.Limit == ISBITMAP) {
 					t.IsEditBox = 1;
 					t.IsFile = 1;
 				}
@@ -534,8 +308,281 @@ void set2::reloadbmp(sitem item)
 		PictureNeedReload.neetreload = 1;
 	}
 }
+json set2::rollback(string jsonpath) {
+	Log slog("files\\log\\set-json.log", 0);
+	slog << "try to rollback setting page" << endl;
+	// 创建JSON数据
+	json j;
+	json p;
+	json i;
+	p[TITLE] = G2U("图片");
+	i[NAME] = G2U("卡池1图片"); i[CONFIGNAME] = "over1"; i[FILECHOOSE] = G2U("选择卡池1图片");
+	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP; i[NUMBER] = 1; i[BITMAPC] = 0;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("卡池2图片"); i[CONFIGNAME] = "over2"; i[FILECHOOSE] = G2U("选择卡池2图片");
+	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP; i[NUMBER] = 2; i[BITMAPC] = 1;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("卡池3图片"); i[CONFIGNAME] = "over3"; i[FILECHOOSE] = G2U("选择卡池3图片");
+	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP; i[NUMBER] = 3; i[BITMAPC] = 2;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("卡池4图片"); i[CONFIGNAME] = "over4"; i[FILECHOOSE] = G2U("选择卡池4图片");
+	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP; i[NUMBER] = 4; i[BITMAPC] = 3;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 11;
+	p["item"].push_back(i); i.clear();
+	j["pages"].push_back(p); p.clear();
+	p[TITLE] = G2U("名单与卡池");
+	i[NAME] = G2U("卡池1名单"); i[CONFIGNAME] = "namesfile1"; i[FILECHOOSE] = G2U("选择卡池1名单"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 1;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("卡池2名单"); i[CONFIGNAME] = "namesfile2"; i[FILECHOOSE] = G2U("选择卡池2名单"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 2;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("卡池3名单"); i[CONFIGNAME] = "namesfile3"; i[FILECHOOSE] = G2U("选择卡池3名单"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 3;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("卡池4名单"); i[CONFIGNAME] = "namesfile4"; i[FILECHOOSE] = G2U("选择卡池4名单"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 4;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("抽卡时名字的R值(RGB)"); i[CONFIGNAME] = "text red"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 255; i[MIN] = 0;
+	i[OUTOFLIMIT] = G2U("输入一个0-255之间的数字"); i[NUMBER] = 5;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("抽卡时名字的G值(RGB)"); i[CONFIGNAME] = "text green"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 255; i[MIN] = 0;
+	i[OUTOFLIMIT] = G2U("输入一个0-255之间的数字"); i[NUMBER] = 6;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("抽卡时名字的B值(RGB)"); i[CONFIGNAME] = "text blue"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 255; i[MIN] = 0;
+	i[OUTOFLIMIT] = G2U("输入一个0-255之间的数字"); i[NUMBER] = 7;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("抽背卡池"); i[CONFIGNAME] = "special"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 4; i[MIN] = 0;
+	i[OUTOFLIMIT] = G2U("输入一个0-4之间的数字（0表示禁用）"); i[NUMBER] = 11;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 12;
+	p["item"].push_back(i); i.clear();
+	j["pages"].push_back(p); p.clear();
+	p[TITLE] = G2U("视频");
+	i[NAME] = G2U("单发3星视频"); i[CONFIGNAME] = "signal 3star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("选择单发3星视频"); i[FILETYPE] = "video"; i[NUMBER] = 1;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("单发4星视频"); i[CONFIGNAME] = "signal 4star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("选择单发4星视频"); i[FILETYPE] = "video"; i[NUMBER] = 2;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("单发5星视频"); i[CONFIGNAME] = "signal 5star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("选择单发5星视频"); i[FILETYPE] = "video"; i[NUMBER] = 3;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("十发4星视频"); i[CONFIGNAME] = "group 4star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("选择十发4星视频"); i[FILETYPE] = "video"; i[NUMBER] = 4;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("十发5星视频"); i[CONFIGNAME] = "group 5star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("选择十发5星视频"); i[FILETYPE] = "video"; i[NUMBER] = 5;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("关闭视频"); i[CONFIGNAME] = "off video"; i[ISSWITCH] = 1; i[NUMBER] = 11;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 12;
+	p["item"].push_back(i); i.clear();
+	j["pages"].push_back(p); p.clear();
+	p[TITLE] = G2U("悬浮窗(重启生效)");
+	i[NAME] = G2U("悬浮窗"); i[CONFIGNAME] = "open float window"; i[ISSWITCH] = 1; i[NUMBER] = 1;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("初始x坐标"); i[CONFIGNAME] = "float window x"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT + RESTART; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
+	i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 2;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("初始y坐标"); i[CONFIGNAME] = "float window y"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT + RESTART; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
+	i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 3;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("宽度"); i[CONFIGNAME] = "float window width"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT + RESTART; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
+	i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 4;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("高度"); i[CONFIGNAME] = "float window height"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT + RESTART; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
+	i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 5;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("滑动系数"); i[CONFIGNAME] = "float window Mu"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT + RESTART; i[MAX] = 1; i[MIN] = 0;
+	i[OUTOFLIMIT] = G2U("大小不能超过1或小于0"); i[NUMBER] = 6;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("悬浮窗图片"); i[CONFIGNAME] = "float window picture"; i[FILECHOOSE] = G2U("选择悬浮窗图片");
+	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP + RESTART; i[NUMBER] = 11; i[BITMAPC] = FLOATPIC;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 12;
+	p["item"].push_back(i); i.clear();
+	j["pages"].push_back(p); p.clear();
+	p[TITLE] = G2U("杂项");
+	i[NAME] = G2U("窗口模式"); i[CONFIGNAME] = "window mode(not full screen)"; i[ISSWITCH] = 1; i[NUMBER] = 1; i[LIMIT] = RESTART;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("标题"); i[CONFIGNAME] = "title name"; i[ISEDIT] = 1; i[LIMIT] = S_WINDOWTITLE; i[NUMBER] = 2;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("设置页面json文件开关"); i[CONFIGNAME] = "cancel setting json file"; i[ISSWITCH] = 1; i[NUMBER] = 3;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("字体兼容模式(出现字体错误再开)"); i[CONFIGNAME] = "the new font is unsuit"; i[ISSWITCH] = 1; i[NUMBER] = 4;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 11;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("调试模式"); i[ISSWITCH] = 1; i[NUMBER] = 5; i[CONFIGNAME] = "debug mode"; i[LIMIT] = RESTART;
+	p["item"].push_back(i); i.clear();
+	j["pages"].push_back(p); p.clear();
+	// 写入JSON文件
+	if (!config::getint(NOSETTINGFILE)) {
+		std::ofstream file(jsonpath);
+		if (file.is_open()) {
+			try
+			{
+				slog << slog.pt() << "[INFO]begin to write json items";
+				file << j.dump(4); // 将JSON数据写入文件，4表示缩进4个空格
+				file.close();
+				slog << "[INFO]JSON data written to" << jsonpath << endl;
+			}
+			catch (const std::exception& e)
+			{
+				slog << slog.pt() << "[ERROR]meet an error when writing json item (rollback):" << e.what() << endl;
+				return j;
+			}
+		}
+		else {
+			slog << "[ERROR]Failed to open file for writing" << std::endl;
+		}
+	}
+	return j;
+}
+void set2::clicked(int x, int y)
+{
+	int totalp = pages.size();
+	int number = -1;
+	int half = 0;
+	sNode* current = shead;
+	if (x >= ui::exitx AND x <= ui::exitxend AND y >= ui::exity AND y <= ui::exityend)quit();
+	else if (x >= nextbmx AND x <= nextxend AND y >= nextbmy AND y <= nextyend) {
+		number = 0;
+		settingpage--;
+		if (settingpage < 1) {
+			settingpage = totalp;
+		}
+		changepage();
+	}
+	else if (x >= lastbmx AND x <= lastxend AND y >= lastbmy AND y <= lastyend) {
+		number = 0;
+		settingpage++;
+		if (settingpage > totalp) {
+			settingpage = 1;
+		}
+		changepage();
+	}
+	else {
+		while (current != NULL) {
+			if (x >= current->x AND x <= current->xend AND y >= current->y AND y <= current->yend) {
+				if (x >= current->x AND x <= current->x + (current->xend - current->x) / 2)
+					half = BEFORE;
+				else half = AFTER;
+				number = current->number;
+				break;
+			}
+			current = current->next;
+		}
+	}
+	if (number != -1) {
+		directshow::music(CLICK_MUSIC);
+		if (number > 0) {
+			for (const auto& item : pages[settingpage - 1].items) {
+				if (number == item.Number) {
+					if (item.IsSwitch) {
+						config::turnUpSideDown(item.ConfigName);
+						rereadconfig();
+					}
+					else if (item.IsFile) {
+						if (half == BEFORE)
+							ChooseFile(item);
+						else {
+							OpenFile(item);
+						}
+						if (item.Limit == ISBITMAP) {
+							reloadbmp(item);
+						}
+					}
+				}
+			}
+			RECT rect = { current->x,current->y,current->xend,current->yend };
+			InvalidateRect(mywindows::main_hwnd,&rect, FALSE);
+		}
+	}
+}
+void set2::showitem(sitem item) {
+	if (item.IsSwitch) {
+		switchbm(item);
+	}
+	else if (item.IsEditBox) {
+		textbox(item);
+	}
+}
+void set2::textbox(sitem item)
+{
+	int number = item.Number;
+	std::wstring wst;
+	if (item.IsFile) {
+		wst = config::getpath(item.ConfigName);
+	}
+	else {
+		wst = config::get(item.ConfigName);
+	}
+	HDC hdc = p->GetDC();
+	SelectObject(hdc, ui::text_mid);
+	SetBkMode(hdc, TRANSPARENT);
+	SetTextColor(hdc, RGB(236, 229, 216));
+	TextOut_(hdc, sxy[item.Number].x, sxy[item.Number].y + mywindows::WH * 0.01, item.Name.c_str());
+	p->ReleaseDC(hdc);
+	if (isused[number] == 0) {
+		textboxhwnd[number] = CreateEditBox(mywindows::main_hwnd, number, sxy[number].bmx, sxy[number].bmy, sxy[number].bmw, sxy[number].bmh, wst.c_str());
+	}
+	else
+	{
+		MoveWindow(textboxhwnd[number], sxy[number].bmx, sxy[number].bmy, sxy[number].bmw, sxy[number].bmh, TRUE);
+	}
+	if (item.IsFile) {
+		if (!isused[number + 20]) {
+			p->Paint(sxy[number].bmxend, sxy[number].bmy, sxy[number].bmw, sxy[number].bmh, setbutton);
+			HDC hdc = p->GetDC();
+			SelectObject(hdc, ui::text_mid);
+			SetBkMode(hdc, TRANSPARENT);
+			TextOut_(hdc, sxy[number].bmxend + sxy[number].bmw / 2 + mywindows::WW * 0.01, sxy[number].y + mywindows::WH * 0.01, L"打开");
+			TextOut_(hdc, sxy[number].bmxend + mywindows::WW * 0.01, sxy[number].y + mywindows::WH * 0.01, L"选择");
+			p->ReleaseDC(hdc);
+			int x = sxy[number].bmxend, y = sxy[number].bmy, xend = sxy[number].bmxend + sxy[number].bmw, yend = sxy[number].bmh + sxy[number].bmy;
+			if (!isused[number]) {
+				sNode* newnode = new sNode;
+				if (newnode == nullptr) {
+					mywindows::errlog(L"Memory allocation error(textbox)");
+				}
+				newnode->x = x;
+				newnode->xend = xend;
+				newnode->y = y;
+				newnode->yend = yend;
+				newnode->next = shead;
+				newnode->number = number;
+				shead = newnode;
+			}
+		}
+	}
+
+	isused[number] = 1;
+}
+void set2::switchbm(sitem item) {
+	p->Paint(sxy[item.Number].bmx, sxy[item.Number].bmy, sxy[item.Number].bmw, sxy[item.Number].bmh, setbutton);
+	HDC hdc = p->GetDC();
+	SelectObject(hdc, ui::text_mid);
+	SetBkMode(hdc, TRANSPARENT);
+	SetTextColor(hdc, RGB(236, 229, 216));
+	TextOut_(hdc, sxy[item.Number].x, sxy[item.Number].y + mywindows::WH * 0.01, item.Name.c_str());
+	SetBkMode(hdc, OPAQUE);
+	SetBkColor(hdc, RGB(236, 229, 216));
+	SetTextColor(hdc, RGB(0, 0, 0));
+	if (config::getint(item.ConfigName) == 1)
+		TextOut_(hdc, sxy[item.Number].bmx + mywindows::WW * 0.04, sxy[item.Number].bmy + mywindows::WH * 0.01, L"开");
+	else
+		TextOut_(hdc, sxy[item.Number].bmx + mywindows::WW * 0.04, sxy[item.Number].bmy + mywindows::WH * 0.01, L"关");
+	p->ReleaseDC(hdc);
+	int x = sxy[item.Number].bmx, y = sxy[item.Number].bmy, xend = sxy[item.Number].bmxend, yend = sxy[item.Number].bmh + sxy[item.Number].bmy;
+	sNode* newnode = new sNode;
+	if (newnode == NULL) {
+		mywindows::errlog("Memory allocation error(textbox)");
+	};
+	newnode->x = x;
+	newnode->xend = xend;
+	newnode->y = y;
+	newnode->yend = yend;
+	newnode->next = shead;
+	newnode->number = item.Number;
+	shead = newnode;
+}
 void set2::ChooseFile(sitem item)
 {
+loop:
 	OPENFILENAMEW ofn = { 0 };
 	wchar_t strFilename[MAX_PATH] = { 0 }; // 用于接收文件名
 
@@ -557,15 +604,54 @@ void set2::ChooseFile(sitem item)
 	ofn.lpstrInitialDir = NULL; // 初始目录为默认
 	ofn.lpstrTitle = item.FileChooseWindowName.c_str(); // 使用系统默认标题留空即可
 	ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY; // 文件、目录必须存在,隐藏只读选项
+	if (item.FileType == "nameFile") {
+		reran = 1;
+	}
 	if (GetOpenFileNameW(&ofn))
 	{
 		std::wstring filename(strFilename);
 		config::replace(item.ConfigName, filename);
 		Edit_SetText(textboxhwnd[item.Number], filename.c_str());
-		if (item.FileType == "nameFile") {
-			reran = 1;
-		}
 	}
+	else
+	{
+		MessageBoxW(NULL, L"请选择一个文件", NULL, MB_ICONERROR);
+		goto loop;
+	}
+}
+void set2::EditBoxEditor(sitem item, wstring tmp)
+{
+	switch (item.Limit)
+	{
+	case S_WINDOWTITLE:
+		SetWindowTextW(mywindows::main_hwnd, tmp.c_str());
+		break;
+	case BETWEENCOUNT: {
+		int value;
+		try
+		{
+			value = std::stoi(tmp);
+		}
+		catch (const std::exception& e)
+		{
+			slog << "[ERROR]meet a error :" << e.what() << endl;
+			MessageBox(NULL, L"请输入数字", L"错误", MB_ICONERROR);
+			return;
+		}
+		if (value < item.min || value > item.max) {
+			MessageBoxA(NULL, U2G(item.OutOfLimitOutPut).c_str(), "错误", MB_ICONERROR);
+			return;
+		}
+	}break;
+	case ISFILE:
+	case ISBITMAP:
+		if (!std::filesystem::exists(tmp))return;
+		if (tmp == Log::wrunpath + config::get(item.ConfigName))return;
+		break;
+	default:
+		break;
+	}
+	config::replace(item.ConfigName, tmp);
 }
 void set2::seteditbox(LPARAM lParam, WPARAM wParam)
 {
@@ -650,86 +736,4 @@ std::string set2::G2U(const std::string& gbk)
 	pBuf = NULL;
 
 	return retStr;
-}
-void set2::showitem(sitem item, Gp* p) {
-	if (item.IsSwitch) {
-		switchbm(item, p);
-	}
-	else if (item.IsEditBox) {
-		textbox(item, p);
-	}
-}
-void set2::textbox(sitem item, Gp* p)
-{
-	int number = item.Number;
-	std::wstring wst;
-	if (item.IsFile) {
-		wst = config::getpath(item.ConfigName);
-	}
-	else {
-		wst = config::get(item.ConfigName);
-	}
-	HDC hdc = p->GetDC();
-	SelectObject(hdc, ui::text_mid);
-	SetBkMode(hdc, TRANSPARENT);
-	SetTextColor(hdc, RGB(236, 229, 216));
-	TextOut_(hdc, sxy[item.Number].x, sxy[item.Number].y + mywindows::windowHeight * 0.01, item.Name.c_str());
-	p->ReleaseDC(hdc);
-	if (isused[number] == 0) {
-		textboxhwnd[number] = CreateEditBox(mywindows::main_hwnd, number, sxy[number].bmx, sxy[number].bmy, sxy[number].bmw, sxy[number].bmh, wst.c_str());
-	}
-	if (item.IsFile) {
-		if (!isused[number + 20]) {
-			p->Paint(sxy[number].bmxend, sxy[number].bmy, sxy[number].bmw, sxy[number].bmh, setbutton);
-			HDC hdc = p->GetDC();
-			SelectObject(hdc, ui::text_mid);
-			SetBkMode(hdc, TRANSPARENT);
-			TextOut_(hdc, sxy[number].bmxend + sxy[number].bmw / 2 + mywindows::windowWidth * 0.01, sxy[number].y + mywindows::windowHeight * 0.01, L"打开");
-			TextOut_(hdc, sxy[number].bmxend + mywindows::windowWidth * 0.01, sxy[number].y + mywindows::windowHeight * 0.01, L"选择");
-			p->ReleaseDC(hdc);
-			int x = sxy[number].bmxend, y = sxy[number].bmy, xend = sxy[number].bmxend + sxy[number].bmw, yend = sxy[number].bmh + sxy[number].bmy;
-			if (!isused[number]) {
-				sNode* newnode = new sNode;
-				if (newnode == nullptr) {
-					mywindows::errlog(L"Memory allocation error(textbox)");
-				}
-				newnode->x = x;
-				newnode->xend = xend;
-				newnode->y = y;
-				newnode->yend = yend;
-				newnode->next = shead;
-				newnode->number = number;
-				shead = newnode;
-			}
-		}
-	}
-	isused[number] = 1;
-}
-void set2::switchbm(sitem item, Gp* p) {
-	p->Paint(sxy[item.Number].bmx, sxy[item.Number].bmy, sxy[item.Number].bmw, sxy[item.Number].bmh, setbutton);
-	HDC hdc = p->GetDC();
-	SelectObject(hdc, ui::text_mid);
-	SetBkMode(hdc, TRANSPARENT);
-	SetTextColor(hdc, RGB(236, 229, 216));
-	TextOut_(hdc, sxy[item.Number].x, sxy[item.Number].y + mywindows::windowHeight * 0.01, item.Name.c_str());
-	SetBkMode(hdc, OPAQUE);
-	SetBkColor(hdc, RGB(236, 229, 216));
-	SetTextColor(hdc, RGB(0, 0, 0));
-	if (config::getint(item.ConfigName) == 1)
-		TextOut_(hdc, sxy[item.Number].bmx + mywindows::windowWidth * 0.04, sxy[item.Number].bmy + mywindows::windowHeight * 0.01, L"开");
-	else
-		TextOut_(hdc, sxy[item.Number].bmx + mywindows::windowWidth * 0.04, sxy[item.Number].bmy + mywindows::windowHeight * 0.01, L"关");
-	p->ReleaseDC(hdc);
-	int x = sxy[item.Number].bmx, y = sxy[item.Number].bmy, xend = sxy[item.Number].bmxend, yend = sxy[item.Number].bmh + sxy[item.Number].bmy;
-	sNode* newnode = new sNode;
-	if (newnode == NULL) {
-		mywindows::errlog("Memory allocation error(textbox)");
-	};
-	newnode->x = x;
-	newnode->xend = xend;
-	newnode->y = y;
-	newnode->yend = yend;
-	newnode->next = shead;
-	newnode->number = item.Number;
-	shead = newnode;
 }

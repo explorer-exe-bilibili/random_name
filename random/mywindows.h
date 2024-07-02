@@ -17,8 +17,8 @@ public:
 	static std::mutex logMutex, randomlock;
 	static int screenHeight;
 	static int screenWidth;
-	static int windowWidth;
-	static int windowHeight;
+	static int WW;//WW
+	static int WH;//WH
 	static int windowTop;
 	static int windowLeft;
 	static int indices[10];

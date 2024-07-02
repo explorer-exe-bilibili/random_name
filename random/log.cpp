@@ -38,7 +38,7 @@ bool Log::CreatedMultipleDirectory(const std::string& direct)
 	std::vector< std::string>::iterator vIter = vpath.begin();
 	for (; vIter != vpath.end(); vIter++)
 	{
-		bSuccess = CreateDirectoryA(vIter->c_str(), NULL) ? TRUE : FALSE;
+		bSuccess = CreateDirectoryA(vIter->c_str(), nullptr) ? TRUE : FALSE;
 	}
 	return bSuccess;
     return false;
@@ -50,7 +50,7 @@ Log::Log(const std::string& fileName) {
 	CreatedMultipleDirectory(".\\files\\log");
 	logFile.open(fileName, std::ios::app);
 }
-Log::Log(const std::string& fileName, bool add) {
+Log::Log(const std::string& fileName, const bool add) {
 	std::string filepath;
 	filepath = runpath;
 	filepath += fileName;
@@ -84,7 +84,7 @@ Log& operator<<(Log& log, std::ostream& (*f)(std::ostream&)) {
 	// 最后返回 log 对象,以支持链式调用
 	return log;
 }
-Log& Log::operator<<(long double value) {
+Log& Log::operator<<(const long double value) {
 	if (value != INSIDEINT) {
 		long int v;
 		long long t = value / 1;
@@ -104,7 +104,7 @@ int Log::nl() {
     return INSIDEINT;
 }
 int Log::pt() {
-    time_t now = time(0);
+    time_t now = time(nullptr);
     struct tm* localTime = localtime(&now);
     char timeStr[32];
     sprintf(timeStr, "%04d-%02d-%02d %02d:%02d:%02d", localTime->tm_year + 1900, localTime->tm_mon + 1, localTime->tm_mday, localTime->tm_hour, localTime->tm_min, localTime->tm_sec);

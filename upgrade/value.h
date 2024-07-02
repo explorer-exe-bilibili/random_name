@@ -563,11 +563,11 @@ public:
 
   /// \deprecated Always pass len.
   JSONCPP_DEPRECATED("Use setComment(String const&) instead.")
-  void setComment(const char* comment, CommentPlacement placement) {
+  void setComment(const char* comment, const CommentPlacement placement) {
     setComment(String(comment, strlen(comment)), placement);
   }
   /// Comments must be //... or /* ... */
-  void setComment(const char* comment, size_t len, CommentPlacement placement) {
+  void setComment(const char* comment, const size_t len, const CommentPlacement placement) {
     setComment(String(comment, len), placement);
   }
   /// Comments must be //... or /* ... */
@@ -592,11 +592,11 @@ public:
   ptrdiff_t getOffsetLimit() const;
 
 private:
-  void setType(ValueType v) {
+  void setType(const ValueType v) {
     bits_.value_type_ = static_cast<unsigned char>(v);
   }
   bool isAllocated() const { return bits_.allocated_; }
-  void setIsAllocated(bool v) { bits_.allocated_ = v; }
+  void setIsAllocated(const bool v) { bits_.allocated_ = v; }
 
   void initBasic(ValueType type, bool allocated = false);
   void dupPayload(const Value& other);

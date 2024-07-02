@@ -13,6 +13,9 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="头文件\base">
+      <UniqueIdentifier>{82688856-db67-491e-a072-7fe3cb4c42fb}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mywindows.h">
@@ -21,31 +24,19 @@
     <ClInclude Include="log.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="bitmaps.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="config.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="getname.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="directshow.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="sth2sth.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="paintfirstscreen.h">
+    <ClInclude Include="FirstScreen.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="paintname.h">
+    <ClInclude Include="NameScreen.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="ui.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="click.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="set-json.h">
@@ -63,11 +54,29 @@
     <ClInclude Include="floatwindow.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="Gp.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="HistoryScreen.h">
       <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="bitmaps.h">
+      <Filter>头文件\base</Filter>
+    </ClInclude>
+    <ClInclude Include="Button.h">
+      <Filter>头文件\base</Filter>
+    </ClInclude>
+    <ClInclude Include="click.h">
+      <Filter>头文件\base</Filter>
+    </ClInclude>
+    <ClInclude Include="config.h">
+      <Filter>头文件\base</Filter>
+    </ClInclude>
+    <ClInclude Include="directshow.h">
+      <Filter>头文件\base</Filter>
+    </ClInclude>
+    <ClInclude Include="Gp.h">
+      <Filter>头文件\base</Filter>
+    </ClInclude>
+    <ClInclude Include="Painter.h">
+      <Filter>头文件\base</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -92,10 +101,10 @@
     <ClCompile Include="sth2sth.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="paintfirstscreen.cpp">
+    <ClCompile Include="FirstScreen.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="paintname.cpp">
+    <ClCompile Include="NameScreen.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ui.cpp">
@@ -120,6 +129,12 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="HistoryScreen.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Button.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Painter.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

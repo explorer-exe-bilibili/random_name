@@ -18,7 +18,7 @@
 #define list3 13
 #define listbg 12
 #define goldencardbg 11
-#define Buttom 10
+#define BUTTON 10
 #define blue10 9
 #define blue1 8
 #define pink10 7

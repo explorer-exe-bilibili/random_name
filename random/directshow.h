@@ -6,7 +6,7 @@
 #define _1_5 "\\files\\mp3\\reveal-5star.mp3"
 #define _1_4 "\\files\\mp3\\reveal-4star.mp3"
 #define _1_3 "\\files\\mp3\\reveal-3star.mp3"
-#define CLICK "\\files\\mp3\\click.mp3"
+#define CLICK_MUSIC "\\files\\mp3\\click.mp3"
 #define ENTER "\\files\\mp3\\enter.mp3"
 class directshow
 {
