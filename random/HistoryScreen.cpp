@@ -125,12 +125,12 @@ void HistoryScreen::getnum(const std::string& input,
 	std::string& textPart, std::string& numberPart) {
 	size_t pos = input.size();
 
-	// 从字符串末尾开始，找到第一个非数字字符的位置
+	// ���ַ���ĩβ��ʼ���ҵ���һ���������ַ���λ��
 	while (pos > 0 && iswdigit(input[pos - 1])) {
 		--pos;
 	}
 
-	// 分割字符串
+	// �ָ��ַ���
 	textPart = input.substr(0, pos);
 	numberPart = input.substr(pos);
 }

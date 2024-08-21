@@ -151,6 +151,24 @@ void Gp::DrawString(std::string str, const HFONT font, const int x, const int y,
 	ReleaseDC(hdc);
 }
 
+void Gp::DrawString(std::wstring str, HFONT font, int x, int y)
+{
+	HDC hdc;
+	hdc= GetDC();
+	SelectObject(hdc, font);
+	TextOut_(hdc, x, y, str.c_str());
+	ReleaseDC(hdc);
+}
+
+void Gp::DrawString(std::string str, HFONT font, int x, int y)
+{
+	HDC hdc;
+	hdc = GetDC();
+	SelectObject(hdc, font);
+	TextOutA(hdc, x, y, str.c_str(), str.size());
+	ReleaseDC(hdc);
+}
+
 HDC Gp::GetDC()
 {
 	return graphic.get()->GetHDC();
