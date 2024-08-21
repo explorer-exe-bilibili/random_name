@@ -19,7 +19,7 @@ class directshow
 	static IBasicAudio* pBaicAudio;
 public:
 	static void play(std::wstring path);
-	static void music(const char* path);
+	static void music(const std::string& path);
 	static void stopmusic();
 	static void startbgm();
 	static bool playingbgm;

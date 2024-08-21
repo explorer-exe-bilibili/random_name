@@ -13,7 +13,7 @@ public:
 	~NameScreen();
 	void showname1();
 	void showname10();
-	bool is5star=0, is4star=0, skipped=0 ;
+	bool is5star=0, is4star=0, skipped=0;
 	int  skipbmx=0, skipbmy=0, skipbmxend=0, skipbmyend=0;
 	HANDLE random_handle=nullptr;
 	HFONT icon_star=nullptr;
@@ -35,13 +35,11 @@ private:
 	int paintstarcount = 0, g_Case6Count = 500, g_StarCount = 0, star_[10]{}, step=0;
 	LPCWSTR  temp[10]{};
 	int type[10]{};
-	void paintBackground();
 	void menu();
 	void printnames();
-	void printstars(int number_t);
+	void printstars(int star_number);
 	void listpainter(LPCWSTR tmp_, int i, HDC hdc);
 	void out10name();
-	void music();
 	void out1name();
 	void skip();
 	void setButton();

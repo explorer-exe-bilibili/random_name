@@ -40,6 +40,7 @@
 #define UNSUITFONT L"the new font is unsuit"
 #define DEBUG L"debug mode"
 #define TYPICAL L"typical mode"
+#define FPS L"fps"
 
 class config
 {

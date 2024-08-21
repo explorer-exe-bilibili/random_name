@@ -2,9 +2,9 @@
 #include<windows.h>
 #include<string>
 #include<vector>
-#include"log.h"
 #include"bitmaps.h"
 #include"Gp.h"
+#include"button.h"
 #include<nlohmann/json.hpp>
 
 #define LASTBM L"b"
@@ -80,6 +80,7 @@ private:
 	std::string G2U(const std::string& gbk);
 	std::string U2G(const std::string& utf8);
 	std::vector<spage> pages;
+	std::vector<std::vector<Button>> buttons;
 	void changepage();
 	void ChooseFile(sitem item);
 	void EditBoxEditor(sitem item,std::wstring tmp);
@@ -92,4 +93,5 @@ private:
 	void switchbm(sitem item);
 	void textbox(sitem item);
 	void cheakLimit(sitem item);
+	void regButton();
 };

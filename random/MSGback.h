@@ -1,10 +1,10 @@
 #pragma once
 #include<Windows.h>
-#include"Gp.h"
 class MSGback
 {
 public:
 	static void create();
+	static void size();
 	static void paint();
 	static void click(LPARAM lParam);
 	static void keyDown(WPARAM wParam);

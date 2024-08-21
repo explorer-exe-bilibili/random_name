@@ -125,12 +125,10 @@ void HistoryScreen::getnum(const std::string& input,
 	std::string& textPart, std::string& numberPart) {
 	size_t pos = input.size();
 
-	// 从字符串末尾开始，找到第一个非数字字符的位置
 	while (pos > 0 && iswdigit(input[pos - 1])) {
 		--pos;
 	}
 
-	// 分割字符串
 	textPart = input.substr(0, pos);
 	numberPart = input.substr(pos);
 }
@@ -139,7 +137,7 @@ void HistoryScreen::show()
 {
 	using namespace std;
 	p->Paint(0, 0, mywindows::WW, mywindows::WH, goldencardbg);
-	p->DrawString(L"历史记录", ui::text_mid, 0.46 * mywindows::WW, 0.01 * mywindows::WH);
+	p->DrawString(L"历史记录", ui::text_mid, (0.46 * mywindows::WW), (0.01 * mywindows::WH));
 	p->Paint(ui::exitx, ui::exity, ui::exitxend - ui::exitx, ui::exityend - ui::exity, exiti);
 	int totalp = history.size() / 20;
 	if (history.size() % 20 != 0)totalp++;

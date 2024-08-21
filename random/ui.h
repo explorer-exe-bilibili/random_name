@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include<Windows.h>
-#include "Gp.h"
 #include "HistoryScreen.h"
 #include "FirstScreen.h"
 #include "NameScreen.h"

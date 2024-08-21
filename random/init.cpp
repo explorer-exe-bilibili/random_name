@@ -76,10 +76,8 @@ void init::resetxy()
 	mywindows::windowTop = rect.left;
 	mywindows::windowLeft = rect.top;
 	int tempint = rect.right - rect.left;
-	if (tempint != mywindows::WW)ui::ScreenModeChanged = 1;
 	mywindows::WW = tempint;
 	tempint = rect.bottom - rect.top;
-	if (tempint != mywindows::WH)ui::ScreenModeChanged = 1;
 	mywindows::WH = tempint;
 	if (ui::ScreenModeChanged) {
 		ui::overX = mywindows::WW / 10 * 2;

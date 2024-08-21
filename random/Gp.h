@@ -8,6 +8,7 @@
 
 class Gp
 {
+	HWND hwnd;
 	std::shared_ptr<Gdiplus::Graphics> graphic;
 	std::shared_ptr<Gdiplus::Bitmap> buffer;
 	std::vector<HBITMAP> HBitmaps;
@@ -17,7 +18,8 @@ class Gp
 public:
 	~Gp();
 	Gp(HWND hwnd);
-	void Flush(HWND hwnd);
+	void Flush();
+	void SizeChanged();
 	std::vector<std::shared_ptr<Gdiplus::Bitmap>> bitmaps;
 	void Paint(int xDest, int yDest, Gdiplus::Bitmap* image);
 	void Paint(int xDest, int yDest, Gdiplus::Bitmap* image, int wDest, int hDest);

@@ -36,6 +36,7 @@ void config::init() {
 		add(TEXTR, L"0");
 		add(TEXTG, L"125");
 		add(TEXTB, L"125");
+		add(FPS, L"60");
 		add(UNSUITFONT, L"0");
 		add(DEBUG, L"0");
 		add(INWINDOW, L"0");
@@ -103,6 +104,8 @@ void config::init() {
 		if (LogString == L"err")add(TEXTG, L"125");
 		LogString = get(TEXTB);
 		if (LogString == L"err")add(TEXTB, L"125");
+		LogString = get(FPS);
+		if (LogString == L"err")add(FPS, L"60");
 		LogString = get(FLOATX);
 		if (LogString==L"err")add(FLOATX, sth2sth::str2wstr(to_string(mywindows::screenWidth * 0.8)));
 		LogString = get(FLOATY);
@@ -318,6 +321,7 @@ void config::add(const std::wstring& name, const int value)
 	newNode->next = head;
 	head = newNode;
 }
+
 // 读取配置文件并保存配置项到链表
 void config::readFile() {
 	FILE* file = _wfopen(configpath.c_str(), L"r, ccs=UNICODE");
@@ -332,14 +336,39 @@ void config::readFile() {
 
 		wchar_t* currentOption = wcstok(trimLine, L"=");
 		if (currentOption != nullptr) {
-			wchar_t* value = wcstok(nullptr, L"=");
-			// 添加配置项到链表
-			add(std::wstring(currentOption), std::wstring(value));
+				wchar_t* value = wcstok(nullptr, L"=");
+				if (value != NULL) {
+					// 添加配置项到链表
+					add(std::wstring(currentOption), std::wstring(value));
+				}
+				else
+				{
+					wstring err = L"读取配置时遇到错误，配置项的名称是： "+wstring(currentOption)+L"请按是检查配置文件，或者按否删除配置文件以恢复默认设置修复错误，或者按取消关闭程序";
+					int i=MessageBox(NULL, err.c_str(), L"严重错误", MB_ICONERROR | MB_YESNOCANCEL);
+					switch(i)
+					{
+					case IDYES:
+						ShellExecute(NULL, L"open", configpath.c_str(), NULL, NULL, SW_SHOWNORMAL);
+						exit(-1);
+						break;
+					case IDNO:
+						fclose(file);
+						_wremove(configpath.c_str());
+						mywindows::reboot();
+						break;
+					case IDCANCEL:
+						exit(-1);
+						break;
+					}
+				}
 		}
 	}
 
 	fclose(file);
 }
+
+
+
 // 保存配置项到配置文件
 void config::saveFile() {
 	FILE* file = _wfopen(configpath.c_str(), L"w, ccs=UNICODE");

@@ -128,6 +128,13 @@ void set2::resetplace() {
 	lastxend = mywindows::WW * 0.822;
 	lastyend = mywindows::WH * 0.95;
 	firstpaint = 1;
+	for(auto & bs:buttons)
+	{
+		for(auto& b:bs)
+		{
+			b.refreash();
+		}
+	}
 }
 void set2::rereadconfig() {
 	offmusic = config::getint(OFFMUSIC);
@@ -140,6 +147,8 @@ void set2::rereadconfig() {
 		mciSendString(L"play bgm repeat", NULL, 0, NULL);
 }
 void set2::paint() {
+	for(const auto&b:buttons[settingpage-1])
+		b.paint();
 	if (firstpaint) {
 		p->Paint(0, 0, mywindows::WW, mywindows::WH, SetBM);
 		firstpaint = 0;
@@ -177,12 +186,14 @@ void set2::paint() {
 	}
 	PictureNeedReload.neetreload = 0;
 }
-
 void set2::setGp(Gp *p)
 {
 	this->p = p;
+	for(auto&bs:buttons)
+		for (auto&b : bs) {
+			b.setGp(p);
+		}
 }
-
 void set2::enter()
 {
 	directshow::music(ENTER);
@@ -190,8 +201,6 @@ void set2::enter()
 	firstpaint = 1;
 	InvalidateRect(mywindows::main_hwnd, nullptr, FALSE);
 }
-
-
 void set2::OpenFile(sitem item)
 {
 	wstring path = config::getpath(item.ConfigName);
@@ -281,8 +290,12 @@ void set2::Load(string jsonpath) {
 		sp++;
 	}
 	settingpage = 1;
+	regButton();
 	return;
 }
+
+
+
 set2::set2(std::string& jsonfile) {
 	std::thread loading(std::bind(&set2::Load, this, jsonfile));
 	loading.detach();
@@ -525,14 +538,14 @@ void set2::textbox(sitem item)
 		MoveWindow(textboxhwnd[number], sxy[number].bmx, sxy[number].bmy, sxy[number].bmw, sxy[number].bmh, TRUE);
 	}
 	if (item.IsFile) {
-		if (!isused[number + 20]) {
-			p->Paint(sxy[number].bmxend, sxy[number].bmy, sxy[number].bmw, sxy[number].bmh, setbutton);
-			HDC hdc = p->GetDC();
-			SelectObject(hdc, ui::text_mid);
-			SetBkMode(hdc, TRANSPARENT);
-			TextOut_(hdc, sxy[number].bmxend + sxy[number].bmw / 2 + mywindows::WW * 0.01, sxy[number].y + mywindows::WH * 0.01, L"打开");
-			TextOut_(hdc, sxy[number].bmxend + mywindows::WW * 0.01, sxy[number].y + mywindows::WH * 0.01, L"选择");
-			p->ReleaseDC(hdc);
+		if (!isused[number]) {
+			//p->Paint(sxy[number].bmxend, sxy[number].bmy, sxy[number].bmw, sxy[number].bmh, setbutton);
+			//HDC hdc = p->GetDC();
+			//SelectObject(hdc, ui::text_mid);
+			//SetBkMode(hdc, TRANSPARENT);
+			//TextOut_(hdc, sxy[number].bmxend + sxy[number].bmw / 2 + mywindows::WW * 0.01, sxy[number].y + mywindows::WH * 0.01, L"打开");
+			//TextOut_(hdc, sxy[number].bmxend + mywindows::WW * 0.01, sxy[number].y + mywindows::WH * 0.01, L"选择");
+			//p->ReleaseDC(hdc);
 			int x = sxy[number].bmxend, y = sxy[number].bmy, xend = sxy[number].bmxend + sxy[number].bmw, yend = sxy[number].bmh + sxy[number].bmy;
 			if (!isused[number]) {
 				sNode* newnode = new sNode;
@@ -736,4 +749,107 @@ std::string set2::G2U(const std::string& gbk)
 	pBuf = NULL;
 
 	return retStr;
+}
+
+void set2::regButton()
+{
+	for(const auto& i:pages)
+	{
+		std::vector<Button> bs;
+		for (const auto& t : i.items)
+		{
+			if (t.IsSwitch)
+			{
+				Button b;
+				double x, y, xend, yend;
+				if (t.Number <= 10)
+				{
+					x = 0.25;
+					y = t.Number * 0.09;
+					xend = 0.35;
+					yend = y + 0.07;
+				}
+				else if (t.Number <= 19)
+				{
+					x = 0.75;
+					y = (t.Number - 9) * 0.09;
+					xend = 0.85;
+					yend = y + 0.07;
+				}
+				else
+				{
+					x = 0; y = 0; xend = 0; yend = 0;
+				}
+				b.setxy2WWWH(x, y, xend, yend);
+				b.bind(
+					[&] {
+						config::turnUpSideDown(t.ConfigName);
+						rereadconfig();
+						if (config::getint(t.ConfigName) == 1)
+							b.setText(L"开");
+						else
+							b.setText(L"关");
+					}
+				);
+				b.setBmapC(setbutton);
+				if (config::getint(t.ConfigName) == 1)
+					b.setText(L"开");
+				else
+					b.setText(L"关");
+				bs.push_back(b);
+			}
+			else if (t.IsFile)
+			{
+				Button b1,b2;
+				double x, y, xend1,xend2, yend;
+				if(t.Number<=10)
+				{
+					x = 0.35;
+					y= t.Number * 0.09;
+					xend1= 0.4;
+					xend2 = 0.45;
+					yend= y + 0.07;
+				}
+				else if(t.Number<=19)
+				{
+					x = 0.75;
+					y= (t.Number - 9) * 0.09;
+					xend1= 0.8;
+					xend2 = 0.85;
+					yend= y + 0.07;
+				}
+				else
+				{
+					x = 0; y = 0; xend1 = 0; xend2 = 0; yend = 0;
+				}
+				b1.setxy2WWWH(x, y, xend1, yend);
+				b2.setxy2WWWH(xend1, y, xend2, yend);
+				b1.setBmapC(setbutton);
+				b2.setBmapC(setbutton);
+				b1.setText(L"选择");
+				b2.setText(L"打开");
+				b1.setTextColor(0, 0, 0);
+				b2.setTextColor(0, 0, 0);
+				b1.setFont(&ui::text_mid);
+				b2.setFont(&ui::text_mid);
+				b1.bind(
+					[&] {
+						ChooseFile(t);
+						if (t.Limit == ISBITMAP)
+						{
+							reloadbmp(t);
+						}
+					}
+				);
+				b2.bind(
+					[&] {
+						OpenFile(t);
+					}
+				);
+				bs.push_back(b1);
+				bs.push_back(b2);
+			}
+		}
+		buttons.push_back(bs);
+	}
 }

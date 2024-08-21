@@ -7,10 +7,13 @@
 #include "ui.h"
 #include "NameScreen.h"
 #include "click.h"
+#include "config.h"
 #include "directshow.h"
 #include"floatwindow.h"
 #include"Gp.h"
 #include "HistoryScreen.h"
+
+Gp* Pptr = nullptr;
 
 
 void MSGback::create()
@@ -25,14 +28,42 @@ void MSGback::create()
 	ui::HS.setFile(L"./name.txt");
 }
 bool _____ = 1;
+
+
+void MSGback::size()
+{
+	ui::ScreenModeChanged = 1;
+	if (Pptr != nullptr) {
+		init::resetxy();
+		Pptr->SizeChanged();
+	}
+}
+
+
 void MSGback::paint()
 {
+	//static int ms_between=1000/config::getint(FPS);
+	//static long last_ms = 0;
+	//auto now=std::chrono::system_clock::now();
+	//auto now_ = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
+	//long now_ms= now_.time_since_epoch().count() % 1000;
+
+	//if(ms_between>=now_ms&&now_ms-last_ms<ms_between)
+	//{
+	//	return;
+	//}
 	static Gp p(mywindows::main_hwnd);
+	Pptr= &p;
 	if (!ui::SS.fullscreen&&_____) {
 		SetWindowPos(mywindows::main_hwnd, nullptr, 0, 0, mywindows::screenWidth * 0.6, mywindows::screenHeight * 0.6, SWP_NOMOVE | SWP_NOZORDER);
 	}
+	if(_____==1)
+	{
+		init::resetxy();
+
+	}
 	_____ = 0;
-	init::resetxy();
+	//init::resetxy();
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(mywindows::main_hwnd, &ps);
 	ui::HS.changeGp(&p);
@@ -51,6 +82,7 @@ void MSGback::paint()
 	{
 		ui::ExitB.paint();
 	}
+	p.Flush();
 	mywindows::log("paint successfully");
 	DeleteDC(hdc);
 	EndPaint(mywindows::main_hwnd, &ps);

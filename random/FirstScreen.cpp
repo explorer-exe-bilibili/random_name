@@ -1,4 +1,7 @@
 ﻿#include "FirstScreen.h"
+
+#include <stdbool.h>
+
 #include "bitmaps.h"
 #include "directshow.h"
 #include "ui.h"
@@ -68,20 +71,28 @@ void FirstScreen::initButtons()
 	b[O1].bind([this] {
 		ui::mode = 1;
 		directshow::music(CLICK_MUSIC);
-		paintoverlay();
+
+		InvalidateRect(mywindows::main_hwnd, NULL, false);
+		//paintoverlay();
 	});
 	b[O2].bind([this] {
 		ui::mode = 2;
 		directshow::music(CLICK_MUSIC);
-		paintoverlay(); });
+		//paintoverlay();
+		InvalidateRect(mywindows::main_hwnd, NULL, false);
+	});
 	b[O3].bind([this] {
 		ui::mode = 3;
 		directshow::music(CLICK_MUSIC);
-		paintoverlay(); });
+		//paintoverlay();
+		InvalidateRect(mywindows::main_hwnd, NULL, false);
+	});
 	b[O4].bind([this] {
 		ui::mode = 4;
 		directshow::music(CLICK_MUSIC);
-		paintoverlay(); });
+		//paintoverlay();
+		InvalidateRect(mywindows::main_hwnd, NULL, false);
+		});
 	b[SET].bind([ObjectPtr = &ui::SS] { ObjectPtr->enter(); });
 	b[OFFVIDEO].bind([this] {
 		directshow::music(CLICK_MUSIC);
@@ -116,6 +127,8 @@ void FirstScreen::enter()
 
 void FirstScreen::paint()
 {
+	p->Paint(0, 0, mywindows::WW, mywindows::WH, BackGround);
+
 	if(ui::ScreenModeChanged)
 	{
 		firstpaint=1;
@@ -123,7 +136,7 @@ void FirstScreen::paint()
 	if(firstpaint)
 	{
 		firstpaint=0;
-		p->Paint(0,0,mywindows::WW,mywindows::WH,BackGround);
+		p->Paint(0, 0, mywindows::WW, mywindows::WH, BackGround);
 		ui::ScreenModeChanged=0;
 	}
 	if(ui::SS.offvideo)

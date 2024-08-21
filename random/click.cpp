@@ -31,10 +31,16 @@ void click::showname(const int x, const int y)
 	{
 		ui::screenmode = FIRST_SCREEN;
 		ui::FS.firsttime = true;
-		if (!ui::SS.offmusic)
+		if (!ui::SS.offmusic) {
 			mciSendString(L"play bgm repeat", nullptr, 0, nullptr); // 使用别名 'bgm' 播放音乐，并设置为循环播放
+			mciSendString(L"stop star3", 0, 0, 0);
+			mciSendString(L"stop star4", 0, 0, 0);
+			mciSendString(L"stop star5", 0, 0, 0);
+			mciSendString(L"stop starfull", 0, 0, 0);
+		}
 	}
 	directshow::stopmusic();
+	InvalidateRect(mywindows::main_hwnd, NULL, FALSE);
 }
 void click::doclick(const int x, const int y)
 {

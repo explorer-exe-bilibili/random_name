@@ -98,7 +98,7 @@ void directshow::play(wstring path) {
 	mywindows::log("play end");
 }
 
-void directshow::music(const char* path) {
+void directshow::music(const std::string& path) {
 	if (!ui::SS.offmusic) {
 		std::wstring p;
 		p = L"close ";

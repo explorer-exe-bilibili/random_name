@@ -141,6 +141,10 @@ void NameScreen::showname1() {
 		if (is5star == 1)
 			directshow::play(config::getpath(SIGNALSTAR5));
 	}
+	else
+	{
+		InvalidateRect(mywindows::main_hwnd, NULL, FALSE);
+	}
 	if (!ui::SS.offmusic)
 			mciSendString(L"stop bgm", nullptr, 0, nullptr);
 	ui::screenmode = SHOW_NAMES_ING;
@@ -178,6 +182,10 @@ void NameScreen::showname10() {
 		else if (is5star == 0)
 			directshow::play(config::getpath(GROUPSTAR4));
 	}
+	else
+	{
+		InvalidateRect(mywindows::main_hwnd, NULL, FALSE);
+	}
 	is5star = 0;
 	is4star = 0;
 	ui::screenmode = SHOW_NAMES_ING;
@@ -189,6 +197,7 @@ void NameScreen::showname10() {
 }
 void NameScreen::out1name() {
 	if (ui::printing) {
+		number_t = star_[0];
 		printnames();
 		if (star_[step] == 0) {
 			star_[step] = 3;
@@ -227,35 +236,26 @@ void NameScreen::out10name() {
 	step++;
 }
 
-void WINAPI NameScreen::music()
-{
-	switch (number_t)
-	{
-	case 3: {
-		directshow::music(_1_3);
-	}break;
-	case 4: {
-		directshow::music(_1_4);
-	}break;
-	case 5: {
-		directshow::music(_1_5);
-	}break;
-	case 6: {
-		directshow::music(_1_6);
-	}
-	default:
-		break;
-	}
-}
-
 void NameScreen::printnames(){
 	//std::thread a_thread([this] {music(); });
 	//a_thread.detach();
 	int t;
+	mywindows::logf << "begin stopping star music" << std::endl;
 	t=mciSendString(L"stop star3", 0, 0, 0);
 	t=mciSendString(L"stop star4", 0, 0, 0);
 	t=mciSendString(L"stop star5", 0, 0, 0);
 	t=mciSendString(L"stop starfull", 0, 0, 0);
+	if(t!=0)
+	{
+		wchar_t errstr[256];
+		mciGetErrorStringW(t, errstr, sizeof(errstr));
+		mywindows::errlogf<<errstr<<std::endl;
+	}
+	else
+	{
+		mywindows::logf << "stop star music success" << std::endl;
+	}
+	mywindows::logf << "begin play star music number_t="<<number_t << std::endl;
 	switch (number_t)
 	{
 	case 3: {
@@ -272,6 +272,16 @@ void NameScreen::printnames(){
 	}
 	default:
 		break;
+	}
+	if (t != 0)
+	{
+		wchar_t errstr[256];
+		mciGetErrorStringW(t, errstr, sizeof(errstr));
+		mywindows::errlogf << errstr << std::endl;
+	}
+	else
+	{
+		mywindows::logf << "play star music success" << std::endl;
 	}
 	if (p) {
 		p->Paint(0, 0, mywindows::WW, mywindows::WH, cardbackground);
@@ -346,6 +356,10 @@ void NameScreen::printnames(){
 }
 
 void NameScreen::menu() {
+	mciSendString(L"stop star3", 0, 0, 0);
+	mciSendString(L"stop star4", 0, 0, 0);
+	mciSendString(L"stop star5", 0, 0, 0);
+	mciSendString(L"stop starfull", 0, 0, 0);
 	if (p)
 	{
 		p->Paint(0, 0, mywindows::WW, mywindows::WH, listbg);
@@ -505,13 +519,13 @@ void NameScreen::listpainter(const LPCWSTR tmp_, const int i, const HDC hdc) {
 		break;
 	}
 }
-void NameScreen::printstars(const int number_t) {
+void NameScreen::printstars(const int star_number) {
 	if (p) {
 		HDC hdc = p->GetDC();
 		SetBkMode(hdc, TRANSPARENT);
 
 		TextOut_(hdc, -1201, -1234, STAR);
-		if (number_t <= 4) {
+		if (star_number <= 4) {
 			SelectObject(hdc, icon_star);
 			SetTextColor(hdc, RGB(220, 184, 14));
 		}
@@ -519,7 +533,7 @@ void NameScreen::printstars(const int number_t) {
 			SelectObject(hdc, icon_star);
 			SetTextColor(hdc, RGB(220, 184, 14));
 		}
-		switch (number_t)
+		switch (star_number)
 		{
 		case 3: {
 			//directshow::music(_1_3);
@@ -547,6 +561,7 @@ void NameScreen::printstars(const int number_t) {
 		}
 		p->ReleaseDC(hdc);
 	}
+	number_t = star_number;
 }
 void NameScreen::rerandom() {
 	for (short m = 0; m <= 3; m++)

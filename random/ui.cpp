@@ -1,6 +1,5 @@
 ﻿#include "ui.h"
 #include "mywindows.h"
-#include "bitmaps.h"
 
 
 int ui::listx[11]={0}, ui::listy=0, ui::listxend=0, ui::listyend=0;

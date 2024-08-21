@@ -24,6 +24,7 @@ LRESULT CALLBACK WinSunProc(const HWND hwnd, const UINT uMsg, const WPARAM wPara
 	switch (uMsg) {//通过判断消息进行消息响应
 	case WM_CREATE:MSGback::create(); break;
 	case WM_PAINT:MSGback::paint(); break;
+	case WM_SIZE:MSGback::size(); break;
 	case WM_LBUTTONDOWN:MSGback::click(lParam); break;
 	case WM_KEYDOWN:MSGback::keyDown(wParam); break;
 	case WM_COMMAND:MSGback::commond(lParam, wParam);	break;
