@@ -1,4 +1,4 @@
-ï»¿#include "HistoryScreen.h"
+#include "HistoryScreen.h"
 
 #include <fstream>
 
@@ -11,15 +11,15 @@
 #include "sth2sth.h"
 
 
-HistoryScreen::HistoryScreen(Gp *pt,std::wstring file_name)
+HistoryScreen::HistoryScreen(Gp* pt, std::wstring file_name)
 {
-	p=pt;
-	filename=file_name;
+	p = pt;
+	filename = file_name;
 }
 
 HistoryScreen::HistoryScreen()
 {
-	p= nullptr;
+	p = nullptr;
 }
 
 HistoryScreen::~HistoryScreen()
@@ -29,12 +29,12 @@ HistoryScreen::~HistoryScreen()
 
 void HistoryScreen::changeGp(Gp* pt)
 {
-	p=pt;
+	p = pt;
 }
 
 void HistoryScreen::setFile(std::wstring file_name)
 {
-	filename=file_name;
+	filename = file_name;
 	hasReaded = 0;
 }
 
@@ -54,47 +54,47 @@ void HistoryScreen::enter()
 bool HistoryScreen::ReadHistory()
 {
 	history.clear();
-	std::ifstream file(filename,std::ios::binary);
+	std::ifstream file(filename, std::ios::binary);
 	if (!file.is_open())
 	{
 		return false;
 	}
 	std::vector<item> temp;
-	char c=1;
+	char c = 1;
 	bool inFile = 1;
 	std::string tmp_string;
 	while (std::getline(file, tmp_string) && c <= 20)
 	{
-		std::wstring tmp_wstring= sth2sth::str2wstru(tmp_string);
+		std::wstring tmp_wstring = sth2sth::str2wstru(tmp_string);
 		item tmp_item;
-		mywindows::logf<<tmp_wstring << std::endl;
+		mywindows::logf << tmp_wstring << std::endl;
 		if (tmp_string.empty())continue;
-		// æ­£åˆ™è¡¨è¾¾å¼ï¼Œç”¨äºåŒ¹é…ç±»å‹ã€æ˜Ÿçº§å’Œåå­—
-		static std::wstring currentTimestamp; // ç”¨äºå­˜å‚¨å½“å‰æ—¶é—´æˆ³
-		static bool inBrackets = false; // æ ‡è®°æ˜¯å¦åœ¨å¤§æ‹¬å·å†…
-		// æ­£åˆ™è¡¨è¾¾å¼ï¼Œç”¨äºåŒ¹é…æ—¶é—´æˆ³ã€ç±»å‹ã€æ˜Ÿçº§å’Œåå­—
-		static std::wregex pattern(LR"(((\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\])?)\[(\d{1})\ç±»å‹\]\[(\d{1})\æ˜Ÿ\]\[(([^\])]+)\])?)");
+		// ÕıÔò±í´ïÊ½£¬ÓÃÓÚÆ¥ÅäÀàĞÍ¡¢ĞÇ¼¶ºÍÃû×Ö
+		static std::wstring currentTimestamp; // ÓÃÓÚ´æ´¢µ±Ç°Ê±¼ä´Á
+		static bool inBrackets = false; // ±ê¼ÇÊÇ·ñÔÚ´óÀ¨ºÅÄÚ
+		// ÕıÔò±í´ïÊ½£¬ÓÃÓÚÆ¥ÅäÊ±¼ä´Á¡¢ÀàĞÍ¡¢ĞÇ¼¶ºÍÃû×Ö
+		static std::wregex pattern(LR"(((\[(\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2})\])?)\[(\d{1})\ÀàĞÍ\]\[(\d{1})\ĞÇ\]\[(([^\])]+)\])?)");
 		static std::wregex timestampPattern(LR"((\[\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}\])\{)");
 		std::wsmatch matches;
-		// åŒ¹é…æ—¶é—´æˆ³å’Œå·¦å¤§æ‹¬å·
+		// Æ¥ÅäÊ±¼ä´ÁºÍ×ó´óÀ¨ºÅ
 		if (std::regex_search(tmp_wstring, matches, timestampPattern)) {
-			// åŒ¹é…åˆ°æ—¶é—´æˆ³å’Œå·¦å¤§æ‹¬å·
+			// Æ¥Åäµ½Ê±¼ä´ÁºÍ×ó´óÀ¨ºÅ
 			currentTimestamp = matches[1];
 			inBrackets = true;
 			continue;
 		}
-		if (tmp_wstring.find(L"}")!=std::wstring::npos) {
-			// é‡åˆ°å³å¤§æ‹¬å·ï¼Œç»“æŸå¤§æ‹¬å·å†…çš„å¤„ç†
+		if (tmp_wstring.find(L"}") != std::wstring::npos) {
+			// Óöµ½ÓÒ´óÀ¨ºÅ£¬½áÊø´óÀ¨ºÅÄÚµÄ´¦Àí
 			inBrackets = false;
 			continue;
 		}
 		if (std::regex_search(tmp_wstring, matches, pattern)) {
-			// è¾“å‡ºåŒ¹é…çš„æ—¶é—´æˆ³ï¼ˆå¦‚æœåœ¨å¤§æ‹¬å·å†…ï¼Œåˆ™ä½¿ç”¨è®°ä½çš„æ—¶é—´æˆ³ï¼‰ã€ç±»å‹ã€æ˜Ÿçº§å’Œåå­—
+			// Êä³öÆ¥ÅäµÄÊ±¼ä´Á£¨Èç¹ûÔÚ´óÀ¨ºÅÄÚ£¬ÔòÊ¹ÓÃ¼Ç×¡µÄÊ±¼ä´Á£©¡¢ÀàĞÍ¡¢ĞÇ¼¶ºÍÃû×Ö
 			std::wstring timestamp = inBrackets ? currentTimestamp : matches[1];
 			tmp_item.time = timestamp;
 		}
 		else {
-			// æœªåŒ¹é…åˆ°ä»»ä½•å†…å®¹ï¼Œè·³è¿‡
+			// Î´Æ¥Åäµ½ÈÎºÎÄÚÈİ£¬Ìø¹ı
 			continue;
 		}
 		if (!matches[7].str().empty())
@@ -125,10 +125,12 @@ void HistoryScreen::getnum(const std::string& input,
 	std::string& textPart, std::string& numberPart) {
 	size_t pos = input.size();
 
+	// ´Ó×Ö·û´®Ä©Î²¿ªÊ¼£¬ÕÒµ½µÚÒ»¸ö·ÇÊı×Ö×Ö·ûµÄÎ»ÖÃ
 	while (pos > 0 && iswdigit(input[pos - 1])) {
 		--pos;
 	}
 
+	// ·Ö¸î×Ö·û´®
 	textPart = input.substr(0, pos);
 	numberPart = input.substr(pos);
 }
@@ -137,11 +139,11 @@ void HistoryScreen::show()
 {
 	using namespace std;
 	p->Paint(0, 0, mywindows::WW, mywindows::WH, goldencardbg);
-	p->DrawString(L"å†å²è®°å½•", ui::text_mid, (0.46 * mywindows::WW), (0.01 * mywindows::WH));
+	p->DrawString(L"ÀúÊ·¼ÇÂ¼", ui::text_mid, 0.46 * mywindows::WW, 0.01 * mywindows::WH);
 	p->Paint(ui::exitx, ui::exity, ui::exitxend - ui::exitx, ui::exityend - ui::exity, exiti);
 	int totalp = history.size() / 20;
 	if (history.size() % 20 != 0)totalp++;
-	wstring t = to_wstring(page+1) + L"/" + to_wstring(totalp);
+	wstring t = to_wstring(page + 1) + L"/" + to_wstring(totalp);
 	HDC hdc = p->GetDC();
 	SetBkMode(hdc, TRANSPARENT);
 	SetTextColor(hdc, RGB(236, 229, 216));
@@ -152,38 +154,38 @@ void HistoryScreen::show()
 	TextOut_(hdc, mywindows::WW * 0.765, mywindows::WH * 0.91, t.c_str());
 	p->ReleaseDC(hdc);
 	if (!hasReaded)if (!ReadHistory()) {
-		int back = MessageBox(nullptr, L"å§“åæ–‡ä»¶å‡ºç°é—®é¢˜ï¼Œè¯·æ£€æŸ¥(ç‚¹å‡»æ˜¯æ‰“å¼€æ–‡ä»¶)", L"é”™è¯¯", MB_ICONERROR | MB_YESNO);
+		int back = MessageBox(nullptr, L"ĞÕÃûÎÄ¼ş³öÏÖÎÊÌâ£¬Çë¼ì²é(µã»÷ÊÇ´ò¿ªÎÄ¼ş)", L"´íÎó", MB_ICONERROR | MB_YESNO);
 		if (back == IDYES)ShellExecute(nullptr, L"open", filename.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
 		ui::screenmode = FIRST_SCREEN;
 	}
 	if (history.size() == 0) {
-		MessageBox(nullptr, L"æ²¡æœ‰å†å²è®°å½•", L"æç¤º", MB_ICONINFORMATION);
+		MessageBox(nullptr, L"Ã»ÓĞÀúÊ·¼ÇÂ¼", L"ÌáÊ¾", MB_ICONINFORMATION);
 		ui::screenmode = FIRST_SCREEN;
 	}
 	for (int j = 0; j < history[page].size(); j++)
 	{
 #define rgb 255,255,255
-		p->DrawString(history[page][j].time,ui::text_mid,xy[j].TimeX,xy[j].y,rgb);
-		p->DrawString(history[page][j].name, ui::text_mid, xy[j].x, xy[j].y,rgb);
-		p->DrawString(std::to_wstring(history[page][j].star), ui::text_mid, xy[j].starX, xy[j].y,rgb);
+		p->DrawString(history[page][j].time, ui::text_mid, xy[j].TimeX, xy[j].y, rgb);
+		p->DrawString(history[page][j].name, ui::text_mid, xy[j].x, xy[j].y, rgb);
+		p->DrawString(std::to_wstring(history[page][j].star), ui::text_mid, xy[j].starX, xy[j].y, rgb);
 		switch (history[page][j].type)
 		{
 		case -1:
-			p->DrawString(L"æœªçŸ¥", ui::text_mid, xy[j].TypeX, xy[j].y,rgb);
+			p->DrawString(L"Î´Öª", ui::text_mid, xy[j].TypeX, xy[j].y, rgb);
 		case 0:
-			p->DrawString(L"å¼“ç®­", ui::text_mid, xy[j].TypeX, xy[j].y,rgb);
+			p->DrawString(L"¹­¼ı", ui::text_mid, xy[j].TypeX, xy[j].y, rgb);
 			break;
 		case 1:
-			p->DrawString(L"å•æ‰‹å‰‘", ui::text_mid, xy[j].TypeX, xy[j].y,rgb);
+			p->DrawString(L"µ¥ÊÖ½£", ui::text_mid, xy[j].TypeX, xy[j].y, rgb);
 			break;
 		case 2:
-			p->DrawString(L"æ³•å™¨", ui::text_mid, xy[j].TypeX, xy[j].y,rgb);
+			p->DrawString(L"·¨Æ÷", ui::text_mid, xy[j].TypeX, xy[j].y, rgb);
 			break;
 		case 3:
-			p->DrawString(L"åŒæ‰‹å‰‘", ui::text_mid, xy[j].TypeX, xy[j].y,rgb);
+			p->DrawString(L"Ë«ÊÖ½£", ui::text_mid, xy[j].TypeX, xy[j].y, rgb);
 			break;
 		case 4:
-			p->DrawString(L"é•¿æª", ui::text_mid, xy[j].TypeX, xy[j].y,rgb);
+			p->DrawString(L"³¤Ç¹", ui::text_mid, xy[j].TypeX, xy[j].y, rgb);
 			break;
 		}
 	}
@@ -226,15 +228,15 @@ void HistoryScreen::setxy() {
 	xy.clear();
 	for (char i = 1; i <= 20; i++) {
 		Hxy txy;
-		txy.x = mywindows::WW * (0.25+0.5*(int)(i/10));
-		txy.y = mywindows::WH * (i%10) * 0.09;
+		txy.x = mywindows::WW * (0.25 + 0.5 * (int)(i / 10));
+		txy.y = mywindows::WH * (i % 10) * 0.09;
 		if (txy.y == 0) {
 			txy.y = mywindows::WH * 0.9;
-			txy.x= mywindows::WW * 0.25+0.5*((int)(i/10)-1);
+			txy.x = mywindows::WW * 0.25 + 0.5 * ((int)(i / 10) - 1);
 		}
-		txy.starX = txy.x+mywindows::WW * 0.05;
-		txy.TypeX = txy.x+mywindows::WW * 0.075;
-		txy.TimeX= txy.x-mywindows::WW*0.25;
+		txy.starX = txy.x + mywindows::WW * 0.05;
+		txy.TypeX = txy.x + mywindows::WW * 0.075;
+		txy.TimeX = txy.x - mywindows::WW * 0.25;
 		xy.push_back(txy);
 	}
 	nextbmx = mywindows::WW * 0.73;

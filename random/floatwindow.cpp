@@ -18,7 +18,6 @@ int floatwindow::icon_w, floatwindow::icon_h;
 POINT lastxy, nowxy;
 UINT_PTR TimerID;
 double speedx, speedy;
-bool floatwindow::needrefearch = 1;
 std::chrono::time_point start = std::chrono::high_resolution_clock::now();
 
 void floatwindow::open()
@@ -27,7 +26,6 @@ void floatwindow::open()
 		showfloatwindow = 0;
 		createWindow();
 	}
-	needrefearch = 1;
 }
 void floatwindow::stop()
 {
@@ -35,18 +33,16 @@ void floatwindow::stop()
 }
 void floatwindow::paint()
 {
-	if (needrefearch) {
+	PAINTSTRUCT ps;
+	HDC hdc= BeginPaint(mywindows::float_hWnd, &ps);
 		static Gp p(mywindows::float_hWnd);
-		PAINTSTRUCT ps;
 		RECT rect;
 		GetWindowRect(mywindows::float_hWnd, &rect);
 		int w = rect.right - rect.left, h = rect.bottom - rect.top;
 		p.Paint(0, 0, w, h, 0);
 		p.Flush();
-		EndPaint(mywindows::float_hWnd, &ps);
-	}
-	needrefearch = 0;
-	Sleep(1);
+
+	EndPaint(mywindows::float_hWnd, &ps);
 }
 void floatwindow::createWindow() {
 	// 计算悬浮窗口的位置和大小
@@ -75,7 +71,6 @@ void floatwindow::createWindow() {
 		L"QUIT", L"", WS_VISIBLE | WS_POPUP, x, y, w, h, nullptr, nullptr, mywindows::hinstance, nullptr);
 	SetLayeredWindowAttributes(mywindows::Quit_hwnd, 0, 200, LWA_ALPHA);
 	ShowWindow(mywindows::Quit_hwnd, SW_HIDE);
-	needrefearch = 1;
 }
 void floatwindow::showQuitWindow()
 {

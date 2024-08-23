@@ -23,5 +23,4 @@ private:
 	static POINT p, p1;
 	static HBITMAP bitmap;
 	static int icon_w, icon_h;
-	static bool needrefearch;
 };
