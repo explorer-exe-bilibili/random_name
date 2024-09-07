@@ -8,12 +8,14 @@
 #include "NameScreen.h"
 #include "click.h"
 #include "config.h"
+#include "Timer.h"
 #include "directshow.h"
 #include"floatwindow.h"
 #include"Gp.h"
 #include "HistoryScreen.h"
 
 Gp* Pptr = nullptr;
+Timer* MSGback::refreash_Timer=nullptr;
 
 
 void MSGback::create()
@@ -26,6 +28,12 @@ void MSGback::create()
 	SetWindowPos(mywindows::main_hwnd, HWND_TOP, 0, 0, mywindows::WW, mywindows::WH, SWP_NOZORDER | SWP_FRAMECHANGED);
 	ReleaseDC(nullptr,hdc);
 	ui::HS.setFile(L"./name.txt");
+	refreash_Timer = new Timer;
+	refreash_Timer->setCallBack([] {InvalidateRect(mywindows::main_hwnd, NULL, FALSE); });
+	refreash_Timer->setPool(1);
+	refreash_Timer->setDelay(1000 / config::getint(FPS));
+	ShowWindow(mywindows::main_hwnd, SW_SHOWNORMAL);//把窗体显示出来
+	refreash_Timer->start();
 }
 bool _____ = 1;
 
@@ -118,6 +126,7 @@ void MSGback::commond(const LPARAM lParam, const WPARAM wParam)
 }
 void MSGback::destroy()
 {
+	refreash_Timer->stop();
 	PostQuitMessage(0);
 }
 
@@ -148,13 +157,14 @@ void MSGback::showwindow(const WPARAM wParam)
 		ShowWindow(mywindows::float_hWnd, SW_HIDE);
 		if (!ui::SS.offmusic)
 			directshow::startbgm();
-
+		refreash_Timer->start();
 	}
 	else // 主窗口隐藏
 	{
 		ShowWindow(mywindows::float_hWnd, SW_SHOWNOACTIVATE);
 		if (!ui::SS.offmusic)
 			directshow::stopmusic();
+		refreash_Timer->pause();
 	}
 }
 void MSGback::destroyall()

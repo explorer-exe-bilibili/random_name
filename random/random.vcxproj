@@ -162,6 +162,7 @@
     <ClInclude Include="Gp.h" />
     <ClInclude Include="HistoryScreen.h" />
     <ClInclude Include="init.h" />
+    <ClInclude Include="item.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="MSGback.h" />
     <ClInclude Include="mywindows.h" />
@@ -169,8 +170,11 @@
     <ClInclude Include="NameScreen.h" />
     <ClInclude Include="Painter.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="resources_manager.h" />
     <ClInclude Include="set-json.h" />
+    <ClInclude Include="SetButton.h" />
     <ClInclude Include="sth2sth.h" />
+    <ClInclude Include="Timer.h" />
     <ClInclude Include="ui.h" />
   </ItemGroup>
   <ItemGroup>
@@ -191,8 +195,11 @@
     <ClCompile Include="NameScreen.cpp" />
     <ClCompile Include="Painter.cpp" />
     <ClCompile Include="random.cpp" />
+    <ClCompile Include="resources_manager.cpp" />
     <ClCompile Include="set-json.cpp" />
+    <ClCompile Include="SetButton.cpp" />
     <ClCompile Include="sth2sth.cpp" />
+    <ClCompile Include="Timer.cpp" />
     <ClCompile Include="ui.cpp" />
   </ItemGroup>
   <ItemGroup>

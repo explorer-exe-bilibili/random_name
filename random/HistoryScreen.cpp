@@ -140,7 +140,7 @@ void HistoryScreen::show()
 	using namespace std;
 	p->Paint(0, 0, mywindows::WW, mywindows::WH, goldencardbg);
 	p->DrawString(L"ÀúÊ·¼ÇÂ¼", ui::text_mid, 0.46 * mywindows::WW, 0.01 * mywindows::WH);
-	p->Paint(ui::exitx, ui::exity, ui::exitxend - ui::exitx, ui::exityend - ui::exity, exiti);
+	p->Paint(ui::exitx, ui::exity, ui::exitxend - ui::exitx, ui::exityend - ui::exity, exitBu);
 	int totalp = history.size() / 20;
 	if (history.size() % 20 != 0)totalp++;
 	wstring t = to_wstring(page + 1) + L"/" + to_wstring(totalp);

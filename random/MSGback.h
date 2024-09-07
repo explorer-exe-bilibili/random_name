@@ -1,5 +1,8 @@
 #pragma once
 #include<Windows.h>
+
+#include "Timer.h"
+
 class MSGback
 {
 public:
@@ -15,4 +18,5 @@ public:
 	static void showwindow(WPARAM wParam);
 private:
 	static void destroyall();
+	static Timer* refreash_Timer;
 };

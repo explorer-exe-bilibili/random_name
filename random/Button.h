@@ -22,7 +22,7 @@ private:
 	HFONT* font=nullptr;
 	Gp *p=nullptr;
 	int x=0, y=0, xE=0, yE=0;
-	int* xP=&x, * yP=&y, * xEP=&xE, * yEP=&yE;
+	int* xP, * yP, * xEP, * yEP;
 	int xAdd=0, yAdd = 0, xEAdd = 0, yEAdd = 0;
 	int TextW=-1,TextH=-1;
 	double x2WW=0,y2WH=0,xE2WW=0,yE2WH=0;
@@ -32,6 +32,7 @@ private:
 	bool DisableBmap=0,DisableStr=0;
 	std::wstring text;
 	std::vector<std::function<void()>> functions;
+	std::string music_string;
 public:
 	Button(int x, int y, int xE, int yE,int BitmapC=BUTTON,std::wstring text=L"");
 	Button();
@@ -39,7 +40,7 @@ public:
 
 
 
-	void click(int condition = CLICK, int x = -1, int y = -1);
+	void click(int condition = CLICK, int x = -1, int y = -1) const;
 	void paint() const;
 
 
@@ -51,11 +52,13 @@ public:
 	void setFont(HFONT* font,int DisableBmap=-1);
 	void setDisableStr(bool newValue);
 	void setDisableBmap(bool newValue);
+	void setMusic(std::string music_string);
 	void setGp(Gp *p);
 
-	void refreash();
+	void refresh();
 	void changeStr(std::wstring NewStr);
 	void changeBmap(int NewBmapC);
+	void reConnect();
 
 	operator bool() const;
 	bool operator==(const Button& b) const;

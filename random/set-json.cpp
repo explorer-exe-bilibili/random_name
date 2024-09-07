@@ -9,30 +9,6 @@
 #include<thread>
 
 
-#define NOLIMIT 0
-#define AFTER 2
-#define BEFORE 1
-#define BETWEENCOUNT 100
-#define RESTART 10
-#define S_WINDOWTITLE 200
-#define ISFILE 300
-#define ISBITMAP 400
-#define FLOATPIC 5000
-#define MAXWINDOWSIZE 1145141919
-#define BITMAPC "BitmapNumber"
-#define CONFIGNAME "ConfigName"
-#define FILECHOOSE "FileChooseWindowName"
-#define FILETYPE "FileType"
-#define ISEDIT "IsEditBox"
-#define ISSWITCH "IsSwitch"
-#define LIMIT "Limit"
-#define NAME "Name"
-#define NUMBER "Number"
-#define OUTOFLIMIT "OutOfLimitOutPut"
-#define TITLE "Title"
-#define MAX "max"
-#define MIN "min"
-
 Log slog("files\\log\\set-json.log", 1);
 using json = nlohmann::json;
 using namespace std;
@@ -64,12 +40,20 @@ void set2::quit() {
 	while (n <= 20) {
 		if (textboxhwnd[n] != NULL)
 			DestroyWindow(textboxhwnd[n]);
+		textboxhwnd[n] = NULL;
 		n++;
 	}
 	ui::screenmode = FIRST_SCREEN;
 	ui::ScreenModeChanged = 1;
 	for (n = 0; n < 40; n++)isused[n] = 0;
 	firstpaint = 1;
+	for (auto& i : pages)
+	{
+		for (auto& b : i.buttons)
+		{
+			b->unshow();
+		}
+	}
 }
 void set2::init()
 {
@@ -96,6 +80,13 @@ void set2::changepage()
 	}
 	for (n = 0; n < 40; n++)isused[n] = 0;
 	firstpaint = 1;
+	for(auto & i:pages)
+	{
+		for(auto&b:i.buttons)
+		{
+			b->unshow();
+		}
+	}
 }
 void set2::resetplace() {
 	mywindows::log(L"Free Setting List complete");
@@ -132,7 +123,7 @@ void set2::resetplace() {
 	{
 		for(auto& b:bs)
 		{
-			b.refreash();
+			b.refresh();
 		}
 	}
 }
@@ -147,20 +138,25 @@ void set2::rereadconfig() {
 		mciSendString(L"play bgm repeat", NULL, 0, NULL);
 }
 void set2::paint() {
-	for(const auto&b:buttons[settingpage-1])
-		b.paint();
+
+	//for(const auto&b:buttons[settingpage-1])
+	//	b.paint();
 	if (firstpaint) {
 		p->Paint(0, 0, mywindows::WW, mywindows::WH, SetBM);
 		firstpaint = 0;
 	}
-	p->Paint(ui::exitx, ui::exity, ui::exitxend - ui::exitx, ui::exityend - ui::exity, exiti);
+	p->Paint(ui::exitx, ui::exity, ui::exitxend - ui::exitx, ui::exityend - ui::exity, exitBu);
 	wstring title = pages[settingpage - 1].Title;
 	int titlex, titley;
 	int stringWidth = 0.0272 * mywindows::WW * title.length();
 	titlex = (mywindows::WW - stringWidth) / 2;
 	titley = mywindows::WH * 0.05;
-	for (const auto& item : pages[settingpage - 1].items) {
-		showitem(item);
+	//for (const auto& item : pages[settingpage - 1].items) {
+	//	showitem(item);
+	//}
+	for(auto&b:pages[settingpage-1].buttons)
+	{
+		b->show();
 	}
 	unsigned int totalp = static_cast<int>(pages.size());
 	wstring t = to_wstring(settingpage) + L"/" + to_wstring(totalp);
@@ -193,7 +189,16 @@ void set2::setGp(Gp *p)
 		for (auto&b : bs) {
 			b.setGp(p);
 		}
+	for(auto&a:pages)
+		for(auto&b:a.buttons)
+			b->setGp(p);
 }
+
+HWND set2::CreateEditBox(HWND hWndParent, int number, int x, int y, int w, int h, const wchar_t* words)
+{
+	return 0;
+}
+
 void set2::enter()
 {
 	directshow::music(ENTER);
@@ -253,7 +258,7 @@ void set2::Load(string jsonpath) {
 				t.ConfigName = sth2sth::str2wstr(sItem.value("ConfigName", ""));
 				t.FileChooseWindowName = sth2sth::str2wstr(U2G(sItem.value("FileChooseWindowName", "")));
 				t.FileType = sItem.value("FileType", "All");
-				if (t.Limit == BETWEENCOUNT) {
+				if (t.Limit & BETWEENCOUNT) {
 					t.max = sItem.value("max", 0);
 					t.min = sItem.value("min", 0);
 					t.OutOfLimitOutPut = sItem.value("OutOfLimitOutPut", "");
@@ -261,7 +266,7 @@ void set2::Load(string jsonpath) {
 						t.max = mywindows::screenWidth;
 					}
 				}
-				else if (t.Limit == ISFILE || t.Limit == ISBITMAP) {
+				else if (t.Limit & ISFILE || t.Limit & ISBITMAP) {
 					t.IsEditBox = 1;
 					t.IsFile = 1;
 				}
@@ -330,16 +335,16 @@ json set2::rollback(string jsonpath) {
 	json i;
 	p[TITLE] = G2U("图片");
 	i[NAME] = G2U("卡池1图片"); i[CONFIGNAME] = "over1"; i[FILECHOOSE] = G2U("选择卡池1图片");
-	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP; i[NUMBER] = 1; i[BITMAPC] = 0;
+	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP| ISFILE; i[NUMBER] = 1; i[BITMAPC] = 0;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("卡池2图片"); i[CONFIGNAME] = "over2"; i[FILECHOOSE] = G2U("选择卡池2图片");
-	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP; i[NUMBER] = 2; i[BITMAPC] = 1;
+	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP | ISFILE; i[NUMBER] = 2; i[BITMAPC] = 1;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("卡池3图片"); i[CONFIGNAME] = "over3"; i[FILECHOOSE] = G2U("选择卡池3图片");
-	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP; i[NUMBER] = 3; i[BITMAPC] = 2;
+	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP | ISFILE; i[NUMBER] = 3; i[BITMAPC] = 2;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("卡池4图片"); i[CONFIGNAME] = "over4"; i[FILECHOOSE] = G2U("选择卡池4图片");
-	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP; i[NUMBER] = 4; i[BITMAPC] = 3;
+	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP | ISFILE; i[NUMBER] = 4; i[BITMAPC] = 3;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 11;
 	p["item"].push_back(i); i.clear();
@@ -387,23 +392,23 @@ json set2::rollback(string jsonpath) {
 	p[TITLE] = G2U("悬浮窗(重启生效)");
 	i[NAME] = G2U("悬浮窗"); i[CONFIGNAME] = "open float window"; i[ISSWITCH] = 1; i[NUMBER] = 1;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("初始x坐标"); i[CONFIGNAME] = "float window x"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT + RESTART; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
+	i[NAME] = G2U("初始x坐标"); i[CONFIGNAME] = "float window x"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT | RESTART; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
 	i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 2;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("初始y坐标"); i[CONFIGNAME] = "float window y"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT + RESTART; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
+	i[NAME] = G2U("初始y坐标"); i[CONFIGNAME] = "float window y"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT | RESTART; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
 	i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 3;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("宽度"); i[CONFIGNAME] = "float window width"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT + RESTART; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
+	i[NAME] = G2U("宽度"); i[CONFIGNAME] = "float window width"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT | RESTART; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
 	i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 4;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("高度"); i[CONFIGNAME] = "float window height"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT + RESTART; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
+	i[NAME] = G2U("高度"); i[CONFIGNAME] = "float window height"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT | RESTART; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
 	i[OUTOFLIMIT] = G2U("大小不能大于屏幕"); i[NUMBER] = 5;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("滑动系数"); i[CONFIGNAME] = "float window Mu"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT + RESTART; i[MAX] = 1; i[MIN] = 0;
+	i[NAME] = G2U("滑动系数"); i[CONFIGNAME] = "float window Mu"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT | RESTART; i[MAX] = 1; i[MIN] = 0;
 	i[OUTOFLIMIT] = G2U("大小不能超过1或小于0"); i[NUMBER] = 6;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("悬浮窗图片"); i[CONFIGNAME] = "float window picture"; i[FILECHOOSE] = G2U("选择悬浮窗图片");
-	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP + RESTART; i[NUMBER] = 11; i[BITMAPC] = FLOATPIC;
+	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP | RESTART; i[NUMBER] = 11; i[BITMAPC] = FLOATPIC;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 12;
 	p["item"].push_back(i); i.clear();
@@ -447,6 +452,10 @@ json set2::rollback(string jsonpath) {
 }
 void set2::clicked(int x, int y)
 {
+	for(auto& i:pages[settingpage-1].buttons)
+	{
+		i->click(x, y);
+	}
 	int totalp = pages.size();
 	int number = -1;
 	int half = 0;
@@ -507,11 +516,15 @@ void set2::clicked(int x, int y)
 	}
 }
 void set2::showitem(sitem item) {
-	if (item.IsSwitch) {
-		switchbm(item);
-	}
-	else if (item.IsEditBox) {
-		textbox(item);
+	//if (item.IsSwitch) {
+	//	switchbm(item);
+	//}
+	//else if (item.IsEditBox) {
+	//	textbox(item);
+	//}
+	for(auto&i:pages[settingpage-1].buttons)
+	{
+		i->show();
 	}
 }
 void set2::textbox(sitem item)
@@ -531,7 +544,7 @@ void set2::textbox(sitem item)
 	TextOut_(hdc, sxy[item.Number].x, sxy[item.Number].y + mywindows::WH * 0.01, item.Name.c_str());
 	p->ReleaseDC(hdc);
 	if (isused[number] == 0) {
-		textboxhwnd[number] = CreateEditBox(mywindows::main_hwnd, number, sxy[number].bmx, sxy[number].bmy, sxy[number].bmw, sxy[number].bmh, wst.c_str());
+		//textboxhwnd[number] = CreateEditBox(mywindows::main_hwnd, number, sxy[number].bmx, sxy[number].bmy, sxy[number].bmw, sxy[number].bmh, wst.c_str());
 	}
 	else
 	{
@@ -666,6 +679,8 @@ void set2::EditBoxEditor(sitem item, wstring tmp)
 	}
 	config::replace(item.ConfigName, tmp);
 }
+
+
 void set2::seteditbox(LPARAM lParam, WPARAM wParam)
 {
 	// 获取文本框的句柄,确保它是有效的
@@ -684,19 +699,7 @@ void set2::seteditbox(LPARAM lParam, WPARAM wParam)
 		}
 	}
 }
-HWND set2::CreateEditBox(HWND hWndParent, int number, int x, int y, int w, int h, const wchar_t* words) {
-	// 创建EDIT控件的样式
-	DWORD editStyle = ES_AUTOHSCROLL | (WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | ES_LEFT | WS_BORDER);
 
-	// 创建EDIT控件的附加样式（可选）
-	DWORD editExStyle = WS_EX_CLIENTEDGE;
-
-	// 创建文本框
-	HWND hEdit = CreateWindowExW(editExStyle, L"EDIT", words, editStyle, x, y, w, h, hWndParent, (HMENU)number, NULL, NULL);
-
-	// 返回文本框句柄
-	return hEdit;
-}
 // UTF8字符串转成GBK字符串
 std::string set2::U2G(const std::string& utf8)
 {
@@ -753,103 +756,14 @@ std::string set2::G2U(const std::string& gbk)
 
 void set2::regButton()
 {
-	for(const auto& i:pages)
+	for (auto& i : pages)
 	{
-		std::vector<Button> bs;
-		for (const auto& t : i.items)
-		{
-			if (t.IsSwitch)
-			{
-				Button b;
-				double x, y, xend, yend;
-				if (t.Number <= 10)
-				{
-					x = 0.25;
-					y = t.Number * 0.09;
-					xend = 0.35;
-					yend = y + 0.07;
-				}
-				else if (t.Number <= 19)
-				{
-					x = 0.75;
-					y = (t.Number - 9) * 0.09;
-					xend = 0.85;
-					yend = y + 0.07;
-				}
-				else
-				{
-					x = 0; y = 0; xend = 0; yend = 0;
-				}
-				b.setxy2WWWH(x, y, xend, yend);
-				b.bind(
-					[&] {
-						config::turnUpSideDown(t.ConfigName);
-						rereadconfig();
-						if (config::getint(t.ConfigName) == 1)
-							b.setText(L"开");
-						else
-							b.setText(L"关");
-					}
-				);
-				b.setBmapC(setbutton);
-				if (config::getint(t.ConfigName) == 1)
-					b.setText(L"开");
-				else
-					b.setText(L"关");
-				bs.push_back(b);
-			}
-			else if (t.IsFile)
-			{
-				Button b1,b2;
-				double x, y, xend1,xend2, yend;
-				if(t.Number<=10)
-				{
-					x = 0.35;
-					y= t.Number * 0.09;
-					xend1= 0.4;
-					xend2 = 0.45;
-					yend= y + 0.07;
-				}
-				else if(t.Number<=19)
-				{
-					x = 0.75;
-					y= (t.Number - 9) * 0.09;
-					xend1= 0.8;
-					xend2 = 0.85;
-					yend= y + 0.07;
-				}
-				else
-				{
-					x = 0; y = 0; xend1 = 0; xend2 = 0; yend = 0;
-				}
-				b1.setxy2WWWH(x, y, xend1, yend);
-				b2.setxy2WWWH(xend1, y, xend2, yend);
-				b1.setBmapC(setbutton);
-				b2.setBmapC(setbutton);
-				b1.setText(L"选择");
-				b2.setText(L"打开");
-				b1.setTextColor(0, 0, 0);
-				b2.setTextColor(0, 0, 0);
-				b1.setFont(&ui::text_mid);
-				b2.setFont(&ui::text_mid);
-				b1.bind(
-					[&] {
-						ChooseFile(t);
-						if (t.Limit == ISBITMAP)
-						{
-							reloadbmp(t);
-						}
-					}
-				);
-				b2.bind(
-					[&] {
-						OpenFile(t);
-					}
-				);
-				bs.push_back(b1);
-				bs.push_back(b2);
-			}
+		int a = 0;
+		for (auto& c : i.items) {
+			//SetButton t(c);
+			i.buttons.push_back(std::make_shared<SetButton>(c));
+			i.buttons[a].get()->reConnect();
+			a++;
 		}
-		buttons.push_back(bs);
 	}
 }

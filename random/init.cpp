@@ -162,11 +162,7 @@ void init::music()
 		str += L"\\files\\mp3\\backsound.mp3\" alias bgm";
 		mywindows::log(L"load bgm,command is :%ws", str.c_str());
 		mciSendString(str.c_str(), NULL, 0, NULL);
-		int a;
-		a=mciSendString((cmd + L"\\files\\mp3\\reveal-3star.mp3\" alias star3").c_str(), 0, 0, 0);
-		a=mciSendString((cmd + L"\\files\\mp3\\reveal-4star.mp3\" alias star4").c_str(), 0, 0, 0);
-		a=mciSendString((cmd + L"\\files\\mp3\\reveal-5star.mp3\" alias star5").c_str(), 0, 0, 0);
-		a=mciSendString((cmd + L"\\files\\mp3\\reveal-fullstar.mp3\" alias starfull").c_str(), 0, 0, 0);
+
 		once = 0;
 	}// 打开并播放背景音乐
 	if (!ui::SS.offmusic)
@@ -196,7 +192,6 @@ void init::MainWindow()
 		mywindows::main_hwnd = CreateWindowW(L"main", config::get(WINDOW_TITEL).c_str(), WS_CLIPSIBLINGS | WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_THICKFRAME,
 			0, 0, mywindows::WW, mywindows::WH, NULL, NULL, GetModuleHandle(NULL), NULL);
 	}
-	ShowWindow(mywindows::main_hwnd, SW_SHOWNORMAL);//把窗体显示出来
 }
 void init::regwindow(const WNDPROC w1, const WNDPROC w2, const WNDPROC w3)
 {

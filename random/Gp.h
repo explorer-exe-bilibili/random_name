@@ -4,6 +4,8 @@
 #include <vector>
 #include <memory>
 #include<string>
+
+#include "resources_manager.h"
 #pragma comment(lib,"gdiplus.lib")
 
 class Gp
@@ -15,6 +17,7 @@ class Gp
 	std::vector<BITMAP> BITMAPs;
 	void Load_();
 	void Load();
+	resources_manager *ptr;
 public:
 	~Gp();
 	Gp(HWND hwnd);

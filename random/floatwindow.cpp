@@ -39,7 +39,7 @@ void floatwindow::paint()
 		RECT rect;
 		GetWindowRect(mywindows::float_hWnd, &rect);
 		int w = rect.right - rect.left, h = rect.bottom - rect.top;
-		p.Paint(0, 0, w, h, 0);
+		p.Paint(0, 0, w, h, floating);
 		p.Flush();
 
 	EndPaint(mywindows::float_hWnd, &ps);
@@ -139,11 +139,12 @@ void floatwindow::mousemove(LPARAM lParam)
 bool uplbutton = 0;
 void movewindow() {
 	int x, y, w, h;
+	double fps_time = config::getint(FPS);
 	static double speedx_;
 	static double speedy_;
 	if (uplbutton) {
-		speedx_ = speedx*16.6;
-		speedy_ = speedy*16.6;
+		speedx_ = speedx*fps_time;
+		speedy_ = speedy*fps_time;
 		uplbutton = 0;
 	}while (speedx_ > 1 || speedy_ > 1||speedx_<-1||speedy_<-1) {
 		RECT WindowRect;
@@ -170,7 +171,7 @@ void movewindow() {
 			speedy_ = -speedy_;
 			MoveWindow(mywindows::float_hWnd, WindowRect.left, mywindows::screenHeight - h, w, h, 0);
 		}
-		Sleep(16.6);
+		Sleep(fps_time);
 		double Mu = config::getd(MU);
 		speedx_ = speedx_ * Mu;
 		speedy_ = speedy_ * Mu;

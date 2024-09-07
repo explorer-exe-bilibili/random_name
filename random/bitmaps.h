@@ -1,31 +1,29 @@
 ﻿#pragma once
-#include<Windows.h>
 
-#define BitmapCounts 26
-
-#define polearm 25
-#define claymore 24
-#define magic 23
-#define sword 22
-#define bow 21
-#define setbutton 20
-#define SetBM 19
-#define exiti 18
-#define exitb 17
-#define list6 16
-#define list5 15
-#define list4 14
-#define list3 13
-#define listbg 12
-#define goldencardbg 11
-#define BUTTON 10
-#define blue10 9
-#define blue1 8
-#define pink10 7
-#define pink1 6
-#define cardbackground 5
-#define BackGround 4
-#define over4 3
-#define over3 2
-#define over2 1
-#define over1 0
+constexpr auto BitmapCounts = 26;
+constexpr auto floating = 25;
+constexpr auto polearm = 24;
+constexpr auto claymore = 23;
+constexpr auto magic = 22;
+constexpr auto sword = 21;
+constexpr auto bow = 20;
+constexpr auto setbutton = 19;
+constexpr auto SetBM = 18;
+constexpr auto exitBu = 17;
+constexpr auto list6 = 16;
+constexpr auto list5 = 15;
+constexpr auto list4 = 14;
+constexpr auto list3 = 13;
+constexpr auto listbg = 12;
+constexpr auto goldencardbg = 11;
+constexpr auto BUTTON = 10;
+constexpr auto blue10 = 9;
+constexpr auto blue1 = 8;
+constexpr auto pink10 = 7;
+constexpr auto pink1 = 6;
+constexpr auto cardbackground = 5;
+constexpr auto BackGround = 4;
+constexpr auto over4 = 3;
+constexpr auto over3 = 2;
+constexpr auto over2 = 1;
+constexpr auto over1 = 0;

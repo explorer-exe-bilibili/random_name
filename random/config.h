@@ -15,6 +15,8 @@
 #define WINDOW_TITEL L"title name"
 #define MODE L"firstmode"
 #define INWINDOW L"window mode(not full screen)"
+#define POOL_COUNT L"pool counts"
+#define IMAGE_DIRECTORY L"ImageDirectory"
 #define OVER4 L"over4"
 #define OVER3 L"over3"
 #define OVER2 L"over2"

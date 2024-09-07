@@ -54,6 +54,8 @@ void config::init() {
 		add(SIGNALSTAR5, L"\\files\\video\\5star-single.mp4");
 		add(GROUPSTAR4, L"\\files\\video\\4star-multi.mp4");
 		add(GROUPSTAR5, L"\\files\\video\\5star-multi.mp4");
+		add(POOL_COUNT, L"4");
+		add(IMAGE_DIRECTORY, L"\\files\\imgs\\");
 		saveFile();
 		readFile();
 		printAllConfigItems();
@@ -134,6 +136,10 @@ void config::init() {
 		if (LogString==L"err")add(GROUPSTAR4, L"\\files\\video\\4star-multi.mp4");
 		LogString = get(GROUPSTAR5);
 		if (LogString==L"err")add(GROUPSTAR5, L"\\files\\video\\5star-multi.mp4");
+		LogString = get(POOL_COUNT);
+		if (LogString==L"err")add(POOL_COUNT, L"4");
+		LogString = get(IMAGE_DIRECTORY);
+		if (LogString==L"err")add(IMAGE_DIRECTORY, L"\\files\\imgs\\");
 		saveFile();
 		printAllConfigItems();
 		mywindows::log(L"config init successfully");

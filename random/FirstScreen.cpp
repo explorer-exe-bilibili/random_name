@@ -1,7 +1,5 @@
 ﻿#include "FirstScreen.h"
 
-#include <stdbool.h>
-
 #include "bitmaps.h"
 #include "directshow.h"
 #include "ui.h"
@@ -45,7 +43,7 @@ void FirstScreen::resetPoint()
 {
 	for(auto & t :b)
 	{
-		t.refreash();
+		t.refresh();
 	}
 }
 

@@ -1,78 +1,116 @@
 #include "Gp.h"
+
+#include <filesystem>
+#include <regex>
+
 #include"config.h"
 #include "mywindows.h"
+#include "resources_manager.h"
 using namespace Gdiplus;
 using namespace std;
 
 #pragma comment(lib, "Msimg32.lib")
 
 void Gp::Load_() {
-	bitmaps.clear();
-	bitmaps.push_back(std::make_shared<Bitmap>(config::getpath(FLOATPHOTO).c_str()));
-	for (const auto& i : bitmaps) {
-		if (i.get()->GetLastStatus() != Ok) {
-			mywindows::errlog("¥Úø™Õº∆¨ ß∞‹");
-		}
-		else
-		{
-			HBITMAP tmp;
-			BITMAP tmp_b;
-			i->GetHBITMAP(Gdiplus::Color(0, 0, 0, 0), &tmp);
-			GetObject(tmp, sizeof(BITMAP), &tmp_b);
-			HBitmaps.push_back(tmp);
-			BITMAPs.push_back(tmp_b);
-		}
-	}
+	ptr=resources_manager::getInstance();
+	//bitmaps.clear();
+	//bitmaps.push_back(std::make_shared<Bitmap>(config::getpath(FLOATPHOTO).c_str()));
+	//for (const auto& i : bitmaps) {
+	//	if (i.get()->GetLastStatus() != Ok) {
+	//		mywindows::errlog("¥Úø™Õº∆¨ ß∞‹");
+	//	}
+	//	else
+	//	{
+	//		HBITMAP tmp;
+	//		BITMAP tmp_b;
+	//		i->GetHBITMAP(Gdiplus::Color(0, 0, 0, 0), &tmp);
+	//		GetObject(tmp, sizeof(BITMAP), &tmp_b);
+	//		HBitmaps.push_back(tmp);
+	//		BITMAPs.push_back(tmp_b);
+	//	}
+	//}
 	//bitmaps.clear();
 }
 void Gp::Load()
 {
-	bitmaps.clear();
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(config::getpath(OVER1).c_str()));//0
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(config::getpath(OVER2).c_str()));//1
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(config::getpath(OVER3).c_str()));//2
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(config::getpath(OVER4).c_str()));//3
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\wish-background.jpg"));//4
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\cardbg.jpg"));//5
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\pink1.png"));//6
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\pink10.png"));//7
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\blue1.png"));//8
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\blue10.png"));//9
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\buttom.png"));//10
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\goldenbg.jpg"));//11
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\list.jpg"));//12
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\3list.png"));//13
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\4list.png"));//14
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\5list.png"));//15
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\fulllist.png"));//16
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\exit.png"));//17
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\exit.png"));//18
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\setting.jpg"));//19
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\settingbuttom.png"));//20
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\bg-bow.png"));//21
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\bg-sword.png"));//22
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\bg-magic.png"));//23
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\bg-claymore.png"));//24
-	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\bg-polearm.png"));//25
-	for (const auto& i : bitmaps) {
-		if (i.get()->GetLastStatus() != Ok) {
-			mywindows::errlog("¥Úø™Õº∆¨ ß∞‹");
-		}
-		else
-		{
-			HBITMAP tmp;
-			BITMAP tmp_B;
-			i->GetHBITMAP(Gdiplus::Color(0, 0, 0, 0), &tmp);
-			GetObject(tmp, sizeof(BITMAP), &tmp_B);
-			HBitmaps.push_back(tmp);
-			BITMAPs.push_back(tmp_B);
-		}
-	}
+	ptr=resources_manager::getInstance();
+	//bitmaps.clear();
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(config::getpath(OVER1).c_str()));//0
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(config::getpath(OVER2).c_str()));//1
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(config::getpath(OVER3).c_str()));//2
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(config::getpath(OVER4).c_str()));//3
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\wish-background.jpg"));//4
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\cardbg.jpg"));//5
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\pink1.png"));//6
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\pink10.png"));//7
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\blue1.png"));//8
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\blue10.png"));//9
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\buttom.png"));//10
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\goldenbg.jpg"));//11
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\list.jpg"));//12
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\3list.png"));//13
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\4list.png"));//14
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\5list.png"));//15
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\fulllist.png"));//16
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\exit.png"));//17
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\setting.jpg"));//18
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\settingbuttom.png"));//19
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\bg-bow.png"));//20
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\bg-sword.png"));//21
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\bg-magic.png"));//22
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\bg-claymore.png"));//23
+	//bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(L".\\files\\imgs\\bg-polearm.png"));//24
+
+
+	//for (char t = 1; t <= config::getint(POOL_COUNT); t++)
+	//{
+	//	std::wstring configName = L"over" + std::to_wstring(t);
+	//	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(config::getpath(configName).c_str()));
+
+	//}
+	//std::wstring directory = config::getpath(IMAGE_DIRECTORY);
+	//std::wregex regex(LR"((\d+)\.\w+)");
+	//std::vector<std::pair<int, std::wstring>> files;
+
+	//for (const auto& entry : std::filesystem::directory_iterator(directory))
+	//{
+	//	if (entry.is_regular_file())
+	//	{
+	//		std::wsmatch match;
+	//		std::wstring filename = entry.path().filename().wstring();
+	//		if (std::regex_match(filename, match, regex))
+	//		{
+	//			int number = std::stoi(match[1].str());
+	//			files.emplace_back(number, entry.path().wstring());
+	//		}
+	//	}
+	//}
+
+	//std::sort(files.begin(), files.end(), [](const auto& a, const auto& b) {
+	//	return a.first < b.first;
+	//	});
+
+	//for (const auto& file : files)
+	//{
+	//	bitmaps.push_back(std::make_shared<Gdiplus::Bitmap>(file.second.c_str()));
+	//}
+	//for (const auto& i : bitmaps) {
+	//	if (i.get()->GetLastStatus() != Ok) {
+	//		mywindows::errlog("¥Úø™Õº∆¨ ß∞‹");
+	//	}
+	//	else
+	//	{
+	//		HBITMAP tmp;
+	//		BITMAP tmp_B;
+	//		i->GetHBITMAP(Gdiplus::Color(0, 0, 0, 0), &tmp);
+	//		GetObject(tmp, sizeof(BITMAP), &tmp_B);
+	//		HBitmaps.push_back(tmp);
+	//		BITMAPs.push_back(tmp_B);
+	//	}
+	//}
 	//bitmaps.clear();
 }
-Gp::~Gp()
-{
-}
+Gp::~Gp() = default;
 Gp::Gp(HWND hwnd):hwnd(hwnd)
 {
 	SizeChanged();
@@ -144,9 +182,14 @@ void Gp::Paint(const int xDest, const int yDest, const int wDest, const int hDes
 	//graphic.get()->DrawImage(bitmaps[number].get(), xDest, yDest, wDest, hDest);
 	HDC hdc = GetDC();
 	HDC hdcMem = CreateCompatibleDC(hdc);
-	SelectObject(hdcMem, HBitmaps[number]);
-	int w = BITMAPs[number].bmWidth;
-	int h = BITMAPs[number].bmHeight;
+	//SelectObject(hdcMem, HBitmaps[number]);
+	//int w = BITMAPs[number].bmWidth;
+	//int h = BITMAPs[number].bmHeight;
+	const HBITMAP t_hbtiamp = ptr->getHBitmap(number);
+	const BITMAP* t_bitmap = ptr->getBitmap(number);
+	int w = t_bitmap->bmWidth;
+	int h = t_bitmap->bmHeight;
+	SelectObject(hdcMem, t_hbtiamp);
 	// …Ë÷√ªÏ∫œ∫Ø ˝
 	BLENDFUNCTION blendFunc;
 	blendFunc.BlendOp = AC_SRC_OVER;
@@ -163,9 +206,14 @@ void Gp::Paint(const int xDest, const int yDest, const int number)
 	//graphic.get()->DrawImage(bitmaps[number].get(), xDest, yDest);
 	HDC hdc = GetDC();
 	HDC hdcMem = CreateCompatibleDC(hdc);
-	SelectObject(hdcMem, HBitmaps[number]);
-	int w = BITMAPs[number].bmWidth;
-	int h = BITMAPs[number].bmHeight;
+	//SelectObject(hdcMem, HBitmaps[number]);
+	//int w = BITMAPs[number].bmWidth;
+	//int h = BITMAPs[number].bmHeight;
+	const HBITMAP t_hbtiamp = ptr->getHBitmap(number);
+	const BITMAP *t_bitmap = ptr->getBitmap(number);
+	int w = t_bitmap->bmWidth;
+	int h = t_bitmap->bmHeight;
+	SelectObject(hdcMem, t_hbtiamp);
 	// …Ë÷√ªÏ∫œ∫Ø ˝
 	BLENDFUNCTION blendFunc;
 	blendFunc.BlendOp = AC_SRC_OVER;

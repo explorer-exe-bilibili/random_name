@@ -16,6 +16,12 @@
     <Filter Include="头文件\base">
       <UniqueIdentifier>{82688856-db67-491e-a072-7fe3cb4c42fb}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\前端">
+      <UniqueIdentifier>{492ffb61-d05d-4845-b4ab-7811cc47a854}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\前端\设置界面">
+      <UniqueIdentifier>{faea4ab6-4bad-45b4-a2ec-35fdf8b98ad5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mywindows.h">
@@ -81,6 +87,18 @@
     <ClInclude Include="Audio.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="SetButton.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="item.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="resources_manager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Timer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="random.cpp">
@@ -104,34 +122,16 @@
     <ClCompile Include="sth2sth.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="FirstScreen.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="NameScreen.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="ui.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="click.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="set-json.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="init.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="MSGback.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="Gp.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="floatwindow.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="HistoryScreen.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Button.cpp">
@@ -141,6 +141,33 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Audio.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="set-json.cpp">
+      <Filter>源文件\前端\设置界面</Filter>
+    </ClCompile>
+    <ClCompile Include="SetButton.cpp">
+      <Filter>源文件\前端\设置界面</Filter>
+    </ClCompile>
+    <ClCompile Include="FirstScreen.cpp">
+      <Filter>源文件\前端</Filter>
+    </ClCompile>
+    <ClCompile Include="floatwindow.cpp">
+      <Filter>源文件\前端</Filter>
+    </ClCompile>
+    <ClCompile Include="Gp.cpp">
+      <Filter>源文件\前端</Filter>
+    </ClCompile>
+    <ClCompile Include="NameScreen.cpp">
+      <Filter>源文件\前端</Filter>
+    </ClCompile>
+    <ClCompile Include="HistoryScreen.cpp">
+      <Filter>源文件\前端</Filter>
+    </ClCompile>
+    <ClCompile Include="resources_manager.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Timer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

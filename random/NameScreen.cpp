@@ -104,13 +104,13 @@ void NameScreen::setButton()
 {
 	B[SKIP].setxy2WWWH(0.8, 0.045, 0.9, 0.045 + 0.17 * 0.17);
 	B[SKIP].setText(L"跳过>>");
-	B[SKIP].refreash();
+	B[SKIP].refresh();
 	B[SKIP].setFont(&ui::text_mid);
 	B[SKIP].bind([this] {skip(); });
 	B[SKIP].setTextColor(255, 255, 255, 1);
 	B[addName].setxy2WWWH(0.4, 0.8, 0.52, 0.836);
 	B[addName].setText(L"增加此名字几率");
-	B[addName].refreash();
+	B[addName].refresh();
 	B[addName].setFont(&ui::text_mid);
 	B[addName].bind([this] {addaname(); });
 	B[addName].setTextColor(255, 230, 34, 1);
@@ -454,7 +454,7 @@ void NameScreen::resetPoint()
 {
 	for(auto& i:B)
 	{
-		i.refreash();
+		i.refresh();
 	}
 }
 

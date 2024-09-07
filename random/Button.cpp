@@ -1,5 +1,6 @@
 #include "Button.h"
 
+#include "directshow.h"
 #include "mywindows.h"
 #include "ui.h"
 
@@ -11,26 +12,36 @@ Button::Button(const int x, const int y, const int xE, const int yE, const int B
 	this->yE = yE;
 	this->BmapC = BitmapC;
 	text= text_;
+	xP = &(this->x);
+	yP = &(this->y);
+	xEP = &(this->xE);
+	yEP = &(this->yE);
 }
 
 Button::Button()
 {
+	xP = &(this->x);
+	yP = &(this->y);
+	xEP = &(this->xE);
+	yEP = &(this->yE);
 }
 
 Button::~Button()
 {
 	x = 0; y = 0; xE = 0; yE = 0;
-	xP = nullptr; yP=nullptr; xEP=nullptr; yEP=nullptr;
+	//xP = nullptr; yP=nullptr; xEP=nullptr; yEP=nullptr;
 	BmapC = 0;
 	FuncCounts = 0;
 	functions.clear();
 }
 
-void Button::click(const int condition, const int x, const int y)
+void Button::click(const int condition, const int x, const int y)const
 {
 	if (x != -1 && y != -1) {
 		if (x >= *xP AND x <= *xEP AND y >= *yP AND y <= *yEP)
 		{
+			if (!music_string.empty())
+				directshow::music(music_string);
 			if (functions.size()>condition)
 			{
 				functions[condition]();
@@ -46,38 +57,63 @@ void Button::paint() const
 	if(!p)return;
 	if(!DisableBmap)
 		p->Paint(x, y, xE-x, yE-y,BmapC);
-	if(!DisableStr){
-		if(TextW!=-1 AND TextH!=-1)
-		{
-			if(font!=nullptr)
-				p->DrawString(text, *font, x + (xE - x - TextW) / 2, y + (yE - y - TextH) / 2, R, G, B);
-			else
-				p->DrawString(text, ui::icon_mid, x + (xE - x - TextW) / 2, y + (yE - y - TextH) / 2, R, G, B);
+	//if(!DisableStr){
+	//	if(TextW!=-1 AND TextH!=-1)
+	//	{
+	//		if(font!=nullptr)
+	//			p->DrawString(text, *font, x + (xE - x - TextW) / 2, y + (yE - y - TextH) / 2, R, G, B);
+	//		else
+	//			p->DrawString(text, ui::icon_mid, x + (xE - x - TextW) / 2, y + (yE - y - TextH) / 2, R, G, B);
+	//	}
+	//	if(font)
+	//	{
+	//		if (*font == ui::text_mid || *font == ui::icon)
+	//		{
+	//			int w = xE - x - (text.size() * mywindows::WW * 0.17 * 0.17 * 0.77) / 2;
+	//			int h = yE - y - mywindows::WH * 0.17 * 0.17 / 2;
+	//			p->DrawString(text, *font, x + w, y + h, R, G, B);
+	//		}
+	//		else if (*font == ui::text || *font == ui::icon_mid)
+	//		{
+	//			int w = (xE - x - (text.size() - 1) * mywindows::WW * 0.17 * 0.11 * 0.77) / 2;
+	//			int h = (yE - y - mywindows::WH * 0.17 * 0.12) / 2;
+	//			p->DrawString(text, *font, x + w, y + h, R, G, B);
+	//		}
+	//		else
+	//			p->DrawString(text, *font, x + (xE - x - (text.size() * mywindows::WW * 0.17 * 0.17)) / 2,
+	//				y + (yE - y - mywindows::WH * 0.17*0.17) / 2, R, G, B);
+	//	}
+	//	else
+	//	{
+	//		p->DrawString(text, ui::icon_mid, x + (xE - x - (text.size() * mywindows::WW * 0.17 * 0.17)) / 2,
+	//			y + (yE - y - mywindows::WH * 0.17*0.17) / 2, R, G, B);
+	//	}
+	//}
+	if (!DisableStr) {
+		// 计算文本的宽度和高度
+		SIZE textSize;
+		HDC hdc = GetDC(NULL); // 获取设备上下文
+		HFONT oldFont = nullptr;
+		if (font != nullptr) {
+			oldFont = (HFONT)SelectObject(hdc, *font);
 		}
-		if(font)
-		{
-			if (*font == ui::text_mid || *font == ui::icon)
-			{
-				int w = xE - x - (text.size() * mywindows::WW * 0.17 * 0.17 * 0.77) / 2;
-				int h = yE - y - mywindows::WH * 0.17 * 0.17 / 2;
-				p->DrawString(text, *font, x + w, y + h, R, G, B);
-			}
-			else if (*font == ui::text || *font == ui::icon_mid)
-			{
-				int w = (xE - x - (text.size() - 1) * mywindows::WW * 0.17 * 0.11 * 0.77) / 2;
-				int h = (yE - y - mywindows::WH * 0.17 * 0.12) / 2;
-				p->DrawString(text, *font, x + w, y + h, R, G, B);
-			}
-			else
-				p->DrawString(text, *font, x + (xE - x - (text.size() * mywindows::WW * 0.17 * 0.17)) / 2,
-					y + (yE - y - mywindows::WH * 0.17*0.17) / 2, R, G, B);
+		else {
+			oldFont = (HFONT)SelectObject(hdc, ui::icon_mid);
 		}
+		GetTextExtentPoint32(hdc, text.c_str(), text.length(), &textSize);
+		SelectObject(hdc, oldFont);
+		ReleaseDC(NULL, hdc);
+
+		// 计算文本的居中位置
+		int textX = x + (xE - x - textSize.cx) / 2-mywindows::WW*0.005;
+		int textY = y + (yE - y - textSize.cy) / 2;
+
+		// 绘制文本
+		if (font != nullptr)
+			p->DrawString(text, *font, textX, textY, R, G, B);
 		else
-		{
-			p->DrawString(text, ui::icon_mid, x + (xE - x - (text.size() * mywindows::WW * 0.17 * 0.17)) / 2,
-				y + (yE - y - mywindows::WH * 0.17*0.17) / 2, R, G, B);
-		}
-	}  
+			p->DrawString(text, ui::icon_mid, textX, textY, R, G, B);
+	}
 }
 
 void Button::setText(const std::wstring& NewText, const int DisableBmap)
@@ -106,6 +142,10 @@ void Button::setPoint(const int x, const int y, const int xE, const int yE)
 
 void Button::setxy2WWWH(const double x2WW, const double y2WH, const double xE2WW, const double yE2WH)
 {
+	this->xP = &x;
+	this->xEP = &xE;
+	this->yP = &y;
+	this->yEP = &yE;
 	this->x2WW = x2WW;
 	this->y2WH = y2WH;
 	this->xE2WW = xE2WW;
@@ -136,12 +176,17 @@ void Button::setDisableBmap(const bool newValue)
 		DisableBmap = newValue;
 }
 
+void Button::setMusic(std::string music_string)
+{
+	this->music_string = music_string;
+}
+
 void Button::setGp(Gp* p)
 {
 	this->p = p;
 }
 
-void Button::refreash()
+void Button::refresh()
 {
 	x = x2WW * mywindows::WW;
 	y = y2WH * mywindows::WH;
@@ -159,6 +204,14 @@ void Button::changeBmap(const int NewBmapC)
 {
 	BmapC=NewBmapC;
 	paint();
+}
+
+void Button::reConnect()
+{
+	xP = &(this->x);
+	yP = &(this->y);
+	xEP = &(this->xE);
+	yEP = &(this->yE);
 }
 
 Button::Breturn Button::Binded()
@@ -212,6 +265,17 @@ int Button::bind(std::function<void()> func, const int condition)
 		FuncCounts++;
 	}
 	return 0;
+}
+
+bool Button::bind(Button* b)
+{
+	binded = b;
+	functions= b->functions;
+	xP= b->xP;
+	yP= b->yP;
+	xEP= b->xEP;
+	yEP= b->yEP;
+	return true;
 }
 
 int Button::bindX(Button* b, const int add)

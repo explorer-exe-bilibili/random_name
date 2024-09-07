@@ -6,6 +6,8 @@
 #include"Gp.h"
 #include"button.h"
 #include<nlohmann/json.hpp>
+#include"item.h"
+#include "SetButton.h"
 
 #define LASTBM L"b"
 #define NEXTBM L"c"
@@ -13,22 +15,6 @@
 class set2
 {
 private:
-	typedef struct sitem {
-		bool IsEditBox = 0;
-		bool IsFile = 0;
-		bool IsSwitch = 0;
-		int Number = 0;
-		int max = 0;
-		int min = 0;
-		int Limit = 0;
-		int BitmapNumber = 0;
-		std::wstring Name;
-		std::wstring ConfigName;
-		std::wstring FileChooseWindowName;
-		std::string FileType;
-		std::string OutOfLimitOutPut;
-		bool neetreload=0;
-	}sitem;
 	typedef struct sNode {
 		int number;
 		int x;
@@ -45,6 +31,7 @@ public:
 		int itemcount = 0;
 		std::wstring Title;
 		std::vector<sitem> items;
+		std::vector<std::shared_ptr<SetButton>> buttons;
 	}spage;
 	~set2();
 	BITMAP setbm, setbu;
@@ -68,7 +55,7 @@ private:
 	Gp* p;
 	BITMAP* bitmaps[BitmapCounts];
 	bool isused[40] = { 0 },needReboot=0;
-	HWND CreateEditBox(HWND hWndParent, int NUMBER, int x, int y, int w, int h, const wchar_t* words);
+	HWND CreateEditBox(HWND hWndParent, int number, int x, int y, int w, int h, const wchar_t* words); 
 	HWND textboxhwnd[20] = { 0 };
 	int lastbmx = 0, lastbmy = 0, lastxend = 0, lastyend = 0;
 	int nextbmx = 0, nextbmy = 0, nextxend = 0, nextyend = 0;
