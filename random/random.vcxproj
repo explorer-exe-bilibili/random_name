@@ -170,7 +170,7 @@
     <ClInclude Include="NameScreen.h" />
     <ClInclude Include="Painter.h" />
     <ClInclude Include="resource.h" />
-    <ClInclude Include="resources_manager.h" />
+    <ClInclude Include="explorer.h" />
     <ClInclude Include="set-json.h" />
     <ClInclude Include="SetButton.h" />
     <ClInclude Include="sth2sth.h" />
@@ -195,9 +195,10 @@
     <ClCompile Include="NameScreen.cpp" />
     <ClCompile Include="Painter.cpp" />
     <ClCompile Include="random.cpp" />
-    <ClCompile Include="resources_manager.cpp" />
+    <ClCompile Include="explorer.cpp" />
     <ClCompile Include="set-json.cpp" />
     <ClCompile Include="SetButton.cpp" />
+    <ClCompile Include="SetPageRollBack.cpp" />
     <ClCompile Include="sth2sth.cpp" />
     <ClCompile Include="Timer.cpp" />
     <ClCompile Include="ui.cpp" />

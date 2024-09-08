@@ -11,21 +11,26 @@
 class getname
 {
 private:
-	static int seed, seed2;
-	static int getattrib(const std::string& input);
-	static std::string removeAfterDash(const std::string& input);
-	static std::string RandomLineFromFile(const std::wstring& filename);
-	static int random_star();
+	int seed=12341, seed2=23332;
+	int getattrib(const std::string& input);
+	std::string removeAfterDash(const std::string& input);
+	std::string RandomLineFromFile(const std::wstring& filename);
+	int random_star();
+	static getname* instance;
 public:
-	static struct Item
+	struct Item
 	{
-		int star;
-		int type;
-		int elemant;
+		std::wstring name = L"";
+		int star = 3;
+		int type = 0;
+		int elemant = 0;
 	}Item;
-	static int star[4][256];
-	static int type_[4][256];
-	static bool fileerr;
-	static LPCWSTR random(int m, int i);
-	static int randomIntegerBetween(int min, int max);
+	getname();
+	~getname();
+	struct Item items[4][256];
+	bool fileerr;
+	bool random(int m, int i);
+	int randomIntegerBetween(int min, int max);
+	void ReRandom(int number);
+	static getname* getInstance();
 };

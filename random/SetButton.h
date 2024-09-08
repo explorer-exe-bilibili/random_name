@@ -18,7 +18,6 @@ private:
 	std::vector<Button> buttons;
 	Gp * p=nullptr;
 	HWND textboxhwnd = NULL;
-	static bool reran;
 	void OpenFile(sitem item);
 	void ChooseFile(sitem item);
 	void load();
@@ -36,5 +35,7 @@ public:
 	void refresh();
 	void reConnect();
 	void click(int x, int y);
+	void EditBoxUpgrade(int number);
+	static bool needReran, needReboot;
 };
 

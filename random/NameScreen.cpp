@@ -2,8 +2,8 @@
 #include"mywindows.h"
 #include "directshow.h"
 #include"config.h"
-#include "getname.h"
 #include"bitmaps.h"
+#include "getname.h"
 #include "sth2sth.h"
 #include "set-json.h"
 #include"ui.h"
@@ -17,37 +17,21 @@ void CALLBACK TimerProc_(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
 void CALLBACK Case6TimerProc_(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
 void CALLBACK InitTimerProc_(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
 
-LPCWSTR names[4][256]{};
+getname* name = nullptr;
 int number_t;
-
-
-void RandomFunc()
-{
-	getname::fileerr = 0;
-	for (short m = 0; m <= 3; m++)
-		for (int i = 0; i <= 255; i++) {
-			names[m][i] = getname::random(m, i);
-			if (getname::fileerr) { MessageBoxA(nullptr, "打开文件失败，请到设置中重新选择名字文件", "错误", MB_SYSTEMMODAL | MB_ICONERROR); return; }
-		}
-	mywindows::log("random finish");
-	return;
-}
-
 
 NameScreen::NameScreen(Gp* p)
 {
-	this->p = p;
-	for(auto& i:B)
-	{
-		i.setGp(p);
-	}
+	setGp(p);
 	setButton();
+	name = getname::getInstance();
 }
 
 NameScreen::NameScreen()
 {
 	p = nullptr;
 	setButton();
+	name = getname::getInstance();
 }
 
 NameScreen::~NameScreen()
@@ -77,13 +61,6 @@ NameScreen::~NameScreen()
 	for(auto& i:g_Case6TimerID)
 	{
 		i = 0;
-	}
-	for (auto& i : names)
-	{
-		for (auto& j : i)
-		{
-			j = nullptr;
-		}
 	}
 	for(auto& i:star_)
 	{
@@ -121,19 +98,23 @@ void NameScreen::setButton()
 }
 
 void NameScreen::showname1() {
-	directshow::music(CLICK_MUSIC);
 	ui::printing = 1;
 	ui::ing = 1;
-	if (number >= 245)rerandom();
-	temp[0] = names[ui::mode - 1][number];
-	star_[0] = getname::star[ui::mode - 1][number];
-	type[0] = getname::type_[ui::mode - 1][number];
+	if (number >= 245)
+	{
+		for (char i = 0; i < config::getint(POOL_COUNT); i++)
+			name->ReRandom(i);
+		number = 0;
+	}
+	temp[0] = name->items[ui::mode - 1][number].name.c_str();
+	star_[0] = name->items[ui::mode - 1][number].star;
+	type[0] = name->items[ui::mode - 1][number].type;
 	randomedlist << randomedlist.pt()<<"["<<type[0]<<"类型]" << 
 		"[" << star_[0] << "星]" << "[" << sth2sth::LWStostr(temp[0]) << "]"
 	<< randomedlist.nl();
 	if (star_[0] >= 5)is5star = 1;
 	if (star_[0] == 4)is4star = 1;
-	if (!ui::SS.offvideo) {
+	if (!ui::SS->offvideo) {
 		if (is4star == 0 AND is5star == 0)
 			directshow::play(config::getpath(SIGNALSTAR3));
 		if (is4star == 1 AND is5star == 0)
@@ -145,7 +126,7 @@ void NameScreen::showname1() {
 	{
 		InvalidateRect(mywindows::main_hwnd, NULL, FALSE);
 	}
-	if (!ui::SS.offmusic)
+	if (!ui::SS->offmusic)
 			mciSendString(L"stop bgm", nullptr, 0, nullptr);
 	ui::screenmode = SHOW_NAMES_ING;
 	ui::isball1 = 1;
@@ -157,16 +138,15 @@ void NameScreen::showname1() {
 	mywindows::log("finish ball 1,number is %d", number);
 }
 void NameScreen::showname10() {
-	directshow::music(CLICK_MUSIC);
 	ui::printing = 1;
 	ui::ing = 1;
 	ui::ft = 1;
 	randomedlist << randomedlist.pt() << "{" << randomedlist.nl();
 	for (const int tmp1 = number + 10; number < tmp1; number++) {
-		temp[10 - (tmp1 - number)] = names[ui::mode - 1][number];
-		star_[10 - (tmp1 - number)] = getname::star[ui::mode - 1][number];
-		type[10 - (tmp1 - number)] = getname::type_[ui::mode - 1][number];
-		if (getname::star[ui::mode - 1][number] >= 5)is5star = 1;
+		temp[10 - (tmp1 - number)] = name->items[ui::mode - 1][number].name.c_str();
+		star_[10 - (tmp1 - number)] = name->items[ui::mode - 1][number].star;
+		type[10 - (tmp1 - number)] = name->items[ui::mode - 1][number].type;
+		if (star_[10-tmp1+number] >= 5)is5star = 1;
 		mywindows::log("10balling number=%d,tmp=%d,star=%d", number, tmp1, star_[10 - (tmp1 - number)]);
 		randomedlist << "[" << type[10-(tmp1-number)] << "类型]" <<
 			"[" << star_[10 - (tmp1 - number)] << "星]" << "[" << 
@@ -174,9 +154,9 @@ void NameScreen::showname10() {
 		<< std::endl;
 	}
 	randomedlist << "}" << randomedlist.nl();
-	if (!ui::SS.offmusic)
+	if (!ui::SS->offmusic)
 		mciSendString(L"stop bgm", nullptr, 0, nullptr);
-	if (!ui::SS.offvideo) {
+	if (!ui::SS->offvideo) {
 		if (is5star == 1)
 			directshow::play(config::getpath(GROUPSTAR5));
 		else if (is5star == 0)
@@ -256,19 +236,20 @@ void NameScreen::printnames(){
 		mywindows::logf << "stop star music success" << std::endl;
 	}
 	mywindows::logf << "begin play star music number_t="<<number_t << std::endl;
+	explorer* ptr = explorer::getInstance();
 	switch (number_t)
 	{
 	case 3: {
-		t=mciSendString(L"play star3 from 0", 0, 0, 0);
+		ptr->PlayMusic("star3");
 	}break;
 	case 4: {
-		t=mciSendString(L"play star4 from 0", 0, 0, 0);
+		ptr->PlayMusic("star4");
 	}break;
 	case 5: {
-		t=mciSendString(L"play star5 from 0", 0, 0, 0);
+		ptr->PlayMusic("star5");
 	}break;
 	case 6: {
-		t=mciSendString(L"play starfull from 0", 0, 0, 0);
+		ptr->PlayMusic("starfull");
 	}
 	default:
 		break;
@@ -458,7 +439,7 @@ void NameScreen::resetPoint()
 	}
 }
 
-void NameScreen::changeGp(Gp* p)
+void NameScreen::setGp(Gp* p)
 {
 	this->p = p;
 	for (auto& i : B)
@@ -563,14 +544,6 @@ void NameScreen::printstars(const int star_number) {
 	}
 	number_t = star_number;
 }
-void NameScreen::rerandom() {
-	for (short m = 0; m <= 3; m++)
-		for (int i = 0; i < 256; i++)names[m][i] = nullptr;
-	CloseHandle(random_handle);
-	random_handle = CreateThread(nullptr, 0, LPTHREAD_START_ROUTINE(RandomFunc), nullptr, 0, nullptr);
-	ui::SS.reran = 0;
-	number = 0;
-}
 void NameScreen::addaname() const
 {
 	std::ofstream File;
@@ -624,8 +597,8 @@ void CALLBACK NameScreen::Case6TimerProc(const HWND hwnd, UINT uMsg, UINT_PTR id
 
 	if (g_Case6Count > 0)
 	{
-		int x = getname::randomIntegerBetween(0, mywindows::WW * 0.99);
-		int y = getname::randomIntegerBetween(0, mywindows::WH * 0.99);
+		int x = name->randomIntegerBetween(0, mywindows::WW * 0.99);
+		int y = name->randomIntegerBetween(0, mywindows::WH * 0.99);
 		TextOut_(hdc, x, y, STAR);
 		g_Case6Count--;
 	}
@@ -743,15 +716,15 @@ void NameScreen::KillAllTimer()
 
 void CALLBACK InitTimerProc_(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
-	ui::NS.InitTimerProc(hwnd, uMsg, idEvent, dwTime);
+	ui::NS->InitTimerProc(hwnd, uMsg, idEvent, dwTime);
 }
 
 void CALLBACK Case6TimerProc_(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
-	ui::NS.Case6TimerProc(hwnd, uMsg, idEvent, dwTime);
+	ui::NS->Case6TimerProc(hwnd, uMsg, idEvent, dwTime);
 }
 
 void CALLBACK TimerProc_(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
-	ui::NS.TimerProc(hwnd, uMsg, idEvent, dwTime);
+	ui::NS->TimerProc(hwnd, uMsg, idEvent, dwTime);
 }

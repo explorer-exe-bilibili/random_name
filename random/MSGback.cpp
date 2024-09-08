@@ -20,14 +20,14 @@ Timer* MSGback::refreash_Timer=nullptr;
 
 void MSGback::create()
 {
-	ui::SS.reinit();
+	ui::SS->reinit();
 	HDC hdc = GetDC(nullptr);
 	init::music();
 	if (mywindows::float_hWnd != nullptr)
 		ShowWindow(mywindows::float_hWnd, SW_HIDE);
 	SetWindowPos(mywindows::main_hwnd, HWND_TOP, 0, 0, mywindows::WW, mywindows::WH, SWP_NOZORDER | SWP_FRAMECHANGED);
 	ReleaseDC(nullptr,hdc);
-	ui::HS.setFile(L"./name.txt");
+	ui::HS->setFile(L"./name.txt");
 	refreash_Timer = new Timer;
 	refreash_Timer->setCallBack([] {InvalidateRect(mywindows::main_hwnd, NULL, FALSE); });
 	refreash_Timer->setPool(1);
@@ -62,7 +62,7 @@ void MSGback::paint()
 	//}
 	static Gp p(mywindows::main_hwnd);
 	Pptr= &p;
-	if (!ui::SS.fullscreen&&_____) {
+	if (!ui::SS->fullscreen&&_____) {
 		SetWindowPos(mywindows::main_hwnd, nullptr, 0, 0, mywindows::screenWidth * 0.6, mywindows::screenHeight * 0.6, SWP_NOMOVE | SWP_NOZORDER);
 	}
 	if(_____==1)
@@ -74,17 +74,17 @@ void MSGback::paint()
 	//init::resetxy();
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(mywindows::main_hwnd, &ps);
-	ui::HS.changeGp(&p);
-	ui::FS.setGp(&p);
-	ui::NS.changeGp(&p);
-	ui::SS.setGp(&p);
+	ui::HS->changeGp(&p);
+	ui::FS->setGp(&p);
+	ui::NS->setGp(&p);
+	ui::SS->setGp(&p);
 	switch (ui::screenmode)
 	{
-	case FIRST_SCREEN:ui::FS.paint(); directshow::startbgm(); break;
-	case SHOW_NAMES_ING:ui::NS.paint();break;
-	case SETTING: ui::SS.paint(); break;
-	case HISTORY: ui::HS.paint(); break;
-	default:ui::FS.paint(); directshow::startbgm(); break;
+	case FIRST_SCREEN:ui::FS->paint(); directshow::startbgm(); break;
+	case SHOW_NAMES_ING:ui::NS->paint();break;
+	case SETTING: ui::SS->paint(); break;
+	case HISTORY: ui::HS->paint(); break;
+	default:ui::FS->paint(); directshow::startbgm(); break;
 	}
 	if(ui::screenmode!=SHOW_NAMES_ING)
 	{
@@ -107,7 +107,7 @@ void MSGback::keyDown(const WPARAM wParam)
 {
 	switch (wParam) {
 	case VK_ESCAPE:
-		if (ui::SS.FloatWindow) {
+		if (ui::SS->FloatWindow) {
 			ShowWindow(mywindows::main_hwnd, SW_HIDE);
 			floatwindow::open();
 		}
@@ -120,7 +120,7 @@ void MSGback::commond(const LPARAM lParam, const WPARAM wParam)
 	switch (HIWORD(wParam)) {
 	case EN_CHANGE: {
 		if (ui::screenmode == SETTING)
-			ui::SS.seteditbox(lParam, wParam);
+			ui::SS->seteditbox(wParam);
 	}break;
 	}
 }
@@ -134,17 +134,17 @@ void MSGback::active()
 {
 	switch (ui::screenmode) {
 	case FIRST_SCREEN:
-		ui::FS.repaint();
+		ui::FS->repaint();
 		break;
 	case SETTING:
-		ui::SS.repaint();
+		ui::SS->repaint();
 		break;
 	}
 }
 
 void MSGback::close()
 {
-	if (ui::SS.FloatWindow) {
+	if (ui::SS->FloatWindow) {
 		ShowWindow(mywindows::main_hwnd, SW_HIDE);
 		floatwindow::open();
 	}
@@ -155,14 +155,14 @@ void MSGback::showwindow(const WPARAM wParam)
 	if (wParam) // 主窗口显示
 	{
 		ShowWindow(mywindows::float_hWnd, SW_HIDE);
-		if (!ui::SS.offmusic)
+		if (!ui::SS->offmusic)
 			directshow::startbgm();
 		refreash_Timer->start();
 	}
 	else // 主窗口隐藏
 	{
 		ShowWindow(mywindows::float_hWnd, SW_SHOWNOACTIVATE);
-		if (!ui::SS.offmusic)
+		if (!ui::SS->offmusic)
 			directshow::stopmusic();
 		refreash_Timer->pause();
 	}

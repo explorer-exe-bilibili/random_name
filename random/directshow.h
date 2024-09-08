@@ -6,8 +6,8 @@
 #define _1_5 "\\files\\mp3\\reveal-5star.mp3"
 #define _1_4 "\\files\\mp3\\reveal-4star.mp3"
 #define _1_3 "\\files\\mp3\\reveal-3star.mp3"
-#define CLICK_MUSIC "\\files\\mp3\\click.mp3"
-#define ENTER "\\files\\mp3\\enter.mp3"
+#define CLICK_MUSIC "click"
+#define ENTER "exter"
 class directshow
 {
 	static IGraphBuilder* pGraph;
@@ -19,7 +19,6 @@ class directshow
 	static IBasicAudio* pBaicAudio;
 public:
 	static void play(std::wstring path);
-	static void music(const std::string& path);
 	static void stopmusic();
 	static void startbgm();
 	static bool playingbgm;

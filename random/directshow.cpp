@@ -3,7 +3,6 @@
 #include "log.h"
 #include "config.h"
 #include "set-json.h"
-#include "sth2sth.h"
 #include "ui.h"
 
 #pragma comment(lib, "Quartz.lib")
@@ -77,11 +76,11 @@ void directshow::play(wstring path) {
 	pVideoWindow->put_Height(mywindows::WH * 1.1);
 	if (SUCCEEDED(hr))
 	{
-		if (!ui::SS.offmusic) {
+		if (!ui::SS->offmusic) {
 			mciSendString(L"stop bgm", nullptr, 0, nullptr); // 停止播放
 			pBaicAudio->put_Volume(0);
 		}
-		if (ui::SS.offmusic) pBaicAudio->put_Volume(-10000);
+		if (ui::SS->offmusic) pBaicAudio->put_Volume(-10000);
 		mywindows::log("play begin");
 		pVideoWindow->SetWindowPosition(0, 0, mywindows::WW, mywindows::WH);
 		hr = pControl->Run();
@@ -98,28 +97,6 @@ void directshow::play(wstring path) {
 	mywindows::log("play end");
 }
 
-void directshow::music(const std::string& path) {
-	if (!ui::SS.offmusic) {
-		std::wstring p;
-		p = L"close ";
-		p += L"temp";
-		mciSendString(p.c_str(), nullptr, 0, nullptr); // 关闭音乐文件
-		mywindows::log(p.c_str());
-		p = L"open \"";
-		p += Log::wrunpath;
-		p += sth2sth::str2wstr(path);
-		p += L"\" alias ";
-		p += L"temp";
-		mciSendString(p.c_str(), nullptr, 0, nullptr);
-		if(mywindows::debug)
-		mywindows::logf << "打开" << path << "指令为" << p;
-		p = L"play ";
-		p += L"temp";
-		mywindows::log(p.c_str());
-		mciSendString(p.c_str(), nullptr, 0, nullptr);
-	}
-}
-
 void directshow::stopmusic() {
 	playingbgm = 0;
 	mciSendStringA("close temp", nullptr, 0, nullptr);
@@ -128,7 +105,7 @@ void directshow::stopmusic() {
 
 void directshow::startbgm() {
 	if (!playingbgm) {
-		if(!ui::SS.offmusic)
+		if(!ui::SS->offmusic)
 		mciSendString(L"play bgm repeat", nullptr, 0, nullptr);
 		playingbgm = 1;
 	}

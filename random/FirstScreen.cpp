@@ -19,6 +19,7 @@
 #define HIS 6
 #define X1 7
 #define X10 8
+#define EXITBUTTON 9
 
 
 FirstScreen::FirstScreen(Gp* p_)
@@ -33,11 +34,7 @@ FirstScreen::FirstScreen()
 	initButtons();
 }
 
-
-
-FirstScreen::~FirstScreen()
-{
-}
+FirstScreen::~FirstScreen() = default;
 
 void FirstScreen::resetPoint()
 {
@@ -66,44 +63,48 @@ void FirstScreen::initButtons()
 	b[HIS].setxy2WWWH(0.18, 0.85, 0.253, 0.886);
 	b[X1].setxy2WWWH(0.568, 0.85, 0.748, 0.925);
 	b[X10].setxy2WWWH(0.766, 0.85, 0.946, 0.925);
+	b[EXITBUTTON].setxy2WWWH(0.9, 0.045, 0.93, 0.105);
+	b[O1].setMusic(CLICK_MUSIC);
+	b[O2].setMusic(CLICK_MUSIC);
+	b[O3].setMusic(CLICK_MUSIC);
+	b[O4].setMusic(CLICK_MUSIC);
+	b[X10].setMusic(CLICK_MUSIC);
+	b[X1].setMusic(CLICK_MUSIC);
+	b[OFFVIDEO].setMusic(CLICK_MUSIC);
+	b[EXITBUTTON].setMusic(ENTER);
 	b[O1].bind([this] {
 		ui::mode = 1;
-		directshow::music(CLICK_MUSIC);
-
 		InvalidateRect(mywindows::main_hwnd, NULL, false);
-		//paintoverlay();
 	});
 	b[O2].bind([this] {
 		ui::mode = 2;
-		directshow::music(CLICK_MUSIC);
-		//paintoverlay();
 		InvalidateRect(mywindows::main_hwnd, NULL, false);
 	});
 	b[O3].bind([this] {
 		ui::mode = 3;
-		directshow::music(CLICK_MUSIC);
-		//paintoverlay();
 		InvalidateRect(mywindows::main_hwnd, NULL, false);
 	});
 	b[O4].bind([this] {
 		ui::mode = 4;
-		directshow::music(CLICK_MUSIC);
-		//paintoverlay();
 		InvalidateRect(mywindows::main_hwnd, NULL, false);
 		});
-	b[SET].bind([ObjectPtr = &ui::SS] { ObjectPtr->enter(); });
+	b[SET].bind([] { ui::SS->enter(); });
 	b[OFFVIDEO].bind([this] {
-		directshow::music(CLICK_MUSIC);
-		ui::SS.offvideo = !ui::SS.offvideo;
+		ui::SS->offvideo = !ui::SS->offvideo;
 		InvalidateRect(mywindows::main_hwnd, nullptr, FALSE);
 	});
-	b[HIS].bind([ObjectPtr = &ui::HS] { ObjectPtr->enter(); });
-	b[X1].bind([ObjectPtr = &ui::NS] {ObjectPtr->showname1(); });
-	b[X10].bind([ObjectPtr = &ui::NS] {ObjectPtr->showname10(); });
+	b[HIS].bind([] {ui::HS->enter(); });
+	b[X1].bind([] { ui::NS->showname1(); });
+	b[X10].bind([] {ui::NS->showname10(); });
+	b[EXITBUTTON].bind(([]
+		{
+			PostMessage(mywindows::main_hwnd, WM_CLOSE, 0, 0);
+		}));
 	b[O1].setBmapC(over1, 1);
 	b[O2].setBmapC(over2, 1);
 	b[O3].setBmapC(over3, 1);
 	b[O4].setBmapC(over4, 1);
+	b[EXITBUTTON].setBmapC(exitBu, 1);
 	b[SET].setFont(&ui::icon_mid, 1);
 	b[SET].setText(SETICON);
 	b[SET].setTextColor(211, 188, 142);
@@ -120,7 +121,7 @@ void FirstScreen::initButtons()
 void FirstScreen::enter()
 {
 	ui::screenmode = FIRST_SCREEN;
-	directshow::music(ENTER);
+	explorer::getInstance()->PlayMusic(ENTER);
 }
 
 void FirstScreen::paint()
@@ -137,7 +138,7 @@ void FirstScreen::paint()
 		p->Paint(0, 0, mywindows::WW, mywindows::WH, BackGround);
 		ui::ScreenModeChanged=0;
 	}
-	if(ui::SS.offvideo)
+	if(ui::SS->offvideo)
 	{
 		b[OFFVIDEO].setText(L"跳过视频:开");
 	}

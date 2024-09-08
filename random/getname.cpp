@@ -10,14 +10,30 @@
 #include"config.h"
 #include"sth2sth.h"
 
-int getname::seed = 2434, getname::seed2 = 32435;
-int getname::star[4][256] = {3};
-int getname::type_[4][256] = {0};
-bool getname::fileerr = 0;
-
 using namespace std;
 
-LPCWSTR getname::random(const int m, const int i) {
+getname* getname::instance = nullptr;
+
+getname::getname()
+{
+	for (char i = 0; i < config::getint(POOL_COUNT); i++)
+		ReRandom(i);
+}
+
+getname::~getname()
+{
+	for(auto& b:items)
+	{
+		for(auto& i:b)
+		{
+			i = {};
+		}
+	}
+	if (instance)delete instance;
+	instance = nullptr;
+}
+
+bool getname::random(const int m, const int i) {
 	std::string tmp1;
 	wstring path;
 	if (m == 0) path = config::getpath(NAMES1);
@@ -25,18 +41,18 @@ LPCWSTR getname::random(const int m, const int i) {
 	else if (m == 2) path = config::getpath(NAMES3);
 	else if (m == 3) path = config::getpath(NAMES4);
 	tmp1 = RandomLineFromFile(path);
-	if (strcmp(tmp1.c_str(), "FOF") == 0)fileerr = 1;
+	if (strcmp(tmp1.c_str(), "FOF") == 0)return 0;
 	int attrib = getattrib(tmp1);
 	if(config::getint(TYPICAL)==(m+1))
 	{
-		star[m][i] = random_star();
+		items[m][i].star = random_star();
 	}
 	else {
-		star[m][i] = attrib % 10;
+		items[m][i].star = attrib % 10;
 	}
-	type_[m][i] = attrib % 100 / 10;
-	tmp1 = removeAfterDash(tmp1);
-	return sth2sth::UTF8To16(tmp1.c_str());
+	items[m][i].type = attrib % 100 / 10;
+	items[m][i].name = sth2sth::UTF8To16(removeAfterDash(tmp1).c_str());
+	return 1;
 }
 int getname::getattrib(const std::string& input) {
 	// 找到第一个 "-"
@@ -112,6 +128,33 @@ int getname::randomIntegerBetween(const int min, const int max) {
 	randomNum = min + rand() % range;
 	seed2 += randomNum;
 	return randomNum;
+}
+
+void getname::ReRandom(int number)
+{
+	thread random([this, number]() {
+		unsigned char t = 0;
+		for (auto& i : getInstance()->items[number])
+		{
+			if (!getname::getInstance()->random(number, t))
+			{
+				wstring basic_string = L"选取的名字文件有问题，对应的卡池序号为" + to_wstring(number + 1);
+				MessageBox(NULL,basic_string.c_str() , L"错误", MB_ICONQUESTION);
+				break;
+			}
+			t++;
+		}
+	});
+	random.detach();
+}
+
+getname* getname::getInstance()
+{
+	if(instance == nullptr)
+	{
+		instance = new getname();
+	}
+	return instance;
 }
 
 long long randi() {

@@ -18,11 +18,11 @@ public:
 	HANDLE random_handle=nullptr;
 	HFONT icon_star=nullptr;
 	void addaname() const;
-	void rerandom();
+	void rerandom() = delete;
 	void KillAllTimer();
 	void paint();
 	void resetPoint();
-	void changeGp(Gp* p);
+	void setGp(Gp* p);
 	void click(int x, int y);
 private:
 	Gp *p=nullptr;

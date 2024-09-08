@@ -29,7 +29,7 @@ void init::font()
 	bool isInstall;
 	isInstall= cheakIsFontInstalled(L"genshin-icon");
 	if (isInstall) {
-		ui::NS.icon_star = CreateFontW(logicalHeight * 0.0862, logicalweidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
+		ui::NS->icon_star = CreateFontW(logicalHeight * 0.0862, logicalweidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
 		ui::icon_mid = CreateFontW(logicalHeight * 0.16, logicalweidth * 0.22, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
 		ui::icon = CreateFontW(logicalHeight * 0.2299, logicalweidth * 0.3008, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
 	}
@@ -85,10 +85,10 @@ void init::resetxy()
 		ui::bottom1x = mywindows::WW * 0.1;
 		ui::bottom1y = mywindows::WH * 0.85;
 		ui::listyend = mywindows::WH;
-		ui::NS.skipbmx = mywindows::WW * 0.8;
-		ui::NS.skipbmy = mywindows::WH * 0.045;
-		ui::NS.skipbmxend = ui::NS.skipbmx + mywindows::WW * 0.1;
-		ui::NS.skipbmyend = ui::NS.skipbmy + 100;
+		ui::NS->skipbmx = mywindows::WW * 0.8;
+		ui::NS->skipbmy = mywindows::WH * 0.045;
+		ui::NS->skipbmxend = ui::NS->skipbmx + mywindows::WW * 0.1;
+		ui::NS->skipbmyend = ui::NS->skipbmy + 100;
 		ui::settingx = mywindows::WW * 0.05;
 		ui::settingy = mywindows::WH * 0.85;
 		ui::settingxend = ui::settingx + mywindows::WW * 0.023;
@@ -107,13 +107,13 @@ void init::resetxy()
 		ui::his.y = ui::bottom1y;
 		ui::his.xE = ui::his.x + mywindows::WW * 0.073;
 		ui::his.yE = ui::bottom1y + mywindows::WH * 0.039;
-		ui::FS.resetPoint();
-		ui::SS.resetplace();
-		ui::NS.resetPoint();
+		ui::FS->resetPoint();
+		ui::SS->resetplace();
+		ui::NS->resetPoint();
 		for (char i = 0; i <= 9; i++) {
 			ui::listx[i + 1] = ui::listx[i] + ui::listxend;
 		}
-		DeleteObject(ui::NS.icon_star);
+		DeleteObject(ui::NS->icon_star);
 		DeleteObject(ui::text_mid);
 		DeleteObject(ui::text_big);
 		DeleteObject(ui::text);
@@ -142,9 +142,13 @@ void init::main(WNDPROC w1, WNDPROC w2, WNDPROC w3)
 	Log::runpath = run;
 	mywindows::log("initiating run path(string) %s", Log::runpath.c_str());
 	mywindows::log(L"initiating run path(wstring) %ws", Log::wrunpath.c_str());
+	ui::FS = new FirstScreen();
+	ui::NS = new NameScreen();
+	ui::HS = new HistoryScreen();
+	ui::SS = new set2();
 	config::init();
-	ui::SS.offmusic = config::getint(OFFMUSIC);
-	ui::SS.FloatWindow = config::getint(FLOATWINDOW);
+	ui::SS->offmusic = config::getint(OFFMUSIC);
+	ui::SS->FloatWindow = config::getint(FLOATWINDOW);
 	config();
 	DWORD threadId2;
 	HANDLE handle = CreateThread(NULL, 0, (LPTHREAD_START_ROUTINE)Upgrade, NULL, 0, &threadId2);
@@ -165,26 +169,25 @@ void init::music()
 
 		once = 0;
 	}// 打开并播放背景音乐
-	if (!ui::SS.offmusic)
+	if (!ui::SS->offmusic)
 		mciSendString(L"play bgm repeat", NULL, 0, NULL); // 使用别名 'bgm' 播放音乐，并设置为循环播放
 }
 
 void init::config()
 {
 	config::init();
-	ui::NS.rerandom();
-	ui::SS.offvideo = config::getint(OFF_VIDEO);
-	ui::SS.offmusic= config::getint(OFFMUSIC);
+	ui::SS->offvideo = config::getint(OFF_VIDEO);
+	ui::SS->offmusic= config::getint(OFFMUSIC);
 	mywindows::debug = config::getint(DEBUG);
 	ui::mode = config::getint(MODE);
-	ui::SS.FloatWindow= config::getint(FLOATWINDOW);
-	ui::SS.fullscreen= config::getint(INWINDOW);
+	ui::SS->FloatWindow= config::getint(FLOATWINDOW);
+	ui::SS->fullscreen= config::getint(INWINDOW);
 }
 
 void init::MainWindow()
 {
-	ui::SS.fullscreen = !config::getint(INWINDOW);
-	if (ui::SS.fullscreen)mywindows::main_hwnd = CreateWindowW(L"main", config::get(WINDOW_TITEL).c_str(), WS_POPUP | WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN,
+	ui::SS->fullscreen = !config::getint(INWINDOW);
+	if (ui::SS->fullscreen)mywindows::main_hwnd = CreateWindowW(L"main", config::get(WINDOW_TITEL).c_str(), WS_POPUP | WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN,
 		0, 0, mywindows::WW, mywindows::WH, NULL, NULL, GetModuleHandle(NULL), NULL);
 	else {
 		mywindows::WW = mywindows::screenWidth;

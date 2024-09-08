@@ -9,7 +9,7 @@
 enum limits
 {
 	BETWEENCOUNT = 1 << 0,
-	RESTART = 1 << 1,
+	REBOOT = 1 << 1,
 	S_WINDOWTITLE = 1 << 2,
 	ISFILE = 1 << 3,
 	ISBITMAP = 1 << 4,

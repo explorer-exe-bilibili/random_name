@@ -93,7 +93,7 @@
     <ClInclude Include="item.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="resources_manager.h">
+    <ClInclude Include="explorer.h">
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Timer.h">
@@ -116,16 +116,10 @@
     <ClCompile Include="getname.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="directshow.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="sth2sth.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="ui.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="click.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="init.cpp">
@@ -164,11 +158,20 @@
     <ClCompile Include="HistoryScreen.cpp">
       <Filter>源文件\前端</Filter>
     </ClCompile>
-    <ClCompile Include="resources_manager.cpp">
+    <ClCompile Include="explorer.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="Timer.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="SetPageRollBack.cpp">
+      <Filter>源文件\前端\设置界面</Filter>
+    </ClCompile>
+    <ClCompile Include="click.cpp">
+      <Filter>源文件\前端</Filter>
+    </ClCompile>
+    <ClCompile Include="directshow.cpp">
+      <Filter>源文件\前端</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

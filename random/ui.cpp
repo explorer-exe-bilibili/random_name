@@ -1,4 +1,6 @@
 ﻿#include "ui.h"
+
+#include "config.h"
 #include "mywindows.h"
 
 
@@ -16,8 +18,9 @@ int ui::addnameendy=0, ui::addnameW=0, ui::addnameH = 0;
 int ui::exitx = 0, ui::exitxend = 0, ui::exity = 0, ui::exityend = 0;
 bool ui::ScreenModeChanged = 1;
 ui::buttom_point ui::his = { 0,0,0,0 };
-HistoryScreen ui::HS;
-FirstScreen ui::FS;
-set2 ui::SS;
-NameScreen ui::NS;
+int i = config::init();
+HistoryScreen* ui::HS=nullptr;
+FirstScreen* ui::FS=nullptr;
+set2* ui::SS=nullptr;
+NameScreen* ui::NS=nullptr;
 Button ui::ExitB;

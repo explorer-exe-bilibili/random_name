@@ -11,7 +11,8 @@
 
 using namespace std;
 
-bool SetButton::reran= 0;
+bool SetButton::needReran= 0;
+bool SetButton::needReboot = 0;
 
 void SetButton::OpenFile(sitem item)
 {
@@ -45,11 +46,16 @@ void SetButton::ChooseFile(sitem item)
 	if (GetOpenFileNameW(&ofn))
 	{
 		if (item.FileType == "nameFile") {
-			reran = 1;
+			needReran = 1;
 		}
 		std::wstring filename(strFilename);
 		config::replace(item.ConfigName, filename);
 		Edit_SetText(textboxhwnd, filename.c_str());
+		if (item.FileType == "picture")
+		{
+			explorer* ptr = explorer::getInstance();
+			ptr->reloadBitmap(item.BitmapNumber);
+		}
 	}
 }
 
@@ -65,7 +71,19 @@ void SetButton::load()
 		b1.setxy2WWWH(ButtonRect[0].x, ButtonRect[0].y, ButtonRect[0].xend, ButtonRect[0].yend);
 		b1.setText(L"选择");
 		b1.setTextColor(0, 0, 0);
-		b1.bind([this] (){ChooseFile(item); });
+		b1.bind([this] ()
+		{
+			
+			wstring last_config = config::getpath(item.ConfigName);
+			ChooseFile(item);
+			if (item.Limit & REBOOT)
+			{
+				if(last_config!=config::getpath(item.ConfigName))
+				{
+					needReboot = 1;
+				}
+			}
+		});
 		b1.setMusic(CLICK_MUSIC);
 		b1.setFont(&ui::text_mid);
 		b1.refresh();
@@ -80,11 +98,21 @@ void SetButton::load()
 		buttons.push_back(b1);
 		buttons.push_back(b2);
 	}
-	else if(item.IsSwitch&&!(ButtonRect.empty()))
+	else if(item.IsSwitch&&!ButtonRect.empty())
 	{
 		b.setxy2WWWH(ButtonRect[0].x, ButtonRect[0].y, ButtonRect[0].xend, ButtonRect[0].yend);
 		b.setBmapC(setbutton);
-		b.bind([this]() {config::turnUpSideDown(item.ConfigName); });
+		b.bind([this]()
+		{
+			config::turnUpSideDown(item.ConfigName);
+			if(item.Limit&REBOOT)
+			{
+				needReboot = 1;
+			}
+			buttons[0].setText(config::getint(item.ConfigName) == 1 ? L"开" : L"关");
+			set2::rereadconfig();
+			InvalidateRect(mywindows::main_hwnd, NULL, false);			
+		});
 		b.setText(config::getint(item.ConfigName) == 1 ? L"开" : L"关");
 		b.setTextColor(0, 0, 0);
 		buttons.push_back(b);
@@ -117,7 +145,7 @@ void SetButton::EditBoxEditor(sitem item, std::wstring tmp)
 	{
 		SetWindowTextW(mywindows::main_hwnd, tmp.c_str());
 	}
-	else if (item.Limit & BETWEENCOUNT)
+	if (item.Limit & BETWEENCOUNT)
 	{
 		int value;
 		try
@@ -136,12 +164,26 @@ void SetButton::EditBoxEditor(sitem item, std::wstring tmp)
 			return;
 		}
 	}
-	else if (item.IsFile)
+	if(item.Limit&REBOOT)
+	{
+		if(tmp==config::get(item.ConfigName))return;
+		if (tmp == config::getpath(item.ConfigName))return;
+		needReboot = 1;
+	}
+	if (item.IsFile)
 	{
 		if (!std::filesystem::exists(tmp))return;
-		if (tmp == Log::wrunpath + config::get(item.ConfigName))return;
+		if (tmp == config::getpath(item.ConfigName))return;
+		if(item.FileType=="nameFile")
+		{
+			
+		}
 	}
 	config::replace(item.ConfigName, tmp);
+	if (item.Limit & ISBITMAP)
+	{
+		explorer::getInstance()->reloadBitmap(item.BitmapNumber);
+	}
 }
 
 SetButton::SetButton(sitem Item)
@@ -248,7 +290,8 @@ void SetButton::refresh()
 	y=TextBoxRext.y * mywindows::WH;
 	w=TextBoxRext.xend * mywindows::WW - x;
 	h=TextBoxRext.yend * mywindows::WH - y;
-	MoveWindow(textboxhwnd, x, y, w, h, 1);
+	if (textboxhwnd!=NULL)
+		MoveWindow(textboxhwnd, x, y, w, h, 1);
 }
 
 void SetButton::reConnect()
@@ -264,5 +307,17 @@ void SetButton::click(int x,int y)
 	for(auto&i:buttons)
 	{
 		i.click(CLICK, x, y);
+	}
+}
+
+void SetButton::EditBoxUpgrade(int number)
+{
+	if (item.Number == number)
+	{
+		wchar_t tmp[MAX_PATH];
+		GetWindowTextW(textboxhwnd, tmp, MAX_PATH);
+		std::wstring tmps = tmp;
+		if (tmps.length() <= 0)return;
+		EditBoxEditor(item, tmps);
 	}
 }

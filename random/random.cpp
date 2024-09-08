@@ -19,8 +19,6 @@ using namespace std;
 
 LRESULT CALLBACK WinSunProc(const HWND hwnd, const UINT uMsg, const WPARAM wParam, const LPARAM lParam) {
 	mywindows::main_hwnd = hwnd;
-
-	if (ui::SS.reran)ui::NS.rerandom();
 	switch (uMsg) {//通过判断消息进行消息响应
 	case WM_CREATE:MSGback::create(); break;
 	case WM_PAINT:MSGback::paint(); break;

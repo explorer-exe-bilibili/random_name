@@ -26,9 +26,9 @@ public:
 	static int exitx, exitxend, exity, exityend;
 	static bool ScreenModeChanged;
 	static buttom_point his;
-	static HistoryScreen HS;
-	static FirstScreen FS;
-	static set2 SS;
-	static NameScreen NS;
+	static HistoryScreen* HS;
+	static FirstScreen* FS;
+	static set2* SS;
+	static NameScreen* NS;
 	static Button ExitB;
 };

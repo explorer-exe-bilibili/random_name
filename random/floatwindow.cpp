@@ -139,7 +139,7 @@ void floatwindow::mousemove(LPARAM lParam)
 bool uplbutton = 0;
 void movewindow() {
 	int x, y, w, h;
-	double fps_time = config::getint(FPS);
+	static double fps_time = 1000/config::getint(FPS);
 	static double speedx_;
 	static double speedy_;
 	if (uplbutton) {

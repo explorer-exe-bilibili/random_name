@@ -72,7 +72,7 @@ public:
 	static void replace(const std::wstring& name, const std::wstring& value);
 	static void replace(const std::wstring& name, const int value);
 	static void printAllConfigItems();
-	static void init();
+	static int init();
 	static std::wstring get(const std::wstring& name);
 	static std::wstring getpath(const std::wstring& name);
 	static double getd(const std::wstring& name);

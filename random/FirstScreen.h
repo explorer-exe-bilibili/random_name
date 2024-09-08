@@ -16,7 +16,7 @@ public:
     void click(int x, int y);
 private:
     bool firstpaint = true;
-    Button b[9];
+    Button b[10];
     void paintoverlay();
     void initButtons();
     void enter();

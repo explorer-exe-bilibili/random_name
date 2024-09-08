@@ -47,7 +47,7 @@ void HistoryScreen::paint()
 void HistoryScreen::enter()
 {
 	ui::screenmode = HISTORY;
-	directshow::music(ENTER);
+	explorer::getInstance()->PlayMusic(ENTER);
 	InvalidateRect(mywindows::main_hwnd, nullptr, FALSE);
 }
 
@@ -193,7 +193,7 @@ void HistoryScreen::show()
 
 void HistoryScreen::changePage() {
 	show();
-	directshow::music(ENTER);
+	explorer::getInstance()->PlayMusic(ENTER);
 }
 
 void HistoryScreen::click(const int x, const int y) {
@@ -217,7 +217,7 @@ void HistoryScreen::click(const int x, const int y) {
 
 void HistoryScreen::quit()
 {
-	directshow::music(ENTER);
+	explorer::getInstance()->PlayMusic(ENTER);
 	ui::screenmode = FIRST_SCREEN;
 	ui::ScreenModeChanged = 1;
 	InvalidateRect(mywindows::main_hwnd, nullptr, FALSE);

@@ -12,7 +12,7 @@ std::wstring config::configpath;
 using namespace std;
 
 //读取和补全配置项
-void config::init() {
+int config::init() {
 	mywindows::log("initing config start");
 	configpath = Log::wrunpath;
 	configpath += CONFIG_;
@@ -144,6 +144,7 @@ void config::init() {
 		printAllConfigItems();
 		mywindows::log(L"config init successfully");
 	}
+	return 0;
 }
 //获取配置项内容
 std::wstring config::get(const std::wstring& name) {
