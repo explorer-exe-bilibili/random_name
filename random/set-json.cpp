@@ -1,6 +1,7 @@
 ﻿#include "set-json.h"
 #include"sth2sth.h"
 #include"config.h"
+#include"configitem.h"
 #include "mywindows.h"
 #include "bitmaps.h"
 #include "directshow.h"
@@ -162,6 +163,7 @@ void set2::Load(string jsonpath) {
 				t.IsFile = sItem.value("IsFile", 0);
 				t.IsEditBox = sItem.value("IsEditBox", 0);
 				t.IsSwitch = sItem.value("IsSwitch", 0);
+				t.IsDir = sItem.value("IsDir", 0);
 				t.Limit = sItem.value("Limit", NOLIMIT);
 				t.Number = sItem.value("Number", in);
 				t.BitmapNumber = sItem.value("BitmapNumber", 0);
@@ -188,6 +190,7 @@ void set2::Load(string jsonpath) {
 				t.IsFile = 0;
 				t.IsEditBox = 0;
 				t.IsSwitch = 0;
+				t.IsDir = 0;
 				t.Limit = NOLIMIT;
 				t.Number = in;
 				t.ConfigName = L"unknow";

@@ -24,10 +24,10 @@ public:
 		int star = 3;
 		int type = 0;
 		int elemant = 0;
-	}Item;
+	};
 	getname();
 	~getname();
-	struct Item items[4][256];
+	Item items[4][256];
 	bool fileerr;
 	bool random(int m, int i);
 	int randomIntegerBetween(int min, int max);

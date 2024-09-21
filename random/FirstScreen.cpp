@@ -1,6 +1,8 @@
 ﻿#include "FirstScreen.h"
 
 #include "bitmaps.h"
+#include "config.h"
+#include "ConfigItem.h"
 #include "directshow.h"
 #include "ui.h"
 #include "mywindows.h"
@@ -52,6 +54,30 @@ void FirstScreen::click(const int x, const int y)
 	}
 }
 
+void FirstScreen::changeMode(int Mode)
+{
+	if (ui::mode == Mode)return;
+	while (ui::mode < Mode)
+	{
+		int x = -mywindows::WW;
+		int y = mywindows::WH * 0.2;
+		int xend = -mywindows::WW * 0.8;
+		int yend = mywindows::WH * 0.8;
+		overlay[ui::mode - 1].MoveTo(x, y, xend, yend, 1, 30, 30);
+		ui::mode++;
+	}
+	while (ui::mode > Mode)
+	{
+		int x = mywindows::WW * 1.2;
+		int y = mywindows::WH * 0.2;
+		int xend = mywindows::WW * 2;
+		int yend = mywindows::WH * 0.8;
+		overlay[ui::mode - 1].MoveTo(x, y, xend, yend, 1, 30, 30);
+		ui::mode--;
+	}
+	overlay[ui::mode - 1].MoveTo(mywindows::WW * 0.2, mywindows::WH * 0.2, mywindows::WW * 0.8, mywindows::WH * 0.8, 1, 30, 30);
+}
+
 void FirstScreen::initButtons()
 {
 	b[O1].setxy2WWWH(0.27, 0.075, 0.345, 0.15);
@@ -71,21 +97,23 @@ void FirstScreen::initButtons()
 	b[X10].setMusic(CLICK_MUSIC);
 	b[X1].setMusic(CLICK_MUSIC);
 	b[OFFVIDEO].setMusic(CLICK_MUSIC);
+	b[SET].setMusic(ENTER);
+	b[HIS].setMusic(ENTER);
 	b[EXITBUTTON].setMusic(ENTER);
 	b[O1].bind([this] {
-		ui::mode = 1;
+		changeMode(1);
 		InvalidateRect(mywindows::main_hwnd, NULL, false);
 	});
 	b[O2].bind([this] {
-		ui::mode = 2;
+		changeMode(2);
 		InvalidateRect(mywindows::main_hwnd, NULL, false);
 	});
 	b[O3].bind([this] {
-		ui::mode = 3;
+		changeMode(3);
 		InvalidateRect(mywindows::main_hwnd, NULL, false);
 	});
 	b[O4].bind([this] {
-		ui::mode = 4;
+		changeMode(4);
 		InvalidateRect(mywindows::main_hwnd, NULL, false);
 		});
 	b[SET].bind([] { ui::SS->enter(); });
@@ -115,6 +143,20 @@ void FirstScreen::initButtons()
 	b[HIS].setTextColor(0, 0, 0);
 	b[X1].setBmapC(pink1, 1);
 	b[X10].setBmapC(pink10, 1);
+	b[HIS].setDisable(1);
+	for (int a = 0; a < config::getint(POOL_COUNT);a++) {
+		Button b;
+		if (a == config::getint(MODE) - 1)b.setPoint(mywindows::WW * 0.2, mywindows::WH * 0.2, mywindows::WW * 0.8, mywindows::WH * 0.8);
+		else if (a > config::getint(MODE) - 1)b.setPoint(mywindows::WW * 1.2, mywindows::WH * 0.2, mywindows::WW * 2, mywindows::WH * 0.8);
+		else b.setPoint(-mywindows::WW, mywindows::WH * 0.2, -mywindows::WW * 0.2, mywindows::WH * 0.8);
+		b.setDisableStr(1);
+		b.setBmapC(a);
+		overlay.push_back(b);
+	}
+	for(auto& b:overlay)
+	{
+		b.reConnect();
+	}
 	resetPoint();
 }
 
@@ -127,17 +169,6 @@ void FirstScreen::enter()
 void FirstScreen::paint()
 {
 	p->Paint(0, 0, mywindows::WW, mywindows::WH, BackGround);
-
-	if(ui::ScreenModeChanged)
-	{
-		firstpaint=1;
-	}
-	if(firstpaint)
-	{
-		firstpaint=0;
-		p->Paint(0, 0, mywindows::WW, mywindows::WH, BackGround);
-		ui::ScreenModeChanged=0;
-	}
 	if(ui::SS->offvideo)
 	{
 		b[OFFVIDEO].setText(L"跳过视频:开");
@@ -160,8 +191,10 @@ void FirstScreen::paint()
 	{
 		t.paint();
 	}
-	paintoverlay();
-
+	for(auto&b:overlay)
+	{
+		b.paint();
+	}
 }
 
 
@@ -178,24 +211,9 @@ void FirstScreen::setGp(Gp* p_)
 	{
 		t.setGp(p);
 	}
+	for(auto&b:overlay)
+	{
+		b.setGp(p);
+	}
 }
 
-void FirstScreen::paintoverlay() {
-	if (ui::mode == 1) {
-		p->Paint(ui::overX, ui::overlayY, (mywindows::WW * 0.6), (mywindows::WH * 0.6), over1);
-		mywindows::log("set mode1 successfully");
-	}
-	else if (ui::mode == 2) {
-		p->Paint(ui::overX, ui::overlayY, (mywindows::WW * 0.6), (mywindows::WH * 0.6), over2);
-		mywindows::log("set mode2 successfully");
-	}
-	else if (ui::mode == 3) {
-		p->Paint(ui::overX, ui::overlayY, (mywindows::WW * 0.6), (mywindows::WH * 0.6), over3);
-		mywindows::log("set mode3 successfully");
-	}
-	else if (ui::mode == 4) {
-		p->Paint(ui::overX, ui::overlayY, (mywindows::WW * 0.6), (mywindows::WH * 0.6), over4);
-		mywindows::log("set mode4 successfully");
-	}
-	mywindows::log("paint overlay bitmap");
-}

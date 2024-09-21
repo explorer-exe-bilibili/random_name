@@ -3,6 +3,7 @@
 #include "mywindows.h"
 #include "set-json.h"
 #include "config.h"
+#include"configitem.h"
 #include<thread>
 #include <dshow.h>
 #include <chrono>

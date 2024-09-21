@@ -1,21 +1,15 @@
 #include "MSGback.h"
 #include"init.h"
-#include<Windows.h>
-#include"set-json.h"
 #include"mywindows.h"
-#include "FirstScreen.h"
 #include "ui.h"
-#include "NameScreen.h"
 #include "click.h"
-#include "config.h"
-#include "Timer.h"
-#include "directshow.h"
+#include"configitem.h"
 #include"floatwindow.h"
 #include"Gp.h"
-#include "HistoryScreen.h"
+#include "LoadWindow.h"
 
-Gp* Pptr = nullptr;
-Timer* MSGback::refreash_Timer=nullptr;
+Gp* MSGback::Pptr = nullptr;
+Timer* MSGback::refresh_Timer=nullptr;
 
 
 void MSGback::create()
@@ -26,14 +20,16 @@ void MSGback::create()
 	if (mywindows::float_hWnd != nullptr)
 		ShowWindow(mywindows::float_hWnd, SW_HIDE);
 	SetWindowPos(mywindows::main_hwnd, HWND_TOP, 0, 0, mywindows::WW, mywindows::WH, SWP_NOZORDER | SWP_FRAMECHANGED);
+	ShowWindow(mywindows::main_hwnd, SW_HIDE);
 	ReleaseDC(nullptr,hdc);
 	ui::HS->setFile(L"./name.txt");
-	refreash_Timer = new Timer;
-	refreash_Timer->setCallBack([] {InvalidateRect(mywindows::main_hwnd, NULL, FALSE); });
-	refreash_Timer->setPool(1);
-	refreash_Timer->setDelay(1000 / config::getint(FPS));
-	ShowWindow(mywindows::main_hwnd, SW_SHOWNORMAL);//把窗体显示出来
-	refreash_Timer->start();
+	refresh_Timer = new Timer;
+	refresh_Timer->Describe = "main Window refresh timer";
+	refresh_Timer->setCallBack([] {InvalidateRect(mywindows::main_hwnd, NULL, FALSE); });
+	refresh_Timer->setPool(1);
+	refresh_Timer->setDelay(1000 / config::getint(FPS));
+	refresh_Timer->start();
+	Pptr=new Gp(mywindows::main_hwnd);
 }
 bool _____ = 1;
 
@@ -50,18 +46,22 @@ void MSGback::size()
 
 void MSGback::paint()
 {
-	//static int ms_between=1000/config::getint(FPS);
-	//static long last_ms = 0;
-	//auto now=std::chrono::system_clock::now();
-	//auto now_ = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
-	//long now_ms= now_.time_since_epoch().count() % 1000;
+	static int ms_between=1000/config::getint(FPS);
+	static long last_ms = 0;
+	auto now=std::chrono::system_clock::now();
+	auto now_ = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
+	long now_ms= now_.time_since_epoch().count() % 1000;
 
-	//if(ms_between>=now_ms&&now_ms-last_ms<ms_between)
-	//{
-	//	return;
-	//}
-	static Gp p(mywindows::main_hwnd);
-	Pptr= &p;
+	if(ms_between>=now_ms&&now_ms-last_ms<ms_between)
+	{
+		return;
+	}
+	extern LoadWindow* loadWindow;
+	if(loadWindow)
+	{
+		loadWindow->destroy();
+		loadWindow = nullptr;
+	}
 	if (!ui::SS->fullscreen&&_____) {
 		SetWindowPos(mywindows::main_hwnd, nullptr, 0, 0, mywindows::screenWidth * 0.6, mywindows::screenHeight * 0.6, SWP_NOMOVE | SWP_NOZORDER);
 	}
@@ -74,23 +74,23 @@ void MSGback::paint()
 	//init::resetxy();
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(mywindows::main_hwnd, &ps);
-	ui::HS->changeGp(&p);
-	ui::FS->setGp(&p);
-	ui::NS->setGp(&p);
-	ui::SS->setGp(&p);
+	ui::HS->changeGp(Pptr);
+	ui::FS->setGp(Pptr);
+	ui::NS->setGp(Pptr);
+	ui::SS->setGp(Pptr);
 	switch (ui::screenmode)
 	{
-	case FIRST_SCREEN:ui::FS->paint(); directshow::startbgm(); break;
+	case FIRST_SCREEN:ui::FS->paint(); /*explorer::getInstance()->startbgm();*/ break;
 	case SHOW_NAMES_ING:ui::NS->paint();break;
 	case SETTING: ui::SS->paint(); break;
 	case HISTORY: ui::HS->paint(); break;
-	default:ui::FS->paint(); directshow::startbgm(); break;
+	default:ui::FS->paint();/* explorer::getInstance()->startbgm();*/ break;
 	}
 	if(ui::screenmode!=SHOW_NAMES_ING)
 	{
 		ui::ExitB.paint();
 	}
-	p.Flush();
+	Pptr->Flush();
 	mywindows::log("paint successfully");
 	DeleteDC(hdc);
 	EndPaint(mywindows::main_hwnd, &ps);
@@ -126,7 +126,7 @@ void MSGback::commond(const LPARAM lParam, const WPARAM wParam)
 }
 void MSGback::destroy()
 {
-	refreash_Timer->stop();
+	refresh_Timer->stop();
 	PostQuitMessage(0);
 }
 
@@ -156,15 +156,15 @@ void MSGback::showwindow(const WPARAM wParam)
 	{
 		ShowWindow(mywindows::float_hWnd, SW_HIDE);
 		if (!ui::SS->offmusic)
-			directshow::startbgm();
-		refreash_Timer->start();
+			mciSendString(L"play bgm repeat from 0", 0, 0, 0);
+		refresh_Timer->start();
 	}
 	else // 主窗口隐藏
 	{
 		ShowWindow(mywindows::float_hWnd, SW_SHOWNOACTIVATE);
 		if (!ui::SS->offmusic)
-			directshow::stopmusic();
-		refreash_Timer->pause();
+			explorer::getInstance()->stopmusic();
+		refresh_Timer->pause();
 	}
 }
 void MSGback::destroyall()

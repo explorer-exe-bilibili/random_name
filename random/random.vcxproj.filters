@@ -33,9 +33,6 @@
     <ClInclude Include="getname.h">
       <Filter>头文件</Filter>
     </ClInclude>
-    <ClInclude Include="sth2sth.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="FirstScreen.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -84,9 +81,6 @@
     <ClInclude Include="Painter.h">
       <Filter>头文件\base</Filter>
     </ClInclude>
-    <ClInclude Include="Audio.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
     <ClInclude Include="SetButton.h">
       <Filter>头文件</Filter>
     </ClInclude>
@@ -97,6 +91,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="Timer.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="ConfigItem.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="sth2sth.h">
+      <Filter>头文件\base</Filter>
+    </ClInclude>
+    <ClInclude Include="LoadWindow.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -134,9 +137,6 @@
     <ClCompile Include="Painter.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Audio.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="set-json.cpp">
       <Filter>源文件\前端\设置界面</Filter>
     </ClCompile>
@@ -172,6 +172,15 @@
     </ClCompile>
     <ClCompile Include="directshow.cpp">
       <Filter>源文件\前端</Filter>
+    </ClCompile>
+    <ClCompile Include="ConfigItem.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Others.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="LoadWindow.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

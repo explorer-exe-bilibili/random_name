@@ -2,7 +2,7 @@
 #include "nlohmann/json.hpp"
 #include "log.h"
 #include "config.h"
-#include <iostream>
+#include"configitem.h"
 
 using namespace std;
 using namespace nlohmann;
@@ -106,6 +106,8 @@ json set2::rollback(string jsonpath) {
 	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 11;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("调试模式"); i[ISSWITCH] = 1; i[NUMBER] = 5; i[CONFIGNAME] = "debug mode"; i[LIMIT] = REBOOT;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("图片资源目录"); i[ISEDIT] = 1; i[NUMBER] = 6; i[CONFIGNAME] = "ImageDirectory"; i[LIMIT] = REBOOT; i[ISDIR] = 1;
 	p["item"].push_back(i); i.clear();
 	j["pages"].push_back(p); p.clear();
 	// 写入JSON文件

@@ -1,9 +1,14 @@
 #include "SetButton.h"
 
+#include <shtypes.h>
 #include <windowsx.h>
+#include <shlobj.h>
+#include <shlwapi.h>
 
 #include "config.h"
+#include"configitem.h"
 #include "directshow.h"
+#include "getname.h"
 #include "mywindows.h"
 #include "sth2sth.h"
 #include "ui.h"
@@ -14,13 +19,13 @@ using namespace std;
 bool SetButton::needReran= 0;
 bool SetButton::needReboot = 0;
 
-void SetButton::OpenFile(sitem item)
+void SetButton::OpenFile()
 {
 	wstring path = config::getpath(item.ConfigName);
 	ShellExecute(NULL, L"open", path.c_str(), NULL, NULL, SW_SHOWNORMAL);
 }
 
-void SetButton::ChooseFile(sitem item)
+void SetButton::ChooseFile()
 {
 	OPENFILENAMEW ofn = { 0 };
 	wchar_t strFilename[MAX_PATH] = { 0 }; // 用于接收文件名
@@ -59,13 +64,34 @@ void SetButton::ChooseFile(sitem item)
 	}
 }
 
+void SetButton::ChooseDir()
+{
+	BROWSEINFOW bi = { 0 };
+	bi.lpszTitle = item.FileChooseWindowName.c_str();
+	bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
+	bi.hwndOwner = mywindows::main_hwnd;
+
+	LPITEMIDLIST pidl = SHBrowseForFolderW(&bi);
+	if (pidl != 0)
+	{
+		wchar_t path[MAX_PATH];
+		if (SHGetPathFromIDListW(pidl, path))
+		{
+			std::wstring dirPath(path);
+			config::replace(item.ConfigName, dirPath);
+			Edit_SetText(textboxhwnd, dirPath.c_str());
+		}
+		CoTaskMemFree(pidl);
+	}
+}
+
 void SetButton::load()
 {
 	setPoint();
 	if(item.Name==L"")return;
 	Button b1, b2;
 	Button b;
-	if(item.IsFile&&ButtonRect.size()>=2)
+	if((item.IsFile||item.IsDir)&&ButtonRect.size()>=2)
 	{
 		b1.setBmapC(setbutton);
 		b1.setxy2WWWH(ButtonRect[0].x, ButtonRect[0].y, ButtonRect[0].xend, ButtonRect[0].yend);
@@ -75,7 +101,10 @@ void SetButton::load()
 		{
 			
 			wstring last_config = config::getpath(item.ConfigName);
-			ChooseFile(item);
+			if (item.IsFile)
+				ChooseFile();
+			else
+				ChooseDir();
 			if (item.Limit & REBOOT)
 			{
 				if(last_config!=config::getpath(item.ConfigName))
@@ -89,7 +118,7 @@ void SetButton::load()
 		b1.refresh();
 		b2.setxy2WWWH(ButtonRect[1].x, ButtonRect[1].y, ButtonRect[1].xend, ButtonRect[1].yend);
 		b2.setText(L"打开");
-		b2.bind([this]() {OpenFile(item); });
+		b2.bind([this]() {OpenFile(); });
 		b2.setFont(&ui::text_mid);
 		b2.setMusic(CLICK_MUSIC);
 		b2.setTextColor(0, 0, 0);
@@ -115,6 +144,7 @@ void SetButton::load()
 		});
 		b.setText(config::getint(item.ConfigName) == 1 ? L"开" : L"关");
 		b.setTextColor(0, 0, 0);
+		b.setMusic(CLICK_MUSIC);
 		buttons.push_back(b);
 	}
 	refresh();
@@ -139,7 +169,7 @@ HWND SetButton::CreateEditBox(HWND hWndParent, int number, point rect, const wch
 }
 
 
-void SetButton::EditBoxEditor(sitem item, std::wstring tmp)
+void SetButton::EditBoxEditor(std::wstring tmp)
 {
 	if (item.Limit & S_WINDOWTITLE)
 	{
@@ -164,9 +194,9 @@ void SetButton::EditBoxEditor(sitem item, std::wstring tmp)
 			return;
 		}
 	}
-	if(item.Limit&REBOOT)
+	if (item.Limit & REBOOT)
 	{
-		if(tmp==config::get(item.ConfigName))return;
+		if (tmp == config::get(item.ConfigName))return;
 		if (tmp == config::getpath(item.ConfigName))return;
 		needReboot = 1;
 	}
@@ -174,15 +204,20 @@ void SetButton::EditBoxEditor(sitem item, std::wstring tmp)
 	{
 		if (!std::filesystem::exists(tmp))return;
 		if (tmp == config::getpath(item.ConfigName))return;
-		if(item.FileType=="nameFile")
+		if (item.FileType == "nameFile")
 		{
-			
+			for (char i = 0; i <= config::getint(POOL_COUNT); i++)
+				getname::getInstance()->ReRandom(i);
 		}
 	}
 	config::replace(item.ConfigName, tmp);
 	if (item.Limit & ISBITMAP)
 	{
 		explorer::getInstance()->reloadBitmap(item.BitmapNumber);
+	}
+	if (item.FileType == "video")
+	{
+		//explorer::getInstance()->reloadVideo(item.ConfigName);
 	}
 }
 
@@ -231,10 +266,10 @@ void SetButton::show()
 				config::get(item.ConfigName).c_str());
 			if (item.IsFile)
 			{
-				EditBoxEditor(item, config::getpath(item.ConfigName));
+				EditBoxEditor(config::getpath(item.ConfigName));
 			}
 			else
-				EditBoxEditor(item, config::get(item.ConfigName));
+				EditBoxEditor(config::get(item.ConfigName));
 		}
 	}
 }
@@ -318,6 +353,6 @@ void SetButton::EditBoxUpgrade(int number)
 		GetWindowTextW(textboxhwnd, tmp, MAX_PATH);
 		std::wstring tmps = tmp;
 		if (tmps.length() <= 0)return;
-		EditBoxEditor(item, tmps);
+		EditBoxEditor(tmps);
 	}
 }

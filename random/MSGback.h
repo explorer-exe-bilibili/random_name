@@ -1,6 +1,7 @@
 #pragma once
 #include<Windows.h>
 
+#include "Gp.h"
 #include "Timer.h"
 
 class MSGback
@@ -18,5 +19,6 @@ public:
 	static void showwindow(WPARAM wParam);
 private:
 	static void destroyall();
-	static Timer* refreash_Timer;
+	static Timer* refresh_Timer;
+	static Gp* Pptr;
 };

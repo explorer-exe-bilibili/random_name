@@ -151,11 +151,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Audio.h" />
     <ClInclude Include="bitmaps.h" />
     <ClInclude Include="Button.h" />
     <ClInclude Include="click.h" />
     <ClInclude Include="config.h" />
+    <ClInclude Include="ConfigItem.h" />
     <ClInclude Include="directshow.h" />
     <ClInclude Include="floatwindow.h" />
     <ClInclude Include="getname.h" />
@@ -163,6 +163,7 @@
     <ClInclude Include="HistoryScreen.h" />
     <ClInclude Include="init.h" />
     <ClInclude Include="item.h" />
+    <ClInclude Include="LoadWindow.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="MSGback.h" />
     <ClInclude Include="mywindows.h" />
@@ -178,21 +179,23 @@
     <ClInclude Include="ui.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Audio.cpp" />
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="click.cpp" />
     <ClCompile Include="config.cpp" />
+    <ClCompile Include="ConfigItem.cpp" />
     <ClCompile Include="directshow.cpp" />
     <ClCompile Include="floatwindow.cpp" />
     <ClCompile Include="getname.cpp" />
     <ClCompile Include="Gp.cpp" />
     <ClCompile Include="HistoryScreen.cpp" />
     <ClCompile Include="init.cpp" />
+    <ClCompile Include="LoadWindow.cpp" />
     <ClCompile Include="log.cpp" />
     <ClCompile Include="MSGback.cpp" />
     <ClCompile Include="mywindows.cpp" />
     <ClCompile Include="FirstScreen.cpp" />
     <ClCompile Include="NameScreen.cpp" />
+    <ClCompile Include="Others.cpp" />
     <ClCompile Include="Painter.cpp" />
     <ClCompile Include="random.cpp" />
     <ClCompile Include="explorer.cpp" />

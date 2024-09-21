@@ -5,6 +5,7 @@
 #include"mywindows.h"
 #include"set-json.h"
 #include"config.h"
+#include"configitem.h"
 #include<filesystem>
 #include <functional>
 
@@ -85,20 +86,20 @@ void init::resetxy()
 		ui::bottom1x = mywindows::WW * 0.1;
 		ui::bottom1y = mywindows::WH * 0.85;
 		ui::listyend = mywindows::WH;
-		ui::NS->skipbmx = mywindows::WW * 0.8;
-		ui::NS->skipbmy = mywindows::WH * 0.045;
-		ui::NS->skipbmxend = ui::NS->skipbmx + mywindows::WW * 0.1;
-		ui::NS->skipbmyend = ui::NS->skipbmy + 100;
-		ui::settingx = mywindows::WW * 0.05;
-		ui::settingy = mywindows::WH * 0.85;
-		ui::settingxend = ui::settingx + mywindows::WW * 0.023;
-		ui::settingyend = ui::settingy + mywindows::WH * 0.036;
-		ui::exitx = mywindows::WW * 0.9;
-		ui::exitxend = mywindows::WW * 0.93;
-		ui::exity = mywindows::WH * 0.045;
-		ui::exityend = mywindows::WH * 0.045 + mywindows::WW * 0.03;
+		//ui::NS->skipbmx = mywindows::WW * 0.8;
+		//ui::NS->skipbmy = mywindows::WH * 0.045;
+		//ui::NS->skipbmxend = ui::NS->skipbmx + mywindows::WW * 0.1;
+		//ui::NS->skipbmyend = ui::NS->skipbmy + 100;
+		//ui::settingx = mywindows::WW * 0.05;
+		//ui::settingy = mywindows::WH * 0.85;
+		//ui::settingxend = ui::settingx + mywindows::WW * 0.023;
+		//ui::settingyend = ui::settingy + mywindows::WH * 0.036;
+		//ui::exitx = mywindows::WW * 0.9;
+		//ui::exitxend = mywindows::WW * 0.93;
+		//ui::exity = mywindows::WH * 0.045;
+		//ui::exityend = mywindows::WH * 0.045 + mywindows::WW * 0.03;
 		ui::listx[0] = mywindows::WW * 0.107;
-		ui::listxend = mywindows::WW * 0.078;
+		ui::listxend = mywindows::WW * 0.078;/*
 		ui::addnamex = mywindows::WW * 0.4;
 		ui::addnameendx = ui::addnamex + mywindows::WW * 0.12;
 		ui::addnamey = mywindows::WH * 0.8;
@@ -106,7 +107,7 @@ void init::resetxy()
 		ui::his.x = ui::bottom1x + mywindows::WW * 0.08;
 		ui::his.y = ui::bottom1y;
 		ui::his.xE = ui::his.x + mywindows::WW * 0.073;
-		ui::his.yE = ui::bottom1y + mywindows::WH * 0.039;
+		ui::his.yE = ui::bottom1y + mywindows::WH * 0.039;*/
 		ui::FS->resetPoint();
 		ui::SS->resetplace();
 		ui::NS->resetPoint();
@@ -142,11 +143,11 @@ void init::main(WNDPROC w1, WNDPROC w2, WNDPROC w3)
 	Log::runpath = run;
 	mywindows::log("initiating run path(string) %s", Log::runpath.c_str());
 	mywindows::log(L"initiating run path(wstring) %ws", Log::wrunpath.c_str());
+	config::init();
 	ui::FS = new FirstScreen();
 	ui::NS = new NameScreen();
 	ui::HS = new HistoryScreen();
 	ui::SS = new set2();
-	config::init();
 	ui::SS->offmusic = config::getint(OFFMUSIC);
 	ui::SS->FloatWindow = config::getint(FLOATWINDOW);
 	config();
@@ -250,7 +251,7 @@ DWORD WINAPI init::Upgrade(){
 			std::getline(file, file_version);
 		}
 
-		const std::string CURRENT_VERSION = "1.5.0"; // 假设当前版本号是 "1.2.3"
+		const std::string CURRENT_VERSION = "1.7.0"; // 假设当前版本号是 "1.2.3"
 
 		if (file_version.empty() || file_version != CURRENT_VERSION) {
 			mywindows::logf << "版本号不同" << file_version << "->" << CURRENT_VERSION << std::endl;

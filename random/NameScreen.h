@@ -14,7 +14,6 @@ public:
 	void showname1();
 	void showname10();
 	bool is5star=0, is4star=0, skipped=0;
-	int  skipbmx=0, skipbmy=0, skipbmxend=0, skipbmyend=0;
 	HANDLE random_handle=nullptr;
 	HFONT icon_star=nullptr;
 	void addaname() const;

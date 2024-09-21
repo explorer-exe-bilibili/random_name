@@ -3,21 +3,21 @@
 #include "Gp.h"
 class FirstScreen
 {
+    Gp* p;
+    Button b[10];
+    bool firstpaint = true;
+    std::vector<Button> overlay;
 public:
-    Gp *p;
     FirstScreen(Gp *p_);
     FirstScreen();
     ~FirstScreen();
-    bool firsttime = true;
     void setGp(Gp* p_);
     void paint();
     void repaint();
     void resetPoint();
     void click(int x, int y);
 private:
-    bool firstpaint = true;
-    Button b[10];
-    void paintoverlay();
+    void changeMode(int Mode);
     void initButtons();
     void enter();
 };

@@ -8,6 +8,7 @@
 
 #include"mywindows.h"
 #include"config.h"
+#include"configitem.h"
 #include"sth2sth.h"
 
 using namespace std;
@@ -16,10 +17,11 @@ getname* getname::instance = nullptr;
 
 getname::getname()
 {
-	for (char i = 0; i < config::getint(POOL_COUNT); i++)
+	for(int i=0;i<config::getint(POOL_COUNT);i++)
+	{
 		ReRandom(i);
+	}
 }
-
 getname::~getname()
 {
 	for(auto& b:items)
@@ -79,7 +81,7 @@ int getname::getattrib(const std::string& input) {
 std::string getname::removeAfterDash(const std::string& input) {
 	// 找到第一个 "-"
 	size_t dashPos = input.find("-");
-	if (dashPos != std::string::npos) {
+	if (dashPos != std::string::npos && dashPos > 1) {
 		// 如果找到了 "-", 裁切掉 "-" 后面的内容
 		return input.substr(0, dashPos);
 	}
@@ -132,11 +134,11 @@ int getname::randomIntegerBetween(const int min, const int max) {
 
 void getname::ReRandom(int number)
 {
-	thread random([this, number]() {
-		unsigned char t = 0;
-		for (auto& i : getInstance()->items[number])
+	thread Random([this, number]() {
+		unsigned int t = 0;
+		while (t<=255)
 		{
-			if (!getname::getInstance()->random(number, t))
+			if (!random(number, t))
 			{
 				wstring basic_string = L"选取的名字文件有问题，对应的卡池序号为" + to_wstring(number + 1);
 				MessageBox(NULL,basic_string.c_str() , L"错误", MB_ICONQUESTION);
@@ -145,12 +147,12 @@ void getname::ReRandom(int number)
 			t++;
 		}
 	});
-	random.detach();
+	Random.detach();
 }
 
 getname* getname::getInstance()
 {
-	if(instance == nullptr)
+	if(!instance)
 	{
 		instance = new getname();
 	}

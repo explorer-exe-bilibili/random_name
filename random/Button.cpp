@@ -37,6 +37,7 @@ Button::~Button()
 
 void Button::click(const int condition, const int x, const int y)const
 {
+	if (Disable)return;
 	if (x != -1 && y != -1) {
 		if (x >= *xP AND x <= *xEP AND y >= *yP AND y <= *yEP)
 		{
@@ -48,12 +49,15 @@ void Button::click(const int condition, const int x, const int y)const
 			}
 		}
 	}
-	else
+	else if(functions.size()>condition)
+	{
 		functions[condition]();
+	}
 }
 
 void Button::paint() const
 {
+	if (Disable)return;
 	if(!p)return;
 	if(!DisableBmap)
 		p->Paint(x, y, xE-x, yE-y,BmapC);
@@ -136,8 +140,100 @@ void Button::setGp(Gp* p)
 	this->p = p;
 }
 
+void Button::setDisable(bool newValue)
+{
+	Disable= newValue;
+}
+
+void Button::MoveTo(int x, int y, int xend, int yend, bool smoothly,double xVelocity,double yVelocity)
+{
+	Moving = 1;
+	if(smoothly)
+	{
+		move_timer.Describe = "Button move timer";
+		move_timer.setDelay(1000 / 60);
+		move_timer.setPool(1);
+		move_timer.setCallBack([this, x, y, xend, yend, xVelocity, yVelocity]() {
+			if (this->x < x ) {
+				this->x += xVelocity;
+				if (x < this->x)
+					this->x = x;
+				if (xend == -1) {
+					this->xE += xVelocity;
+					if (x < this->x)
+						this->xE = xend;
+				}
+			}
+			else if (this->x > x) {
+				this->x -= xVelocity;
+				if (x > this->x)
+					this->x = x;
+				if (xend == -1) {
+					this->xE -= xVelocity;
+					if (x > this->x)
+						this->xE = xend;
+				}
+			}
+			if (this->y < y) {
+				this->y += yVelocity;
+				if (y < this->y)
+					this->y = y;
+				if (yend == -1) {
+					this->yE += yVelocity;
+					if (y < this->y)
+						this->yE = yend;
+				}
+			}
+			else if (this->y > y) {
+				this->y -= yVelocity;
+				if (y > this->y)
+					this->y = y;
+				if (yend == -1) {
+					this->yE += yVelocity;
+					if (y > this->y)
+						this->y = y;
+				}
+			}
+			if (this->xE < xend AND xend != -1) {
+				this->xE += xVelocity;
+				if (xend < this->xE)
+					this->xE = xend;
+			}
+			else if (this->xE > xend AND xend != -1) {
+				this->xE -= xVelocity;
+				if (xend > this->xE)
+					this->xE = xend;
+			}
+			if (this->yE < yend AND yend != -1) {
+				this->yE += yVelocity;
+				if (yend < this->yE)
+					this->yE = yend;
+			}
+			else if (this->yE > yend AND yend != -1) {
+				this->yE -= yVelocity;
+				if (yend > this->yE)
+					this->yE = yend;
+			}
+			if (this->x == x AND this->y == y AND(this->xE == xend OR xend == -1) AND(this->yE == yend OR yend == -1)) {
+				this->move_timer.stop();
+				Moving = 0;
+			}
+		});
+		move_timer.init();
+		move_timer.start();
+	}
+	else
+	{
+		this->x = x;
+		this->y = y;
+		this->xE = xend;
+		this->yE = yend;
+	}
+}
+
 void Button::refresh()
 {
+	if (Moving)return;
 	x = x2WW * mywindows::WW;
 	y = y2WH * mywindows::WH;
 	xE = xE2WW * mywindows::WW;
@@ -162,6 +258,14 @@ void Button::reConnect()
 	yP = &(this->y);
 	xEP = &(this->xE);
 	yEP = &(this->yE);
+}
+
+void Button::disConnect()
+{
+	xP = nullptr;
+	yP = nullptr;
+	xEP = nullptr;
+	yEP = nullptr;
 }
 
 Button::Breturn Button::Binded()
@@ -326,4 +430,14 @@ int Button::getyE() const
 	}
 	else
 		return mywindows::WH*yE2WH;
+}
+
+bool Button::IsDisabled() const
+{
+	return Disable;
+}
+
+bool Button::IsMoving() const
+{
+	return Moving;
 }

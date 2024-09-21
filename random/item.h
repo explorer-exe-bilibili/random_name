@@ -22,6 +22,7 @@ enum limits
 #define FILETYPE "FileType"
 #define ISEDIT "IsEditBox"
 #define ISSWITCH "IsSwitch"
+#define ISDIR "IsDir"
 #define LIMIT "Limit"
 #define NAME "Name"
 #define NUMBER "Number"
@@ -34,6 +35,7 @@ typedef struct sitem {
 	bool IsEditBox = 0;
 	bool IsFile = 0;
 	bool IsSwitch = 0;
+	bool IsDir = 0;
 	int Number = 0;
 	int max = 0;
 	int min = 0;

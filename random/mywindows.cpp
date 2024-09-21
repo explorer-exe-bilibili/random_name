@@ -87,7 +87,7 @@ void mywindows::removeFileNameFromPath(std::wstring& path) {
 }
 //INFO输出日志
 void mywindows::log(const char* format, ...) {
-	if (!debug) {
+	if (debug) {
 		if (format == nullptr)errlog("meet a void string");
 		else {
 			va_list args;
@@ -108,7 +108,7 @@ void mywindows::log(const char* format, ...) {
 	}
 }
 void mywindows::log(const wchar_t* format, ...) {
-	if (!debug) {
+	if (debug) {
 		if (format == nullptr) errlog(L"meet a void string");
 		else {
 			va_list args;

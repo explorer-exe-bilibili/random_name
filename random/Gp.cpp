@@ -8,7 +8,11 @@ using namespace std;
 
 #pragma comment(lib, "Msimg32.lib")
 
-Gp::~Gp() = default;
+Gp::~Gp(){
+	if (cachedHDC)
+		ReleaseDC(hdc);
+	delete ptr;
+}
 Gp::Gp(HWND hwnd):hwnd(hwnd)
 {
 	SizeChanged();

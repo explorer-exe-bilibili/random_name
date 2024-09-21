@@ -2,6 +2,7 @@
 #include"mywindows.h"
 #include "directshow.h"
 #include"config.h"
+#include"configitem.h"
 #include"bitmaps.h"
 #include "getname.h"
 #include "sth2sth.h"
@@ -26,14 +27,12 @@ NameScreen::NameScreen(Gp* p)
 	setButton();
 	name = getname::getInstance();
 }
-
 NameScreen::NameScreen()
 {
 	p = nullptr;
 	setButton();
 	name = getname::getInstance();
 }
-
 NameScreen::~NameScreen()
 {
 	p = nullptr;
@@ -52,10 +51,6 @@ NameScreen::~NameScreen()
 	is5star = 0;
 	is4star = 0;
 	skipped = 0;
-	skipbmx = 0;
-	skipbmy = 0;
-	skipbmxend = 0;
-	skipbmyend = 0;
 	random_handle = nullptr;
 	icon_star = nullptr;
 	for(auto& i:g_Case6TimerID)
@@ -75,8 +70,6 @@ NameScreen::~NameScreen()
 		i = 0;
 	}
 }
-
-
 void NameScreen::setButton()
 {
 	B[SKIP].setxy2WWWH(0.8, 0.045, 0.9, 0.045 + 0.17 * 0.17);
@@ -96,7 +89,6 @@ void NameScreen::setButton()
 		i.setGp(p);
 	}
 }
-
 void NameScreen::showname1() {
 	ui::printing = 1;
 	ui::ing = 1;
@@ -116,11 +108,11 @@ void NameScreen::showname1() {
 	if (star_[0] == 4)is4star = 1;
 	if (!ui::SS->offvideo) {
 		if (is4star == 0 AND is5star == 0)
-			directshow::play(config::getpath(SIGNALSTAR3));
+			explorer::getInstance()->PlayVideo(SIGNALSTAR3);
 		if (is4star == 1 AND is5star == 0)
-			directshow::play(config::getpath(SIGNALSTAR4));
+			explorer::getInstance()->PlayVideo(SIGNALSTAR4);
 		if (is5star == 1)
-			directshow::play(config::getpath(SIGNALSTAR5));
+			explorer::getInstance()->PlayVideo(SIGNALSTAR5);
 	}
 	else
 	{
@@ -158,9 +150,9 @@ void NameScreen::showname10() {
 		mciSendString(L"stop bgm", nullptr, 0, nullptr);
 	if (!ui::SS->offvideo) {
 		if (is5star == 1)
-			directshow::play(config::getpath(GROUPSTAR5));
+			explorer::getInstance()->PlayVideo(GROUPSTAR5);
 		else if (is5star == 0)
-			directshow::play(config::getpath(GROUPSTAR4));
+			explorer::getInstance()->PlayVideo(GROUPSTAR4);
 	}
 	else
 	{
@@ -186,7 +178,6 @@ void NameScreen::out1name() {
 		ui::printing = !ui::printing;
 	}
 }
-
 void NameScreen::skip()
 {
 	if (ui::ball10ing) {
@@ -194,7 +185,6 @@ void NameScreen::skip()
 		ui::clicked = true;
 	}
 }
-
 void NameScreen::out10name() {
 	if (skipped) {
 		menu();
@@ -215,26 +205,11 @@ void NameScreen::out10name() {
 	}
 	step++;
 }
-
 void NameScreen::printnames(){
-	//std::thread a_thread([this] {music(); });
-	//a_thread.detach();
-	int t;
-	mywindows::logf << "begin stopping star music" << std::endl;
-	t=mciSendString(L"stop star3", 0, 0, 0);
-	t=mciSendString(L"stop star4", 0, 0, 0);
-	t=mciSendString(L"stop star5", 0, 0, 0);
-	t=mciSendString(L"stop starfull", 0, 0, 0);
-	if(t!=0)
-	{
-		wchar_t errstr[256];
-		mciGetErrorStringW(t, errstr, sizeof(errstr));
-		mywindows::errlogf<<errstr<<std::endl;
-	}
-	else
-	{
-		mywindows::logf << "stop star music success" << std::endl;
-	}
+	mciSendString(L"stop star3", 0, 0, 0);
+	mciSendString(L"stop star4", 0, 0, 0);
+	mciSendString(L"stop star5", 0, 0, 0);
+	mciSendString(L"stop starfull", 0, 0, 0);
 	mywindows::logf << "begin play star music number_t="<<number_t << std::endl;
 	explorer* ptr = explorer::getInstance();
 	switch (number_t)
@@ -253,16 +228,6 @@ void NameScreen::printnames(){
 	}
 	default:
 		break;
-	}
-	if (t != 0)
-	{
-		wchar_t errstr[256];
-		mciGetErrorStringW(t, errstr, sizeof(errstr));
-		mywindows::errlogf << errstr << std::endl;
-	}
-	else
-	{
-		mywindows::logf << "play star music success" << std::endl;
 	}
 	if (p) {
 		p->Paint(0, 0, mywindows::WW, mywindows::WH, cardbackground);
@@ -335,7 +300,6 @@ void NameScreen::printnames(){
 			B[addName].paint();
 	}
 }
-
 void NameScreen::menu() {
 	mciSendString(L"stop star3", 0, 0, 0);
 	mciSendString(L"stop star4", 0, 0, 0);
@@ -408,8 +372,6 @@ void NameScreen::menu() {
 		step = 0;
 	}
 }
-
-
 void NameScreen::paint()
 {
 	ui::ScreenModeChanged = 0;
@@ -430,7 +392,6 @@ void NameScreen::paint()
 		}
 	}
 }
-
 void NameScreen::resetPoint()
 {
 	for(auto& i:B)
@@ -438,7 +399,6 @@ void NameScreen::resetPoint()
 		i.refresh();
 	}
 }
-
 void NameScreen::setGp(Gp* p)
 {
 	this->p = p;
@@ -447,15 +407,27 @@ void NameScreen::setGp(Gp* p)
 		i.setGp(this->p);
 	}
 }
-
 void NameScreen::click(int x, int y)
 {
+	if(ui::ball10ing)
+		ui::clicked = 1;
 	for(auto &i:B)
 	{
 		i.click(x, y);
 	}
+	if (!ui::ball10ing)
+	{
+		ui::screenmode = FIRST_SCREEN;
+		if (!ui::SS->offmusic) {
+			mciSendString(L"play bgm repeat", nullptr, 0, nullptr); // 使用别名 'bgm' 播放音乐，并设置为循环播放
+			mciSendString(L"stop star3", 0, 0, 0);
+			mciSendString(L"stop star4", 0, 0, 0);
+			mciSendString(L"stop star5", 0, 0, 0);
+			mciSendString(L"stop starfull", 0, 0, 0);
+		}
+	}
+	KillAllTimer();
 }
-
 void NameScreen::listpainter(const LPCWSTR tmp_, const int i, const HDC hdc) {
 	wchar_t a[2];
 	a[1] = '\0';
@@ -569,7 +541,6 @@ void NameScreen::addaname() const
 	MessageBoxW(nullptr, t.c_str(), L"info", MB_OK);
 	File.close();
 }
-
 void CALLBACK NameScreen::InitTimerProc(const HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
 	InitTimerHwnd = hwnd;
@@ -714,16 +685,16 @@ void NameScreen::KillAllTimer()
 	g_StarCount = 0;
 }
 
+
+
 void CALLBACK InitTimerProc_(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
 	ui::NS->InitTimerProc(hwnd, uMsg, idEvent, dwTime);
 }
-
 void CALLBACK Case6TimerProc_(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
 	ui::NS->Case6TimerProc(hwnd, uMsg, idEvent, dwTime);
 }
-
 void CALLBACK TimerProc_(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime)
 {
 	ui::NS->TimerProc(hwnd, uMsg, idEvent, dwTime);

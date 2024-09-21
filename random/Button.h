@@ -4,6 +4,7 @@
 
 #include "Gp.h"
 #include "bitmaps.h"
+#include "Timer.h"
 
 #define CLICK 0
 #define DCLICK 1
@@ -21,18 +22,19 @@ private:
 	Button *binded=nullptr;
 	HFONT* font=nullptr;
 	Gp *p=nullptr;
-	int x=0, y=0, xE=0, yE=0;
-	int* xP, * yP, * xEP, * yEP;
+	double x=0, y=0, xE=0, yE=0;
+	double* xP, * yP, * xEP, * yEP;
 	int xAdd=0, yAdd = 0, xEAdd = 0, yEAdd = 0;
 	int TextW=-1,TextH=-1;
 	double x2WW=0,y2WH=0,xE2WW=0,yE2WH=0;
 	int R= 255, G = 255, B = 255;
 	int BmapC = BUTTON;
 	int FuncCounts=0;
-	bool DisableBmap=0,DisableStr=0;
+	bool DisableBmap = 0, DisableStr = 0, Disable = 0, Moving = 0;
 	std::wstring text;
 	std::vector<std::function<void()>> functions;
 	std::string music_string;
+	Timer move_timer;
 public:
 	Button(int x, int y, int xE, int yE,int BitmapC=BUTTON,std::wstring text=L"");
 	Button();
@@ -54,15 +56,18 @@ public:
 	void setDisableBmap(bool newValue);
 	void setMusic(std::string music_string);
 	void setGp(Gp *p);
+	void setDisable(bool newValue);
+
+	void MoveTo(int x, int y, int xend = -1, int yend = -1, bool smoothly = 1, double xVelocity = 1, double yXelocity = 1);
 
 	void refresh();
 	void changeStr(std::wstring NewStr);
 	void changeBmap(int NewBmapC);
 	void reConnect();
+	void disConnect();
 
 	operator bool() const;
 	bool operator==(const Button& b) const;
-
 
 
 	int bind(std::function<void()> func,int condition = CLICK);
@@ -79,6 +84,8 @@ public:
 
 
 
+	bool IsDisabled() const;
+	bool IsMoving()const;
 	Breturn Binded();
 	int getx() const;
 	int gety() const;

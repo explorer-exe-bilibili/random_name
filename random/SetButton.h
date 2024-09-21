@@ -18,11 +18,12 @@ private:
 	std::vector<Button> buttons;
 	Gp * p=nullptr;
 	HWND textboxhwnd = NULL;
-	void OpenFile(sitem item);
-	void ChooseFile(sitem item);
+	void OpenFile();
+	void ChooseFile();
+	void ChooseDir();
 	void load();
 	HWND CreateEditBox(HWND hWndParent, int number, point rect, const wchar_t* words);
-	void EditBoxEditor(sitem item, std::wstring tmp);
+	void EditBoxEditor(std::wstring tmp);
 public:
 	SetButton(sitem Item);
 	SetButton();

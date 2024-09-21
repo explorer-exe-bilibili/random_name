@@ -3,12 +3,12 @@
 #include"mywindows.h"
 #include <filesystem>
 #include "floatwindow.h"
-#include "NameScreen.h"
 #include"set-json.h"
 #include "init.h"
 #include"MSGback.h"
-#include "ui.h"
 #include<gdiplus.h>
+
+#include "LoadWindow.h"
 
 #define BALL1 100
 #define BALL10 101
@@ -16,6 +16,8 @@
 #define EXIT 444
 
 using namespace std;
+
+LoadWindow* loadWindow = nullptr;
 
 LRESULT CALLBACK WinSunProc(const HWND hwnd, const UINT uMsg, const WPARAM wParam, const LPARAM lParam) {
 	mywindows::main_hwnd = hwnd;
@@ -92,11 +94,13 @@ int WINAPI WinMain(
 	_In_ int nCmdShow              // show state
 ) {
 	mywindows::hinstance = hInstance;
-	init::main(WinSunProc, FloatWindowProc, KillWindowProc);
-	init::MainWindow();
 	Gdiplus::GdiplusStartupInput gdiplusStartupInput;
 	ULONG_PTR gdiplusToken;
 	Gdiplus::GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
+	loadWindow=new LoadWindow();
+	loadWindow->create();
+	init::main(WinSunProc, FloatWindowProc, KillWindowProc);
+	init::MainWindow();
 	mywindows::log("INIT COMPETENTLY SUCCESSFULLY");
 	MSG msg;
 	while (GetMessageW(&msg, nullptr, NULL, NULL)) {
