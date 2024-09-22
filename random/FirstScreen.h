@@ -1,6 +1,5 @@
 ﻿#pragma once
 #include "Button.h"
-#include "Gp.h"
 class FirstScreen
 {
     Gp* p;
@@ -14,10 +13,11 @@ public:
     void setGp(Gp* p_);
     void paint();
     void repaint();
-    void resetPoint();
+    void resetSize();
     void click(int x, int y);
 private:
     void changeMode(int Mode);
+    void resetPoint();
     void initButtons();
     void enter();
 };

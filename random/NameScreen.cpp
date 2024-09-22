@@ -72,7 +72,7 @@ NameScreen::~NameScreen()
 }
 void NameScreen::setButton()
 {
-	B[SKIP].setxy2WWWH(0.8, 0.045, 0.9, 0.045 + 0.17 * 0.17);
+	B[SKIP].setxy2WWWH(0.82, 0.045, 0.88, 0.08);
 	B[SKIP].setText(L"跳过>>");
 	B[SKIP].refresh();
 	B[SKIP].setFont(&ui::text_mid);
@@ -320,7 +320,6 @@ void NameScreen::menu() {
 		if (itmp != nullptr) for (int i = 0; i < count3; ++i) tmp_[i + count + count1 + count2] = temp[itmp[i]];
 
 		for (int i = 0; i < count; ++i) {
-			Sleep(20);
 			p->Paint(ui::listx[i], ui::listy, ui::listxend, ui::listyend, list6);
 			HDC hdc = p->GetDC();
 			SetTextColor(hdc, RGB(255, 255, 255));
@@ -331,7 +330,6 @@ void NameScreen::menu() {
 			p->ReleaseDC(hdc);
 		}
 		for (int i = count; i < count + count1; ++i) {
-			Sleep(20);
 			p->Paint(ui::listx[i], ui::listy, ui::listxend, ui::listyend, list5);
 			HDC hdc = p->GetDC();
 			SetTextColor(hdc, RGB(255, 255, 255));
@@ -342,7 +340,6 @@ void NameScreen::menu() {
 			p->ReleaseDC(hdc);
 		}
 		for (int i = count + count1; i < count + count1 + count2; ++i) {
-			Sleep(20);
 			p->Paint(ui::listx[i], ui::listy, ui::listxend, ui::listyend, list4);
 			HDC hdc = p->GetDC();
 			SetTextColor(hdc, RGB(255, 255, 255));
@@ -353,7 +350,6 @@ void NameScreen::menu() {
 			p->ReleaseDC(hdc);
 		}
 		for (int i = count + count1 + count2; i < count + count1 + count2 + count3; ++i) {
-			Sleep(20);
 			p->Paint(ui::listx[i], ui::listy, ui::listxend, ui::listyend, list3);
 			HDC hdc = p->GetDC();
 			SetTextColor(hdc, RGB(255, 255, 255));
@@ -413,7 +409,7 @@ void NameScreen::click(int x, int y)
 		ui::clicked = 1;
 	for(auto &i:B)
 	{
-		i.click(x, y);
+		i.click(CLICK,x, y);
 	}
 	if (!ui::ball10ing)
 	{

@@ -106,7 +106,7 @@ void LoadWindow::init()
 		ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"Arial");
 	hwnd = CreateWindowEx(WS_EX_LAYERED | WS_EX_TOPMOST | WS_EX_TOOLWINDOW, L"LoadWindow", L"LoadWindow", WS_POPUPWINDOW,
 		mywindows::screenWidth*0.3,mywindows::screenHeight*0.4,mywindows::screenWidth*0.4,mywindows::screenHeight*0.2, NULL, NULL, NULL, NULL);
-	refresh.Describe = "Load Window refresh Timer";
+	//refresh.Describe = "Load Window refresh Timer";
 	refresh.setPool(1);
 	refresh.setDelay(10);
 	refresh.setCallBack([this]()

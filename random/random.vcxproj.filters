@@ -102,6 +102,9 @@
     <ClInclude Include="LoadWindow.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="MenuItem.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="random.cpp">
@@ -180,6 +183,9 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="LoadWindow.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuItem.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

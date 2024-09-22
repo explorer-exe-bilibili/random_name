@@ -1,6 +1,5 @@
 #pragma once
 #include <functional>
-#include <string>
 #include <thread>
 
 
@@ -12,15 +11,12 @@ class Timer
 	bool IsUsing = 0;
 	bool IsPool = 0;
 	bool kill = 0;
-	bool Inited = 0;
 public:
-	std::string Describe;
 	struct TimerInfo
 	{
 		int delay;
 		bool IsUsing;
 		bool IsPool;
-		std::string Describe;
 	};
 	Timer() = default;
 	~Timer();
@@ -34,4 +30,6 @@ public:
 	void stop();
 
 	TimerInfo getTimerInfo();
+
 };
+

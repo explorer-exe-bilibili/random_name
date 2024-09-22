@@ -30,12 +30,14 @@ private:
 	int R= 255, G = 255, B = 255;
 	int BmapC = BUTTON;
 	int FuncCounts=0;
-	bool DisableBmap = 0, DisableStr = 0, Disable = 0, Moving = 0;
+	bool DisableBmap = 0, DisableStr = 0, Disable = 0, Moving = 0, IsVertical = 0;
 	std::wstring text;
 	std::vector<std::function<void()>> functions;
 	std::string music_string;
 	Timer move_timer;
 public:
+	static bool needFresh;
+
 	Button(int x, int y, int xE, int yE,int BitmapC=BUTTON,std::wstring text=L"");
 	Button();
 	~Button();
@@ -57,6 +59,7 @@ public:
 	void setMusic(std::string music_string);
 	void setGp(Gp *p);
 	void setDisable(bool newValue);
+	void setVertical(bool newValue);
 
 	void MoveTo(int x, int y, int xend = -1, int yend = -1, bool smoothly = 1, double xVelocity = 1, double yXelocity = 1);
 

@@ -1,8 +1,11 @@
 #include "Button.h"
 
+#include "configitem.h"
 #include "directshow.h"
 #include "mywindows.h"
 #include "ui.h"
+
+bool Button::needFresh = false;
 
 Button::Button(const int x, const int y, const int xE, const int yE, const int BitmapC,std::wstring text_)
 {
@@ -57,16 +60,35 @@ void Button::click(const int condition, const int x, const int y)const
 
 void Button::paint() const
 {
+	static bool debug=config::getint(DEBUG);
 	if (Disable)return;
+	if ((xE < 0 AND x < 0)
+		OR(yE < 0 AND y < 0)
+		OR(x > mywindows::WW AND xE > mywindows::WW)
+		OR(y > mywindows::WH AND yE > mywindows::WH))
+		return;
 	if(!p)return;
 	if(!DisableBmap)
 		p->Paint(x, y, xE-x, yE-y,BmapC);
 	if (!DisableStr) {
 		// 绘制文本
-		if (font != nullptr)
-			p->DrawStringBetween(text, *font, x, y, xE, yE, R, G, B);
-		else
-			p->DrawStringBetween(text, ui::text_mid, x, y, xE, yE, R, G, B);
+		if (IsVertical)
+		{
+			if (font != nullptr)
+				p->DrawVerticalStringBetween(text, *font, x, y, xE, yE, R, G, B);
+			else
+				p->DrawVerticalStringBetween(text, ui::text_mid, x, y, xE, yE, R, G, B);
+		}
+		else {
+			if (font != nullptr)
+				p->DrawStringBetween(text, *font, x, y, xE, yE, R, G, B);
+			else
+				p->DrawStringBetween(text, ui::text_mid, x, y, xE, yE, R, G, B);
+		}
+	}
+	if(debug)
+	{
+		p->DrawSqare(x, y, xE, yE, 255, 0, 0, 0);
 	}
 }
 
@@ -145,12 +167,17 @@ void Button::setDisable(bool newValue)
 	Disable= newValue;
 }
 
+void Button::setVertical(bool newValue)
+{
+	IsVertical = newValue;
+}
+
 void Button::MoveTo(int x, int y, int xend, int yend, bool smoothly,double xVelocity,double yVelocity)
 {
 	Moving = 1;
 	if(smoothly)
 	{
-		move_timer.Describe = "Button move timer";
+		//move_timer.Describe = "Button move timer";
 		move_timer.setDelay(1000 / 60);
 		move_timer.setPool(1);
 		move_timer.setCallBack([this, x, y, xend, yend, xVelocity, yVelocity]() {
@@ -214,10 +241,19 @@ void Button::MoveTo(int x, int y, int xend, int yend, bool smoothly,double xVelo
 				if (yend > this->yE)
 					this->yE = yend;
 			}
+			//检测是否在屏幕外
+			if ((this->x > mywindows::WW OR this->xE < 0)AND(this->y > mywindows::WH OR this->yE < 0))
+			{
+				this->x = x;
+				this->y = y;
+				this->xE = xend;
+				this->yE = yend;
+			}
 			if (this->x == x AND this->y == y AND(this->xE == xend OR xend == -1) AND(this->yE == yend OR yend == -1)) {
 				this->move_timer.stop();
 				Moving = 0;
 			}
+			needFresh = 1;
 		});
 		move_timer.init();
 		move_timer.start();

@@ -2,7 +2,6 @@
 #include<Windows.h>
 
 #include "Gp.h"
-#include "Timer.h"
 
 class MSGback
 {
@@ -18,7 +17,12 @@ public:
 	static void close();
 	static void showwindow(WPARAM wParam);
 private:
-	static void destroyall();
-	static Timer* refresh_Timer;
 	static Gp* Pptr;
+	static LARGE_INTEGER frequency;
+	static LARGE_INTEGER lastTime;
+	static int frameCount;
+	static float fps;
+
+	static void updateFrameRate();
+	static void destroyall();
 };

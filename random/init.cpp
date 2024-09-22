@@ -108,7 +108,7 @@ void init::resetxy()
 		ui::his.y = ui::bottom1y;
 		ui::his.xE = ui::his.x + mywindows::WW * 0.073;
 		ui::his.yE = ui::bottom1y + mywindows::WH * 0.039;*/
-		ui::FS->resetPoint();
+		ui::FS->resetSize();
 		ui::SS->resetplace();
 		ui::NS->resetPoint();
 		for (char i = 0; i <= 9; i++) {

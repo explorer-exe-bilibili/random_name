@@ -38,12 +38,27 @@ FirstScreen::FirstScreen()
 
 FirstScreen::~FirstScreen() = default;
 
-void FirstScreen::resetPoint()
+void FirstScreen::resetSize()
 {
-	for(auto & t :b)
+	int mode = ui::mode - 1;
+	int tmp = mode;
+	while(mode>0)
 	{
-		t.refresh();
+		mode--;
+		overlay[mode].setPoint(-mywindows::WW * (tmp - mode), mywindows::WH * 0.2,
+			-mywindows::WW * 0.4 * (tmp - mode), mywindows::WH * 0.8);
 	}
+	mode = tmp;
+	while(mode<config::getint(POOL_COUNT)-1)
+	{
+		mode++;
+		overlay[mode].setPoint(mywindows::WW * (mode - tmp), mywindows::WH * 0.2,
+			mywindows::WW * 1.6 * (mode - tmp), mywindows::WH * 0.8);
+	}
+	mode = tmp;
+	overlay[mode].setPoint(mywindows::WW * 0.2, mywindows::WH * 0.2, mywindows::WW * 0.8, mywindows::WH * 0.8);
+	changeMode(ui::mode);
+	resetPoint();
 }
 
 void FirstScreen::click(const int x, const int y)
@@ -56,26 +71,36 @@ void FirstScreen::click(const int x, const int y)
 
 void FirstScreen::changeMode(int Mode)
 {
-	if (ui::mode == Mode)return;
+	ui::mode = 1;
 	while (ui::mode < Mode)
 	{
-		int x = -mywindows::WW;
+		int x = mywindows::WW * (ui::mode - Mode);
 		int y = mywindows::WH * 0.2;
-		int xend = -mywindows::WW * 0.8;
+		int xend = mywindows::WW * (ui::mode - Mode + 0.6);
 		int yend = mywindows::WH * 0.8;
-		overlay[ui::mode - 1].MoveTo(x, y, xend, yend, 1, 30, 30);
+		overlay[ui::mode - 1].MoveTo(x, y, xend, yend, 1, 30, 40);
 		ui::mode++;
 	}
+	ui::mode = 4;
 	while (ui::mode > Mode)
 	{
-		int x = mywindows::WW * 1.2;
+		int x = mywindows::WW * (0.2 + ui::mode - Mode);
 		int y = mywindows::WH * 0.2;
-		int xend = mywindows::WW * 2;
+		int xend = mywindows::WW * (0.8 + ui::mode - Mode);
 		int yend = mywindows::WH * 0.8;
-		overlay[ui::mode - 1].MoveTo(x, y, xend, yend, 1, 30, 30);
+		overlay[ui::mode - 1].MoveTo(x, y, xend, yend, 1, 30, 40);
 		ui::mode--;
 	}
 	overlay[ui::mode - 1].MoveTo(mywindows::WW * 0.2, mywindows::WH * 0.2, mywindows::WW * 0.8, mywindows::WH * 0.8, 1, 30, 30);
+	InvalidateRect(mywindows::main_hwnd, NULL, false);
+}
+
+void FirstScreen::resetPoint()
+{
+	for (auto& t : b)
+	{
+		t.refresh();
+	}
 }
 
 void FirstScreen::initButtons()
@@ -100,22 +125,10 @@ void FirstScreen::initButtons()
 	b[SET].setMusic(ENTER);
 	b[HIS].setMusic(ENTER);
 	b[EXITBUTTON].setMusic(ENTER);
-	b[O1].bind([this] {
-		changeMode(1);
-		InvalidateRect(mywindows::main_hwnd, NULL, false);
-	});
-	b[O2].bind([this] {
-		changeMode(2);
-		InvalidateRect(mywindows::main_hwnd, NULL, false);
-	});
-	b[O3].bind([this] {
-		changeMode(3);
-		InvalidateRect(mywindows::main_hwnd, NULL, false);
-	});
-	b[O4].bind([this] {
-		changeMode(4);
-		InvalidateRect(mywindows::main_hwnd, NULL, false);
-		});
+	b[O1].bind([this] {changeMode(1);});
+	b[O2].bind([this] {changeMode(2);});
+	b[O3].bind([this] {changeMode(3);});
+	b[O4].bind([this] {changeMode(4);});
 	b[SET].bind([] { ui::SS->enter(); });
 	b[OFFVIDEO].bind([this] {
 		ui::SS->offvideo = !ui::SS->offvideo;
@@ -157,7 +170,7 @@ void FirstScreen::initButtons()
 	{
 		b.reConnect();
 	}
-	resetPoint();
+	resetSize();
 }
 
 void FirstScreen::enter()
@@ -203,6 +216,7 @@ void FirstScreen::repaint()
 	firstpaint = 1;
 	InvalidateRect(mywindows::main_hwnd, nullptr, 0);
 }
+
 
 void FirstScreen::setGp(Gp* p_)
 {

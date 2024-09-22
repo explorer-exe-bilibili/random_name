@@ -43,6 +43,7 @@ private:
 	void skip();
 	void setButton();
 	Button B[2];
+	Button List[10];
 public:
 	void CALLBACK TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);
 	void CALLBACK Case6TimerProc(HWND hwnd, UINT uMsg, UINT_PTR idEvent, DWORD dwTime);

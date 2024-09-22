@@ -3,17 +3,21 @@
 #include"mywindows.h"
 #include "ui.h"
 #include "click.h"
-#include"configitem.h"
+#include "ConfigItem.h"
 #include"floatwindow.h"
 #include"Gp.h"
 #include "LoadWindow.h"
 
 Gp* MSGback::Pptr = nullptr;
-Timer* MSGback::refresh_Timer=nullptr;
-
+LARGE_INTEGER MSGback::frequency;
+LARGE_INTEGER MSGback::lastTime;
+int MSGback::frameCount = 0;
+float MSGback::fps = 0.0f;
 
 void MSGback::create()
 {
+	QueryPerformanceFrequency(&frequency);
+	QueryPerformanceCounter(&lastTime);
 	ui::SS->reinit();
 	HDC hdc = GetDC(nullptr);
 	init::music();
@@ -23,13 +27,8 @@ void MSGback::create()
 	ShowWindow(mywindows::main_hwnd, SW_HIDE);
 	ReleaseDC(nullptr,hdc);
 	ui::HS->setFile(L"./name.txt");
-	refresh_Timer = new Timer;
-	refresh_Timer->Describe = "main Window refresh timer";
-	refresh_Timer->setCallBack([] {InvalidateRect(mywindows::main_hwnd, NULL, FALSE); });
-	refresh_Timer->setPool(1);
-	refresh_Timer->setDelay(1000 / config::getint(FPS));
-	refresh_Timer->start();
 	Pptr=new Gp(mywindows::main_hwnd);
+	init::resetxy();
 }
 bool _____ = 1;
 
@@ -46,16 +45,7 @@ void MSGback::size()
 
 void MSGback::paint()
 {
-	static int ms_between=1000/config::getint(FPS);
-	static long last_ms = 0;
-	auto now=std::chrono::system_clock::now();
-	auto now_ = std::chrono::time_point_cast<std::chrono::milliseconds>(now);
-	long now_ms= now_.time_since_epoch().count() % 1000;
-
-	if(ms_between>=now_ms&&now_ms-last_ms<ms_between)
-	{
-		return;
-	}
+	static bool debug=config::getint(DEBUG);
 	extern LoadWindow* loadWindow;
 	if(loadWindow)
 	{
@@ -68,10 +58,8 @@ void MSGback::paint()
 	if(_____==1)
 	{
 		init::resetxy();
-
 	}
 	_____ = 0;
-	//init::resetxy();
 	PAINTSTRUCT ps;
 	HDC hdc = BeginPaint(mywindows::main_hwnd, &ps);
 	ui::HS->changeGp(Pptr);
@@ -80,20 +68,29 @@ void MSGback::paint()
 	ui::SS->setGp(Pptr);
 	switch (ui::screenmode)
 	{
-	case FIRST_SCREEN:ui::FS->paint(); /*explorer::getInstance()->startbgm();*/ break;
+	case FIRST_SCREEN:ui::FS->paint(); break;
 	case SHOW_NAMES_ING:ui::NS->paint();break;
 	case SETTING: ui::SS->paint(); break;
 	case HISTORY: ui::HS->paint(); break;
-	default:ui::FS->paint();/* explorer::getInstance()->startbgm();*/ break;
+	default:ui::FS->paint(); break;
 	}
 	if(ui::screenmode!=SHOW_NAMES_ING)
 	{
 		ui::ExitB.paint();
 	}
+	updateFrameRate();
+	if (debug) {
+		Pptr->DrawString(("FPS:" + std::to_string(fps)), ui::text, 0, 0, 0, 0, 0);
+	}
 	Pptr->Flush();
 	mywindows::log("paint successfully");
 	DeleteDC(hdc);
 	EndPaint(mywindows::main_hwnd, &ps);
+	if(Button::needFresh)
+	{
+		InvalidateRect(mywindows::main_hwnd, nullptr, 0);
+		Button::needFresh = 0;
+	}
 }
 
 void MSGback::click(const LPARAM lParam)
@@ -101,6 +98,7 @@ void MSGback::click(const LPARAM lParam)
 	int x = GET_X_LPARAM(lParam);
 	int y = GET_Y_LPARAM(lParam);
 	click::doclick(x, y);
+	InvalidateRect(mywindows::main_hwnd, NULL, FALSE);
 }
 
 void MSGback::keyDown(const WPARAM wParam)
@@ -126,7 +124,6 @@ void MSGback::commond(const LPARAM lParam, const WPARAM wParam)
 }
 void MSGback::destroy()
 {
-	refresh_Timer->stop();
 	PostQuitMessage(0);
 }
 
@@ -157,16 +154,28 @@ void MSGback::showwindow(const WPARAM wParam)
 		ShowWindow(mywindows::float_hWnd, SW_HIDE);
 		if (!ui::SS->offmusic)
 			mciSendString(L"play bgm repeat from 0", 0, 0, 0);
-		refresh_Timer->start();
 	}
 	else // Ö÷´°¿ÚÒþ²Ø
 	{
 		ShowWindow(mywindows::float_hWnd, SW_SHOWNOACTIVATE);
 		if (!ui::SS->offmusic)
 			explorer::getInstance()->stopmusic();
-		refresh_Timer->pause();
 	}
 }
+
+void MSGback::updateFrameRate()
+{
+	LARGE_INTEGER currentTime;
+	QueryPerformanceCounter(&currentTime);
+	frameCount++;
+	if (currentTime.QuadPart - lastTime.QuadPart >= frequency.QuadPart)
+	{
+		fps = frameCount / ((currentTime.QuadPart - lastTime.QuadPart) / (float)frequency.QuadPart);
+		frameCount = 0;
+		lastTime = currentTime;
+	}
+}
+
 void MSGback::destroyall()
 {
 	mciSendString(L"close bgm", nullptr, 0, nullptr);

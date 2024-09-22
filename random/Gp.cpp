@@ -216,6 +216,115 @@ void Gp::DrawstringBetween(std::string str, HFONT font, int x, int y, int xend, 
 
 }
 
+void Gp::DrawVerticalString(std::wstring str, const HFONT font, const int x, const int y, unsigned const char R, unsigned const char G, unsigned const char B) {
+	if (!cachedHDC)
+		hdc = GetDC();
+	// 创建一个GDI+ Graphics对象
+	Graphics graphics(hdc);
+	// 设置文本渲染模式为抗锯齿
+	graphics.SetTextRenderingHint(TextRenderingHintAntiAlias);
+
+	// 创建一个GDI+ Font对象
+	Font gdiPlusFont(hdc, font);
+	// 创建一个GDI+ SolidBrush对象
+	SolidBrush brush(Color(255, R, G, B));
+
+	// 绘制每个字符
+	int yOffset = y;
+	for (wchar_t& ch : str) {
+		std::wstring wstr(1, ch);
+		graphics.DrawString(wstr.c_str(), -1, &gdiPlusFont, PointF(x, yOffset), &brush);
+		yOffset += gdiPlusFont.GetHeight(&graphics); // 更新y偏移量
+	}
+}
+
+void Gp::DrawVerticalString(std::string str, const HFONT font, const int x, const int y, unsigned const char R, unsigned const char G, unsigned const char B) {
+	if (!cachedHDC)
+		hdc = GetDC();
+	// 创建一个GDI+ Graphics对象
+	Graphics graphics(hdc);
+	// 设置文本渲染模式为抗锯齿
+	graphics.SetTextRenderingHint(TextRenderingHintAntiAlias);
+
+	// 创建一个GDI+ Font对象
+	Font gdiPlusFont(hdc, font);
+	// 创建一个GDI+ SolidBrush对象
+	SolidBrush brush(Color(255, R, G, B));
+
+	// 绘制每个字符
+	int yOffset = y;
+	for (char& ch : str) {
+		std::wstring wstr(1, ch);
+		graphics.DrawString(wstr.c_str(), -1, &gdiPlusFont, PointF(x, yOffset), &brush);
+		yOffset += gdiPlusFont.GetHeight(&graphics); // 更新y偏移量
+	}
+}
+
+void Gp::DrawVerticalStringBetween(std::wstring str, const HFONT font, const int x, const int y, const int xend, const int yend, unsigned const char R, unsigned const char G, unsigned const char B) {
+	if (!cachedHDC)
+		hdc = GetDC();
+	// 创建一个GDI+ Graphics对象
+	Graphics graphics(hdc);
+	// 设置文本渲染模式为抗锯齿
+	graphics.SetTextRenderingHint(TextRenderingHintAntiAlias);
+
+	// 创建一个GDI+ Font对象
+	Font gdiPlusFont(hdc, font);
+	// 创建一个GDI+ SolidBrush对象
+	SolidBrush brush(Color(255, R, G, B));
+
+	// 计算字符串的总高度
+	int totalHeight = 0;
+	for (wchar_t& ch : str) {
+		totalHeight += gdiPlusFont.GetHeight(&graphics);
+	}
+
+	// 计算起始y偏移量，使字符串在垂直方向居中
+	int yOffset = y + (yend - y - totalHeight) / 2;
+
+	// 计算起始x偏移量，使字符串在水平方向居中
+	int xOffset = x + (xend - x - gdiPlusFont.GetHeight(&graphics)) / 2;
+
+	// 绘制每个字符
+	for (wchar_t& ch : str) {
+		std::wstring wstr(1, ch);
+		graphics.DrawString(wstr.c_str(), -1, &gdiPlusFont, PointF(xOffset, yOffset), &brush);
+		yOffset += gdiPlusFont.GetHeight(&graphics); // 更新y偏移量
+	}
+}
+
+void Gp::DrawVerticalStringBetween(std::string str, const HFONT font, const int x, const int y, const int xend, const int yend, unsigned const char R, unsigned const char G, unsigned const char B) {
+	if (!cachedHDC)
+		hdc = GetDC();
+	// 创建一个GDI+ Graphics对象
+	Graphics graphics(hdc);
+	// 设置文本渲染模式为抗锯齿
+	graphics.SetTextRenderingHint(TextRenderingHintAntiAlias);
+
+	// 创建一个GDI+ Font对象
+	Font gdiPlusFont(hdc, font);
+	// 创建一个GDI+ SolidBrush对象
+	SolidBrush brush(Color(255, R, G, B));
+
+	// 计算字符串的总高度
+	int totalHeight = 0;
+	for (char& ch : str) {
+		totalHeight += gdiPlusFont.GetHeight(&graphics);
+	}
+
+	// 计算起始y偏移量，使字符串在垂直方向居中
+	int yOffset = y + (yend - y - totalHeight) / 2;
+
+	// 计算起始x偏移量，使字符串在水平方向居中
+	int xOffset = x + (xend - x - gdiPlusFont.GetHeight(&graphics)) / 2;
+
+	// 绘制每个字符
+	for (char& ch : str) {
+		std::wstring wstr(1, ch);
+		graphics.DrawString(wstr.c_str(), -1, &gdiPlusFont, PointF(xOffset, yOffset), &brush);
+		yOffset += gdiPlusFont.GetHeight(&graphics); // 更新y偏移量
+	}
+}
 
 HDC Gp::GetDC()
 {
@@ -233,5 +342,28 @@ void Gp::ReleaseDC(const HDC hdc)
 	if (cachedHDC) {
 		graphic->ReleaseHDC(hdc);
 		cachedHDC = 0;
+	}
+}
+
+void Gp::DrawSqare(int xDest, int yDest, int xEnd, int yEnd, int R, int G, int B, bool filled)
+{
+	hdc = GetDC();
+	if (filled) {
+		// 绘制实心矩形
+		HBRUSH hBrush = CreateSolidBrush(RGB(R, G, B)); // 红色实心刷子
+		HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
+		Rectangle(hdc, xDest, yDest, xEnd, yEnd);
+		SelectObject(hdc, hOldBrush);
+		DeleteObject(hBrush);
+	}
+	else {
+		// 绘制空心矩形
+		HPEN hPen = CreatePen(PS_SOLID, 2, RGB(R, G, B)); // 蓝色画笔
+		HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
+		HBRUSH hNullBrush = (HBRUSH)SelectObject(hdc, GetStockObject(NULL_BRUSH));
+		Rectangle(hdc, xDest, yDest, xEnd, yEnd);
+		SelectObject(hdc, hOldPen);
+		SelectObject(hdc, hNullBrush);
+		DeleteObject(hPen);
 	}
 }

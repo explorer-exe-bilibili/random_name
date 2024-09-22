@@ -165,6 +165,7 @@
     <ClInclude Include="item.h" />
     <ClInclude Include="LoadWindow.h" />
     <ClInclude Include="log.h" />
+    <ClInclude Include="MenuItem.h" />
     <ClInclude Include="MSGback.h" />
     <ClInclude Include="mywindows.h" />
     <ClInclude Include="FirstScreen.h" />
@@ -191,6 +192,7 @@
     <ClCompile Include="init.cpp" />
     <ClCompile Include="LoadWindow.cpp" />
     <ClCompile Include="log.cpp" />
+    <ClCompile Include="MenuItem.cpp" />
     <ClCompile Include="MSGback.cpp" />
     <ClCompile Include="mywindows.cpp" />
     <ClCompile Include="FirstScreen.cpp" />
