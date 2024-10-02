@@ -51,7 +51,7 @@ std::wstring sth2sth::Utf82Unicode(const std::string& utf8string)
 
 	return std::wstring(&resultstring[0]);
 }
-std::string sth2sth::WideByte2Acsi(std::wstring& wstrcode)
+std::string sth2sth::WideByte2Acsi(const std::wstring& wstrcode)
 {
 	int asciisize = ::WideCharToMultiByte(CP_OEMCP, 0, wstrcode.c_str(), -1, nullptr, 0, nullptr, nullptr);
 	if (asciisize == ERROR_NO_UNICODE_TRANSLATION)
@@ -72,7 +72,7 @@ std::string sth2sth::WideByte2Acsi(std::wstring& wstrcode)
 
 	return std::string(&resultstring[0]);
 }
-std::string sth2sth::UTF_82ASCII(std::string& strUtf8Code)
+std::string sth2sth::UTF_82ASCII(const std::string& strUtf8Code)
 {
 	std::string strRet("");
 	//先把 utf8 转为 unicode

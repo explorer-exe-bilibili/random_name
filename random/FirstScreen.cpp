@@ -3,11 +3,13 @@
 #include "bitmaps.h"
 #include "config.h"
 #include "ConfigItem.h"
-#include "directshow.h"
+#include "VideoPlayer.h"
 #include "ui.h"
 #include "mywindows.h"
 #include "set-json.h"
 #include"Gp.h"
+#include "HistoryScreen.h"
+#include "NameScreen.h"
 
 #define QI_YUAN L"r"
 #define SETICON L"'"
@@ -23,17 +25,10 @@
 #define X10 8
 #define EXITBUTTON 9
 
-
-FirstScreen::FirstScreen(Gp* p_)
-{
-	p=p_;
-	initButtons();
-}
-
 FirstScreen::FirstScreen()
 {
 	p=nullptr;
-	initButtons();
+	regButtons();
 }
 
 FirstScreen::~FirstScreen() = default;
@@ -63,7 +58,7 @@ void FirstScreen::resetSize()
 
 void FirstScreen::click(const int x, const int y)
 {
-	for(auto& t:b)
+	for(auto& t:buttons)
 	{
 		t.click(CLICK,x,y);
 	}
@@ -78,7 +73,7 @@ void FirstScreen::changeMode(int Mode)
 		int y = mywindows::WH * 0.2;
 		int xend = mywindows::WW * (ui::mode - Mode + 0.6);
 		int yend = mywindows::WH * 0.8;
-		overlay[ui::mode - 1].MoveTo(x, y, xend, yend, 1, 30, 40);
+		overlay[ui::mode - 1].MoveTo(x, y, xend, yend, true, 30, 40);
 		ui::mode++;
 	}
 	ui::mode = 4;
@@ -88,81 +83,81 @@ void FirstScreen::changeMode(int Mode)
 		int y = mywindows::WH * 0.2;
 		int xend = mywindows::WW * (0.8 + ui::mode - Mode);
 		int yend = mywindows::WH * 0.8;
-		overlay[ui::mode - 1].MoveTo(x, y, xend, yend, 1, 30, 40);
+		overlay[ui::mode - 1].MoveTo(x, y, xend, yend, true, 30, 40);
 		ui::mode--;
 	}
-	overlay[ui::mode - 1].MoveTo(mywindows::WW * 0.2, mywindows::WH * 0.2, mywindows::WW * 0.8, mywindows::WH * 0.8, 1, 30, 30);
+	overlay[ui::mode - 1].MoveTo(mywindows::WW * 0.2, mywindows::WH * 0.2, mywindows::WW * 0.8, mywindows::WH * 0.8, true, 30, 30);
 	InvalidateRect(mywindows::main_hwnd, NULL, false);
 }
 
 void FirstScreen::resetPoint()
 {
-	for (auto& t : b)
+	for (auto& t : buttons)
 	{
 		t.refresh();
 	}
 }
 
-void FirstScreen::initButtons()
+void FirstScreen::regButtons()
 {
-	b[O1].setxy2WWWH(0.27, 0.075, 0.345, 0.15);
-	b[O2].setxy2WWWH(0.38, 0.075, 0.459, 0.15);
-	b[O3].setxy2WWWH(0.50, 0.075, 0.571, 0.15);
-	b[O4].setxy2WWWH(0.61, 0.075, 0.682, 0.15);
-	b[SET].setxy2WWWH(0.05, 0.85, 0.073, 0.886);
-	b[OFFVIDEO].setxy2WWWH(0.1, 0.85, 0.173, 0.886);
-	b[HIS].setxy2WWWH(0.18, 0.85, 0.253, 0.886);
-	b[X1].setxy2WWWH(0.568, 0.85, 0.748, 0.925);
-	b[X10].setxy2WWWH(0.766, 0.85, 0.946, 0.925);
-	b[EXITBUTTON].setxy2WWWH(0.9, 0.045, 0.93, 0.105);
-	b[O1].setMusic(CLICK_MUSIC);
-	b[O2].setMusic(CLICK_MUSIC);
-	b[O3].setMusic(CLICK_MUSIC);
-	b[O4].setMusic(CLICK_MUSIC);
-	b[X10].setMusic(CLICK_MUSIC);
-	b[X1].setMusic(CLICK_MUSIC);
-	b[OFFVIDEO].setMusic(CLICK_MUSIC);
-	b[SET].setMusic(ENTER);
-	b[HIS].setMusic(ENTER);
-	b[EXITBUTTON].setMusic(ENTER);
-	b[O1].bind([this] {changeMode(1);});
-	b[O2].bind([this] {changeMode(2);});
-	b[O3].bind([this] {changeMode(3);});
-	b[O4].bind([this] {changeMode(4);});
-	b[SET].bind([] { ui::SS->enter(); });
-	b[OFFVIDEO].bind([this] {
-		ui::SS->offvideo = !ui::SS->offvideo;
+	for (int a = 0; a < 10; a++)
+		buttons.push_back(Button());
+	buttons[O1].bind([this] {changeMode(1); });
+	buttons[O1].setBmapC(over1, 1);
+	buttons[O1].setMusic(CLICK_MUSIC);
+	buttons[O1].setxy2WWWH(0.27, 0.075, 0.345, 0.15);
+	buttons[O2].bind([this] {changeMode(2); });
+	buttons[O2].setBmapC(over2, 1);
+	buttons[O2].setMusic(CLICK_MUSIC);
+	buttons[O2].setxy2WWWH(0.38, 0.075, 0.459, 0.15);
+	buttons[O3].bind([this] {changeMode(3); });
+	buttons[O3].setBmapC(over3, 1);
+	buttons[O3].setMusic(CLICK_MUSIC);
+	buttons[O3].setxy2WWWH(0.50, 0.075, 0.571, 0.15);
+	buttons[O4].bind([this] {changeMode(4); });
+	buttons[O4].setBmapC(over4, 1);
+	buttons[O4].setMusic(CLICK_MUSIC);
+	buttons[O4].setxy2WWWH(0.61, 0.075, 0.682, 0.15);
+	buttons[EXITBUTTON].bind(([]{PostMessage(mywindows::main_hwnd, WM_CLOSE, 0, 0);}));
+	buttons[EXITBUTTON].setBmapC(exitBu, 1);
+	buttons[EXITBUTTON].setMusic(ENTER);
+	buttons[EXITBUTTON].setxy2WWWH(0.9, 0.045, 0.93, 0.105);
+	buttons[HIS].bind([] {ui::HS->enter(); });
+	buttons[HIS].setDisable(true);
+	buttons[HIS].setFont(&ui::text);
+	buttons[HIS].setMusic(ENTER);
+	buttons[HIS].setText(L"历史记录");
+	buttons[HIS].setTextColor(0, 0, 0);
+	buttons[HIS].setxy2WWWH(0.18, 0.85, 0.253, 0.886);
+	buttons[OFFVIDEO].bind([this]
+	{
+		ui::SS->offVideo = !ui::SS->offVideo;
 		InvalidateRect(mywindows::main_hwnd, nullptr, FALSE);
 	});
-	b[HIS].bind([] {ui::HS->enter(); });
-	b[X1].bind([] { ui::NS->showname1(); });
-	b[X10].bind([] {ui::NS->showname10(); });
-	b[EXITBUTTON].bind(([]
-		{
-			PostMessage(mywindows::main_hwnd, WM_CLOSE, 0, 0);
-		}));
-	b[O1].setBmapC(over1, 1);
-	b[O2].setBmapC(over2, 1);
-	b[O3].setBmapC(over3, 1);
-	b[O4].setBmapC(over4, 1);
-	b[EXITBUTTON].setBmapC(exitBu, 1);
-	b[SET].setFont(&ui::icon_mid, 1);
-	b[SET].setText(SETICON);
-	b[SET].setTextColor(211, 188, 142);
-	b[OFFVIDEO].setFont(&ui::text);
-	b[OFFVIDEO].setTextColor(0, 0, 0);
-	b[HIS].setFont(&ui::text);
-	b[HIS].setText(L"历史记录");
-	b[HIS].setTextColor(0, 0, 0);
-	b[X1].setBmapC(pink1, 1);
-	b[X10].setBmapC(pink10, 1);
-	b[HIS].setDisable(1);
+	buttons[OFFVIDEO].setFont(&ui::text);
+	buttons[OFFVIDEO].setMusic(CLICK_MUSIC);
+	buttons[OFFVIDEO].setTextColor(0, 0, 0);
+	buttons[OFFVIDEO].setxy2WWWH(0.1, 0.85, 0.173, 0.886);
+	buttons[SET].bind([] { ui::SS->enter(); });
+	buttons[SET].setFont(&ui::icon_mid, 1);
+	buttons[SET].setMusic(ENTER);
+	buttons[SET].setText(SETICON);
+	buttons[SET].setTextColor(211, 188, 142);
+	buttons[SET].setxy2WWWH(0.05, 0.85, 0.073, 0.886);
+	buttons[X1].bind([] { ui::NS->ShowName1(); });
+	buttons[X1].setBmapC(pink1, 1);
+	buttons[X1].setMusic(CLICK_MUSIC);
+	buttons[X1].setxy2WWWH(0.568, 0.85, 0.748, 0.925);
+	buttons[X10].bind([] {ui::NS->ShowName10(); });
+	buttons[X10].setBmapC(pink10, 1);
+	buttons[X10].setMusic(CLICK_MUSIC);
+	buttons[X10].setxy2WWWH(0.766, 0.85, 0.946, 0.925);
 	for (int a = 0; a < config::getint(POOL_COUNT);a++) {
 		Button b;
 		if (a == config::getint(MODE) - 1)b.setPoint(mywindows::WW * 0.2, mywindows::WH * 0.2, mywindows::WW * 0.8, mywindows::WH * 0.8);
 		else if (a > config::getint(MODE) - 1)b.setPoint(mywindows::WW * 1.2, mywindows::WH * 0.2, mywindows::WW * 2, mywindows::WH * 0.8);
 		else b.setPoint(-mywindows::WW, mywindows::WH * 0.2, -mywindows::WW * 0.2, mywindows::WH * 0.8);
-		b.setDisableStr(1);
+		b.setDisableStr(true);
 		b.setBmapC(a);
 		overlay.push_back(b);
 	}
@@ -175,32 +170,33 @@ void FirstScreen::initButtons()
 
 void FirstScreen::enter()
 {
-	ui::screenmode = FIRST_SCREEN;
-	explorer::getInstance()->PlayMusic(ENTER);
+	ui::ScreenMode = FIRST_SCREEN;
+	if (!ui::SS->offMusic)
+		mciSendString(L"play bgm repeat", 0, 0, 0);
 }
 
 void FirstScreen::paint()
 {
 	p->Paint(0, 0, mywindows::WW, mywindows::WH, BackGround);
-	if(ui::SS->offvideo)
+	if(ui::SS->offVideo)
 	{
-		b[OFFVIDEO].setText(L"跳过视频:开");
+		buttons[OFFVIDEO].setText(L"跳过视频:开");
 	}
 	else
 	{
-		b[OFFVIDEO].setText(L"跳过视频:关");
+		buttons[OFFVIDEO].setText(L"跳过视频:关");
 	}
 	if(ui::mode<=3)
 	{
-		b[X1].setBmapC(pink1,1);
-		b[X10].setBmapC(pink10,1);
+		buttons[X1].setBmapC(pink1,1);
+		buttons[X10].setBmapC(pink10,1);
 	}
 	else
 	{
-		b[X1].setBmapC(blue1,1);
-		b[X10].setBmapC(blue10,1);
+		buttons[X1].setBmapC(blue1,1);
+		buttons[X10].setBmapC(blue10,1);
 	}
-	for(auto & t :b)
+	for(auto & t :buttons)
 	{
 		t.paint();
 	}
@@ -210,21 +206,9 @@ void FirstScreen::paint()
 	}
 }
 
-
-void FirstScreen::repaint()
+void FirstScreen::setGp(Gp* p)
 {
-	firstpaint = 1;
-	InvalidateRect(mywindows::main_hwnd, nullptr, 0);
-}
-
-
-void FirstScreen::setGp(Gp* p_)
-{
-	p=p_;
-	for(auto & t :b)
-	{
-		t.setGp(p);
-	}
+	Screen::setGp(p);
 	for(auto&b:overlay)
 	{
 		b.setGp(p);

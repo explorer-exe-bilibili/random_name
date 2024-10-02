@@ -1,9 +1,14 @@
 #pragma once
-#include "Button.h"
+#include <vector>
+#include <Windows.h>
+
 #include "item.h"
+
+class Gp;
+class Button;
+
 class SetButton
 {
-private:
 	struct point
 	{
 		double x = 0;
@@ -12,30 +17,30 @@ private:
 		double yend;
 	};
 
-	point TitleRect = {}, TextBoxRext = {};
+	point TitleRect = {}, TextBoxRect = {};
 	sitem item;
 	std::vector<point>  ButtonRect;
 	std::vector<Button> buttons;
 	Gp * p=nullptr;
-	HWND textboxhwnd = NULL;
-	void OpenFile();
-	void ChooseFile();
-	void ChooseDir();
+	HWND textboxHwnd = nullptr;
+	void OpenFile() const;
+	void ChooseFile() const;
+	void ChooseDir() const;
 	void load();
-	HWND CreateEditBox(HWND hWndParent, int number, point rect, const wchar_t* words);
-	void EditBoxEditor(std::wstring tmp);
+	static HWND CreateEditBox(HWND hWndParent, int number, const point& rect, const wchar_t* words);
+	void EditBoxEditor(const std::wstring& tmp);
 public:
-	SetButton(sitem Item);
+	explicit SetButton(const sitem& Item);
 	SetButton();
 	~SetButton();
-	void setItem(sitem Item);
+	void setItem(const sitem& Item);
 	void show();
 	void unshow();
 	void setGp(Gp* p);
 	void setPoint();
 	void refresh();
 	void reConnect();
-	void click(int x, int y);
+	void click(int x, int y) const;
 	void EditBoxUpgrade(int number);
 	static bool needReran, needReboot;
 };

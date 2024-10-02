@@ -1,19 +1,18 @@
 #include "floatwindow.h"
-#include<Windows.h>
-#include "mywindows.h"
-#include "set-json.h"
-#include "config.h"
-#include"configitem.h"
 #include<thread>
-#include <dshow.h>
 #include <chrono>
 
-bool showfloatwindow = 1,showQuitwindow=1;
+#include "bitmaps.h"
+#include "ConfigItem.h"
+#include "Gp.h"
+#include "mywindows.h"
+
+bool ShowFloatWindow = true,ShowQuitWindow=true;
 WNDPROC floatwindow::g_OrigFloatWndProc = nullptr;
 bool floatwindow::is_mouse_dragging;
 POINT floatwindow::p, floatwindow::p1;
 POINT floatwindow::last_mouse_pos;
-bool showing = 0,buttomdown=0;
+bool showing = false,buttonDown=false;
 HBITMAP floatwindow::bitmap;
 int floatwindow::icon_w, floatwindow::icon_h;
 POINT lastxy, nowxy;
@@ -23,8 +22,8 @@ std::chrono::time_point start = std::chrono::high_resolution_clock::now();
 
 void floatwindow::open()
 {
-	if (showfloatwindow) {
-		showfloatwindow = 0;
+	if (ShowFloatWindow) {
+		ShowFloatWindow = false;
 		createWindow();
 	}
 }
@@ -35,24 +34,22 @@ void floatwindow::stop()
 void floatwindow::paint()
 {
 	PAINTSTRUCT ps;
-	HDC hdc= BeginPaint(mywindows::float_hWnd, &ps);
+	const HDC hdc= BeginPaint(mywindows::float_hWnd, &ps);
 		static Gp p(mywindows::float_hWnd);
 		RECT rect;
 		GetWindowRect(mywindows::float_hWnd, &rect);
-		int w = rect.right - rect.left, h = rect.bottom - rect.top;
+		const int w = rect.right - rect.left, h = rect.bottom - rect.top;
 		p.Paint(0, 0, w, h, floating);
 		p.Flush();
-
+		ReleaseDC(mywindows::float_hWnd, hdc);
 	EndPaint(mywindows::float_hWnd, &ps);
 }
 void floatwindow::createWindow() {
 	// 计算悬浮窗口的位置和大小
-	const int screenWidth = GetSystemMetrics(SM_CXSCREEN);
-	const int screenHeight = GetSystemMetrics(SM_CYSCREEN);
-	int floatWndWidth = config::getscreen(FLOATW);
-	int floatWndHeight = config::getscreen(FLOATH);
-	const int floatWndX = config::getscreen(FLOATX);
-	const int floatWndY = config::getscreen(FLOATY);
+	const int floatWndWidth = config::getScreen(FLOATW);
+	const int floatWndHeight = config::getScreen(FLOATH);
+	const int floatWndX = config::getScreen(FLOATX);
+	const int floatWndY = config::getScreen(FLOATY);
 
 	// 创建悬浮窗口
 	mywindows::float_hWnd = CreateWindowEx(
@@ -66,8 +63,10 @@ void floatwindow::createWindow() {
 	// 显示悬浮窗口
 	ShowWindow(mywindows::float_hWnd, SW_SHOWNOACTIVATE);
 	UpdateWindow(mywindows::float_hWnd);
-	int x, y, w, h;
-	x = 0; y = 0; w = mywindows::screenWidth; h = mywindows::screenHeight * 0.3;
+	constexpr int x = 0;
+	constexpr int y = 0;
+	const int w = mywindows::screenWidth;
+	const int h = mywindows::screenHeight * 0.3;
 	mywindows::Quit_hwnd = CreateWindowEx(WS_EX_LAYERED | WS_EX_TOPMOST|WS_EX_TOOLWINDOW,
 		L"QUIT", L"", WS_VISIBLE | WS_POPUP, x, y, w, h, nullptr, nullptr, mywindows::hinstance, nullptr);
 	SetLayeredWindowAttributes(mywindows::Quit_hwnd, 0, 200, LWA_ALPHA);
@@ -76,9 +75,9 @@ void floatwindow::createWindow() {
 void floatwindow::showQuitWindow()
 {
 	if (!showing) {
-		showing = 1;
+		showing = true;
 		ShowWindow(mywindows::Quit_hwnd, SW_SHOWNOACTIVATE);
-		InvalidateRect(mywindows::Quit_hwnd, NULL, FALSE);
+		InvalidateRect(mywindows::Quit_hwnd, nullptr, FALSE);
 	}
 }
 void floatwindow::create()
@@ -88,7 +87,7 @@ void floatwindow::hideQuitWindow()
 {
 	if (showing) {
 		ShowWindow(mywindows::Quit_hwnd, SW_HIDE);
-		showing = 0;
+		showing = false;
 	}
 }
 LRESULT floatwindow::nchittest(const WPARAM wParam)
@@ -118,7 +117,7 @@ void floatwindow::lbuttondown(const WPARAM wParam)
 	}
 	GetCursorPos(&lastxy);
 	TimerID = 1;
-	buttomdown = 1;
+	buttonDown = true;
 }
 void floatwindow::mousemove(LPARAM lParam)
 {
@@ -129,31 +128,30 @@ void floatwindow::mousemove(LPARAM lParam)
 
 		RECT rect;
 		GetWindowRect(mywindows::float_hWnd, &rect);
-		int dx = currentMousePos.x - last_mouse_pos.x;
-		int dy = currentMousePos.y - last_mouse_pos.y;
+		const int dx = currentMousePos.x - last_mouse_pos.x;
+		const int dy = currentMousePos.y - last_mouse_pos.y;
 
 		MoveWindow(mywindows::float_hWnd, rect.left + dx, rect.top + dy, rect.right - rect.left, rect.bottom - rect.top, TRUE);
 
 		last_mouse_pos = currentMousePos;
 	}
 }
-bool uplbutton = 0;
+bool uplbutton = false;
 void movewindow() {
-	int x, y, w, h;
 	static double fps_time = 1000/config::getint(FPS);
 	static double speedx_;
 	static double speedy_;
 	if (uplbutton) {
 		speedx_ = speedx*fps_time;
 		speedy_ = speedy*fps_time;
-		uplbutton = 0;
+		uplbutton = false;
 	}while (speedx_ > 1 || speedy_ > 1||speedx_<-1||speedy_<-1) {
 		RECT WindowRect;
 		GetWindowRect(mywindows::float_hWnd, &WindowRect);
-		x = WindowRect.left + (int)speedx_;
-		y = WindowRect.top + (int)speedy_;
-		w = WindowRect.right - WindowRect.left;
-		h = WindowRect.bottom - WindowRect.top;
+		const int x = WindowRect.left + int(speedx_);
+		const int y = WindowRect.top + int(speedy_);
+		const int w = WindowRect.right - WindowRect.left;
+		const int h = WindowRect.bottom - WindowRect.top;
 		MoveWindow(mywindows::float_hWnd, x, y, w, h, 0);
 		GetWindowRect(mywindows::float_hWnd, &WindowRect);
 		if (WindowRect.left + speedx_ < 0) {
@@ -173,7 +171,7 @@ void movewindow() {
 			MoveWindow(mywindows::float_hWnd, WindowRect.left, mywindows::screenHeight - h, w, h, 0);
 		}
 		Sleep(fps_time);
-		double Mu = config::getd(MU);
+		const double Mu = config::getd(MU);
 		speedx_ = speedx_ * Mu;
 		speedy_ = speedy_ * Mu;
 		if (TimerID) {
@@ -183,7 +181,7 @@ void movewindow() {
 }
 void floatwindow::lbuttonup()
 {
-	buttomdown = 0;
+	buttonDown = false;
 	if (is_mouse_dragging)
 	{
 		hideQuitWindow();
@@ -198,8 +196,8 @@ void floatwindow::lbuttonup()
 	}
 	POINT currentMousePos;
 	GetCursorPos(&currentMousePos);
-	std::chrono::time_point end = std::chrono::high_resolution_clock::now();
-	std::chrono::duration<double, std::milli> elapsed = end - start;
+	const std::chrono::time_point end = std::chrono::high_resolution_clock::now();
+	const std::chrono::duration<double, std::milli> elapsed = end - start;
 	speedx =(currentMousePos.x - prevPos.x)/elapsed.count();
 	speedy = (currentMousePos.y - prevPos.y) / elapsed.count();
 	if (currentMousePos.y <= mywindows::screenHeight * 0.3) {
@@ -209,7 +207,7 @@ void floatwindow::lbuttonup()
 	}
 	KillTimer(nullptr, TimerID);
 	TimerID = NULL;
-	uplbutton = 1;
+	uplbutton = true;
 	std::thread m(movewindow);
 	m.detach();
 }

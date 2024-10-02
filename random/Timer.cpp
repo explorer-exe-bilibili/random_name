@@ -2,15 +2,9 @@
 
 Timer::~Timer()
 {
-	
 	kill = 1;
 	IsUsing = 0;
-	if (!TimerThread)return;
-	if (TimerThread->joinable())
-	{
-		TimerThread->join();
-	}
-	delete TimerThread;
+	if(TimerThread)if(TimerThread->joinable())TimerThread->join();
 }
 
 void Timer::setDelay(int delayMS)
@@ -20,7 +14,7 @@ void Timer::setDelay(int delayMS)
 
 void Timer::setCallBack(std::function<void()> func)
 {
-	this->CallBack = func;
+	this->CallBack = std::move(func);
 }
 
 void Timer::setPool(bool isPool)
@@ -30,28 +24,25 @@ void Timer::setPool(bool isPool)
 
 void Timer::init()
 {
-	 TimerThread=new std::thread([this]
+	 TimerThread=std::make_shared<std::thread>( std::thread([this]
 		{
 			 while (true)
 			 {
 				 while (IsUsing)
 				 {
-					 std::this_thread::sleep_for(std::chrono::milliseconds(WaitFor));
-					 if (IsUsing)
-						 CallBack();
-					 if (!IsPool)
-					 {
-						 IsUsing = 0;
-					 }
+					std::this_thread::sleep_for(std::chrono::milliseconds(WaitFor));
+				 	if (IsUsing&&CallBack)
+					CallBack();
+					if (!IsPool)
+					{
+					IsUsing = 0;
+					}
 				 }
-				if(kill)
-				{
-					break;
-				}
+				if(kill)return;
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			 }
 		}
-	 );
+	 ));
 	TimerThread->detach();
 }
 

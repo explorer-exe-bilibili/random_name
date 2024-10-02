@@ -1,11 +1,14 @@
-﻿#include "config.h"
+﻿// ReSharper disable CppClangTidyConcurrencyMtUnsafe
+#include "config.h"
+
+#include <sstream>
+
 #include"mywindows.h"
-#include <codecvt>
 
 // 定义链表头节点
-config::Node* config::head = nullptr;
-const wchar_t* config::LogString;
-std::wstring config::configpath;
+config::Node* head = nullptr;
+const wchar_t* LogString;
+std::wstring configPath;
 using namespace std;
 
 //获取配置项内容
@@ -27,14 +30,14 @@ std::wstring config::get(const std::wstring& name) {
 std::wstring config::getpath(const std::wstring& name)
 {
 	wstring path = get(name);
-	if (path.find_first_of(L"\\") == 0) {
+	if (path.find_first_of(L'\\') == 0) {
 		path = Log::wrunpath + path;
 	}
 	return path;
 }
 double config::getd(const std::wstring& name)
 {
-	Node* current = head;
+	const Node* current = head;
 
 	// 遍历链表查找匹配的配置项
 	while (current != nullptr) {
@@ -60,7 +63,7 @@ double config::getd(const std::wstring& name)
 }
 int config::getint(const std::wstring& name)
 {
-	Node* current = head;
+	const Node* current = head;
 
 	// 遍历链表查找匹配的配置项
 	while (current != nullptr) {
@@ -90,61 +93,60 @@ bool endsWith(const std::wstring& str, const std::wstring& suffix) {
 	}
 	return str.compare(str.length() - suffix.length(), suffix.length(), suffix) == 0;
 }
-long long config::getscreen(const std::wstring& name)
+long long config::getScreen(const std::wstring& name)
 {
-	wstring strv = get(name);
-	long double douv = stold(strv);
+	const wstring strv = get(name);
+	const long double douv = stold(strv);
 	if (douv> 1) {
-		long long llv = douv;
+		const long long llv = douv;
 		return llv;
 	}
 	else {
 		if (name.back()=='x' || endsWith(name,L"width")) {
-			long long llv = douv * mywindows::screenWidth;
+			const long long llv = douv * mywindows::screenWidth;
 			return llv;
 		}
 		else if (name.back()=='y' || endsWith(name,L"height")) {
-			long long llv = douv * mywindows::screenHeight;
+			const long long llv = douv * mywindows::screenHeight;
 			return llv;
 		}
 	}
+	return 0;
 }
-long long config::getwindow(const std::wstring& name)
+long long config::getWindow(const std::wstring& name)
 {
-	wstring strv = get(name);
-	long double douv = stold(strv);
-	if (douv> 1) {
-		long long llv = douv;
+	const wstring strv = get(name);
+	if (const long double douv = stold(strv); douv> 1) {
+		const long long llv = douv;
 		return llv;
 	}
 	else {
 		if (name.back()=='x' || endsWith(name,L"width")) {
-			long long llv = douv * mywindows::WW;
+			const long long llv = douv * mywindows::WW;
 			return llv;
 		}
 		else if (name.back()=='y' || endsWith(name,L"height")) {
-			long long llv = douv * mywindows::WH;
+			const long long llv = douv * mywindows::WH;
 			return llv;
 		}
 	}
+	return 0;
 }
 int config::turnUpSideDown(const std::wstring& name)
 {
-	bool t = !getint(name);
+	const bool t = !getint(name);
 	replace(name, to_wstring(t));
 	return t;
 }
 // 添加配置项到链表
 void config::add(const std::wstring& name, const std::wstring& value) {
 	Node* current = head;
-	Node* prev = nullptr;
 
 	while (current != nullptr) {
 		if (current->item.name == name) {
 			current->item.value = value;
 			return;
 		}
-		prev = current;
 		current = current->next;
 	}
 
@@ -152,7 +154,7 @@ void config::add(const std::wstring& name, const std::wstring& value) {
 	newItem.name = name;
 	newItem.value = value;
 
-	Node* newNode = new Node;
+	const auto newNode = new Node;
 	if (newNode == nullptr) {
 		mywindows::errlog(L"Memory allocation error(add)");
 		return;
@@ -165,22 +167,20 @@ void config::add(const std::wstring& name, const std::wstring& value) {
 void config::add(const std::wstring& name, const int value)
 {
 	Node* current = head;
-	Node* prev = nullptr;
 
 	while (current != nullptr) {
 		if (current->item.name == name) {
 			current->item.value = to_wstring(value);
 			return;
 		}
-		prev = current;
 		current = current->next;
 	}
 
 	ConfigItem newItem;
 	newItem.name = name;
-	newItem.value = value;
+	newItem.value = std::to_wstring(value);
 
-	Node* newNode = new Node;
+	const auto newNode = new Node;
 	if (newNode == nullptr) {
 		mywindows::errlog(L"Memory allocation error(add)");
 		return;
@@ -193,75 +193,71 @@ void config::add(const std::wstring& name, const int value)
 
 // 读取配置文件并保存配置项到链表
 void config::readFile() {
-	FILE* file = _wfopen(configpath.c_str(), L"r, ccs=UNICODE");
-	if (file == nullptr) {
+	std::wifstream file(configPath);
+	if (!file.is_open()) {
 		mywindows::errlog(L"Error opening file for reading");
 		return;
 	}
-
-	wchar_t line[256];
-	while (fgetws(line, sizeof(line) / sizeof(wchar_t), file) != nullptr) {
-		wchar_t* trimLine = wcstok(line, L"\n"); // 移除换行符
-
-		wchar_t* currentOption = wcstok(trimLine, L"=");
-		if (currentOption != nullptr) {
-				wchar_t* value = wcstok(nullptr, L"=");
-				if (value != NULL) {
-					// 添加配置项到链表
-					add(std::wstring(currentOption), std::wstring(value));
-				}
-				else
-				{
-					wstring err = L"读取配置时遇到错误，配置项的名称是： "+wstring(currentOption)+L"请按是检查配置文件，或者按否删除配置文件以恢复默认设置修复错误，或者按取消关闭程序";
-					int i=MessageBox(NULL, err.c_str(), L"严重错误", MB_ICONERROR | MB_YESNOCANCEL);
-					switch(i)
-					{
-					case IDYES:
-						ShellExecute(NULL, L"open", configpath.c_str(), NULL, NULL, SW_SHOWNORMAL);
-						exit(-1);
-						break;
-					case IDNO:
-						fclose(file);
-						_wremove(configpath.c_str());
-						mywindows::reboot();
-						break;
-					case IDCANCEL:
-						exit(-1);
-						break;
-					}
-				}
+	file.imbue(std::locale(""));
+	wstring line;
+	while (std::getline(file, line)) {
+		std::wistringstream iss(line);
+		std::wstring currentOption, value;
+		if (std::getline(iss, currentOption, L'=') && std::getline(iss, value))
+		{
+			add(currentOption, value);
+		}
+		else
+		{
+			wstring err = L"读取配置时遇到错误，配置项的名称是： " + wstring(currentOption) +
+				L"请按是检查配置文件，或者按否删除配置文件以恢复默认设置修复错误，或者按取消关闭程序";
+			switch (MessageBox(nullptr, err.c_str(), L"严重错误", MB_ICONERROR | MB_YESNOCANCEL))
+			{
+			case IDYES:
+				ShellExecute(nullptr, L"open", configPath.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+				exit(-1);
+				break;
+			case IDNO:
+				file.close();
+				_wremove(configPath.c_str());
+				mywindows::reboot();
+				break;
+			case IDCANCEL:
+				exit(-1);
+				break;
+			default: ;
+			}
 		}
 	}
-
-	fclose(file);
+	file.close();
 }
 
 
 
 // 保存配置项到配置文件
 void config::saveFile() {
-	FILE* file = _wfopen(configpath.c_str(), L"w, ccs=UNICODE");
-	if (file == nullptr) {
-		mywindows::errlog(L"Error opening file for writing");
+	std::wofstream file(configPath);
+	if (!file.is_open())
+	{
+		mywindows::errlog(L"Error opening file for writing config");
 		return;
 	}
-
-	Node* current = head;
-	while (current != nullptr) {
-		fwprintf(file, L"%s=%s\n", current->item.name.c_str(), current->item.value.c_str());
+	// 设置本地化，确保正确处理宽字符
+	file.imbue(std::locale(""));
+	const Node* current = head;
+	while(current!=nullptr)
+	{
+		file << current->item.name << L"=" << current->item.value << L'\n';
 		current = current->next;
 	}
-
-	fclose(file);
+	file.close();
 }
 // 释放链表节点的内存
 void config::cleanup() {
-	Node* current = head;
-	Node* next;
+	const Node* current = head;
 
 	while (current != nullptr) {
-		next = current->next;
-		// 不需要手动释放 std::wstring 对象的内存
+		const Node* next = current->next;
 		delete current;
 		current = next;
 	}
@@ -297,7 +293,6 @@ void config::deleteItem(const std::wstring& name) {
 }
 //替换配置项
 void config::replace(const std::wstring& name, const std::wstring& value) {
-	Node* prev = nullptr;
 	Node* current = head;
 
 	while (current != nullptr) {
@@ -306,8 +301,6 @@ void config::replace(const std::wstring& name, const std::wstring& value) {
 			saveFile();
 			return;
 		}
-
-		prev = current;
 		current = current->next;
 	}
 
@@ -317,7 +310,6 @@ void config::replace(const std::wstring& name, const std::wstring& value) {
 }
 void config::replace(const std::wstring& name, const int value)
 {
-	Node* prev = nullptr;
 	Node* current = head;
 
 	while (current != nullptr) {
@@ -326,8 +318,6 @@ void config::replace(const std::wstring& name, const int value)
 			saveFile();
 			return;
 		}
-
-		prev = current;
 		current = current->next;
 	}
 
@@ -338,7 +328,7 @@ void config::replace(const std::wstring& name, const int value)
 //打印配置
 void config::printAllConfigItems() {
 	mywindows::log(L" Configuration:");
-	Node* current = head;
+	const Node* current = head;
 	while (current != nullptr) {
 		mywindows::log(L"%s: %s", current->item.name.c_str(), current->item.value.c_str());
 		current = current->next;

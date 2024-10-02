@@ -66,13 +66,10 @@
     <ClInclude Include="Button.h">
       <Filter>头文件\base</Filter>
     </ClInclude>
-    <ClInclude Include="click.h">
-      <Filter>头文件\base</Filter>
-    </ClInclude>
     <ClInclude Include="config.h">
       <Filter>头文件\base</Filter>
     </ClInclude>
-    <ClInclude Include="directshow.h">
+    <ClInclude Include="VideoPlayer.h">
       <Filter>头文件\base</Filter>
     </ClInclude>
     <ClInclude Include="Gp.h">
@@ -103,6 +100,15 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="MenuItem.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="MenuScreen.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="NameButton.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
+    <ClInclude Include="Screen.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
@@ -170,10 +176,7 @@
     <ClCompile Include="SetPageRollBack.cpp">
       <Filter>源文件\前端\设置界面</Filter>
     </ClCompile>
-    <ClCompile Include="click.cpp">
-      <Filter>源文件\前端</Filter>
-    </ClCompile>
-    <ClCompile Include="directshow.cpp">
+    <ClCompile Include="VideoPlayer.cpp">
       <Filter>源文件\前端</Filter>
     </ClCompile>
     <ClCompile Include="ConfigItem.cpp">
@@ -186,6 +189,15 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="MenuItem.cpp">
+      <Filter>源文件\前端</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuScreen.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="NameButton.cpp">
+      <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="Screen.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>

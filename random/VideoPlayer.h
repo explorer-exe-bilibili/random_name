@@ -7,13 +7,13 @@
 #define CLICK_MUSIC "click"
 #define ENTER "enter"
 
-class directshow {
+class VideoPlayer {
 public:
     void load(const std::wstring& id, const std::wstring& path);
     void play(const std::wstring& id);
     void unload(const std::wstring& id);
-    static directshow* getInstance();
-	~directshow();
+    static VideoPlayer* getInstance();
+	~VideoPlayer();
 
 private:
     struct VideoData {
@@ -24,7 +24,7 @@ private:
         IBasicAudio* pBasicAudio = nullptr;
         IMediaSeeking* pSeeking = nullptr;
     };
-    static directshow* Instance;
+    static VideoPlayer* Instance;
     std::map<std::wstring, VideoData> videos;
     bool comInitialized = false;
 };

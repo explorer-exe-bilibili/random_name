@@ -31,11 +31,11 @@ enum limits
 #define MAX "max"
 #define MIN "min"
 
-typedef struct sitem {
-	bool IsEditBox = 0;
-	bool IsFile = 0;
-	bool IsSwitch = 0;
-	bool IsDir = 0;
+struct sitem {
+	bool IsEditBox = false;
+	bool IsFile = false;
+	bool IsSwitch = false;
+	bool IsDir = false;
 	int Number = 0;
 	int max = 0;
 	int min = 0;
@@ -46,5 +46,5 @@ typedef struct sitem {
 	std::wstring FileChooseWindowName;
 	std::string FileType;
 	std::string OutOfLimitOutPut;
-	bool neetreload = 0;
-}sitem;
+	bool needReload = false;
+};

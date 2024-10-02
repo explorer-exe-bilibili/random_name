@@ -8,9 +8,9 @@ public:
 	static std::string LWStostr(LPCWSTR lpcwszStr);
 	static std::wstring Utf82Unicode(const std::string& utf8string);
 	//unicode תΪ ascii
-	static std::string WideByte2Acsi(std::wstring& wstrcode);
+	static std::string WideByte2Acsi(const std::wstring& wstrcode);
 	//utf-8 ת ascii
-	static std::string UTF_82ASCII(std::string& strUtf8Code);
+	static std::string UTF_82ASCII(const std::string& strUtf8Code);
 	static char* const_char_ptr_to_char_ptr(const char* const_char_ptr);
 	static std::string TCHAR2STRING(TCHAR* STR);
 	static char* TCHAR2CHAR(TCHAR* STR);

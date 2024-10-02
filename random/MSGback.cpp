@@ -1,12 +1,16 @@
 #include "MSGback.h"
-#include"init.h"
-#include"mywindows.h"
-#include "ui.h"
-#include "click.h"
+
 #include "ConfigItem.h"
+#include "FirstScreen.h"
 #include"floatwindow.h"
-#include"Gp.h"
+#include "HistoryScreen.h"
+#include"init.h"
 #include "LoadWindow.h"
+#include "MenuScreen.h"
+#include"mywindows.h"
+#include "NameScreen.h"
+#include "set-json.h"
+#include "ui.h"
 
 Gp* MSGback::Pptr = nullptr;
 LARGE_INTEGER MSGback::frequency;
@@ -18,8 +22,8 @@ void MSGback::create()
 {
 	QueryPerformanceFrequency(&frequency);
 	QueryPerformanceCounter(&lastTime);
-	ui::SS->reinit();
-	HDC hdc = GetDC(nullptr);
+	set2::reinit();
+	const HDC hdc = GetDC(nullptr);
 	init::music();
 	if (mywindows::float_hWnd != nullptr)
 		ShowWindow(mywindows::float_hWnd, SW_HIDE);
@@ -28,16 +32,16 @@ void MSGback::create()
 	ReleaseDC(nullptr,hdc);
 	ui::HS->setFile(L"./name.txt");
 	Pptr=new Gp(mywindows::main_hwnd);
-	init::resetxy();
+	init::resetPoint();
 }
-bool _____ = 1;
+bool _ = true;
 
 
 void MSGback::size()
 {
-	ui::ScreenModeChanged = 1;
+	ui::ScreenModeChanged = true;
 	if (Pptr != nullptr) {
-		init::resetxy();
+		init::resetPoint();
 		Pptr->SizeChanged();
 	}
 }
@@ -46,37 +50,34 @@ void MSGback::size()
 void MSGback::paint()
 {
 	static bool debug=config::getint(DEBUG);
-	extern LoadWindow* loadWindow;
-	if(loadWindow)
+	if(extern LoadWindow* loadWindow; loadWindow)
 	{
 		loadWindow->destroy();
 		loadWindow = nullptr;
 	}
-	if (!ui::SS->fullscreen&&_____) {
+	if (set2::fullscreen&&_) {
 		SetWindowPos(mywindows::main_hwnd, nullptr, 0, 0, mywindows::screenWidth * 0.6, mywindows::screenHeight * 0.6, SWP_NOMOVE | SWP_NOZORDER);
 	}
-	if(_____==1)
+	if(_)
 	{
-		init::resetxy();
+		init::resetPoint();
 	}
-	_____ = 0;
+	_ = false;
 	PAINTSTRUCT ps;
-	HDC hdc = BeginPaint(mywindows::main_hwnd, &ps);
-	ui::HS->changeGp(Pptr);
+	const HDC hdc = BeginPaint(mywindows::main_hwnd, &ps);
+	ui::HS->setGp(Pptr);
 	ui::FS->setGp(Pptr);
 	ui::NS->setGp(Pptr);
 	ui::SS->setGp(Pptr);
-	switch (ui::screenmode)
+	ui::MS->setGp(Pptr);
+	switch (ui::ScreenMode)
 	{
 	case FIRST_SCREEN:ui::FS->paint(); break;
-	case SHOW_NAMES_ING:ui::NS->paint();break;
+	case namescreen:ui::NS->paint();break;
 	case SETTING: ui::SS->paint(); break;
 	case HISTORY: ui::HS->paint(); break;
-	default:ui::FS->paint(); break;
-	}
-	if(ui::screenmode!=SHOW_NAMES_ING)
-	{
-		ui::ExitB.paint();
+	case MENU:ui::MS->paint(); break;
+	default: break;
 	}
 	updateFrameRate();
 	if (debug) {
@@ -89,37 +90,47 @@ void MSGback::paint()
 	if(Button::needFresh)
 	{
 		InvalidateRect(mywindows::main_hwnd, nullptr, 0);
-		Button::needFresh = 0;
+		Button::needFresh = false;
 	}
 }
 
 void MSGback::click(const LPARAM lParam)
 {
-	int x = GET_X_LPARAM(lParam);
-	int y = GET_Y_LPARAM(lParam);
-	click::doclick(x, y);
-	InvalidateRect(mywindows::main_hwnd, NULL, FALSE);
+	const int x = GET_X_LPARAM(lParam);
+	const int y = GET_Y_LPARAM(lParam);
+	switch (ui::ScreenMode)
+	{
+	case FIRST_SCREEN: ui::FS->click(x, y);break;
+	case namescreen: ui::NS->click(x, y);break;
+	case SETTING: ui::SS->clicked(x, y);break;
+	case HISTORY: ui::HS->click(x, y); break;
+	case MENU: ui::MS->click(x, y); break;
+	default: break;
+	}
+	InvalidateRect(mywindows::main_hwnd, nullptr, FALSE);
 }
 
 void MSGback::keyDown(const WPARAM wParam)
 {
 	switch (wParam) {
 	case VK_ESCAPE:
-		if (ui::SS->FloatWindow) {
+		if (set2::FloatWindow) {
 			ShowWindow(mywindows::main_hwnd, SW_HIDE);
 			floatwindow::open();
 		}
 		else DestroyWindow(mywindows::main_hwnd); break;
+	default:break;
 	}
 }
 
-void MSGback::commond(const LPARAM lParam, const WPARAM wParam)
+void MSGback::command(const LPARAM lParam, const WPARAM wParam)
 {
 	switch (HIWORD(wParam)) {
 	case EN_CHANGE: {
-		if (ui::screenmode == SETTING)
-			ui::SS->seteditbox(wParam);
+		if (ui::ScreenMode == SETTING)
+			ui::SS->setEditBox(wParam);
 	}break;
+	default:break;
 	}
 }
 void MSGback::destroy()
@@ -129,36 +140,29 @@ void MSGback::destroy()
 
 void MSGback::active()
 {
-	switch (ui::screenmode) {
-	case FIRST_SCREEN:
-		ui::FS->repaint();
-		break;
-	case SETTING:
-		ui::SS->repaint();
-		break;
-	}
+	InvalidateRect(mywindows::main_hwnd, nullptr, FALSE);
 }
 
 void MSGback::close()
 {
-	if (ui::SS->FloatWindow) {
+	if (set2::FloatWindow) {
 		ShowWindow(mywindows::main_hwnd, SW_HIDE);
 		floatwindow::open();
 	}
 	else DestroyWindow(mywindows::main_hwnd);
 }
-void MSGback::showwindow(const WPARAM wParam)
+void MSGback::showWindow(const WPARAM wParam)
 {
 	if (wParam) // 主窗口显示
 	{
 		ShowWindow(mywindows::float_hWnd, SW_HIDE);
-		if (!ui::SS->offmusic)
-			mciSendString(L"play bgm repeat from 0", 0, 0, 0);
+		if (!set2::offMusic)
+			mciSendString(L"play bgm repeat from 0", nullptr, 0, nullptr);
 	}
 	else // 主窗口隐藏
 	{
 		ShowWindow(mywindows::float_hWnd, SW_SHOWNOACTIVATE);
-		if (!ui::SS->offmusic)
+		if (!set2::offMusic)
 			explorer::getInstance()->stopmusic();
 	}
 }
@@ -170,13 +174,8 @@ void MSGback::updateFrameRate()
 	frameCount++;
 	if (currentTime.QuadPart - lastTime.QuadPart >= frequency.QuadPart)
 	{
-		fps = frameCount / ((currentTime.QuadPart - lastTime.QuadPart) / (float)frequency.QuadPart);
+		fps = float(frameCount) / ((currentTime.QuadPart - lastTime.QuadPart) / float(frequency.QuadPart));
 		frameCount = 0;
 		lastTime = currentTime;
 	}
-}
-
-void MSGback::destroyall()
-{
-	mciSendString(L"close bgm", nullptr, 0, nullptr);
 }

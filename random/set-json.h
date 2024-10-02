@@ -2,16 +2,18 @@
 #include<windows.h>
 #include<string>
 #include<vector>
-#include"Gp.h"
-#include"button.h"
-#include<nlohmann/json.hpp>
-#include"item.h"
-#include "SetButton.h"
+#include <nlohmann/json.hpp>
+
+
+class Button;
+class Gp;
+class SetButton;
+struct sitem;
 
 class set2
 {
 	struct spage {
-		int itemcount = 0;
+		int ItemCount = 0;
 		std::wstring Title;
 		std::vector<sitem> items;
 		std::vector<std::shared_ptr<SetButton>> buttons;
@@ -20,28 +22,27 @@ class set2
 	std::vector<spage> pages;
 	std::vector<Button> buttons;
 public:
-	static bool offvideo, reran, offmusic, fullscreen, FloatWindow;
-	int settingpage;
+	static bool offVideo, reran, offMusic, fullscreen, FloatWindow;
+	int page;
 	set2();
 	~set2();
-	set2(std::string& jsonfile);
-	void clicked(int x, int y);
-	void paint();
-	void quit();
-	void reinit();
-	void repaint();
+	explicit set2(std::string& jsonfile);
+	void clicked(int x, int y) const;
+	void paint() const;
+	void quit() const;
+	static void reinit();
 	void resetplace();
-	void enter();
-	void seteditbox(WPARAM wParam);
+	static void enter();
+	void setEditBox(WPARAM wParam) const;
 	void setGp(Gp* p);
-	static void rereadconfig();
+	static void rereadConfig();
 private:
 	std::string G2U(const std::string& gbk);
 	std::string U2G(const std::string& utf8);
 	nlohmann::json rollback(std::string jsonpath);
-	void changepage();
-	void init();
-	void Load(std::string jsonpath);
-	void showitem(sitem item);
+	void changePage() const;
+	static void init();
+	void Load(const std::string& jsonpath);
+	void showItem(const sitem& item) const;
 	void regButton();
 };

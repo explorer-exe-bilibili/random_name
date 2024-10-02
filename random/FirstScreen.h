@@ -1,23 +1,20 @@
 ﻿#pragma once
 #include "Button.h"
-class FirstScreen
+#include "Screen.h"
+
+class FirstScreen:Screen
 {
-    Gp* p;
-    Button b[10];
-    bool firstpaint = true;
     std::vector<Button> overlay;
 public:
-    FirstScreen(Gp *p_);
     FirstScreen();
-    ~FirstScreen();
-    void setGp(Gp* p_);
+    ~FirstScreen() override;
+    void setGp(Gp* p);
     void paint();
-    void repaint();
     void resetSize();
     void click(int x, int y);
+    static void enter();
 private:
     void changeMode(int Mode);
     void resetPoint();
-    void initButtons();
-    void enter();
+    void regButtons() override;
 };

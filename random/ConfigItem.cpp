@@ -4,16 +4,18 @@
 #include "sth2sth.h"
 
 #include<string>
+#include <filesystem>
 
 using namespace std;
+
+extern wstring configPath;
 
 //读取和补全配置项
 int config::init() {
 	mywindows::log("initing config start");
-	configpath = Log::wrunpath;
-	configpath += CONFIG_;
-	FILE* file = _wfopen(configpath.c_str(), L"r");
-	if (file == nullptr) {
+	configPath = Log::wrunpath;
+	configPath += CONFIG_;
+	if (!std::filesystem::exists(configPath)) {
 		add(NAMES1, L"\\names1.txt");
 		add(NAMES2, L"\\names2.txt");
 		add(NAMES3, L"\\names3.txt");
@@ -40,7 +42,7 @@ int config::init() {
 		add(FLOATWINDOW, L"1");
 		add(TYPICAL, L"0");
 		add(MEM, L"0");
-		add(WINDOW_TITEL, L"祈愿");
+		add(WINDOW_TITLE, L"祈愿");
 		add(OVER4, L"\\files\\imgs\\over4.jpg");
 		add(OVER3, L"\\files\\imgs\\over3.jpg");
 		add(OVER2, L"\\files\\imgs\\over2.jpg");
@@ -59,14 +61,13 @@ int config::init() {
 	}
 	else
 	{
-		fclose(file);
 		readFile();
 		wstring LogString = get(MODE);
 		if (LogString == L"err")add(MODE, L"1");
 		LogString = get(OFF_VIDEO);
 		if (LogString == L"err")add(OFF_VIDEO, L"0");
-		LogString = get(WINDOW_TITEL);
-		if (LogString == L"err")add(WINDOW_TITEL, L"原神");
+		LogString = get(WINDOW_TITLE);
+		if (LogString == L"err")add(WINDOW_TITLE,L"原神");
 		LogString = get(NAMES1);
 		if (LogString == L"err")add(NAMES1, L"\\names1.txt");
 		LogString = get(NAMES2);

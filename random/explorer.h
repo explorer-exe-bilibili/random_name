@@ -4,14 +4,14 @@
 #include <memory>
 #include <string>
 #include <vector>
-#include "directshow.h"
+#include "VideoPlayer.h"
 class explorer
 {
 	static explorer* instance;
 	std::vector<std::shared_ptr<Gdiplus::Bitmap>> GdiImage;
 	std::vector<HBITMAP> HBitmap;
 	std::vector<BITMAP> Bitmap;
-	directshow* video = nullptr;
+	VideoPlayer* video = nullptr;
 	bool playingbgm = 0;
 public:
 	explorer();

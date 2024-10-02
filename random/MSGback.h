@@ -11,11 +11,11 @@ public:
 	static void paint();
 	static void click(LPARAM lParam);
 	static void keyDown(WPARAM wParam);
-	static void commond(LPARAM lParam, WPARAM wParam);
+	static void command(LPARAM lParam, WPARAM wParam);
 	static void destroy();
 	static void active();
 	static void close();
-	static void showwindow(WPARAM wParam);
+	static void showWindow(WPARAM wParam);
 private:
 	static Gp* Pptr;
 	static LARGE_INTEGER frequency;
@@ -24,5 +24,4 @@ private:
 	static float fps;
 
 	static void updateFrameRate();
-	static void destroyall();
 };

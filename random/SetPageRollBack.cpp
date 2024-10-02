@@ -3,6 +3,7 @@
 #include "log.h"
 #include "config.h"
 #include"configitem.h"
+#include "item.h"
 
 using namespace std;
 using namespace nlohmann;

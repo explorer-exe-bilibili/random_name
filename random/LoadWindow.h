@@ -1,8 +1,15 @@
 #pragma once
 
+#include <string>
 #include<Windows.h>
-#include "Gp.h"
 #include "Timer.h"
+
+namespace Gdiplus
+{
+	class Graphics;
+	class Image;
+	class Bitmap;
+}
 
 class LoadWindowPainter;
 class LoadWindowExplorer;
@@ -32,9 +39,9 @@ public:
 	LoadWindowExplorer();
 	~LoadWindowExplorer();
 	static LoadWindowExplorer* getInstance();
-	HBITMAP getHBitmap(const int number)const;
-	const BITMAP* getBitmap(const int number)const;
-	const Gdiplus::Image* getGdiImage(const int number)const;
+	HBITMAP getHBitmap(int number)const;
+	const BITMAP* getBitmap(int number)const;
+	const Gdiplus::Image* getGdiImage(int number)const;
 };
 
 class LoadWindowPainter
@@ -42,23 +49,23 @@ class LoadWindowPainter
 	static LoadWindowPainter* instance;
 	HWND hwnd;
 	HDC hdc;
-	bool cachedHDC = 0;
+	bool cachedHDC = false;
 	std::shared_ptr<Gdiplus::Graphics> graphic;
 	std::shared_ptr<Gdiplus::Bitmap> buffer;
 	LoadWindowExplorer* ptr;
 public:
-	LoadWindowPainter(HWND hwnd);
+	explicit LoadWindowPainter(HWND hwnd);
 	~LoadWindowPainter();
 	static LoadWindowPainter* getInstance(HWND hwnd);
 	static LoadWindowPainter* getInstance();
 	void Flush();
 	void Paint(int xDest, int yDest, int wDest, int hDest, int number);
 	void Paint(int xDest, int yDest, int number);
-	void DrawStringBetween(std::wstring str, HFONT font, int x, int y, int xend, int yend,
-		unsigned char R = 255, unsigned char G = 255, unsigned char B = 255);
+	void DrawStringBetween(const std::wstring& str, HFONT font, int x, int y, int xend, int yend,
+	                       unsigned char R = 255, unsigned char G = 255, unsigned char B = 255);
 	void DrawStringBetween(std::string str, HFONT font, int x, int y, int xend, int yend,
 		unsigned char R = 255, unsigned char G = 255, unsigned char B = 255);
-	void DrawSqare(int xDest, int yDest, int xEnd, int yEnd, int R, int G, int B,bool filled);
+	void DrawSquare(int xDest, int yDest, int xEnd, int yEnd, int R, int G, int B,bool filled);
 	HDC GetDC();
 	void ReleaseDC(HDC hdc);
 };

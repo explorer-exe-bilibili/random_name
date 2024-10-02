@@ -2,15 +2,15 @@
 
 #include "mywindows.h"
 #include "resource.h"
+#include<gdiplus.h>
+
 
 using namespace std;
 using namespace Gdiplus;
 
-extern double prosses;
-extern string prosses_str;
-HFONT LoadWIndowFont;
-
-#define ROLL 0
+extern double presses;
+extern string presses_str;
+HFONT LoadWindowFont;
 
 LoadWindowExplorer* LoadWindowExplorer::instance = nullptr;
 LoadWindowPainter* LoadWindowPainter::instance = nullptr;
@@ -26,25 +26,25 @@ LRESULT CALLBACK LoadWindowProc(const HWND hWnd, const UINT message, const WPARA
 	case WM_PAINT:
 	{
 		PAINTSTRUCT ps;
-		HDC hdc = BeginPaint(hWnd, &ps);
-		double x, y, w, h;
-		x = mywindows::screenWidth * 0.04;
-		y = mywindows::screenHeight * 0.04;
-		w = mywindows::screenWidth * 0.31;
-		h = mywindows::screenHeight * 0.085;
-		painter->DrawSqare(x, y, x + w, y + h, 255, 255, 255, 0);
+		const HDC hdc = BeginPaint(hWnd, &ps);
+		double x = mywindows::screenWidth * 0.04;
+		double y = mywindows::screenHeight * 0.04;
+		double w = mywindows::screenWidth * 0.31;
+		double h = mywindows::screenHeight * 0.085;
+		painter->DrawSquare(x, y, x + w, y + h, 255, 255, 255, false);
 		x = mywindows::screenWidth * 0.05;
 		y = mywindows::screenHeight * 0.05;
-		w = mywindows::screenWidth * 0.3 * prosses / 100;
+		w = mywindows::screenWidth * 0.3 * presses / 100;
 		h = mywindows::screenHeight * 0.075;
-		painter->DrawSqare(x, y, w + x, y + h, 243, 123, 122, 1);
-		x = mywindows::screenWidth * 0.05 + (prosses / 100.0) * mywindows::screenWidth * 0.3;
+		painter->DrawSquare(x, y, w + x, y + h, 243, 123, 122, true);
+		x = mywindows::screenWidth * 0.05 + (presses / 100.0) * mywindows::screenWidth * 0.3;
 		y = mywindows::screenHeight * 0.05;
 		w = mywindows::screenHeight * 0.075;
 		h = mywindows::screenHeight * 0.075;
 		painter->Paint(x, y, w, h, 0);
-		painter->DrawStringBetween(prosses_str, LoadWIndowFont, 0, 0, mywindows::screenWidth * 0.4, mywindows::screenHeight * 0.2);
+		painter->DrawStringBetween(presses_str, LoadWindowFont, 0, 0, mywindows::screenWidth * 0.4, mywindows::screenHeight * 0.2);
 		painter->Flush();
+		ReleaseDC(hWnd, hdc);
 		EndPaint(hWnd, &ps);
 		break;
 	}
@@ -67,8 +67,8 @@ LRESULT CALLBACK LoadWindowProc(const HWND hWnd, const UINT message, const WPARA
 
 			RECT rect;
 			GetWindowRect(hWnd, &rect);
-			int dx = currentMousePos.x - last_mouse_pos.x;
-			int dy = currentMousePos.y - last_mouse_pos.y;
+			const int dx = currentMousePos.x - last_mouse_pos.x;
+			const int dy = currentMousePos.y - last_mouse_pos.y;
 
 			MoveWindow(hWnd, rect.left + dx, rect.top + dy, rect.right - rect.left, rect.bottom - rect.top, TRUE);
 
@@ -79,39 +79,40 @@ LRESULT CALLBACK LoadWindowProc(const HWND hWnd, const UINT message, const WPARA
 	default:
 		break;
 	}
+	return 0;
 }
 
 void LoadWindow::init()
 {
-	WNDCLASS wndcls{}; //创建一个窗体类
+	WNDCLASS wndcls; //创建一个窗体类
 	wndcls.cbClsExtra = 0;//类的额外内存，默认为0即可
 	wndcls.cbWndExtra = 0;//窗口的额外内存，默认为0即可
-	wndcls.hbrBackground = (HBRUSH)GetStockObject(WHITE_BRUSH);//获取画刷句柄（将返回的HGDIOBJ进行强制类型转换）
-	wndcls.hCursor = LoadCursorW(NULL, IDC_ARROW);//设置光标
-	wndcls.hIcon = LoadIconW(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1));//设置窗体左上角的图标
-	wndcls.hInstance = GetModuleHandle(NULL);;//设置窗体所属的应用程序实例
+	wndcls.hbrBackground = HBRUSH(GetStockObject(WHITE_BRUSH));//获取画刷句柄（将返回的HGDIOBJ进行强制类型转换）
+	wndcls.hCursor = LoadCursorW(nullptr, IDC_ARROW);//设置光标
+	wndcls.hIcon = LoadIconW(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_ICON1));//设置窗体左上角的图标
+	wndcls.hInstance = GetModuleHandle(nullptr);//设置窗体所属的应用程序实例
 	wndcls.lpfnWndProc = LoadWindowProc;//WinSunProc;//设置窗体的回调函数，暂时没写，先设置为NULL，后面补上
 	wndcls.lpszClassName = L"LoadWindow";//设置窗体的类名
-	wndcls.lpszMenuName = NULL;//设置窗体的菜单,没有，填NULL
+	wndcls.lpszMenuName = nullptr;//设置窗体的菜单,没有，填NULL
 	wndcls.style = CS_HREDRAW | CS_VREDRAW;//设置窗体风格为水平重画和垂直重画
 	RegisterClass(&wndcls);//向操作系统注册窗体
-	int desiredPixelHeight = mywindows::screenWidth * 0.02;
+	const int desiredPixelHeight = mywindows::screenWidth * 0.02;
 	// 获取设备上下文的 DPI
-	HDC hdc = GetDC(nullptr); // 获取桌面设备上下文
-	int dpi = GetDeviceCaps(hdc, LOGPIXELSY);
+	const HDC hdc = GetDC(nullptr); // 获取桌面设备上下文
+	const int dpi = GetDeviceCaps(hdc, LOGPIXELSY);
 	// 计算逻辑单位高度
-	int logicalHeight = MulDiv(desiredPixelHeight, 72, dpi);
-	int logicalweidth = logicalHeight * 0.77;
-	LoadWIndowFont = CreateFontW(logicalHeight, logicalweidth, 0, 0, FW_NORMAL, 0, 0, 0, 
+	const int Height = MulDiv(desiredPixelHeight, 72, dpi);
+	const int width = Height * 0.77;
+	LoadWindowFont = CreateFontW(Height, width, 0, 0, FW_NORMAL, 0, 0, 0, 
 		ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"Arial");
 	hwnd = CreateWindowEx(WS_EX_LAYERED | WS_EX_TOPMOST | WS_EX_TOOLWINDOW, L"LoadWindow", L"LoadWindow", WS_POPUPWINDOW,
-		mywindows::screenWidth*0.3,mywindows::screenHeight*0.4,mywindows::screenWidth*0.4,mywindows::screenHeight*0.2, NULL, NULL, NULL, NULL);
+		mywindows::screenWidth*0.3,mywindows::screenHeight*0.4,mywindows::screenWidth*0.4,mywindows::screenHeight*0.2, nullptr, nullptr, nullptr, nullptr);
 	//refresh.Describe = "Load Window refresh Timer";
-	refresh.setPool(1);
+	refresh.setPool(true);
 	refresh.setDelay(10);
 	refresh.setCallBack([this]()
 		{
-			InvalidateRect(hwnd, NULL, FALSE);
+			InvalidateRect(hwnd, nullptr, FALSE);
 		});
 }
 
@@ -122,9 +123,9 @@ LoadWindow::LoadWindow()
 
 LoadWindow::~LoadWindow()
 {
-	UnregisterClassW(L"LoadWindow", GetModuleHandle(NULL));
+	UnregisterClassW(L"LoadWindow", GetModuleHandle(nullptr));
 	DestroyWindow(hwnd);
-	hwnd = 0;
+	hwnd = nullptr;
 
 }
 
@@ -144,8 +145,8 @@ void LoadWindow::destroy()
 
 void LoadWindowExplorer::Load()
 {
-	GBitmaps.push_back(make_shared<Bitmap>(LoadIconW(GetModuleHandle(NULL), MAKEINTRESOURCE(IDI_ICON1))));
-	for(auto&i:GBitmaps)
+	GBitmaps.push_back(make_shared<Bitmap>(LoadIconW(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_ICON1))));
+	for(const auto&i:GBitmaps)
 	{
 		HBITMAP hBitmap;
 		i->GetHBITMAP(Color(0, 0, 0), &hBitmap);
@@ -190,9 +191,9 @@ const Gdiplus::Image* LoadWindowExplorer::getGdiImage(const int number) const
 	return GBitmaps[number].get();
 }
 
-LoadWindowPainter::LoadWindowPainter(HWND hwnd)
+LoadWindowPainter::LoadWindowPainter(const HWND hwnd)
 {
-	hdc = 0;
+	hdc = nullptr;
 	this->hwnd = hwnd;
 	ptr = LoadWindowExplorer::getInstance();
 	ReleaseDC(hdc);
@@ -213,11 +214,11 @@ LoadWindowPainter::~LoadWindowPainter()
 	if (cachedHDC)
 		ReleaseDC(hdc);
 	delete ptr;
-	hwnd = 0;
-	hdc = 0;
+	hwnd = nullptr;
+	hdc = nullptr;
 }
 
-LoadWindowPainter* LoadWindowPainter::getInstance(HWND hwnd)
+LoadWindowPainter* LoadWindowPainter::getInstance(const HWND hwnd)
 {
 	if (instance == nullptr)
 		instance = new LoadWindowPainter(hwnd);
@@ -234,16 +235,16 @@ void LoadWindowPainter::Flush()
 	if (cachedHDC)
 		ReleaseDC(hdc);
 	// 获取窗口的设备上下文
-	HDC hdcWindow = ::GetDC(hwnd);
+	const HDC hdcWindow = ::GetDC(hwnd);
 
 	// 创建一个离屏DC
-	HDC hdcOffscreen = CreateCompatibleDC(hdcWindow);
+	const HDC hdcOffscreen = CreateCompatibleDC(hdcWindow);
 
 	// 创建一个与窗口大小相同的位图
-	HBITMAP hBitmap = CreateCompatibleBitmap(hdcWindow, buffer->GetWidth(), buffer->GetHeight());
+	const HBITMAP hBitmap = CreateCompatibleBitmap(hdcWindow, buffer->GetWidth(), buffer->GetHeight());
 
 	// 将位图选入离屏DC
-	HBITMAP hOldBitmap = (HBITMAP)SelectObject(hdcOffscreen, hBitmap);
+	const auto hOldBitmap = HBITMAP(SelectObject(hdcOffscreen, hBitmap));
 
 	// 将离屏缓冲区的内容绘制到离屏DC上
 	Gdiplus::Graphics graphicsOffscreen(hdcOffscreen);
@@ -261,15 +262,15 @@ void LoadWindowPainter::Flush()
 	::ReleaseDC(hwnd, hdcWindow);
 }
 
-void LoadWindowPainter::Paint(int xDest, int yDest, int wDest, int hDest, int number)
+void LoadWindowPainter::Paint(const int xDest, const int yDest, const int wDest, const int hDest, const int number)
 {
 	if (!cachedHDC)
 		hdc = GetDC();
-	HDC hdcMem = CreateCompatibleDC(hdc);
+	const HDC hdcMem = CreateCompatibleDC(hdc);
 	const HBITMAP t_hbtiamp = ptr->getHBitmap(number);
 	const BITMAP* t_bitmap = ptr->getBitmap(number);
-	int w = t_bitmap->bmWidth;
-	int h = t_bitmap->bmHeight;
+	const int w = t_bitmap->bmWidth;
+	const int h = t_bitmap->bmHeight;
 	SelectObject(hdcMem, t_hbtiamp);
 	// 设置混合函数
 	BLENDFUNCTION blendFunc;
@@ -282,15 +283,15 @@ void LoadWindowPainter::Paint(int xDest, int yDest, int wDest, int hDest, int nu
 	DeleteDC(hdcMem);
 }
 
-void LoadWindowPainter::Paint(int xDest, int yDest, int number)
+void LoadWindowPainter::Paint(const int xDest, const int yDest, const int number)
 {
 	if (!cachedHDC)
 		hdc = GetDC();
-	HDC hdcMem = CreateCompatibleDC(hdc);
+	const HDC hdcMem = CreateCompatibleDC(hdc);
 	const HBITMAP t_hbtiamp = ptr->getHBitmap(number);
 	const BITMAP* t_bitmap = ptr->getBitmap(number);
-	int w = t_bitmap->bmWidth;
-	int h = t_bitmap->bmHeight;
+	const int w = t_bitmap->bmWidth;
+	const int h = t_bitmap->bmHeight;
 	SelectObject(hdcMem, t_hbtiamp);
 	// 设置混合函数
 	BLENDFUNCTION blendFunc;
@@ -303,8 +304,8 @@ void LoadWindowPainter::Paint(int xDest, int yDest, int number)
 	DeleteDC(hdcMem);
 }
 
-void LoadWindowPainter::DrawStringBetween(std::wstring str, HFONT font, int x, int y, int xend, int yend,
-	unsigned char R, unsigned char G, unsigned char B)
+void LoadWindowPainter::DrawStringBetween(const std::wstring& str, const HFONT font, const int x, const int y,
+	const int xend, const int yend,const unsigned char R, const unsigned char G, const unsigned char B)
 {
 	if (!cachedHDC)
 		hdc = GetDC();
@@ -314,12 +315,12 @@ void LoadWindowPainter::DrawStringBetween(std::wstring str, HFONT font, int x, i
 	graphics.SetTextRenderingHint(TextRenderingHintAntiAlias);
 
 	// 创建一个GDI+ Font对象
-	Font gdiPlusFont(hdc, font);
+	const Font gdiPlusFont(hdc, font);
 	// 创建一个GDI+ SolidBrush对象
-	SolidBrush brush(Color(255, R, G, B));
+	const SolidBrush brush(Color(255, R, G, B));
 
 	// 创建一个GDI+ RectF对象，表示文本绘制的区域
-	RectF layoutRect(x, y, xend - x, yend - y);
+	const RectF layoutRect(x, y, xend - x, yend - y);
 
 	// 创建一个GDI+ StringFormat对象，用于设置文本格式
 	StringFormat format;
@@ -330,8 +331,8 @@ void LoadWindowPainter::DrawStringBetween(std::wstring str, HFONT font, int x, i
 	graphics.DrawString(str.c_str(), -1, &gdiPlusFont, layoutRect, &format, &brush);
 }
 
-void LoadWindowPainter::DrawStringBetween(std::string str, HFONT font, int x, int y, int xend, int yend,
-	unsigned char R, unsigned char G, unsigned char B)
+void LoadWindowPainter::DrawStringBetween(std::string str, const HFONT font, const int x, const int y, const int xend, const int yend,
+                                          const unsigned char R, const unsigned char G, const unsigned char B)
 {
 	if (!cachedHDC)
 		hdc = GetDC();
@@ -341,12 +342,12 @@ void LoadWindowPainter::DrawStringBetween(std::string str, HFONT font, int x, in
 	graphics.SetTextRenderingHint(TextRenderingHintAntiAlias);
 
 	// 创建一个GDI+ Font对象
-	Font gdiPlusFont(hdc, font);
+	const Font gdiPlusFont(hdc, font);
 	// 创建一个GDI+ SolidBrush对象
-	SolidBrush brush(Color(255, R, G, B));
+	const SolidBrush brush(Color(255, R, G, B));
 
 	// 创建一个GDI+ RectF对象，表示文本绘制的区域
-	RectF layoutRect(x, y, xend - x, yend - y);
+	const RectF layoutRect(x, y, xend - x, yend - y);
 
 	// 创建一个GDI+ StringFormat对象，用于设置文本格式
 	StringFormat format;
@@ -354,26 +355,26 @@ void LoadWindowPainter::DrawStringBetween(std::string str, HFONT font, int x, in
 	format.SetLineAlignment(StringAlignmentCenter);
 
 	// 绘制文本
-	std::wstring wstr(str.begin(), str.end());
+	const std::wstring wstr(str.begin(), str.end());
 	graphics.DrawString(wstr.c_str(), -1, &gdiPlusFont, layoutRect, &format, &brush);
 }
 
-void LoadWindowPainter::DrawSqare(int xDest, int yDest, int xEnd, int yEnd, int R, int G, int B, bool filled)
+void LoadWindowPainter::DrawSquare(const int xDest, const int yDest, const int xEnd, const int yEnd, const int R, const int G, const int B, const bool filled)
 {
 	hdc = GetDC();
 	if (filled) {
 		// 绘制实心矩形
-		HBRUSH hBrush = CreateSolidBrush(RGB(R, G, B)); // 红色实心刷子
-		HBRUSH hOldBrush = (HBRUSH)SelectObject(hdc, hBrush);
+		const HBRUSH hBrush = CreateSolidBrush(RGB(R, G, B)); // 红色实心刷子
+		const HBRUSH hOldBrush = HBRUSH(SelectObject(hdc, hBrush));
 		Rectangle(hdc, xDest, yDest, xEnd, yEnd);
 		SelectObject(hdc, hOldBrush);
 		DeleteObject(hBrush);
 	}
 	else {
 		// 绘制空心矩形
-		HPEN hPen = CreatePen(PS_SOLID, 2, RGB(R, G, B)); // 蓝色画笔
-		HPEN hOldPen = (HPEN)SelectObject(hdc, hPen);
-		HBRUSH hNullBrush = (HBRUSH)SelectObject(hdc, GetStockObject(NULL_BRUSH));
+		const HPEN hPen = CreatePen(PS_SOLID, 2, RGB(R, G, B)); // 蓝色画笔
+		const HPEN hOldPen = HPEN(SelectObject(hdc, hPen));
+		const HBRUSH hNullBrush = HBRUSH(SelectObject(hdc, GetStockObject(NULL_BRUSH)));
 		Rectangle(hdc, xDest, yDest, xEnd, yEnd);
 		SelectObject(hdc, hOldPen);
 		SelectObject(hdc, hNullBrush);
@@ -387,16 +388,16 @@ HDC LoadWindowPainter::GetDC()
 		return hdc;
 	else
 	{
-		cachedHDC = 1;
+		cachedHDC = true;
 		return graphic->GetHDC();
 	}
 }
 
-void LoadWindowPainter::ReleaseDC(HDC hdc)
+void LoadWindowPainter::ReleaseDC(const HDC hdc)
 {
 	if (cachedHDC) {
 		graphic->ReleaseHDC(hdc);
-		cachedHDC = 0;
+		cachedHDC = false;
 	}
 }
 

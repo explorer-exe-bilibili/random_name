@@ -8,6 +8,78 @@ using namespace std;
 
 #pragma comment(lib, "Msimg32.lib")
 
+bool Gp::FontInfo::operator==(const FontInfo& newFont) const
+{
+	if (R == newFont.R && G == newFont.G && B == newFont.B && font == newFont.font)
+		return 1;
+	else return 0;
+}
+
+bool Gp::FontInfo::operator!=(const FontInfo& newFont) const
+{
+	if (R != newFont.R || G != newFont.G || B != newFont.B || font != newFont.font)
+		return 1;
+	else return 0;
+}
+
+Gp::FontInfo::operator bool()
+{
+	if (font)
+		return 1;
+	else return 0;
+}
+
+struct Gp::TextNeeds Gp::getTextNeeds()
+{
+	hdc = GetDC();
+	if (!cachedGraphics)
+	{
+		TextNeeds.hdc_graphics = make_shared<Graphics>(hdc);
+		TextNeeds.hdc_graphics->SetTextRenderingHint(TextRenderingHintAntiAlias);
+		cachedGraphics = 1;
+	}
+	if (!cachedFont)
+	{
+		TextNeeds.font = make_shared<Font>(hdc, NowFontInfo.font);
+		cachedFont = 1;
+	}
+	if (!cachedBrush)
+	{
+		TextNeeds.brush = make_shared<SolidBrush>(Color(255, NowFontInfo.R, NowFontInfo.G, NowFontInfo.B));
+		cachedBrush = 1;
+	}
+	if(NowFontInfo!=LastFontInfo)
+	{
+		TextNeeds.brush.reset();
+		TextNeeds.font.reset();
+		TextNeeds.font = make_shared<Font>(hdc, NowFontInfo.font);
+		TextNeeds.brush = make_shared<SolidBrush>(Color(255, NowFontInfo.R, NowFontInfo.G, NowFontInfo.B));
+		LastFontInfo = NowFontInfo;
+	}
+	return TextNeeds;
+}
+
+void Gp::releaseTextNeeds()
+{
+	TextNeeds.brush.reset();
+	TextNeeds.font.reset();
+	TextNeeds.hdc_graphics.reset();
+	cachedBrush = 0;
+	cachedFont = 0;
+	cachedGraphics = 0;
+}
+
+void Gp::PaintStaticItems()
+{
+	for (auto& i : StaticPaintList)
+	{
+		if(IsBadReadPtr(i.str.c_str(), sizeof(wchar_t) * i.str.length()))continue;
+		if(i.str.empty())continue;
+		if(i.str.size()<=0)continue;
+		DrawString(i.str, i.font, i.xDest, i.yDest, i.r, i.g, i.b);
+	}
+}
+
 Gp::~Gp(){
 	if (cachedHDC)
 		ReleaseDC(hdc);
@@ -20,8 +92,9 @@ Gp::Gp(HWND hwnd):hwnd(hwnd)
 }
 
 void Gp::Flush() {
-	if (cachedHDC)
-		ReleaseDC(hdc);
+	PaintStaticItems();
+	ReleaseDC(hdc);
+	releaseTextNeeds();
     // 获取窗口的设备上下文
     HDC hdcWindow = ::GetDC(hwnd);
 
@@ -69,25 +142,22 @@ void Gp::SizeChanged()
 
 void Gp::Paint(const int xDest, const int yDest, Bitmap* image, const int wDest = 0, const int hDest = 0)
 {
-	if(cachedHDC)
-		ReleaseDC(hdc);
+	ReleaseDC(hdc);
 	if (wDest != 0 && hDest != 0) {
-		graphic.get()->DrawImage(image, xDest, yDest, wDest, hDest);
+		graphic->DrawImage(image, xDest, yDest, wDest, hDest);
 	}
 	else {
-		graphic.get()->DrawImage(image, xDest, yDest);
+		graphic->DrawImage(image, xDest, yDest);
 	}
 }
 void Gp::Paint(const int xDest, const int yDest, Bitmap* image)
 {
-	if (cachedHDC)
-		ReleaseDC(hdc);
-	graphic.get()->DrawImage(image, xDest, yDest);
+	ReleaseDC(hdc);
+	graphic->DrawImage(image, xDest, yDest);
 }
-void Gp::Paint(const int xDest, const int yDest, const int wDest, const int hDest, const int number)
+void Gp::Paint(int xDest, int yDest, int wDest, int hDest, int number, unsigned char alpha_count)
 {
-	if (!cachedHDC)
-		hdc = GetDC();
+	hdc = GetDC();
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	const HBITMAP t_hbtiamp = ptr->getHBitmap(number);
 	const BITMAP* t_bitmap = ptr->getBitmap(number);
@@ -98,16 +168,15 @@ void Gp::Paint(const int xDest, const int yDest, const int wDest, const int hDes
 	BLENDFUNCTION blendFunc;
 	blendFunc.BlendOp = AC_SRC_OVER;
 	blendFunc.BlendFlags = 0;
-	blendFunc.SourceConstantAlpha = 255; // 255 = 不透明，0 = 完全透明
+	blendFunc.SourceConstantAlpha = alpha_count; // 255 = 不透明，0 = 完全透明
 	blendFunc.AlphaFormat = AC_SRC_ALPHA; // 使用源图像的Alpha通道
 
 	AlphaBlend(hdc, xDest, yDest, wDest, hDest, hdcMem, 0, 0, w, h, blendFunc);
 	DeleteDC(hdcMem);
 }
-void Gp::Paint(const int xDest, const int yDest, const int number)
+void Gp::Paint(int xDest, int yDest, int number, unsigned char alpha_count)
 {
-	if (!cachedHDC)
-		hdc = GetDC();
+	hdc = GetDC();
 	HDC hdcMem = CreateCompatibleDC(hdc);
 	const HBITMAP t_hbtiamp = ptr->getHBitmap(number);
 	const BITMAP *t_bitmap = ptr->getBitmap(number);
@@ -118,64 +187,51 @@ void Gp::Paint(const int xDest, const int yDest, const int number)
 	BLENDFUNCTION blendFunc;
 	blendFunc.BlendOp = AC_SRC_OVER;
 	blendFunc.BlendFlags = 0;
-	blendFunc.SourceConstantAlpha = 255; // 255 = 不透明，0 = 完全透明
+	blendFunc.SourceConstantAlpha = alpha_count; // 255 = 不透明，0 = 完全透明
 	blendFunc.AlphaFormat = AC_SRC_ALPHA; // 使用源图像的Alpha通道
 
 	AlphaBlend(hdc, xDest, yDest, w, h, hdcMem, 0, 0, w, h, blendFunc);
 	DeleteDC(hdcMem);
 }
 
-void Gp::DrawString(std::wstring str, const HFONT font, const int x, const int y, unsigned const char R, unsigned const char G, unsigned const char B) {
-	if (!cachedHDC)
-		hdc = GetDC();
-	// 创建一个GDI+ Graphics对象
-	Graphics graphics(hdc);
-	// 设置文本渲染模式为抗锯齿
-	graphics.SetTextRenderingHint(TextRenderingHintAntiAlias);
-
-	// 创建一个GDI+ Font对象
-	Font gdiPlusFont(hdc, font);
-	// 创建一个GDI+ SolidBrush对象
-	SolidBrush brush(Color(255, R, G, B));
-
-	// 绘制文本
-	graphics.DrawString(str.c_str(), -1, &gdiPlusFont, PointF(x, y), &brush);
-}
-
-void Gp::DrawString(std::string str, const HFONT font, const int x, const int y, unsigned const char R, unsigned const char G, unsigned const char B) {
-	if (!cachedHDC)
-		hdc = GetDC();
-
-	// 创建一个GDI+ Graphics对象
-	Graphics graphics(hdc);
-	// 设置文本渲染模式为抗锯齿
-	graphics.SetTextRenderingHint(TextRenderingHintAntiAlias);
-
-	// 创建一个GDI+ Font对象
-	Font gdiPlusFont(hdc, font);
-	// 创建一个GDI+ SolidBrush对象
-	SolidBrush brush(Color(255, R, G, B));
-
-	// 绘制文本
-	std::wstring wstr(str.begin(), str.end());
-	graphics.DrawString(wstr.c_str(), -1, &gdiPlusFont, PointF(x, y), &brush);
-}
-
-void Gp::DrawStringBetween(std::wstring str, HFONT font, int x, int y, int xend, int yend, unsigned char R,
-	unsigned char G, unsigned char B)
+void Gp::Paint(int xDest, int yDest, int wDest, int hDest, HBITMAP hbitmap, unsigned char alpha_count)
 {
-	if (!cachedHDC)
-		hdc = GetDC();
-	// 创建一个GDI+ Graphics对象
-	Graphics graphics(hdc);
-	// 设置文本渲染模式为抗锯齿
-	graphics.SetTextRenderingHint(TextRenderingHintAntiAlias);
+	hdc = GetDC();
+	HDC hdcMem = CreateCompatibleDC(hdc);
+	const HBITMAP t_hbtiamp = hbitmap;
+	BITMAP t_bitmap;
+	GetObject(t_hbtiamp, sizeof(BITMAP), &t_bitmap);
+	int w = t_bitmap.bmWidth;
+	int h = t_bitmap.bmHeight;
+	SelectObject(hdcMem, t_hbtiamp);
+	// 设置混合函数
+	BLENDFUNCTION blendFunc;
+	blendFunc.BlendOp = AC_SRC_OVER;
+	blendFunc.BlendFlags = 0;
+	blendFunc.SourceConstantAlpha = alpha_count; // 255 = 不透明，0 = 完全透明
+	blendFunc.AlphaFormat = AC_SRC_ALPHA; // 使用源图像的Alpha通道
 
-	// 创建一个GDI+ Font对象
-	Font gdiPlusFont(hdc, font);
-	// 创建一个GDI+ SolidBrush对象
-	SolidBrush brush(Color(255, R, G, B));
+	AlphaBlend(hdc, xDest, yDest, wDest, hDest, hdcMem, 0, 0, w, h, blendFunc);
+	DeleteDC(hdcMem);
+}
 
+void Gp::DrawString(const std::wstring& str, const HFONT font, const int x, const int y, unsigned const char R, unsigned const char G, unsigned const char B) {
+	NowFontInfo = { R,G,B,font };
+	auto TextNeeds = getTextNeeds();
+	// 绘制文本
+	TextNeeds.hdc_graphics->DrawString(str.c_str(), -1, TextNeeds.font.get(), PointF(x, y), TextNeeds.brush.get());
+}
+
+void Gp::DrawString(const std::string& str, const HFONT font, const int x, const int y, unsigned const char R, unsigned const char G, unsigned const char B) {
+	NowFontInfo = { R,G,B,font };
+	auto TextNeeds = getTextNeeds();
+	std::wstring wstr(str.begin(), str.end());
+	// 绘制文本
+	TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), PointF(x, y), TextNeeds.brush.get());
+}
+
+void Gp::DrawStringBetween(const std::wstring& str, HFONT font, int x, int y, int xend, int yend, unsigned char R,
+	unsigned char G, unsigned char B){
 	// 创建一个GDI+ RectF对象，表示文本绘制的区域
 	RectF layoutRect(x, y, xend - x, yend - y);
 
@@ -183,25 +239,14 @@ void Gp::DrawStringBetween(std::wstring str, HFONT font, int x, int y, int xend,
 	StringFormat format;
 	format.SetAlignment(StringAlignmentCenter);
 	format.SetLineAlignment(StringAlignmentCenter);
-
+	NowFontInfo = { R,G,B,font };
+	auto TextNeeds = getTextNeeds();
 	// 绘制文本
-	graphics.DrawString(str.c_str(), -1, &gdiPlusFont, layoutRect, &format, &brush);
+	TextNeeds.hdc_graphics->DrawString(str.c_str(), -1, TextNeeds.font.get(), layoutRect, &format, TextNeeds.brush.get());
 }
 
-void Gp::DrawstringBetween(std::string str, HFONT font, int x, int y, int xend, int yend, unsigned char R, unsigned char G, unsigned char B)
+void Gp::DrawstringBetween(const std::string& str, HFONT font, int x, int y, int xend, int yend, unsigned char R, unsigned char G, unsigned char B)
 {
-	if (!cachedHDC)
-		hdc = GetDC();
-	// 创建一个GDI+ Graphics对象
-	Graphics graphics(hdc);
-	// 设置文本渲染模式为抗锯齿
-	graphics.SetTextRenderingHint(TextRenderingHintAntiAlias);
-
-	// 创建一个GDI+ Font对象
-	Font gdiPlusFont(hdc, font);
-	// 创建一个GDI+ SolidBrush对象
-	SolidBrush brush(Color(255, R, G, B));
-
 	// 创建一个GDI+ RectF对象，表示文本绘制的区域
 	RectF layoutRect(x, y, xend - x, yend - y);
 
@@ -209,121 +254,111 @@ void Gp::DrawstringBetween(std::string str, HFONT font, int x, int y, int xend, 
 	StringFormat format;
 	format.SetAlignment(StringAlignmentCenter);
 	format.SetLineAlignment(StringAlignmentCenter);
-
+	NowFontInfo = { R,G,B,font };
+	auto TextNeeds = getTextNeeds();
 	// 绘制文本
 	std::wstring wstr(str.begin(), str.end());
-	graphics.DrawString(wstr.c_str(), -1, &gdiPlusFont, layoutRect, &format, &brush);
+	TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), layoutRect, &format, TextNeeds.brush.get());
 
 }
 
-void Gp::DrawVerticalString(std::wstring str, const HFONT font, const int x, const int y, unsigned const char R, unsigned const char G, unsigned const char B) {
-	if (!cachedHDC)
-		hdc = GetDC();
-	// 创建一个GDI+ Graphics对象
-	Graphics graphics(hdc);
-	// 设置文本渲染模式为抗锯齿
-	graphics.SetTextRenderingHint(TextRenderingHintAntiAlias);
-
-	// 创建一个GDI+ Font对象
-	Font gdiPlusFont(hdc, font);
-	// 创建一个GDI+ SolidBrush对象
-	SolidBrush brush(Color(255, R, G, B));
-
+void Gp::DrawVerticalString(const std::wstring& str, const HFONT font, const int x, const int y, unsigned const char R, unsigned const char G, unsigned const char B) {
+	NowFontInfo = { R,G,B,font };
+	auto TextNeeds = getTextNeeds();
 	// 绘制每个字符
 	int yOffset = y;
-	for (wchar_t& ch : str) {
+	for (const wchar_t& ch : str) {
 		std::wstring wstr(1, ch);
-		graphics.DrawString(wstr.c_str(), -1, &gdiPlusFont, PointF(x, yOffset), &brush);
-		yOffset += gdiPlusFont.GetHeight(&graphics); // 更新y偏移量
+		TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), PointF(x, yOffset), TextNeeds.brush.get());
+		yOffset += TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get()); // 更新y偏移量
 	}
 }
 
-void Gp::DrawVerticalString(std::string str, const HFONT font, const int x, const int y, unsigned const char R, unsigned const char G, unsigned const char B) {
-	if (!cachedHDC)
-		hdc = GetDC();
-	// 创建一个GDI+ Graphics对象
-	Graphics graphics(hdc);
-	// 设置文本渲染模式为抗锯齿
-	graphics.SetTextRenderingHint(TextRenderingHintAntiAlias);
+void Gp::DrawVerticalString(const std::string& str, const HFONT font, const int x, const int y, unsigned const char R, unsigned const char G, unsigned const char B) {
 
-	// 创建一个GDI+ Font对象
-	Font gdiPlusFont(hdc, font);
-	// 创建一个GDI+ SolidBrush对象
-	SolidBrush brush(Color(255, R, G, B));
-
+	NowFontInfo = { R,G,B,font };
+	auto TextNeeds = getTextNeeds();
 	// 绘制每个字符
 	int yOffset = y;
-	for (char& ch : str) {
+	for (const wchar_t& ch : str) {
 		std::wstring wstr(1, ch);
-		graphics.DrawString(wstr.c_str(), -1, &gdiPlusFont, PointF(x, yOffset), &brush);
-		yOffset += gdiPlusFont.GetHeight(&graphics); // 更新y偏移量
+		TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), PointF(x, yOffset), TextNeeds.brush.get());
+		yOffset += TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get()); // 更新y偏移量
 	}
 }
 
-void Gp::DrawVerticalStringBetween(std::wstring str, const HFONT font, const int x, const int y, const int xend, const int yend, unsigned const char R, unsigned const char G, unsigned const char B) {
-	if (!cachedHDC)
-		hdc = GetDC();
-	// 创建一个GDI+ Graphics对象
-	Graphics graphics(hdc);
-	// 设置文本渲染模式为抗锯齿
-	graphics.SetTextRenderingHint(TextRenderingHintAntiAlias);
-
-	// 创建一个GDI+ Font对象
-	Font gdiPlusFont(hdc, font);
-	// 创建一个GDI+ SolidBrush对象
-	SolidBrush brush(Color(255, R, G, B));
-
+void Gp::DrawVerticalStringBetween(const std::wstring& str, const HFONT font, const int x, const int y, const int xend, const int yend, unsigned const char R, unsigned const char G, unsigned const char B) {
+	NowFontInfo = { R,G,B,font };
+	auto TextNeeds = getTextNeeds();
 	// 计算字符串的总高度
 	int totalHeight = 0;
-	for (wchar_t& ch : str) {
-		totalHeight += gdiPlusFont.GetHeight(&graphics);
+	for (const wchar_t& ch : str) {
+		totalHeight += TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get());
 	}
 
 	// 计算起始y偏移量，使字符串在垂直方向居中
 	int yOffset = y + (yend - y - totalHeight) / 2;
 
 	// 计算起始x偏移量，使字符串在水平方向居中
-	int xOffset = x + (xend - x - gdiPlusFont.GetHeight(&graphics)) / 2;
+	int xOffset = x + (xend - x - TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get())) / 2;
 
 	// 绘制每个字符
-	for (wchar_t& ch : str) {
+	for (const wchar_t& ch : str) {
 		std::wstring wstr(1, ch);
-		graphics.DrawString(wstr.c_str(), -1, &gdiPlusFont, PointF(xOffset, yOffset), &brush);
-		yOffset += gdiPlusFont.GetHeight(&graphics); // 更新y偏移量
+		TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), PointF(xOffset, yOffset), TextNeeds.brush.get());
+		yOffset += TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get()); // 更新y偏移量
 	}
 }
 
-void Gp::DrawVerticalStringBetween(std::string str, const HFONT font, const int x, const int y, const int xend, const int yend, unsigned const char R, unsigned const char G, unsigned const char B) {
-	if (!cachedHDC)
-		hdc = GetDC();
-	// 创建一个GDI+ Graphics对象
-	Graphics graphics(hdc);
-	// 设置文本渲染模式为抗锯齿
-	graphics.SetTextRenderingHint(TextRenderingHintAntiAlias);
-
-	// 创建一个GDI+ Font对象
-	Font gdiPlusFont(hdc, font);
-	// 创建一个GDI+ SolidBrush对象
-	SolidBrush brush(Color(255, R, G, B));
-
+void Gp::DrawVerticalStringBetween(const std::string& str, const HFONT font, const int x, const int y, const int xend, const int yend, unsigned const char R, unsigned const char G, unsigned const char B) {
+	NowFontInfo = { R,G,B,font };
+	auto TextNeeds = getTextNeeds();
 	// 计算字符串的总高度
 	int totalHeight = 0;
-	for (char& ch : str) {
-		totalHeight += gdiPlusFont.GetHeight(&graphics);
+	for (const wchar_t& ch : str) {
+		totalHeight += TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get());
 	}
 
 	// 计算起始y偏移量，使字符串在垂直方向居中
 	int yOffset = y + (yend - y - totalHeight) / 2;
 
 	// 计算起始x偏移量，使字符串在水平方向居中
-	int xOffset = x + (xend - x - gdiPlusFont.GetHeight(&graphics)) / 2;
+	int xOffset = x + (xend - x - TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get())) / 2;
 
 	// 绘制每个字符
-	for (char& ch : str) {
+	for (const wchar_t& ch : str) {
 		std::wstring wstr(1, ch);
-		graphics.DrawString(wstr.c_str(), -1, &gdiPlusFont, PointF(xOffset, yOffset), &brush);
-		yOffset += gdiPlusFont.GetHeight(&graphics); // 更新y偏移量
+		TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), PointF(xOffset, yOffset), TextNeeds.brush.get());
+		yOffset += TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get()); // 更新y偏移量
 	}
+}
+
+void Gp::DrawChar(const wchar_t ch, HFONT font, int x, int y, unsigned char R, unsigned char G, unsigned char B)
+{
+	std::wstring wstr(1, ch);
+	NowFontInfo = { R,G,B,font };
+	auto TextNeeds = getTextNeeds();
+	// 绘制文本
+	TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), PointF(x, y), TextNeeds.brush.get());
+}
+
+void Gp::DrawChar(const char ch, HFONT font, int x, int y, unsigned char R, unsigned char G, unsigned char B)
+{
+	std::wstring wstr(1, ch);
+	NowFontInfo = { R,G,B,font };
+	auto TextNeeds = getTextNeeds();
+	// 绘制文本
+	TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), PointF(x, y), TextNeeds.brush.get());
+}
+
+void Gp::AddStaticPaintItem(StaticPaintInfo Item)
+{
+	StaticPaintList.push_back(Item);
+}
+
+void Gp::ClearStaticPaintItem()
+{
+	StaticPaintList.clear();
 }
 
 HDC Gp::GetDC()

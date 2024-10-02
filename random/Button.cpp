@@ -1,20 +1,23 @@
 #include "Button.h"
 
 #include "configitem.h"
-#include "directshow.h"
+#include "VideoPlayer.h"
+#include "explorer.h"
+#include "Gp.h"
 #include "mywindows.h"
 #include "ui.h"
 
 bool Button::needFresh = false;
 
-Button::Button(const int x, const int y, const int xE, const int yE, const int BitmapC,std::wstring text_)
+Button::Button(const int x, const int y, const int xE, const int yE,
+	const int BitmapC, const std::wstring& text)
 {
 	this->x = x;
 	this->y = y;
 	this->xE = xE;
 	this->yE = yE;
 	this->BmapC = BitmapC;
-	text= text_;
+	this->text = text;
 	xP = &(this->x);
 	yP = &(this->y);
 	xEP = &(this->xE);
@@ -38,9 +41,9 @@ Button::~Button()
 	functions.clear();
 }
 
-void Button::click(const int condition, const int x, const int y)const
+int Button::click(const int condition, const int x, const int y) const
 {
-	if (Disable)return;
+	if (Disable)return Disabled;
 	if (x != -1 && y != -1) {
 		if (x >= *xP AND x <= *xEP AND y >= *yP AND y <= *yEP)
 		{
@@ -50,12 +53,14 @@ void Button::click(const int condition, const int x, const int y)const
 			{
 				functions[condition]();
 			}
+			return Clicked;
 		}
 	}
 	else if(functions.size()>condition)
 	{
 		functions[condition]();
 	}
+	return outOfRange;
 }
 
 void Button::paint() const
@@ -88,7 +93,7 @@ void Button::paint() const
 	}
 	if(debug)
 	{
-		p->DrawSqare(x, y, xE, yE, 255, 0, 0, 0);
+		p->DrawSqare(x, y, xE, yE, 255, 0, 0, false);
 	}
 }
 
@@ -144,15 +149,15 @@ void Button::setFont(HFONT* font, const int DisableBmap)
 
 void Button::setDisableStr(const bool newValue)
 {
-		DisableStr = newValue;
+	DisableStr = newValue;
 }
 
 void Button::setDisableBmap(const bool newValue)
 {
-		DisableBmap = newValue;
+	DisableBmap = newValue;
 }
 
-void Button::setMusic(std::string music_string)
+void Button::setMusic(const std::string& music_string)
 {
 	this->music_string = music_string;
 }
@@ -174,13 +179,15 @@ void Button::setVertical(bool newValue)
 
 void Button::MoveTo(int x, int y, int xend, int yend, bool smoothly,double xVelocity,double yVelocity)
 {
-	Moving = 1;
+	Moving = true;
 	if(smoothly)
 	{
 		//move_timer.Describe = "Button move timer";
 		move_timer.setDelay(1000 / 60);
-		move_timer.setPool(1);
+		move_timer.setPool(true);
 		move_timer.setCallBack([this, x, y, xend, yend, xVelocity, yVelocity]() {
+			
+			needFresh = true;
 			if (this->x < x ) {
 				this->x += xVelocity;
 				if (x < this->x)
@@ -251,9 +258,8 @@ void Button::MoveTo(int x, int y, int xend, int yend, bool smoothly,double xVelo
 			}
 			if (this->x == x AND this->y == y AND(this->xE == xend OR xend == -1) AND(this->yE == yend OR yend == -1)) {
 				this->move_timer.stop();
-				Moving = 0;
+				Moving = false;
 			}
-			needFresh = 1;
 		});
 		move_timer.init();
 		move_timer.start();
@@ -276,7 +282,7 @@ void Button::refresh()
 	yE = yE2WH * mywindows::WH;
 }
 
-void Button::changeStr(std::wstring NewStr)
+void Button::changeStr(const std::wstring& NewStr)
 {
 	text=NewStr;
 	paint();
@@ -304,7 +310,46 @@ void Button::disConnect()
 	yEP = nullptr;
 }
 
-Button::Breturn Button::Binded()
+Button& Button::operator=(const Button& b)
+{
+	if (this == &b)return *this;
+	x = b.x;
+	y = b.y;
+	xE = b.xE;
+	yE = b.yE;
+	xP = &x;
+	yP = &y;
+	xEP = &xE;
+	yEP = &yE;
+	x2WW = b.x2WW;
+	y2WH = b.y2WH;
+	xE2WW = b.xE2WW;
+	yE2WH = b.yE2WH;
+	xAdd = b.xAdd;
+	yAdd = b.yAdd;
+	xEAdd = b.xEAdd;
+	yEAdd = b.yEAdd;
+	R = b.R;
+	G = b.G;
+	B = b.B;
+	font = b.font;
+	BmapC = b.BmapC;
+	FuncCounts = b.FuncCounts;
+	DisableBmap = b.DisableBmap;
+	DisableStr = b.DisableStr;
+	Disable = b.Disable;
+	Moving = b.Moving;
+	IsVertical = b.IsVertical;
+	text = b.text;
+	TextW = b.TextW;
+	TextH = b.TextH;
+	functions = b.functions;
+	music_string = b.music_string;
+	move_timer = b.move_timer;
+	return *this;
+}
+
+Button::Breturn Button::Binded() const
 {
 	if(binded!=nullptr){
 		Breturn b;
@@ -343,7 +388,7 @@ bool Button::operator==(const Button& b) const
 		return false;
 }
 
-int Button::bind(std::function<void()> func, const int condition)
+int Button::bind(const std::function<void()>& func, const int condition)
 {
 	if(functions.size()>condition)
 	{
@@ -368,7 +413,7 @@ bool Button::bind(Button* b)
 	return true;
 }
 
-int Button::bindX(Button* b, const int add)
+int Button::bindX(const Button* b, const int add)
 {
 	this->x = -1;
 	this->xAdd=add;
@@ -376,7 +421,7 @@ int Button::bindX(Button* b, const int add)
 	return *xP;
 }
 
-int Button::bindXE(Button* b, const int add)
+int Button::bindXE(const Button* b, const int add)
 {
 	this->xE = -1;
 	this->xEAdd=add;
@@ -384,7 +429,7 @@ int Button::bindXE(Button* b, const int add)
 	return *xEP;
 }
 
-int Button::bindY(Button* b, const int add)
+int Button::bindY(const Button* b, const int add)
 {
 	this->y = -1;
 	this->yAdd=add;
@@ -392,7 +437,7 @@ int Button::bindY(Button* b, const int add)
 	return *yP;
 }
 
-int Button::bindYE(Button* b, const int add)
+int Button::bindYE(const Button* b, const int add)
 {
 	this->yE = -1;
 	this->yEAdd=add;
@@ -400,7 +445,7 @@ int Button::bindYE(Button* b, const int add)
 	return *yEP;
 }
 
-int Button::bindXXE(Button* b, const int add)
+int Button::bindXXE(const Button* b, const int add)
 {
 	this->xE = -1;
 	this->xP= b->xP;
@@ -410,7 +455,7 @@ int Button::bindXXE(Button* b, const int add)
 	return *xEP+*xP;
 }
 
-int Button::bindYYE(Button* b, const int add)
+int Button::bindYYE(const Button* b, const int add)
 {
 	this->yE = -1;
 	this->yP = b->yP;

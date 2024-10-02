@@ -3,32 +3,34 @@
 #include <shtypes.h>
 #include <windowsx.h>
 #include <shlobj.h>
-#include <shlwapi.h>
 
-#include "config.h"
+#include "Button.h"
 #include"configitem.h"
-#include "directshow.h"
+#include "VideoPlayer.h"
+#include "explorer.h"
 #include "getname.h"
+#include "Gp.h"
 #include "mywindows.h"
+#include "set-json.h"
 #include "sth2sth.h"
 #include "ui.h"
 
 
 using namespace std;
 
-bool SetButton::needReran= 0;
-bool SetButton::needReboot = 0;
+bool SetButton::needReran= false;
+bool SetButton::needReboot = false;
 
-void SetButton::OpenFile()
+void SetButton::OpenFile() const
 {
-	wstring path = config::getpath(item.ConfigName);
-	ShellExecute(NULL, L"open", path.c_str(), NULL, NULL, SW_SHOWNORMAL);
+	const wstring path = config::getpath(item.ConfigName);
+	ShellExecute(nullptr, L"open", path.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
 }
 
-void SetButton::ChooseFile()
+void SetButton::ChooseFile() const
 {
-	OPENFILENAMEW ofn = { 0 };
-	wchar_t strFilename[MAX_PATH] = { 0 }; // 用于接收文件名
+	OPENFILENAMEW ofn = {};
+	wchar_t strFilename[MAX_PATH] = {}; // 用于接收文件名
 
 	ofn.lStructSize = sizeof(OPENFILENAMEW); // 结构体大小
 	ofn.hwndOwner = mywindows::main_hwnd; // 拥有者窗口句柄,为NULL表示对话框是非模态的,实际应用中一般都要有这个句柄
@@ -45,17 +47,17 @@ void SetButton::ChooseFile()
 	ofn.nFilterIndex = 1; // 过滤器索引
 	ofn.lpstrFile = strFilename; // 接收返回的文件名,注意第一个字符需要为NULL
 	ofn.nMaxFile = sizeof(strFilename); // 缓冲区长度
-	ofn.lpstrInitialDir = NULL; // 初始目录为默认
+	ofn.lpstrInitialDir = nullptr; // 初始目录为默认
 	ofn.lpstrTitle = item.FileChooseWindowName.c_str(); // 使用系统默认标题留空即可
 	ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY; // 文件、目录必须存在,隐藏只读选项
 	if (GetOpenFileNameW(&ofn))
 	{
 		if (item.FileType == "nameFile") {
-			needReran = 1;
+			needReran = true;
 		}
-		std::wstring filename(strFilename);
+		const std::wstring filename(strFilename);
 		config::replace(item.ConfigName, filename);
-		Edit_SetText(textboxhwnd, filename.c_str());
+		Edit_SetText(textboxHwnd, filename.c_str());
 		if (item.FileType == "picture")
 		{
 			explorer* ptr = explorer::getInstance();
@@ -64,43 +66,40 @@ void SetButton::ChooseFile()
 	}
 }
 
-void SetButton::ChooseDir()
+void SetButton::ChooseDir() const
 {
-	BROWSEINFOW bi = { 0 };
+	BROWSEINFOW bi = {};
 	bi.lpszTitle = item.FileChooseWindowName.c_str();
 	bi.ulFlags = BIF_RETURNONLYFSDIRS | BIF_NEWDIALOGSTYLE;
 	bi.hwndOwner = mywindows::main_hwnd;
 
-	LPITEMIDLIST pidl = SHBrowseForFolderW(&bi);
-	if (pidl != 0)
+	if (const LPITEMIDLIST piddle = SHBrowseForFolderW(&bi); piddle != nullptr)
 	{
-		wchar_t path[MAX_PATH];
-		if (SHGetPathFromIDListW(pidl, path))
+		if (wchar_t path[MAX_PATH]; SHGetPathFromIDListW(piddle, path))
 		{
-			std::wstring dirPath(path);
+			const std::wstring dirPath(path);
 			config::replace(item.ConfigName, dirPath);
-			Edit_SetText(textboxhwnd, dirPath.c_str());
+			Edit_SetText(textboxHwnd, dirPath.c_str());
 		}
-		CoTaskMemFree(pidl);
+		CoTaskMemFree(piddle);
 	}
 }
 
 void SetButton::load()
 {
 	setPoint();
-	if(item.Name==L"")return;
-	Button b1, b2;
-	Button b;
+	if(item.Name.empty())return;
 	if((item.IsFile||item.IsDir)&&ButtonRect.size()>=2)
 	{
+		Button b2;
+		Button b1;
 		b1.setBmapC(setbutton);
 		b1.setxy2WWWH(ButtonRect[0].x, ButtonRect[0].y, ButtonRect[0].xend, ButtonRect[0].yend);
 		b1.setText(L"选择");
 		b1.setTextColor(0, 0, 0);
 		b1.bind([this] ()
 		{
-			
-			wstring last_config = config::getpath(item.ConfigName);
+			const wstring last_config = config::getpath(item.ConfigName);
 			if (item.IsFile)
 				ChooseFile();
 			else
@@ -109,7 +108,7 @@ void SetButton::load()
 			{
 				if(last_config!=config::getpath(item.ConfigName))
 				{
-					needReboot = 1;
+					needReboot = true;
 				}
 			}
 		});
@@ -129,6 +128,7 @@ void SetButton::load()
 	}
 	else if(item.IsSwitch&&!ButtonRect.empty())
 	{
+		Button b;
 		b.setxy2WWWH(ButtonRect[0].x, ButtonRect[0].y, ButtonRect[0].xend, ButtonRect[0].yend);
 		b.setBmapC(setbutton);
 		b.bind([this]()
@@ -136,11 +136,11 @@ void SetButton::load()
 			config::turnUpSideDown(item.ConfigName);
 			if(item.Limit&REBOOT)
 			{
-				needReboot = 1;
+				needReboot = true;
 			}
 			buttons[0].setText(config::getint(item.ConfigName) == 1 ? L"开" : L"关");
-			set2::rereadconfig();
-			InvalidateRect(mywindows::main_hwnd, NULL, false);			
+			set2::rereadConfig();
+			InvalidateRect(mywindows::main_hwnd, nullptr, false);			
 		});
 		b.setText(config::getint(item.ConfigName) == 1 ? L"开" : L"关");
 		b.setTextColor(0, 0, 0);
@@ -150,26 +150,26 @@ void SetButton::load()
 	refresh();
 }
 
-HWND SetButton::CreateEditBox(HWND hWndParent, int number, point rect, const wchar_t* words) {
+HWND SetButton::CreateEditBox(const HWND hWndParent, const int number, const point& rect, const wchar_t* words) {
 	// 创建EDIT控件的样式
-	DWORD editStyle = ES_AUTOHSCROLL | (WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | ES_LEFT | WS_BORDER);
+	constexpr DWORD editStyle = ES_AUTOHSCROLL | (WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | ES_LEFT | WS_BORDER);
 
 	// 创建EDIT控件的附加样式（可选）
-	DWORD editExStyle = WS_EX_CLIENTEDGE;
-	int x, y, w, h;
-	x = rect.x * mywindows::WW;
-	y = rect.y * mywindows::WH;
-	w = rect.xend * mywindows::WW - x;
-	h = rect.yend * mywindows::WH - y;
+	constexpr DWORD editExStyle = WS_EX_CLIENTEDGE;
+	const int x = rect.x * mywindows::WW;
+	const int y = rect.y * mywindows::WH;
+	const int w = rect.xend * mywindows::WW - x;
+	const int h = rect.yend * mywindows::WH - y;
 	// 创建文本框
-	HWND hEdit = CreateWindowExW(editExStyle, L"EDIT", words, editStyle, x, y, w, h, hWndParent, (HMENU)number, NULL, NULL);
+	const HWND hEdit = CreateWindowExW(editExStyle, L"EDIT", words, editStyle,
+		x, y, w, h, hWndParent, HMENU(number), nullptr, nullptr);
 
 	// 返回文本框句柄
 	return hEdit;
 }
 
 
-void SetButton::EditBoxEditor(std::wstring tmp)
+void SetButton::EditBoxEditor(const std::wstring& tmp)
 {
 	if (item.Limit & S_WINDOWTITLE)
 	{
@@ -184,13 +184,13 @@ void SetButton::EditBoxEditor(std::wstring tmp)
 		}
 		catch (const std::exception& e)
 		{
-			mywindows::errlogf << "[ERROR]meet a error :" << e.what() << std::endl;
-			MessageBox(NULL, L"请输入数字", L"错误", MB_ICONERROR);
+			mywindows::errlogf << "[ERROR]meet a error :" << e.what() << '\n';
+			MessageBox(nullptr, L"请输入数字", L"错误", MB_ICONERROR);
 			return;
 		}
 		if (value<item.min || value>item.max)
 		{
-			MessageBoxA(NULL, sth2sth::UTF_82ASCII(item.OutOfLimitOutPut).c_str(), "错误", MB_ICONERROR);
+			MessageBoxA(nullptr, sth2sth::UTF_82ASCII(item.OutOfLimitOutPut).c_str(), R"(错误)", MB_ICONERROR);
 			return;
 		}
 	}
@@ -198,7 +198,7 @@ void SetButton::EditBoxEditor(std::wstring tmp)
 	{
 		if (tmp == config::get(item.ConfigName))return;
 		if (tmp == config::getpath(item.ConfigName))return;
-		needReboot = 1;
+		needReboot = true;
 	}
 	if (item.IsFile)
 	{
@@ -217,11 +217,11 @@ void SetButton::EditBoxEditor(std::wstring tmp)
 	}
 	if (item.FileType == "video")
 	{
-		//explorer::getInstance()->reloadVideo(item.ConfigName);
+		explorer::getInstance()->reloadVideo(item.ConfigName);
 	}
 }
 
-SetButton::SetButton(sitem Item)
+SetButton::SetButton(const sitem& Item)
 {
 	setItem(Item);
 }
@@ -235,13 +235,13 @@ SetButton::~SetButton()
 {
 	TitleRect = {};
 	ButtonRect = {};
-	TextBoxRext = {};
+	TextBoxRect = {};
 	item = {};
 	buttons.clear();
 	p = nullptr;
 }
 
-void SetButton::setItem(sitem Item)
+void SetButton::setItem(const sitem& Item)
 {
 	item = Item;
 	load();
@@ -251,8 +251,8 @@ void SetButton::show()
 {
 	if (!item.Name.empty())
 	{
-		int x = TitleRect.x * mywindows::WW;
-		int y = TitleRect.y * mywindows::WH;
+		const int x = TitleRect.x * mywindows::WW;
+		const int y = TitleRect.y * mywindows::WH;
 		p->DrawString(item.Name, ui::text_mid, x, y, 236, 229, 216);
 	}
 	for (auto& i : buttons)
@@ -261,8 +261,8 @@ void SetButton::show()
 	}
 	if (item.IsEditBox)
 	{
-		if (textboxhwnd == NULL) {
-			textboxhwnd = CreateEditBox(mywindows::main_hwnd, item.Number, TextBoxRext,
+		if (textboxHwnd == nullptr) {
+			textboxHwnd = CreateEditBox(mywindows::main_hwnd, item.Number, TextBoxRect,
 				config::get(item.ConfigName).c_str());
 			if (item.IsFile)
 			{
@@ -276,10 +276,10 @@ void SetButton::show()
 
 void SetButton::unshow()
 {
-	if (item.IsEditBox&&textboxhwnd!=NULL)
+	if (item.IsEditBox&&textboxHwnd!= nullptr)
 	{
-		DestroyWindow(textboxhwnd);
-		textboxhwnd=NULL;
+		DestroyWindow(textboxHwnd);
+		textboxHwnd= nullptr;
 	}
 }
 
@@ -294,12 +294,12 @@ void SetButton::setGp(Gp* p)
 
 
 void SetButton::setPoint() {
-	int i = item.Number;
-	double x = (i <= 10) ? 0.05 : ((i > 10 && i <= 19) ? (0.55) : 0);
-	double y = (i <= 10) ? (i * 0.09) : ((i > 10 && i <= 19) ? ((i - 9) * 0.09) : 0);
+	const int i = item.Number;
+	const double x = (i <= 10) ? 0.05 : ((i > 10 && i <= 19) ? (0.55) : 0);
+	const double y = (i <= 10) ? (i * 0.09) : ((i > 10 && i <= 19) ? ((i - 9) * 0.09) : 0);
 	TitleRect = { x,y,0,0 };
 	if (item.IsEditBox) {
-		TextBoxRext = { x + 0.2,y,x + 0.3,y + 0.07 };
+		TextBoxRect = { x + 0.2,y,x + 0.3,y + 0.07 };
 		if (item.IsFile) {
 			point temp = {x + 0.3, y, x + 0.35, y + 0.07};
 			ButtonRect.push_back(temp);
@@ -308,7 +308,7 @@ void SetButton::setPoint() {
 		}
 	}
 	else if (item.IsSwitch) {
-		point temp = {x + 0.2, y, x + 0.3, y + 0.07};
+		const point temp = {x + 0.2, y, x + 0.3, y + 0.07};
 		ButtonRect.push_back(temp);
 	}
 	refresh();
@@ -320,13 +320,12 @@ void SetButton::refresh()
 	{
 		i.refresh();
 	}
-	int x, y, w, h;
-	x=TextBoxRext.x * mywindows::WW;
-	y=TextBoxRext.y * mywindows::WH;
-	w=TextBoxRext.xend * mywindows::WW - x;
-	h=TextBoxRext.yend * mywindows::WH - y;
-	if (textboxhwnd!=NULL)
-		MoveWindow(textboxhwnd, x, y, w, h, 1);
+	const int x = TextBoxRect.x * mywindows::WW;
+	const int y = TextBoxRect.y * mywindows::WH;
+	const int w = TextBoxRect.xend * mywindows::WW - x;
+	const int h = TextBoxRect.yend * mywindows::WH - y;
+	if (textboxHwnd!= nullptr)
+		MoveWindow(textboxHwnd, x, y, w, h, 1);
 }
 
 void SetButton::reConnect()
@@ -337,7 +336,7 @@ void SetButton::reConnect()
 	}
 }
 
-void SetButton::click(int x,int y)
+void SetButton::click(const int x, const int y) const
 {
 	for(auto&i:buttons)
 	{
@@ -345,14 +344,14 @@ void SetButton::click(int x,int y)
 	}
 }
 
-void SetButton::EditBoxUpgrade(int number)
+void SetButton::EditBoxUpgrade(const int number)
 {
 	if (item.Number == number)
 	{
 		wchar_t tmp[MAX_PATH];
-		GetWindowTextW(textboxhwnd, tmp, MAX_PATH);
-		std::wstring tmps = tmp;
-		if (tmps.length() <= 0)return;
-		EditBoxEditor(tmps);
+		GetWindowTextW(textboxHwnd, tmp, MAX_PATH);
+		const std::wstring temps(tmp);
+		if (temps.empty())return;
+		EditBoxEditor(temps);
 	}
 }

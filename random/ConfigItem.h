@@ -9,7 +9,7 @@
 #define BLUE_BALL_COUNT L"buleball"
 #define PINK_BALL_COUNT L"redball"
 #define OFF_VIDEO L"off video"
-#define WINDOW_TITEL L"title name"
+#define WINDOW_TITLE L"title name"
 #define MODE L"firstmode"
 #define INWINDOW L"window mode(not full screen)"
 #define POOL_COUNT L"pool counts"

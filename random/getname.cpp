@@ -43,7 +43,7 @@ bool getname::random(const int m, const int i) {
 	else if (m == 2) path = config::getpath(NAMES3);
 	else if (m == 3) path = config::getpath(NAMES4);
 	tmp1 = RandomLineFromFile(path);
-	if (strcmp(tmp1.c_str(), "FOF") == 0)return 0;
+	if (tmp1 == "FOF")return 0;
 	int attrib = getattrib(tmp1);
 	if(config::getint(TYPICAL)==(m+1))
 	{
@@ -53,7 +53,7 @@ bool getname::random(const int m, const int i) {
 		items[m][i].star = attrib % 10;
 	}
 	items[m][i].type = attrib % 100 / 10;
-	items[m][i].name = sth2sth::UTF8To16(removeAfterDash(tmp1).c_str());
+	items[m][i].name = sth2sth::UTF8To16(Make(tmp1).c_str());
 	return 1;
 }
 int getname::getattrib(const std::string& input) {
@@ -78,16 +78,23 @@ int getname::getattrib(const std::string& input) {
 	// 如果未找到 "-" 或转换失败，返回默认值（可以根据需要修改）
 	return 3;
 }
-std::string getname::removeAfterDash(const std::string& input) {
+std::string getname::Make(const std::string& input) {
+	std::wstring trimmed = sth2sth::str2wstru(input);
+	//如果存在，删去utf-8的bom
+	if (trimmed[0] == 65279)
+	{
+		trimmed = trimmed.substr(1);
+	}
+
 	// 找到第一个 "-"
-	size_t dashPos = input.find("-");
+	size_t dashPos = trimmed.find(L"-");
 	if (dashPos != std::string::npos && dashPos > 1) {
 		// 如果找到了 "-", 裁切掉 "-" 后面的内容
-		return input.substr(0, dashPos);
+		return sth2sth::wstr2stru(trimmed.substr(0, dashPos));
 	}
 	else {
 		// 如果未找到 "-", 直接返回原字符串
-		return input;
+		return sth2sth::wstr2stru(trimmed);
 	}
 }
 std::string getname::RandomLineFromFile(const std::wstring& filename)

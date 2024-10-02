@@ -11,10 +11,13 @@ class MenuItem
 
 public:
 	MenuItem();
+	MenuItem(int number, int star, std::wstring name, Gp* p);
 	~MenuItem();
 
-	void enterScreen()const;
-	void deshow()const;
+	void enterScreen();
+	void deshow();
+	void paint();
+	bool click(int x, int y);
 
 	void setStar(int star);
 	void setName(std::wstring name);

@@ -5,7 +5,7 @@
 
 class Timer
 {
-	std::thread *TimerThread;
+	std::shared_ptr<std::thread> TimerThread;
 	std::function<void()> CallBack;
 	int WaitFor = 0;
 	bool IsUsing = 0;

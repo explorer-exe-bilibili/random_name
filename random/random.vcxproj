@@ -153,10 +153,10 @@
   <ItemGroup>
     <ClInclude Include="bitmaps.h" />
     <ClInclude Include="Button.h" />
-    <ClInclude Include="click.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="ConfigItem.h" />
-    <ClInclude Include="directshow.h" />
+    <ClInclude Include="Screen.h" />
+    <ClInclude Include="VideoPlayer.h" />
     <ClInclude Include="floatwindow.h" />
     <ClInclude Include="getname.h" />
     <ClInclude Include="Gp.h" />
@@ -166,9 +166,11 @@
     <ClInclude Include="LoadWindow.h" />
     <ClInclude Include="log.h" />
     <ClInclude Include="MenuItem.h" />
+    <ClInclude Include="MenuScreen.h" />
     <ClInclude Include="MSGback.h" />
     <ClInclude Include="mywindows.h" />
     <ClInclude Include="FirstScreen.h" />
+    <ClInclude Include="NameButton.h" />
     <ClInclude Include="NameScreen.h" />
     <ClInclude Include="Painter.h" />
     <ClInclude Include="resource.h" />
@@ -181,10 +183,10 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Button.cpp" />
-    <ClCompile Include="click.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="ConfigItem.cpp" />
-    <ClCompile Include="directshow.cpp" />
+    <ClCompile Include="Screen.cpp" />
+    <ClCompile Include="VideoPlayer.cpp" />
     <ClCompile Include="floatwindow.cpp" />
     <ClCompile Include="getname.cpp" />
     <ClCompile Include="Gp.cpp" />
@@ -193,9 +195,11 @@
     <ClCompile Include="LoadWindow.cpp" />
     <ClCompile Include="log.cpp" />
     <ClCompile Include="MenuItem.cpp" />
+    <ClCompile Include="MenuScreen.cpp" />
     <ClCompile Include="MSGback.cpp" />
     <ClCompile Include="mywindows.cpp" />
     <ClCompile Include="FirstScreen.cpp" />
+    <ClCompile Include="NameButton.cpp" />
     <ClCompile Include="NameScreen.cpp" />
     <ClCompile Include="Others.cpp" />
     <ClCompile Include="Painter.cpp" />

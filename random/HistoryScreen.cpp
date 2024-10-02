@@ -7,11 +7,10 @@
 #include "ui.h"
 #include <regex>
 
-#include "directshow.h"
 #include "sth2sth.h"
 
 
-HistoryScreen::HistoryScreen(Gp* pt, std::wstring file_name)
+HistoryScreen::HistoryScreen(Gp* pt, const std::wstring& file_name)
 {
 	p = pt;
 	filename = file_name;
@@ -26,16 +25,10 @@ HistoryScreen::~HistoryScreen()
 {
 	xy.clear();
 }
-
-void HistoryScreen::changeGp(Gp* pt)
-{
-	p = pt;
-}
-
-void HistoryScreen::setFile(std::wstring file_name)
+void HistoryScreen::setFile(const std::wstring& file_name)
 {
 	filename = file_name;
-	hasReaded = 0;
+	hasRead = false;
 }
 
 void HistoryScreen::paint()
@@ -46,7 +39,7 @@ void HistoryScreen::paint()
 
 void HistoryScreen::enter()
 {
-	ui::screenmode = HISTORY;
+	ui::ScreenMode = HISTORY;
 	explorer::getInstance()->PlayMusic(ENTER);
 	InvalidateRect(mywindows::main_hwnd, nullptr, FALSE);
 }
@@ -61,7 +54,6 @@ bool HistoryScreen::ReadHistory()
 	}
 	std::vector<item> temp;
 	char c = 1;
-	bool inFile = 1;
 	std::string tmp_string;
 	while (std::getline(file, tmp_string) && c <= 20)
 	{
@@ -117,7 +109,7 @@ bool HistoryScreen::ReadHistory()
 	}
 	history.push_back(temp);
 	file.close();
-	hasReaded = 1;
+	hasRead = true;
 	return true;
 }
 
@@ -140,11 +132,10 @@ void HistoryScreen::show()
 	using namespace std;
 	p->Paint(0, 0, mywindows::WW, mywindows::WH, goldencardbg);
 	p->DrawString(L"历史记录", ui::text_mid, 0.46 * mywindows::WW, 0.01 * mywindows::WH);
-	p->Paint(ui::exitx, ui::exity, ui::exitxend - ui::exitx, ui::exityend - ui::exity, exitBu);
 	int totalp = history.size() / 20;
 	if (history.size() % 20 != 0)totalp++;
-	wstring t = to_wstring(page + 1) + L"/" + to_wstring(totalp);
-	HDC hdc = p->GetDC();
+	const wstring t = to_wstring(page + 1) + L"/" + to_wstring(totalp);
+	const HDC hdc = p->GetDC();
 	SetBkMode(hdc, TRANSPARENT);
 	SetTextColor(hdc, RGB(236, 229, 216));
 	SelectObject(hdc, ui::icon_mid);
@@ -153,14 +144,14 @@ void HistoryScreen::show()
 	SelectObject(hdc, ui::text_mid);
 	TextOut_(hdc, mywindows::WW * 0.765, mywindows::WH * 0.91, t.c_str());
 	p->ReleaseDC(hdc);
-	if (!hasReaded)if (!ReadHistory()) {
-		int back = MessageBox(nullptr, L"姓名文件出现问题，请检查(点击是打开文件)", L"错误", MB_ICONERROR | MB_YESNO);
+	if (!hasRead)if (!ReadHistory()) {
+		const int back = MessageBox(nullptr, L"姓名文件出现问题，请检查(点击是打开文件)", L"错误", MB_ICONERROR | MB_YESNO);
 		if (back == IDYES)ShellExecute(nullptr, L"open", filename.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
-		ui::screenmode = FIRST_SCREEN;
+		ui::ScreenMode = FIRST_SCREEN;
 	}
 	if (history.size() == 0) {
 		MessageBox(nullptr, L"没有历史记录", L"提示", MB_ICONINFORMATION);
-		ui::screenmode = FIRST_SCREEN;
+		ui::ScreenMode = FIRST_SCREEN;
 	}
 	for (int j = 0; j < history[page].size(); j++)
 	{
@@ -187,6 +178,7 @@ void HistoryScreen::show()
 		case 4:
 			p->DrawString(L"长枪", ui::text_mid, xy[j].TypeX, xy[j].y, rgb);
 			break;
+		default: ;
 		}
 	}
 }
@@ -196,30 +188,11 @@ void HistoryScreen::changePage() {
 	explorer::getInstance()->PlayMusic(ENTER);
 }
 
-void HistoryScreen::click(const int x, const int y) {
-	int totalp = history.size();
-	if (x >= ui::exitx AND x <= ui::exitxend AND y >= ui::exity AND y <= ui::exityend)quit();
-	else if (x >= nextbmx AND x <= nextxend AND y >= nextbmy AND y <= nextyend) {
-		page--;
-		if (page < 1) {
-			page = totalp;
-		}
-		changePage();
-	}
-	else if (x >= lastbmx AND x <= lastxend AND y >= lastbmy AND y <= lastyend) {
-		page++;
-		if (page > totalp) {
-			page = 1;
-		}
-		changePage();
-	}
-}
-
 void HistoryScreen::quit()
 {
 	explorer::getInstance()->PlayMusic(ENTER);
-	ui::screenmode = FIRST_SCREEN;
-	ui::ScreenModeChanged = 1;
+	ui::ScreenMode = FIRST_SCREEN;
+	ui::ScreenModeChanged = true;
 	InvalidateRect(mywindows::main_hwnd, nullptr, FALSE);
 }
 

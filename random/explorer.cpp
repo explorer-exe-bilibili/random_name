@@ -38,6 +38,7 @@ explorer::~explorer()
 	mciSendString(L"close starfull", 0, 0, 0);
 	mciSendString(L"close enter", 0, 0, 0);
 	mciSendString(L"close click", 0, 0, 0);
+	mciSendString(L"close bgm", 0, 0, 0);
 
 }
 
@@ -113,33 +114,33 @@ void explorer::stopmusic()
 	mciSendString(L"stop bgm", 0, 0, 0);
 }
 
-double prosses = 0;
-std::string prosses_str;
+double presses = 0;
+std::string presses_str;
 
 
 void explorer::Load()
 {
-	prosses = 0;
-	prosses_str = "正在加载视频";
-	video = directshow::getInstance();
+	presses = 0;
+	presses_str = "正在加载视频";
+	video = VideoPlayer::getInstance();
 	if (!config::getint(MEM)) {
 		video->load(GROUPSTAR4, config::getpath(GROUPSTAR4));
-		prosses = 10;
+		presses = 10;
 		video->load(GROUPSTAR5, config::getpath(GROUPSTAR5));
-		prosses = 20;
+		presses = 20;
 		video->load(SIGNALSTAR3, config::getpath(SIGNALSTAR3));
-		prosses = 30;
+		presses = 30;
 		video->load(SIGNALSTAR4, config::getpath(SIGNALSTAR4));
-		prosses = 40;
+		presses = 40;
 		video->load(SIGNALSTAR5, config::getpath(SIGNALSTAR5));
 	}
-	prosses = 50;
-	prosses_str = "加载图片中";
+	presses = 50;
+	presses_str = "加载图片中";
 	for (char t = 1; t <= config::getint(POOL_COUNT); t++)
 	{
 		std::wstring configName = L"over" + std::to_wstring(t);
 		GdiImage.push_back(std::make_shared<Gdiplus::Bitmap>(config::getpath(configName).c_str()));
-		prosses+=0.5;
+		presses+=0.5;
 	}
 	std::wstring path = config::getpath(FLOATPHOTO);
 	GdiImage.push_back(std::make_shared<Gdiplus::Bitmap>(path.c_str()));
@@ -164,11 +165,11 @@ void explorer::Load()
 	std::sort(files.begin(), files.end(), [](const auto& a, const auto& b) {
 		return a.first < b.first;
 		});
-	prosses++;
+	presses++;
 	for (const auto& file : files)
 	{
 		GdiImage.push_back(std::make_shared<Gdiplus::Bitmap>(file.second.c_str()));
-		prosses+=0.5;
+		presses+=0.5;
 	}
 	for (auto& i : GdiImage)
 	{
@@ -179,7 +180,7 @@ void explorer::Load()
 		HBITMAP temp;
 		i->GetHBITMAP(Gdiplus::Color(0, 0, 0), &temp);
 		HBitmap.push_back(temp);
-		prosses += 0.25;
+		presses += 0.25;
 	}
 	for (auto& i : HBitmap)
 	{
@@ -191,22 +192,22 @@ void explorer::Load()
 			GetObject(i, sizeof(BITMAP), &temp);
 			Bitmap.push_back(temp);
 		}
-		prosses += 0.1;
+		presses += 0.1;
 	}
-	prosses = 75;
-	prosses_str = "加载其它音乐和音效";
+	presses = 75;
+	presses_str = "加载其它音乐和音效";
 	mciSendString(L"open .\\files\\mp3\\reveal-3star.mp3 alias star3", 0, 0, 0);
-	prosses = 78;
+	presses = 78;
 	mciSendString(L"open .\\files\\mp3\\reveal-4star.mp3 alias star4", 0, 0, 0);
-	prosses = 81;
+	presses = 81;
 	mciSendString(L"open .\\files\\mp3\\reveal-5star.mp3 alias star5", 0, 0, 0);
-	prosses = 84;
+	presses = 84;
 	mciSendString(L"open .\\files\\mp3\\reveal-fullstar.mp3 alias starfull", 0, 0, 0);
-	prosses = 88;
+	presses = 88;
 	mciSendString(L"open .\\files\\mp3\\enter.mp3 alias enter", 0, 0, 0);
-	prosses = 94;
+	presses = 94;
 	mciSendString(L"open .\\files\\mp3\\click.mp3 alias click", 0, 0, 0);
-	prosses = 100;
+	presses = 100;
 	mciSendString(L"play bgm from 0 repeat", 0, 0, 0);
 	ShowWindow(mywindows::main_hwnd, SW_SHOW);
 }
