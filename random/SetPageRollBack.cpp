@@ -28,8 +28,12 @@ json set2::rollback(string jsonpath) {
 	i[NAME] = G2U("卡池4图片"); i[CONFIGNAME] = "over4"; i[FILECHOOSE] = G2U("选择卡池4图片");
 	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP | ISFILE; i[NUMBER] = 4; i[BITMAPC] = 3;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 11;
+	i[NAME] = G2U("图片移动的速度"); i[CONFIGNAME] = "first screen Picture speed"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 10000; i[MIN] = 0;
+	i[OUTOFLIMIT] = G2U("输入一个0-10000之间的数字"); i[NUMBER] = 11;
 	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("关闭音乐"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 12;
+	p["item"].push_back(i); i.clear();
+
 	j["pages"].push_back(p); p.clear();
 	p[TITLE] = G2U("名单与卡池");
 	i[NAME] = G2U("卡池1名单"); i[CONFIGNAME] = "namesfile1"; i[FILECHOOSE] = G2U("选择卡池1名单"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 1;
@@ -96,7 +100,7 @@ json set2::rollback(string jsonpath) {
 	p["item"].push_back(i); i.clear();
 	j["pages"].push_back(p); p.clear();
 	p[TITLE] = G2U("杂项");
-	i[NAME] = G2U("窗口模式"); i[CONFIGNAME] = "window mode(not full screen)"; i[ISSWITCH] = 1; i[NUMBER] = 1; i[LIMIT] = REBOOT;
+	i[NAME] = G2U("窗口模式"); i[CONFIGNAME] = "window mode(not full screen)"; i[ISSWITCH] = 1; i[NUMBER] = 1;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("标题"); i[CONFIGNAME] = "title name"; i[ISEDIT] = 1; i[LIMIT] = S_WINDOWTITLE; i[NUMBER] = 2;
 	p["item"].push_back(i); i.clear();
@@ -108,7 +112,9 @@ json set2::rollback(string jsonpath) {
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("调试模式"); i[ISSWITCH] = 1; i[NUMBER] = 5; i[CONFIGNAME] = "debug mode"; i[LIMIT] = REBOOT;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("图片资源目录"); i[ISEDIT] = 1; i[NUMBER] = 6; i[CONFIGNAME] = "ImageDirectory"; i[LIMIT] = REBOOT; i[ISDIR] = 1;
+	i[NAME] = G2U("省内存模式"); i[ISSWITCH] = 1; i[NUMBER] = 6; i[CONFIGNAME] = "small memory"; i[LIMIT] = REBOOT;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("图片资源目录"); i[ISEDIT] = 1; i[NUMBER] = 7; i[CONFIGNAME] = "ImageDirectory"; i[LIMIT] = REBOOT; i[ISDIR] = 1;
 	p["item"].push_back(i); i.clear();
 	j["pages"].push_back(p); p.clear();
 	// 写入JSON文件

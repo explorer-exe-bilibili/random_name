@@ -208,8 +208,7 @@ void floatwindow::lbuttonup()
 	KillTimer(nullptr, TimerID);
 	TimerID = NULL;
 	uplbutton = true;
-	std::thread m(movewindow);
-	m.detach();
+	std::thread (movewindow).detach();
 }
 
 void floatwindow::lbuttonclick(const WPARAM wParam)

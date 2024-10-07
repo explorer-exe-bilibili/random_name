@@ -52,7 +52,7 @@ void init::font()
 	if (!config::getint(UNSUITFONT)) {
 		isInstall = checkIsFontInstalled(L"Aa漆书");
 		if (isInstall) {
-			ui::text_big = CreateFontW(logicalHeight, logicalWidth, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"Aa漆书");
+			ui::text_big = CreateFontW(logicalHeight*1.3, logicalWidth*1.3, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"Aa漆书");
 		}
 		else {
 			MessageBox(nullptr, L"请安装字体", L"错误", MB_ICONERROR);
@@ -62,7 +62,7 @@ void init::font()
 		}
 	}
 	else {
-		ui::text_big = CreateFontW(logicalHeight, logicalWidth, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
+		ui::text_big = CreateFontW(logicalHeight*1.3, logicalWidth*1.3, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
 	}
 	ReleaseDC(nullptr, hdc);
 }
@@ -93,8 +93,7 @@ void init::resetPoint()
 }
 void init::main(WNDPROC w1, WNDPROC w2, WNDPROC w3)
 {
-	std::thread loading([w1, w2, w3] { regWindow(w1, w2, w3); });
-	loading.detach();
+	std::thread([w1, w2, w3] { regWindow(w1, w2, w3); }).detach();
 	SetConsoleOutputCP(65001); // 设置为UTF-8编码
 	CHAR run[260] = {};
 	GetModuleFileNameA(nullptr, run, MAX_PATH);
@@ -146,7 +145,7 @@ void init::config()
 	mywindows::debug = config::getint(DEBUG);
 	ui::mode = config::getint(MODE);
 	set2::FloatWindow= config::getint(FLOATWINDOW);
-	set2::fullscreen= !config::getint(INWINDOW);
+	set2::fullscreen= config::getint(INWINDOW);
 }
 
 void init::MainWindow()
@@ -164,7 +163,7 @@ void init::regWindow(const WNDPROC w1, const WNDPROC w2, const WNDPROC w3)
 	WNDCLASS wndcls; //创建一个窗体类
 	wndcls.cbClsExtra = 0;//类的额外内存，默认为0即可
 	wndcls.cbWndExtra = 0;//窗口的额外内存，默认为0即可
-	wndcls.hbrBackground = HBRUSH(GetStockObject(WHITE_BRUSH));//获取画刷句柄（将返回的HGDIOBJ进行强制类型转换）
+	wndcls.hbrBackground = HBRUSH(GetStockObject(NULL_BRUSH));//获取画刷句柄（将返回的HGDIOBJ进行强制类型转换）
 	wndcls.hCursor = LoadCursorW(nullptr, IDC_ARROW);//设置光标
 	wndcls.hIcon = LoadIconW(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_ICON1));//设置窗体左上角的图标
 	wndcls.hInstance = GetModuleHandle(nullptr);;//设置窗体所属的应用程序实例
@@ -174,13 +173,13 @@ void init::regWindow(const WNDPROC w1, const WNDPROC w2, const WNDPROC w3)
 	wndcls.style = CS_HREDRAW | CS_VREDRAW;//设置窗体风格为水平重画和垂直重画
 	RegisterClass(&wndcls);//向操作系统注册窗体
 	DWORD threadId;
-	CreateThread(nullptr, 0, LPTHREAD_START_ROUTINE(RegWindows), nullptr, 0, &threadId);
+	CreateThread(nullptr, 0, PTHREAD_START_ROUTINE(RegWindows), nullptr, 0, &threadId);
 }
 DWORD WINAPI init::RegWindows() {
 	WNDCLASS Fwndcls; //创建一个窗体类
 	Fwndcls.cbClsExtra = 0;//类的额外内存，默认为0即可
 	Fwndcls.cbWndExtra = 0;//窗口的额外内存，默认为0即可
-	Fwndcls.hbrBackground = HBRUSH(GetStockObject(WHITE_BRUSH));//获取画刷句柄（将返回的HGDIOBJ进行强制类型转换）
+	Fwndcls.hbrBackground = HBRUSH(GetStockObject(NULL_BRUSH));//获取画刷句柄（将返回的HGDIOBJ进行强制类型转换）
 	Fwndcls.hCursor = LoadCursorW(nullptr, IDC_ARROW);//设置光标
 	Fwndcls.hIcon = LoadIconW(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_ICON1));//设置窗体左上角的图标
 	Fwndcls.hInstance = GetModuleHandle(nullptr);;//设置窗体所属的应用程序实例
@@ -211,7 +210,7 @@ DWORD WINAPI init::Upgrade(){
 			std::getline(file, file_version);
 		}
 
-		const std::string CURRENT_VERSION = "1.7.0"; // 假设当前版本号是 "1.2.3"
+		const std::string CURRENT_VERSION = "1.9.0"; // 假设当前版本号是 "1.2.3"
 
 		if (file_version.empty() || file_version != CURRENT_VERSION) {
 			mywindows::logf << "版本号不同" << file_version << "->" << CURRENT_VERSION << std::endl;

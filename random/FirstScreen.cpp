@@ -28,7 +28,7 @@
 FirstScreen::FirstScreen()
 {
 	p=nullptr;
-	regButtons();
+	FirstScreen::regButtons();
 }
 
 FirstScreen::~FirstScreen() = default;
@@ -56,7 +56,7 @@ void FirstScreen::resetSize()
 	resetPoint();
 }
 
-void FirstScreen::click(const int x, const int y)
+void FirstScreen::click(const int x, const int y) const
 {
 	for(auto& t:buttons)
 	{
@@ -66,6 +66,7 @@ void FirstScreen::click(const int x, const int y)
 
 void FirstScreen::changeMode(int Mode)
 {
+	int v = config::getint(SPEED_FIRST_SCREEN);
 	ui::mode = 1;
 	while (ui::mode < Mode)
 	{
@@ -73,7 +74,7 @@ void FirstScreen::changeMode(int Mode)
 		int y = mywindows::WH * 0.2;
 		int xend = mywindows::WW * (ui::mode - Mode + 0.6);
 		int yend = mywindows::WH * 0.8;
-		overlay[ui::mode - 1].MoveTo(x, y, xend, yend, true, 30, 40);
+		overlay[ui::mode - 1].MoveTo(x, y, xend, yend, true, v, v);
 		ui::mode++;
 	}
 	ui::mode = 4;
@@ -83,11 +84,11 @@ void FirstScreen::changeMode(int Mode)
 		int y = mywindows::WH * 0.2;
 		int xend = mywindows::WW * (0.8 + ui::mode - Mode);
 		int yend = mywindows::WH * 0.8;
-		overlay[ui::mode - 1].MoveTo(x, y, xend, yend, true, 30, 40);
+		overlay[ui::mode - 1].MoveTo(x, y, xend, yend, true, v, v);
 		ui::mode--;
 	}
-	overlay[ui::mode - 1].MoveTo(mywindows::WW * 0.2, mywindows::WH * 0.2, mywindows::WW * 0.8, mywindows::WH * 0.8, true, 30, 30);
-	InvalidateRect(mywindows::main_hwnd, NULL, false);
+	overlay[ui::mode - 1].MoveTo(mywindows::WW * 0.2, mywindows::WH * 0.2, mywindows::WW * 0.8, mywindows::WH * 0.8, true, v, v);
+	InvalidateRect(mywindows::main_hwnd, nullptr, false);
 }
 
 void FirstScreen::resetPoint()
@@ -101,7 +102,7 @@ void FirstScreen::resetPoint()
 void FirstScreen::regButtons()
 {
 	for (int a = 0; a < 10; a++)
-		buttons.push_back(Button());
+		buttons.emplace_back();
 	buttons[O1].bind([this] {changeMode(1); });
 	buttons[O1].setBmapC(over1, 1);
 	buttons[O1].setMusic(CLICK_MUSIC);
@@ -172,7 +173,7 @@ void FirstScreen::enter()
 {
 	ui::ScreenMode = FIRST_SCREEN;
 	if (!ui::SS->offMusic)
-		mciSendString(L"play bgm repeat", 0, 0, 0);
+		mciSendString(L"play bgm repeat", nullptr, 0, nullptr);
 }
 
 void FirstScreen::paint()

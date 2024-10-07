@@ -10,6 +10,8 @@
 #define AND &&
 #define LOGPATH ".\\files\\log\\main.log"
 #define ERR_LOGPATH ".\\files\\log\\err.log"
+#define （ (
+#define ） )
 class mywindows
 {
 public:

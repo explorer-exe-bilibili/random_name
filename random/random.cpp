@@ -85,6 +85,8 @@ int WINAPI WinMain(
 	const Gdiplus::GdiplusStartupInput gdiplusStartupInput;
 	ULONG_PTR gdiplusToken;
 	GdiplusStartup(&gdiplusToken, &gdiplusStartupInput, nullptr);
+	if(mywindows::debug)
+	SetEnvironmentVariable(L"GDIPlusDebugLevel", L"4");
 	loadWindow=new LoadWindow();
 	loadWindow->create();
 	init::main(WinSunProc, FloatWindowProc, KillWindowProc);

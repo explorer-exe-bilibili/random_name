@@ -11,16 +11,16 @@ class MenuItem
 
 public:
 	MenuItem();
-	MenuItem(int number, int star, std::wstring name, Gp* p);
+	MenuItem(int number, int star, const std::wstring& name, Gp* p);
 	~MenuItem();
 
 	void enterScreen();
 	void deshow();
-	void paint();
-	bool click(int x, int y);
+	void paint() const;
+	bool click(int x, int y) const;
 
 	void setStar(int star);
-	void setName(std::wstring name);
+	void setName(const std::wstring& name);
 	void setGp(Gp* p);
 	void setNumber(int number);
 

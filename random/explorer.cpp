@@ -23,7 +23,7 @@ explorer::~explorer()
 	{
 		if(i)
 			DeleteObject(&i);
-		i = 0;
+		i = nullptr;
 	}
 	for(auto&i:Bitmap)
 	{
@@ -32,13 +32,14 @@ explorer::~explorer()
 	HBitmap.clear();
 	Bitmap.clear();
 	GdiImage.clear();
-	mciSendString(L"close star3", 0, 0, 0);
-	mciSendString(L"close star4", 0, 0, 0);
-	mciSendString(L"close star5", 0, 0, 0);
-	mciSendString(L"close starfull", 0, 0, 0);
-	mciSendString(L"close enter", 0, 0, 0);
-	mciSendString(L"close click", 0, 0, 0);
-	mciSendString(L"close bgm", 0, 0, 0);
+	mciSendString(L"close star3", nullptr, 0, nullptr);
+	mciSendString(L"close star4", nullptr, 0, nullptr);
+	mciSendString(L"close star5", nullptr, 0, nullptr);
+	mciSendString(L"close starfull", nullptr, 0, nullptr);
+	mciSendString(L"close enter", nullptr, 0, nullptr);
+	mciSendString(L"close click", nullptr, 0, nullptr);
+	mciSendString(L"close bgm", nullptr, 0, nullptr);
+	mciSendString(L"close list", nullptr, 0, nullptr);
 
 }
 
@@ -76,18 +77,18 @@ const Gdiplus::Image* explorer::getGdiImage(const int number)const
 		return GdiImage[number].get();
 }
 
-void explorer::PlayMusic(const std::string& alias)const
+void explorer::PlayMusic(const std::string& alias)
 {
 	if (config::getint(OFFMUSIC))return;
-	std::string cmd = "play " + alias + " from 0";
-	mciSendStringA(cmd.c_str(),0,0,0);
+	const std::string cmd = "play " + alias + " from 0";
+	mciSendStringA(cmd.c_str(),nullptr,0,nullptr);
 }
 
-void explorer::PlayMusic(const std::wstring& alias)const
+void explorer::PlayMusic(const std::wstring& alias)
 {
 	if (config::getint(OFFMUSIC))return;
-	std::wstring cmd = L"play " + alias + L" from 0";
-	mciSendStringW(cmd.c_str(), 0, 0, 0);
+	const std::wstring cmd = L"play " + alias + L" from 0";
+	mciSendStringW(cmd.c_str(), nullptr, 0, nullptr);
 }
 
 void explorer::PlayVideo(const std::wstring& alias) const
@@ -103,15 +104,16 @@ void explorer::PlayVideo(const std::wstring& alias) const
 	}
 }
 
-void explorer::stopmusic()
+void explorer::stopMusic()
 {
-	mciSendString(L"stop starfull", 0, 0, 0);
-	mciSendString(L"stop star5", 0, 0, 0);
-	mciSendString(L"stop star3", 0, 0, 0);
-	mciSendString(L"stop star4", 0, 0, 0);
-	mciSendString(L"stop enter", 0, 0, 0);
-	mciSendString(L"stop click", 0, 0, 0);
-	mciSendString(L"stop bgm", 0, 0, 0);
+	mciSendString(L"stop starfull", nullptr, 0, nullptr);
+	mciSendString(L"stop star5", nullptr, 0, nullptr);
+	mciSendString(L"stop star3", nullptr, 0, nullptr);
+	mciSendString(L"stop star4", nullptr, 0, nullptr);
+	mciSendString(L"stop enter", nullptr, 0, nullptr);
+	mciSendString(L"stop click", nullptr, 0, nullptr);
+	mciSendString(L"stop bgm", nullptr, 0, nullptr);
+	mciSendString(L"stop list", nullptr, 0, nullptr);
 }
 
 double presses = 0;
@@ -162,7 +164,7 @@ void explorer::Load()
 		}
 	}
 
-	std::sort(files.begin(), files.end(), [](const auto& a, const auto& b) {
+	std::ranges::sort(files, [](const auto& a, const auto& b) {
 		return a.first < b.first;
 		});
 	presses++;
@@ -196,19 +198,21 @@ void explorer::Load()
 	}
 	presses = 75;
 	presses_str = "加载其它音乐和音效";
-	mciSendString(L"open .\\files\\mp3\\reveal-3star.mp3 alias star3", 0, 0, 0);
+	mciSendString(L"open .\\files\\mp3\\reveal-3star.mp3 alias star3", nullptr, 0, nullptr);
 	presses = 78;
-	mciSendString(L"open .\\files\\mp3\\reveal-4star.mp3 alias star4", 0, 0, 0);
+	mciSendString(L"open .\\files\\mp3\\reveal-4star.mp3 alias star4", nullptr, 0, nullptr);
 	presses = 81;
-	mciSendString(L"open .\\files\\mp3\\reveal-5star.mp3 alias star5", 0, 0, 0);
+	mciSendString(L"open .\\files\\mp3\\reveal-5star.mp3 alias star5", nullptr, 0, nullptr);
 	presses = 84;
-	mciSendString(L"open .\\files\\mp3\\reveal-fullstar.mp3 alias starfull", 0, 0, 0);
+	mciSendString(L"open .\\files\\mp3\\reveal-fullstar.mp3 alias starfull", nullptr, 0, nullptr);
 	presses = 88;
-	mciSendString(L"open .\\files\\mp3\\enter.mp3 alias enter", 0, 0, 0);
+	mciSendString(L"open .\\files\\mp3\\enter.mp3 alias enter", nullptr, 0, nullptr);
 	presses = 94;
-	mciSendString(L"open .\\files\\mp3\\click.mp3 alias click", 0, 0, 0);
+	mciSendString(L"open .\\files\\mp3\\click.mp3 alias click", nullptr, 0, nullptr);
+	presses = 98;
+	mciSendString(L"open .\\files\\mp3\\result-list.mp3 alias list", nullptr, 0, nullptr);
 	presses = 100;
-	mciSendString(L"play bgm from 0 repeat", 0, 0, 0);
+	mciSendString(L"play bgm from 0 repeat", nullptr, 0, nullptr);
 	ShowWindow(mywindows::main_hwnd, SW_SHOW);
 }
 
@@ -219,7 +223,7 @@ void explorer::reloadBitmap(int number)
 	if (number <= 3)
 	{
 		std::wstring configName = L"over" + std::to_wstring(number + 1);
-		path = config::getpath(configName).c_str();
+		path = config::getpath(configName);
 	}
 	else if (number > 3)
 	{
@@ -241,7 +245,7 @@ void explorer::reloadBitmap(int number)
 			}
 		}
 
-		std::sort(files.begin(), files.end(), [](const auto& a, const auto& b) {
+		std::ranges::sort(files, [](const auto& a, const auto& b) {
 			return a.first < b.first;
 			});
 		path += files[number - 4].second;
@@ -251,7 +255,7 @@ void explorer::reloadBitmap(int number)
 	if (t_gb->GetLastStatus() != Gdiplus::Status::Ok)
 	{
 		std::wstring message = L"加载图片出错，请检查文件路径，报错码为（gdiplus）：" + t_gb->GetLastStatus();
-		MessageBox(NULL, message.c_str(), L"错误", MB_ICONERROR);
+		MessageBox(nullptr, message.c_str(), L"错误", MB_ICONERROR);
 		mywindows::errlog(message.c_str());
 		return;
 	}
@@ -265,7 +269,7 @@ void explorer::reloadBitmap(int number)
 	Bitmap[number] = t_B;
 }
 
-void explorer::reloadVideo(std::wstring alias)
+void explorer::reloadVideo(std::wstring alias) const
 {
 	if (config::getint(MEM))return;
 	video->unload(alias);

@@ -17,12 +17,15 @@ class NameScreen :Screen
 {
 	bool isBall10=false;
 	bool is5star = false, is4star = false;
+	mutable bool entered = false;
 	int number = 0;
 	int step = 0;
+	unsigned int printedTime = 0;
 	NameItem items[10];
-	std::thread* NameBitmapThread = nullptr;
 	std::vector<HBITMAP> nameBitmaps;
+	std::vector<HBITMAP> nameBitmaps_Black;
 	std::shared_ptr<NameButton> nameButton;
+	std::shared_ptr<Button> typeButton;
 public:
 	HFONT icon_star = nullptr;
 
@@ -33,7 +36,7 @@ public:
 	void ShowName1();
 	void ShowName10();
 
-	void paint() const override;
+	void paint()const override;
 	void resetPoint();
 	void click(int x, int y);
 

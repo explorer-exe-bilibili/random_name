@@ -3,6 +3,7 @@
 #include<gdiplus.h>
 #include <memory>
 #include<string>
+#include <mutex>
 
 #include "explorer.h"
 #pragma comment(lib,"gdiplus.lib")
@@ -10,10 +11,10 @@
 class Gp
 {
 public:
-		struct StaticPaintInfo
+	struct StaticPaintInfo
 	{
 		int xDest, yDest;
-		unsigned char r,g,b;
+		unsigned char r, g, b;
 		std::wstring str;
 		HFONT font;
 	};
@@ -31,14 +32,15 @@ private:
 		HFONT font = 0;
 		bool operator==(const FontInfo&) const;
 		bool operator!=(const FontInfo&) const;
-		operator bool();
+		operator bool() const;
 	}NowFontInfo, LastFontInfo;
 	HWND hwnd;
 	HDC hdc;
 	bool cachedHDC = 0, cachedGraphics = 0, cachedFont = 0, cachedBrush = 0;
 	std::shared_ptr<Gdiplus::Graphics> graphic;
 	std::shared_ptr<Gdiplus::Bitmap> buffer;
-	explorer *ptr;
+	explorer* ptr;
+	std::mutex SizeChangeMutex;
 	std::vector<StaticPaintInfo> StaticPaintList;
 	struct TextNeeds getTextNeeds();
 	void releaseTextNeeds();
@@ -58,7 +60,7 @@ public:
 		unsigned char R = 255, unsigned char G = 255, unsigned char B = 255);
 	void DrawString(const std::string& str, HFONT font, int x, int y,
 		unsigned char R = 255, unsigned char G = 255, unsigned char B = 255);
-	void DrawStringBetween(const std::wstring& str, HFONT font, int x, int y, int xend, int yend, 
+	void DrawStringBetween(const std::wstring& str, HFONT font, int x, int y, int xend, int yend,
 		unsigned char R = 255, unsigned char G = 255, unsigned char B = 255);
 	void DrawstringBetween(const std::string& str, HFONT font, int x, int y, int xend, int yend,
 		unsigned char R = 255, unsigned char G = 255, unsigned char B = 255);
@@ -74,9 +76,11 @@ public:
 		unsigned char R = 255, unsigned char G = 255, unsigned char B = 255);
 	void DrawChar(char ch, HFONT font, int x, int y,
 		unsigned char R = 255, unsigned char G = 255, unsigned char B = 255);
-	void AddStaticPaintItem(StaticPaintInfo Item);
+	void AddStaticPaintItem(const StaticPaintInfo& Item);
 	void ClearStaticPaintItem();
 	HDC GetDC();
 	void ReleaseDC(HDC hdc);
-	void DrawSqare(int xDest, int yDest, int xEnd, int yEnd, int R, int G, int B, bool filled);
+	void DrawSquare(int xDest, int yDest, int xEnd, int yEnd, int R, int G, int B, bool filled);
+	void LockWindowSize() const;
+	void UnlockWindowSize() const;
 };

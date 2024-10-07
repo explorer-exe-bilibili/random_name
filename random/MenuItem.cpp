@@ -1,5 +1,6 @@
 #include "MenuItem.h"
 
+#include "explorer.h"
 #include "mywindows.h"
 #include "ui.h"
 
@@ -10,7 +11,7 @@ MenuItem::MenuItem()
 	p = nullptr;
 }
 
-MenuItem::MenuItem(int number, int star, std::wstring name, Gp* p)
+MenuItem::MenuItem(int number, int star, const std::wstring& name, Gp* p)
 {
 	this->number = number;
 	this->star = star;
@@ -32,25 +33,30 @@ void MenuItem::enterScreen()
 	int y = 0;
 	int xend = x + 0.078 * mywindows::WW;
 	int yend = mywindows::WH;
-	button.MoveTo(x, y, xend, yend, 1, 30, 10);
+	button.MoveTo(x, y, xend, yend, true, 30, 10);
+	std::thread ([x, y, xend, yend, this]
+		{
+			std::this_thread::sleep_for(std::chrono::milliseconds(150));
+			button.MoveTo(x, y, xend, yend, true, 30, 10);
+		}).detach();
 }
 
 void MenuItem::deshow()
 {
-	button.setDisable(1);
+	button.setDisable(true);
 	button.setPoint(mywindows::WW, 0, mywindows::WW * 1.078, mywindows::WH);
 }
 
-void MenuItem::paint()
+void MenuItem::paint() const
 {
 	button.paint();
 }
 
-bool MenuItem::click(int x, int y)
+bool MenuItem::click(int x, int y) const
 {
 	int i=button.click(CLICK, x, y);
-	if (i == Clicked)return 1;
-	else return 0;
+	if (i == Clicked)return true;
+	else return false;
 }
 
 void MenuItem::setStar(int star)
@@ -58,7 +64,7 @@ void MenuItem::setStar(int star)
 	this->star = star;
 }
 
-void MenuItem::setName(std::wstring name)
+void MenuItem::setName(const std::wstring& name)
 {
 	this->name = name;
 }
@@ -76,14 +82,14 @@ void MenuItem::setNumber(int number)
 void MenuItem::prepare()
 {
 	setButton();
-	button.setDisable(0);
+	button.setDisable(false);
 }
 
 void MenuItem::setButton()
 {
 	button.setGp(p);
 	button.setText(name);
-	button.setVertical(1);
+	button.setVertical(true);
 	button.setTextColor(255, 255, 255);
 	button.setFont(&ui::text_list);
 	button.setBmapC(star + 11);

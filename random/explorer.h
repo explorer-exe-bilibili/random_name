@@ -12,21 +12,21 @@ class explorer
 	std::vector<HBITMAP> HBitmap;
 	std::vector<BITMAP> Bitmap;
 	VideoPlayer* video = nullptr;
-	bool playingbgm = 0;
+	bool playingbgm = false;
 public:
 	explorer();
 	~explorer();
 	static explorer* getInstance();
-	HBITMAP getHBitmap(const int number)const;
-	const BITMAP* getBitmap(const int number)const;
-	const Gdiplus::Image* getGdiImage(const int number)const;
-	void PlayMusic(const std::string& alias)const;
-	void PlayMusic(const std::wstring& alias)const;
+	HBITMAP getHBitmap(int number)const;
+	const BITMAP* getBitmap(int number)const;
+	const Gdiplus::Image* getGdiImage(int number)const;
+	static void PlayMusic(const std::string& alias);
+	static void PlayMusic(const std::wstring& alias);
 	void PlayVideo(const std::wstring& alias)const;
-	void stopmusic();
+	static void stopMusic();
 	void Load();
 	void reloadBitmap(int number);
-	void reloadVideo(std::wstring alias);
+	void reloadVideo(std::wstring alias) const;
 };
 
 

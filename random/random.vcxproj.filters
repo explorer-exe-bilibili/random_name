@@ -140,9 +140,6 @@
     <ClCompile Include="MSGback.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="Button.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Painter.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -191,14 +188,17 @@
     <ClCompile Include="MenuItem.cpp">
       <Filter>源文件\前端</Filter>
     </ClCompile>
-    <ClCompile Include="MenuScreen.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="NameButton.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="Screen.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="MenuScreen.cpp">
+      <Filter>源文件\前端</Filter>
+    </ClCompile>
+    <ClCompile Include="Button.cpp">
+      <Filter>源文件\前端</Filter>
+    </ClCompile>
+    <ClCompile Include="NameButton.cpp">
+      <Filter>源文件\前端</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

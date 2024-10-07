@@ -141,7 +141,7 @@ int getname::randomIntegerBetween(const int min, const int max) {
 
 void getname::ReRandom(int number)
 {
-	thread Random([this, number]() {
+	thread ([this, number]() {
 		unsigned int t = 0;
 		while (t<=255)
 		{
@@ -153,8 +153,7 @@ void getname::ReRandom(int number)
 			}
 			t++;
 		}
-	});
-	Random.detach();
+	}).detach();
 }
 
 getname* getname::getInstance()

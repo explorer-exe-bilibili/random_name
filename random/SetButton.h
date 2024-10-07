@@ -26,9 +26,10 @@ class SetButton
 	void OpenFile() const;
 	void ChooseFile() const;
 	void ChooseDir() const;
+	static void FullScreen();
 	void load();
 	static HWND CreateEditBox(HWND hWndParent, int number, const point& rect, const wchar_t* words);
-	void EditBoxEditor(const std::wstring& tmp);
+	void EditBoxEditor(const std::wstring& tmp) const;
 public:
 	explicit SetButton(const sitem& Item);
 	SetButton();
@@ -41,7 +42,7 @@ public:
 	void refresh();
 	void reConnect();
 	void click(int x, int y) const;
-	void EditBoxUpgrade(int number);
+	void EditBoxUpgrade(int number) const;
 	static bool needReran, needReboot;
 };
 

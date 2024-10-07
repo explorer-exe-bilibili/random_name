@@ -14,7 +14,6 @@ public:
     void unload(const std::wstring& id);
     static VideoPlayer* getInstance();
 	~VideoPlayer();
-
 private:
     struct VideoData {
         IGraphBuilder* pGraph = nullptr;

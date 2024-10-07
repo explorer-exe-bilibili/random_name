@@ -4,7 +4,7 @@
 #include "Gp.h"
 #include "mywindows.h"
 
-void NameButton::paint()
+void NameButton::paint() const
 {
 	static bool debug = config::getint(DEBUG);
 	if (Disable)return;
@@ -17,7 +17,7 @@ void NameButton::paint()
 	p->Paint(x, y, xE - x, yE - y, hBitmap);
 	if (debug)
 	{
-		p->DrawSqare(x, y, xE, yE, 255, 0, 0, 0);
+		p->DrawSquare(x, y, xE, yE, 255, 0, 0, 0);
 	}
 }
 

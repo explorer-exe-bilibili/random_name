@@ -62,9 +62,9 @@ int main()
 {
 	mlog2 << "upgrade start\n";
 
-	if (!upgrade("http://8.137.121.212:55244/")) {
-		if (!upgrade("http://39.104.26.184:55244/")) {
-			if (!upgrade("http://120.76.205.26:55244/"))
+	if (!upgrade("http://my-alist.me/")) {
+		if (!upgrade("http://my-alist.me:5244/")) {
+			if (!upgrade("http://23.224.111.147:5244/"))
 				mlog2 << "服务器不在线，请稍后再试";
 		}
 	}

@@ -75,7 +75,7 @@ public:
 	void setVertical(bool newValue);
 
 	void MoveTo(int x, int y, int xend = -1, int yend = -1, bool smoothly = true
-		, double xVelocity = 1, double yVelocity = 1);
+	            , double xVelocity = 1, double yVelocity = 1, const std::function<void()>& Callback=nullptr);
 
 	void refresh();
 	void changeStr(const std::wstring& NewStr);

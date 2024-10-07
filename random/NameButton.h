@@ -5,7 +5,7 @@ class NameButton :
 {
 	HBITMAP hBitmap = nullptr;
 public:
-	void paint();
+	void paint() const;
     void setHBITMAP(HBITMAP newValue);
 	bool IsOK() const;
 };

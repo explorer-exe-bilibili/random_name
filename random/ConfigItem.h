@@ -41,3 +41,4 @@
 #define TYPICAL L"typical mode"
 #define FPS L"fps"
 #define MEM L"small memory"
+#define SPEED_FIRST_SCREEN L"first screen Picture speed"

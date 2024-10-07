@@ -34,6 +34,7 @@ Button::Button()
 
 Button::~Button()
 {
+	//move_timer.stop();
 	x = 0; y = 0; xE = 0; yE = 0;
 	xP = nullptr; yP=nullptr; xEP=nullptr; yEP=nullptr;
 	BmapC = 0;
@@ -93,7 +94,7 @@ void Button::paint() const
 	}
 	if(debug)
 	{
-		p->DrawSqare(x, y, xE, yE, 255, 0, 0, false);
+		p->DrawSquare(x, y, xE, yE, 255, 0, 0, false);
 	}
 }
 
@@ -177,16 +178,28 @@ void Button::setVertical(bool newValue)
 	IsVertical = newValue;
 }
 
-void Button::MoveTo(int x, int y, int xend, int yend, bool smoothly,double xVelocity,double yVelocity)
+void Button::MoveTo(int x, int y, int xend, int yend, bool smoothly, double xVelocity, double yVelocity, const std::function<void()>& Callback)
 {
+	std::thread ([this, x, y, xend, yend, xVelocity,yVelocity,Callback]
+		{
+			const int last_x = this->x;
+			const int last_y = this->y;
+			const int last_xE = this->xE;
+			const int last_yE = this->yE;
+			std::this_thread::sleep_for(std::chrono::milliseconds(128));
+			if (last_x == this->x AND last_y == this->y AND last_xE == this->xE AND last_yE == this->yE)
+				MoveTo(x, y, xend, yend, true, xVelocity, yVelocity, Callback);
+			return;
+		}).detach();
 	Moving = true;
-	if(smoothly)
+	if (smoothly)
 	{
-		//move_timer.Describe = "Button move timer";
+		move_timer.stop();
+		move_timer.name = "Button move timer";
 		move_timer.setDelay(1000 / 60);
 		move_timer.setPool(true);
-		move_timer.setCallBack([this, x, y, xend, yend, xVelocity, yVelocity]() {
-			
+		move_timer.setCallBack([this, x, y, xend, yend, xVelocity, yVelocity, Callback]() {
+			//InvalidateRect(mywindows::main_hwnd, nullptr, false);
 			needFresh = true;
 			if (this->x < x ) {
 				this->x += xVelocity;
@@ -256,9 +269,10 @@ void Button::MoveTo(int x, int y, int xend, int yend, bool smoothly,double xVelo
 				this->xE = xend;
 				this->yE = yend;
 			}
-			if (this->x == x AND this->y == y AND(this->xE == xend OR xend == -1) AND(this->yE == yend OR yend == -1)) {
+			if (int(this->x) == x AND int(this->y) == y AND(int(this->xE) == xend OR xend == -1) AND(int(this->yE) == yend OR yend == -1)) {
 				this->move_timer.stop();
 				Moving = false;
+				if (Callback)Callback();
 			}
 		});
 		move_timer.init();
@@ -345,7 +359,7 @@ Button& Button::operator=(const Button& b)
 	TextH = b.TextH;
 	functions = b.functions;
 	music_string = b.music_string;
-	move_timer = b.move_timer;
+	//move_timer = b.move_timer;
 	return *this;
 }
 

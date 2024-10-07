@@ -24,8 +24,7 @@ using namespace std;
 
 set2::set2() {
 	string jsonpath = "files\\setting.json";
-	std::thread loading([this, jsonpath] { Load(jsonpath); });
-	loading.detach();
+	std::thread ([this, jsonpath] { Load(jsonpath); }).detach();
 }
 set2::~set2() = default;
 void set2::quit() const
@@ -82,7 +81,7 @@ void set2::resetplace() {
 }
 void set2::rereadConfig() {
 	offMusic = config::getint(OFFMUSIC);
-	fullscreen = !config::getint(INWINDOW);
+	fullscreen = config::getint(INWINDOW);
 	offVideo = config::getint(OFF_VIDEO);
 	FloatWindow = config::getint(FLOATWINDOW);
 	if (offMusic)
@@ -214,8 +213,7 @@ void set2::Load(const string& jsonpath) {
 	return;
 }
 set2::set2(std::string& jsonfile) {
-	std::thread loading([this, jsonfile] { Load(jsonfile); });
-	loading.detach();
+	std::thread ([this, jsonfile] { Load(jsonfile); }).detach();
 }
 
 void set2::clicked(int x, int y) const

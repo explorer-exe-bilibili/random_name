@@ -30,15 +30,15 @@ void MenuScreen::enter()
 {
 	ui::ScreenMode = MENU;
 	setItems();
-	std::thread enterScreen([this]
+	explorer::getInstance()->PlayMusic("list");
+	std::thread ([this]
 		{
 			for (const auto& item : items)
 			{
 				item->enterScreen();
 				std::this_thread::sleep_for(std::chrono::milliseconds(150));
 			}
-		});
-	enterScreen.detach();
+		}).detach();
 	InvalidateRect(mywindows::main_hwnd, nullptr, FALSE);
 	Button::needFresh=true;
 }

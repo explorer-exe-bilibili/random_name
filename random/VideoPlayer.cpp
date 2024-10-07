@@ -3,8 +3,9 @@
 #include <thread>
 #include <windows.h>
 
+#include "config.h"
+#include "configitem.h"
 #include "mywindows.h"
-#include"configitem.h"
 #include "Log.h"
 #include "set-json.h"
 
@@ -15,7 +16,7 @@ VideoPlayer* VideoPlayer::Instance = nullptr;
 void trySetMEMMode();
 
 void VideoPlayer::load(const std::wstring& id, const std::wstring& path) {
-	std::thread Load([this, id, path] {
+	std::thread a([this, id, path] {
 
 		if (!std::filesystem::exists(path)) {
 			mywindows::errlog("file not found");
@@ -103,7 +104,8 @@ void VideoPlayer::load(const std::wstring& id, const std::wstring& path) {
 
 		videos[id] = videoData;
 		});
-	Load.detach();
+	if (config::getint(MEM))a.join();
+	else a.detach();
 }
 
 VideoPlayer* VideoPlayer::getInstance()
@@ -129,12 +131,7 @@ void VideoPlayer::play(const std::wstring& id) {
 		LONGLONG pos = 0;
 		videoData.pSeeking->SetPositions(&pos, AM_SEEKING_AbsolutePositioning, nullptr, AM_SEEKING_NoPositioning);
 	}
-	if (!config::getint(INWINDOW)) {
-		videoData.pVideoWindow->put_WindowStyle(WS_POPUP | WS_CHILD);
-	}
-	else {
-		videoData.pVideoWindow->put_WindowStyle(WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN | WS_THICKFRAME);
-	}
+	videoData.pVideoWindow->put_WindowStyle(WS_POPUP | WS_CHILD);
 
 	videoData.pVideoWindow->put_Owner(OAHWND(mywindows::main_hwnd));
 	videoData.pVideoWindow->put_MessageDrain(OAHWND(mywindows::main_hwnd));
@@ -151,12 +148,14 @@ void VideoPlayer::play(const std::wstring& id) {
 	const HRESULT hr = videoData.pControl->Run();
 	if (SUCCEEDED(hr)) {
 		long evCode;
+		std::this_thread::sleep_for(std::chrono::milliseconds(200));
 		videoData.pVideoWindow->SetWindowPosition(0, 0, mywindows::WW, mywindows::WH);
 		videoData.pEvent->WaitForCompletion(INFINITE, &evCode);
+
+		mywindows::log("play end");
+		// 隐藏视频窗口
+		videoData.pVideoWindow->put_Visible(OAFALSE);
 	}
-	mywindows::log("play end");
-	// 隐藏视频窗口
-	videoData.pVideoWindow->put_Visible(OAFALSE);
 }
 
 void VideoPlayer::unload(const std::wstring& id) {

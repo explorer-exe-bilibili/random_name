@@ -85,6 +85,19 @@ void SetButton::ChooseDir() const
 	}
 }
 
+void SetButton::FullScreen()
+{
+	if (const long style=GetWindowStyle(mywindows::main_hwnd); style & WS_POPUP) {
+		SetWindowLong(mywindows::main_hwnd, GWL_STYLE, style & (~WS_POPUP)|WS_SIZEBOX|WS_CAPTION);
+		SetWindowPos(mywindows::main_hwnd, nullptr, 0, 0, mywindows::screenWidth * 0.5, mywindows::screenHeight * 0.5, SWP_FRAMECHANGED);
+	}
+	else
+	{
+		SetWindowLong(mywindows::main_hwnd, GWL_STYLE, ((style | WS_POPUP)&(~WS_SIZEBOX))&(~WS_CAPTION));
+		SetWindowPos(mywindows::main_hwnd, nullptr, 0, 0, mywindows::screenWidth, mywindows::screenHeight, SWP_FRAMECHANGED);
+	}
+}
+
 void SetButton::load()
 {
 	setPoint();
@@ -134,6 +147,7 @@ void SetButton::load()
 		b.bind([this]()
 		{
 			config::turnUpSideDown(item.ConfigName);
+			if (item.ConfigName == INWINDOW)FullScreen();
 			if(item.Limit&REBOOT)
 			{
 				needReboot = true;
@@ -169,7 +183,7 @@ HWND SetButton::CreateEditBox(const HWND hWndParent, const int number, const poi
 }
 
 
-void SetButton::EditBoxEditor(const std::wstring& tmp)
+void SetButton::EditBoxEditor(const std::wstring& tmp) const
 {
 	if (item.Limit & S_WINDOWTITLE)
 	{
@@ -300,7 +314,7 @@ void SetButton::setPoint() {
 	TitleRect = { x,y,0,0 };
 	if (item.IsEditBox) {
 		TextBoxRect = { x + 0.2,y,x + 0.3,y + 0.07 };
-		if (item.IsFile) {
+		if (item.IsFile||item.IsDir) {
 			point temp = {x + 0.3, y, x + 0.35, y + 0.07};
 			ButtonRect.push_back(temp);
 			temp = { x + 0.35,y,x + 0.4,y + 0.07 };
@@ -344,7 +358,7 @@ void SetButton::click(const int x, const int y) const
 	}
 }
 
-void SetButton::EditBoxUpgrade(const int number)
+void SetButton::EditBoxUpgrade(const int number) const
 {
 	if (item.Number == number)
 	{

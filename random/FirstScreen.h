@@ -11,7 +11,7 @@ public:
     void setGp(Gp* p);
     void paint();
     void resetSize();
-    void click(int x, int y);
+    void click(int x, int y) const;
     static void enter();
 private:
     void changeMode(int Mode);

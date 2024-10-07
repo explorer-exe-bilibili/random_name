@@ -500,6 +500,7 @@ std::string web::findMaxVersion(const std::vector<std::string>& versions) {
 	}
 
 	// 找到最大的数字部分
+	if (numericParts.empty())return "";
 	std::sort(numericParts.begin(), numericParts.end(), std::greater<>());
 	std::string maxNumericPart = removeAfterpoint(numericParts.front());
 

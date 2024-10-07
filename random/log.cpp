@@ -6,8 +6,9 @@
 #include <vector>
 #include <locale>
 #include <codecvt>
+#include <fstream>
+
 #include"sth2sth.h"
-#include <ctime>
 
 
 std::wstring Log::wrunpath = L"";

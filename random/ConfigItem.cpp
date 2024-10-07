@@ -42,6 +42,7 @@ int config::init() {
 		add(FLOATWINDOW, L"1");
 		add(TYPICAL, L"0");
 		add(MEM, L"0");
+		add(SPEED_FIRST_SCREEN, L"50");
 		add(WINDOW_TITLE, L"∆Ì‘∏");
 		add(OVER4, L"\\files\\imgs\\over4.jpg");
 		add(OVER3, L"\\files\\imgs\\over3.jpg");
@@ -108,6 +109,8 @@ int config::init() {
 		if (LogString == L"err")add(FPS, L"60");
 		LogString = get(MEM);
 		if (LogString == L"err")add(MEM, L"0");
+		LogString = get(SPEED_FIRST_SCREEN);
+		if (LogString == L"err")add(SPEED_FIRST_SCREEN, L"50");
 		LogString = get(FLOATX);
 		if (LogString == L"err")add(FLOATX, sth2sth::str2wstr(to_string(mywindows::screenWidth * 0.8)));
 		LogString = get(FLOATY);

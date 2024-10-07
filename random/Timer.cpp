@@ -1,10 +1,25 @@
 #include "Timer.h"
 
+#include <thread>
+#include "log.h"
+
+Log Timer_log("./files/log/Timer.log", true);
+
+Timer::Timer(const Timer& t)
+{
+	kill = t.kill;
+	IsUsing = t.IsUsing;
+	IsPool = t.IsPool;
+	name = t.name;
+	WaitFor = t.WaitFor;
+	CallBack = t.CallBack;
+}
+
 Timer::~Timer()
 {
-	kill = 1;
-	IsUsing = 0;
-	if(TimerThread)if(TimerThread->joinable())TimerThread->join();
+	Timer_log<< Timer_log.pt() << "Timer " << name << " is deleted" << std::endl;
+	kill = true;
+	IsUsing = false;
 }
 
 void Timer::setDelay(int delayMS)
@@ -12,9 +27,10 @@ void Timer::setDelay(int delayMS)
 	this->WaitFor = delayMS;
 }
 
-void Timer::setCallBack(std::function<void()> func)
+void Timer::setCallBack(const std::function<void()>& func)
 {
-	this->CallBack = std::move(func);
+	CallBack.reset();
+	this->CallBack = std::make_shared<std::function<void()>>(func);
 }
 
 void Timer::setPool(bool isPool)
@@ -24,49 +40,70 @@ void Timer::setPool(bool isPool)
 
 void Timer::init()
 {
-	 TimerThread=std::make_shared<std::thread>( std::thread([this]
+	Timer_log << Timer_log.pt() << "Timer " << name << " is created" << std::endl;
+	try{std::thread([this]
 		{
 			 while (true)
 			 {
 				 while (IsUsing)
 				 {
 					std::this_thread::sleep_for(std::chrono::milliseconds(WaitFor));
-				 	if (IsUsing&&CallBack)
-					CallBack();
+					if (IsUsing && CallBack)
+					{
+						if(reinterpret_cast<long long>(CallBack.get())>0xFFFFFFFFFFF)return;
+						try
+						{
+							std::lock_guard lock(CallBackLock);
+							if (CallBack) {
+								CallBack->operator()();
+							}
+						}
+						catch (const std::exception& e)
+						{
+							Timer_log << "Timer:" << name << "meet a error when running callback" << e.what() << std::endl;
+						}
+					}
 					if (!IsPool)
 					{
-					IsUsing = 0;
+					IsUsing = false;
 					}
 				 }
 				if(kill)return;
 				std::this_thread::sleep_for(std::chrono::milliseconds(1));
 			 }
 		}
-	 ));
-	TimerThread->detach();
+	 ).detach();
+
+	}
+	catch (const std::exception &e)
+	{
+		Timer_log <<"Timer:"<<name<<"  meet a problem:"<< e.what() << std::endl;
+	}
+	Timer_log <<Timer_log.pt()<< "Timer " << name << " is created compete" << std::endl;
 }
 
 void Timer::start()
 {
-	IsUsing = 1;
+	IsUsing = true;
 }
 
 void Timer::pause()
 {
-	IsUsing = 0;
+	IsUsing = false;
 }
 
 void Timer::stop()
 {
-	kill = 1;
-	IsUsing = 0;
+	kill = true;
+	IsUsing = false;
 }
 
-Timer::TimerInfo Timer::getTimerInfo()
+Timer::TimerInfo Timer::getTimerInfo() const
 {
 	TimerInfo info;
 	info.delay = WaitFor;
 	info.IsUsing = IsUsing;
 	info.IsPool = IsPool;
+	info.name = name;
 	return info;
 }

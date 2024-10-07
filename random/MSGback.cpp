@@ -33,6 +33,8 @@ void MSGback::create()
 	ui::HS->setFile(L"./name.txt");
 	Pptr=new Gp(mywindows::main_hwnd);
 	init::resetPoint();
+	std::thread([] {while (true) { InvalidateRect(mywindows::main_hwnd, nullptr, FALSE);
+	std::this_thread::sleep_for(std::chrono::milliseconds(300)); }}).detach();
 }
 bool _ = true;
 
@@ -163,7 +165,7 @@ void MSGback::showWindow(const WPARAM wParam)
 	{
 		ShowWindow(mywindows::float_hWnd, SW_SHOWNOACTIVATE);
 		if (!set2::offMusic)
-			explorer::getInstance()->stopmusic();
+			explorer::getInstance()->stopMusic();
 	}
 }
 

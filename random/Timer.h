@@ -1,27 +1,31 @@
 #pragma once
 #include <functional>
-#include <thread>
+#include <mutex>
+#include <string>
 
 
 class Timer
 {
-	std::shared_ptr<std::thread> TimerThread;
-	std::function<void()> CallBack;
+	std::shared_ptr<std::function<void()>> CallBack;
 	int WaitFor = 0;
-	bool IsUsing = 0;
-	bool IsPool = 0;
-	bool kill = 0;
+	bool IsUsing = false;
+	bool IsPool = false;
+	bool kill = false;
 public:
 	struct TimerInfo
 	{
 		int delay;
 		bool IsUsing;
 		bool IsPool;
+		std::string name;
 	};
+	std::mutex CallBackLock;
+	std::string name;
 	Timer() = default;
+	Timer(const Timer&);
 	~Timer();
 	void setDelay(int delayMS);
-	void setCallBack(std::function<void()> func);
+	void setCallBack(const std::function<void()>& func);
 	void setPool(bool isPool);
 	
 	void init();
@@ -29,7 +33,7 @@ public:
 	void pause();
 	void stop();
 
-	TimerInfo getTimerInfo();
+	TimerInfo getTimerInfo() const;
 
 };
 
