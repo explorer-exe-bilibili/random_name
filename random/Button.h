@@ -53,6 +53,7 @@ public:
 	static bool needFresh;
 
 	Button(int x, int y, int xE, int yE,int BitmapC=BUTTON, const std::wstring& text=L"");
+	Button(const Button& b);
 	Button();
 	~Button();
 
@@ -83,9 +84,9 @@ public:
 	void reConnect();
 	void disConnect();
 
-	Button& operator=(const Button& b);
 	explicit operator bool() const;
 	bool operator==(const Button& b) const;
+	Button& operator=(const Button&);
 
 
 	int bind(const std::function<void()>& func,int condition = CLICK);

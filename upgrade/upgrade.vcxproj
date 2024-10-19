@@ -181,9 +181,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="json_reader.cpp" />
-    <ClCompile Include="json_value.cpp" />
-    <ClCompile Include="json_writer.cpp" />
     <ClCompile Include="local.cpp" />
     <ClCompile Include="Log.cpp" />
     <ClCompile Include="task.cpp" />
@@ -195,13 +192,10 @@
     <ClInclude Include="isdebug.h" />
     <ClInclude Include="local.h" />
     <ClInclude Include="Log.h" />
-    <ClInclude Include="reader.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="task.h" />
     <ClInclude Include="unzip.h" />
-    <ClInclude Include="value.h" />
     <ClInclude Include="web.h" />
-    <ClInclude Include="writer.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="upgrade.rc" />

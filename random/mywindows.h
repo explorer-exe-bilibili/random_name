@@ -12,32 +12,31 @@
 #define ERR_LOGPATH ".\\files\\log\\err.log"
 #define （ (
 #define ） )
-class mywindows
+namespace mywindows
 {
-public:
-	static Log logf, errlogf;
-	static std::mutex logMutex, randomlock;
-	static int screenHeight;
-	static int screenWidth;
-	static int WW;//WW
-	static int WH;//WH
-	static int windowTop;
-	static int windowLeft;
-	static int indices[10];
-	static HWND main_hwnd,load_hwnd;
-	static HWND float_hWnd,Quit_hwnd;
-	static void removeFileNameFromPath(char* path);
-	static void removeFileNameFromPath(wchar_t* path);
-	static void removeFileNameFromPath(std::wstring& path);
-	static void log(const char* format, ...);
-	static void log(const wchar_t* format, ...);
-	static void errlog(const char* format, ...);
-	static void errlog(const wchar_t* format, ...);
-	static int* find(int* array, int size, int valueToFind, int* count);
-	static bool CreatedMultipleDirectory(const std::string& direct);
-	static int GetStringWidth(HDC hdc, const std::wstring& str, int height);
-	static HINSTANCE hinstance;
-	static void reboot();
-	static bool debug;
+	extern Log logf, errlogf;
+	inline std::mutex logMutex, randomlock;
+	inline int screenHeight=GetSystemMetrics(SM_CYSCREEN);
+	inline int screenWidth=GetSystemMetrics(SM_CXSCREEN);
+	inline int WW=screenWidth;//WW
+	inline int WH=screenHeight;//WH
+	inline int windowTop=0;
+	inline int windowLeft=0;
+	inline int indices[10]={};
+	inline HWND main_hwnd=0,load_hwnd=0;
+	inline HWND float_hWnd=0,Quit_hwnd=0;
+	void removeFileNameFromPath(char* path);
+	void removeFileNameFromPath(wchar_t* path);
+	void removeFileNameFromPath(std::wstring& path);
+	void log(const char* format, ...);
+	void log(const wchar_t* format, ...);
+	void errlog(const char* format, ...);
+	void errlog(const wchar_t* format, ...);
+	int* find(int* array, int size, int valueToFind, int* count);
+	bool CreatedMultipleDirectory(const std::string& direct);
+	int GetStringWidth(HDC hdc, const std::wstring& str, int height);
+	inline HINSTANCE hinstance=nullptr;
+	void reboot();
+	inline bool debug=false;
 };
 

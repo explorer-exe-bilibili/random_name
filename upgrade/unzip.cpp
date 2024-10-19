@@ -1,4 +1,4 @@
-#define ZLIB_WINAPI
+//#define ZLIB_WINAPI
 #include "unzip.h"
 
 #include <iostream>
@@ -8,6 +8,7 @@
 using namespace std;
 
 #pragma comment(lib, "Shlwapi.lib")
+#pragma comment(lib, "minizip.lib")
 
 string unzip::upgraderfile = "";
 Log mlog("upgrade.log", 1);

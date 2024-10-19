@@ -35,5 +35,6 @@ public:
 
 	TimerInfo getTimerInfo() const;
 
+	Timer& operator=(const Timer&);
 };
 

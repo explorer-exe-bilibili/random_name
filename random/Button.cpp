@@ -1,7 +1,6 @@
 #include "Button.h"
 
 #include "configitem.h"
-#include "VideoPlayer.h"
 #include "explorer.h"
 #include "Gp.h"
 #include "mywindows.h"
@@ -324,43 +323,44 @@ void Button::disConnect()
 	yEP = nullptr;
 }
 
-Button& Button::operator=(const Button& b)
+Button::Button(const Button& b)
+	: binded(b.binded),
+	font(b.font),
+	p(b.p),
+	x(b.x),
+	y(b.y),
+	xE(b.xE),
+	yE(b.yE),
+	xP(b.xP),
+	yP(b.yP),
+	xEP(b.xEP),
+	yEP(b.yEP),
+	xAdd(b.xAdd),
+	yAdd(b.yAdd),
+	xEAdd(b.xEAdd),
+	yEAdd(b.yEAdd),
+	TextW(b.TextW),
+	TextH(b.TextH),
+	x2WW(b.x2WW),
+	y2WH(b.y2WH),
+	xE2WW(b.xE2WW),
+	yE2WH(b.yE2WH),
+	R(b.R),
+	G(b.G),
+	B(b.B),
+	BmapC(b.BmapC),
+	FuncCounts(b.FuncCounts),
+	DisableBmap(b.DisableBmap),
+	DisableStr(b.DisableStr),
+	Disable(b.Disable),
+	Moving(b.Moving),
+	IsVertical(b.IsVertical),
+	text(b.text),
+	functions(b.functions),
+	music_string(b.music_string),
+	move_timer(b.move_timer)
 {
-	if (this == &b)return *this;
-	x = b.x;
-	y = b.y;
-	xE = b.xE;
-	yE = b.yE;
-	xP = &x;
-	yP = &y;
-	xEP = &xE;
-	yEP = &yE;
-	x2WW = b.x2WW;
-	y2WH = b.y2WH;
-	xE2WW = b.xE2WW;
-	yE2WH = b.yE2WH;
-	xAdd = b.xAdd;
-	yAdd = b.yAdd;
-	xEAdd = b.xEAdd;
-	yEAdd = b.yEAdd;
-	R = b.R;
-	G = b.G;
-	B = b.B;
-	font = b.font;
-	BmapC = b.BmapC;
-	FuncCounts = b.FuncCounts;
-	DisableBmap = b.DisableBmap;
-	DisableStr = b.DisableStr;
-	Disable = b.Disable;
-	Moving = b.Moving;
-	IsVertical = b.IsVertical;
-	text = b.text;
-	TextW = b.TextW;
-	TextH = b.TextH;
-	functions = b.functions;
-	music_string = b.music_string;
-	//move_timer = b.move_timer;
-	return *this;
+	// 拷贝构造函数的主体可以为空，因为所有成员变量都已经在初始化列表中被正确复制
 }
 
 Button::Breturn Button::Binded() const
@@ -400,6 +400,51 @@ bool Button::operator==(const Button& b) const
 		return true;
 	else
 		return false;
+}
+
+Button& Button::operator=(const Button& b)
+{
+	if (this == &b)
+		return *this; // 防止自我赋值
+
+	// 复制所有成员变量
+	binded = b.binded;
+	font = b.font;
+	p = b.p;
+	x = b.x;
+	y = b.y;
+	xE = b.xE;
+	yE = b.yE;
+	xP = b.xP;
+	yP = b.yP;
+	xEP = b.xEP;
+	yEP = b.yEP;
+	xAdd = b.xAdd;
+	yAdd = b.yAdd;
+	xEAdd = b.xEAdd;
+	yEAdd = b.yEAdd;
+	TextW = b.TextW;
+	TextH = b.TextH;
+	x2WW = b.x2WW;
+	y2WH = b.y2WH;
+	xE2WW = b.xE2WW;
+	yE2WH = b.yE2WH;
+	R = b.R;
+	G = b.G;
+	B = b.B;
+	BmapC = b.BmapC;
+	FuncCounts = b.FuncCounts;
+	DisableBmap = b.DisableBmap;
+	DisableStr = b.DisableStr;
+	Disable = b.Disable;
+	Moving = b.Moving;
+	IsVertical = b.IsVertical;
+	text = b.text;
+	functions = b.functions;
+	music_string = b.music_string;
+	move_timer = b.move_timer; // Timer 类的赋值运算符是隐式删除的，所以这里需要注意
+
+	return *this;
 }
 
 int Button::bind(const std::function<void()>& func, const int condition)

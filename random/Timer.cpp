@@ -107,3 +107,15 @@ Timer::TimerInfo Timer::getTimerInfo() const
 	info.name = name;
 	return info;
 }
+
+Timer& Timer::operator=(const Timer& t)
+{
+	if (this == &t)return *this;
+	kill = t.kill;
+	IsUsing = t.IsUsing;
+	IsPool = t.IsPool;
+	name = t.name;
+	WaitFor = t.WaitFor;
+	CallBack = t.CallBack;
+	return *this;
+}

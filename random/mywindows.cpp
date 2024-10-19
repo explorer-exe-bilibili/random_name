@@ -1,26 +1,14 @@
 ﻿#include "mywindows.h"
-#include <mmsystem.h>
 #include <cstdarg>
 #include <filesystem>
-#include"sth2sth.h"
 
 #pragma comment(lib, "winmm.lib") // 链接到 Winmm.lib
 
-std::mutex mywindows::logMutex, mywindows::randomlock;
-int mywindows::screenHeight = GetSystemMetrics(SM_CYSCREEN);
-int mywindows::screenWidth = GetSystemMetrics(SM_CXSCREEN);
-int mywindows::WW = screenWidth;
-int mywindows::WH = screenHeight;
-int mywindows::windowTop;
-int mywindows::windowLeft;
-int mywindows::indices[10];
-HWND mywindows::main_hwnd;
-HWND mywindows::load_hwnd;
-HWND mywindows::float_hWnd;
-HWND mywindows::Quit_hwnd;
-HINSTANCE mywindows::hinstance = nullptr;
-Log mywindows::logf(LOGPATH, 0), mywindows::errlogf(ERR_LOGPATH, 0);
-bool mywindows::debug = false;
+namespace mywindows
+{
+	Log logf(LOGPATH, 0), errlogf(ERR_LOGPATH, 0);
+}
+
 
 // 创建多级目录
 bool mywindows::CreatedMultipleDirectory(const std::string& direct)

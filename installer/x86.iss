@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "random name"
-#define MyAppVersion "1.1.0"
+#define MyAppVersion "1.9.0"
 #define MyAppExeName "random.exe"
 #define MyAppAssocName MyAppName + " File"
 #define MyAppAssocExt ".myp"
@@ -20,9 +20,9 @@ ChangesAssociations=yes
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
-OutputDir=C:\Users\Administrator\Desktop
+OutputDir=D:\Users\explorer\source\repos\random_name\release86\x86
 OutputBaseFilename=random_namex86_setup
-SetupIconFile=C:\Users\Administrator\source\repos\random_name\random\OIP-C.ico
+SetupIconFile=D:\Users\explorer\source\repos\random_name\random\OIP-C.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -56,11 +56,12 @@ Name: "turkish"; MessagesFile: "compiler:Languages\Turkish.isl"
 Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 
 [Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checked
 
 [Files]
-Source: "C:\Users\Administrator\source\repos\random_name\Win32\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Administrator\Desktop\out\x86\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "D:\Users\explorer\Source\Repos\random_name\Win32\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "D:\Users\explorer\Source\Repos\random_name\Win32\Release\upgrade.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "D:\Users\explorer\Source\Repos\random_name\Release86\files\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]

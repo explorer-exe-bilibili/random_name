@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "Random Name"
-#define MyAppVersion "1.5.0"
+#define MyAppVersion "1.9.0"
 #define MyAppURL "https://my-alist.me/"
 #define MyAppExeName "random.exe"
 #define MyAppAssocName MyAppName + " File"
@@ -26,9 +26,9 @@ DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 PrivilegesRequiredOverridesAllowed=dialog
-OutputDir=C:\Users\Administrator\Desktop\out
+OutputDir=D:\Users\explorer\source\repos\random_name\release\x64
 OutputBaseFilename=Random Name setupx86-64
-SetupIconFile=C:\Users\Administrator\source\repos\random_name\random\OIP-C.ico
+SetupIconFile=D:\Users\explorer\source\repos\random_name\random\OIP-C.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -62,11 +62,12 @@ Name: "turkish"; MessagesFile: "compiler:Languages\Turkish.isl"
 Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 
 [Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
 
 [Files]
-Source: "C:\Users\Administrator\source\repos\random_name\x64\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Administrator\Desktop\out\x64\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "D:\Users\explorer\Source\Repos\random_name\x64\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "D:\Users\explorer\Source\Repos\random_name\x64\Release\upgrade.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "D:\Users\explorer\Source\Repos\random_name\Release\files\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]
@@ -81,6 +82,5 @@ Name: "{autoprograms}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"
 Name: "{autodesktop}\{#MyAppName}"; Filename: "{app}\{#MyAppExeName}"; Tasks: desktopicon
 
 [Run]
-Filename: "{app}\files\fontinstall.bat"; Description: "安装字体（首次安装）"; Flags: postinstall
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, '&', '&&')}}"; Flags: nowait postinstall skipifsilent
 

@@ -33,15 +33,6 @@
     <ClCompile Include="local.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
-    <ClCompile Include="json_value.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="json_reader.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="json_writer.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Log.h">
@@ -63,15 +54,6 @@
       <Filter>头文件</Filter>
     </ClInclude>
     <ClInclude Include="local.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="value.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="reader.h">
-      <Filter>头文件</Filter>
-    </ClInclude>
-    <ClInclude Include="writer.h">
       <Filter>头文件</Filter>
     </ClInclude>
   </ItemGroup>
