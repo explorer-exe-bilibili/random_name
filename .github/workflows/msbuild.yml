@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        platform: ['x64', 'x86','arm64']
+        platform: ['x64', 'x86', 'arm64']
 
     steps:
     - uses: actions/checkout@v2
@@ -26,7 +26,7 @@ jobs:
         .\vcpkg\bootstrap-vcpkg.bat
         .\vcpkg\vcpkg integrate install
 
-    - name: Setup MSBuild
+    - name: Setup MSBuild——安装 MSBuild
       uses: microsoft/setup-msbuild@v1
 
     - name: Restore dependencies
@@ -35,9 +35,8 @@ jobs:
         .\vcpkg\vcpkg install
 
     - name: Build Solution for ${{ matrix.platform }}
-    run: |
-      msbuild /m /p:Configuration=Release /p:RuntimeLibrary=MultiThreaded /p:Platform=${{ matrix.platform }} random.sln
-
+      run: |
+        msbuild /m /p:Configuration=Release /p:RuntimeLibrary=MultiThreaded /p:Platform=${{ matrix.platform }} random.sln
 
     - name: Package Artifact for ${{ matrix.platform }}
       run: |
@@ -45,7 +44,7 @@ jobs:
         Compress-Archive -Path .\YourProject\bin\Release\${{ matrix.platform }}\* -DestinationPath $artifactName
         echo "ARTIFACT_NAME=$artifactName" >> $env:GITHUB_ENV
 
-    - name: Upload Artifact for {{ matrix.platform }}
+    - name: Upload Artifact for ${{ matrix.platform }}
       uses: actions/upload-artifact@v3
       with:
         name: ${{ env.ARTIFACT_NAME }}
