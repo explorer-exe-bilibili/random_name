@@ -30,16 +30,19 @@ jobs:
       uses: microsoft/setup-msbuild@v1
 
     - name: Restore dependencies
-      run: .\vcpkg\vcpkg install
-
-    - name: Build Solution for matrix.platform
       run: |
-        msbuild /m /p:Configuration=Release /p:Platform="{{ matrix.platform }}" random.sln
+        set VCPKG_FEATURE_FLAGS=manifests,static
+        .\vcpkg\vcpkg install
 
-    - name: Package Artifact for matrix.platform
+    - name: Build Solution for ${{ matrix.platform }}
+    run: |
+      msbuild /m /p:Configuration=Release /p:RuntimeLibrary=MultiThreaded /p:Platform=${{ matrix.platform }} random.sln
+
+
+    - name: Package Artifact for ${{ matrix.platform }}
       run: |
-        $artifactName = "YourArtifact_{{ matrix.platform }}"
-        Compress-Archive -Path .\YourProject\bin\Release\{{ matrix.platform }}\* -DestinationPath $artifactName
+        $artifactName = "YourArtifact_${{ matrix.platform }}"
+        Compress-Archive -Path .\YourProject\bin\Release\${{ matrix.platform }}\* -DestinationPath $artifactName
         echo "ARTIFACT_NAME=$artifactName" >> $env:GITHUB_ENV
 
     - name: Upload Artifact for {{ matrix.platform }}
