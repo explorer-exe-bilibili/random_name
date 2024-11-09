@@ -24,7 +24,6 @@ jobs:
         git clone https://github.com/microsoft/vcpkg.git
         .\vcpkg\bootstrap-vcpkg.bat
         .\vcpkg\vcpkg integrate install
-        .\vcpkg\vcpkg upgrade --no-dry-run
 
     - name: Setup MSBuild
       uses: microsoft/setup-msbuild@v1
