@@ -36,8 +36,7 @@ jobs:
 
     - name: Build Solution for ${{ matrix.platform }}
       run: |
-        msbuild /m /p:Configuration=Release /p:RuntimeLibrary=MultiThreaded /p:Platform=${{ matrix.platform }} random.sln
-
+        msbuild /m /p:Configuration=Release /p:RuntimeLibrary=MultiThreaded /p:Platform=${{ matrix.platform }} /p:VcpkgTriplet=${{ matrix.platform }}-windows random.sln
     - name: Package Artifact for ${{ matrix.platform }}
       run: |
         $artifactName = "YourArtifact_${{ matrix.platform }}"
