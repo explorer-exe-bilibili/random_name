@@ -32,9 +32,18 @@ jobs:
     - name: Restore dependencies
       run: .\vcpkg\vcpkg install
 
-    - name: Build Solution for matrix.platformrun:msbuild/m/p:Configuration=Release/p:Platform=&quot;{{ matrix.platform }}" YourSolution.sln
+    - name: Build Solution for matrix.platform
+      run: |
+        msbuild /m /p:Configuration=Release /p:Platform="{{ matrix.platform }}" random.sln
 
-    - name: Package Artifact for matrix.platformrun:∣artifactName = "YourArtifact_KaTeX parse error: Undefined control sequence: \YourProject at position 60: …Archive -Path .\̲Y̲o̲u̲r̲P̲r̲o̲j̲e̲c̲t̲\bin\Release_{{ matrix.platform }}\* -DestinationPath artifactNameecho&quot;ARTIFACTN​AME=artifactName" >> env:GITHUBE​NV−name:UploadArtifactfor{{ matrix.platform }}
+    - name: Package Artifact for matrix.platform
+      run: |
+        $artifactName = "YourArtifact_{{ matrix.platform }}"
+        Compress-Archive -Path .\YourProject\bin\Release\{{ matrix.platform }}\* -DestinationPath $artifactName
+        echo "ARTIFACT_NAME=$artifactName" >> $env:GITHUB_ENV
+
+    - name: Upload Artifact for {{ matrix.platform }}
       uses: actions/upload-artifact@v2
       with:
-        name: env.ARTIFACTN​AMEpath:{{ env.ARTIFACT_NAME }}
+        name: ${{ env.ARTIFACT_NAME }}
+        path: ${{ env.ARTIFACT_NAME }}
