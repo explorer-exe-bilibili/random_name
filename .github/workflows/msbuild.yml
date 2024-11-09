@@ -36,7 +36,7 @@ jobs:
 
     - name: Build Solution for ${{ matrix.platform }}
       run: |
-        msbuild /m /p:Configuration=Release /p:RuntimeLibrary=MultiThreaded /p:Platform=${{ matrix.platform }} /p:VcpkgTriplet=${{ matrix.platform }}-windows /p:VcpkgEnabled=true /p:VcpkgRoot=.\vcpkg random.sln
+        msbuild /m /p:Configuration=Release /p:RuntimeLibrary=MultiThreaded /p:Platform=${{ matrix.platform }} /p:VcpkgTriplet=${{ matrix.platform }}-windows /p:VcpkgEnabled=true /p:VcpkgRoot=.\vcpkg random.sln /verbosity:diagnostic
 
     - name: Package Artifact for ${{ matrix.platform }}
       run: |
