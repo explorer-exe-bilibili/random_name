@@ -32,6 +32,7 @@ jobs:
     - name: Restore dependencies
       run: |
         set VCPKG_FEATURE_FLAGS=manifests,static
+        .\vcpkg.exe integrate install
         .\vcpkg\vcpkg install
 
     - name: Build Solution for ${{ matrix.platform }}
