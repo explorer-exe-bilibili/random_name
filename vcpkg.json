@@ -1,5 +1,5 @@
 {
-    "name": "random_name",
+    "name": "random-name",
     "version-string": "0.1.0",
     "dependencies": [
         "uchardet",
