@@ -4,6 +4,7 @@
 #include "explorer.h"
 #include "Gp.h"
 #include "mywindows.h"
+#include "set-json.h"
 #include "ui.h"
 
 bool Button::needFresh = false;
@@ -48,7 +49,7 @@ int Button::click(const int condition, const int x, const int y) const
 		if (x >= *xP AND x <= *xEP AND y >= *yP AND y <= *yEP)
 		{
 			if (!music_string.empty())
-				explorer::getInstance()->PlayMusic(music_string);
+				explorer::PlayMusic(music_string);
 			if (functions.size()>condition)
 			{
 				functions[condition]();
@@ -73,6 +74,10 @@ void Button::paint() const
 		OR(y > mywindows::WH AND yE > mywindows::WH))
 		return;
 	if(!p)return;
+	if (!DisableBackGroundColor)
+	{
+		p->DrawSquare(x, y, xE, yE, BackGround_argb, true);
+	}
 	if(!DisableBmap)
 		p->Paint(x, y, xE-x, yE-y,BmapC);
 	if (!DisableStr) {
@@ -80,20 +85,20 @@ void Button::paint() const
 		if (IsVertical)
 		{
 			if (font != nullptr)
-				p->DrawVerticalStringBetween(text, *font, x, y, xE, yE, R, G, B);
+				p->DrawVerticalStringBetween(text, *font, x, y, xE, yE, Text_argb);
 			else
-				p->DrawVerticalStringBetween(text, ui::text_mid, x, y, xE, yE, R, G, B);
+				p->DrawVerticalStringBetween(text, ui::text_mid, x, y, xE, yE, Text_argb);
 		}
 		else {
 			if (font != nullptr)
-				p->DrawStringBetween(text, *font, x, y, xE, yE, R, G, B);
+				p->DrawStringBetween(text, *font, x, y, xE, yE, Text_argb);
 			else
-				p->DrawStringBetween(text, ui::text_mid, x, y, xE, yE, R, G, B);
+				p->DrawStringBetween(text, ui::text_mid, x, y, xE, yE, Text_argb);
 		}
 	}
 	if(debug)
 	{
-		p->DrawSquare(x, y, xE, yE, 255, 0, 0, false);
+		p->DrawSquare(x, y, xE, yE, ARGB(255,255,0,0), false);
 	}
 }
 
@@ -104,12 +109,10 @@ void Button::setText(const std::wstring& NewText, const int DisableBmap)
 		this->DisableBmap = DisableBmap;
 }
 
-void Button::setTextColor(const int R, const int G, const int B, const int DisableBmap)
+void Button::setTextColor(uint32_t argb, int DisableBmap)
 {
-	this->R = R;
-	this->G = G;
-	this->B = B;
-	if(DisableBmap!=-1)
+	this->Text_argb = argb;
+	if (DisableBmap != -1)
 		this->DisableBmap = DisableBmap;
 }
 
@@ -157,6 +160,11 @@ void Button::setDisableBmap(const bool newValue)
 	DisableBmap = newValue;
 }
 
+void Button::setDisableBkColor(bool newValue)
+{
+	DisableBackGroundColor = newValue;
+}
+
 void Button::setMusic(const std::string& music_string)
 {
 	this->music_string = music_string;
@@ -175,6 +183,11 @@ void Button::setDisable(bool newValue)
 void Button::setVertical(bool newValue)
 {
 	IsVertical = newValue;
+}
+
+void Button::setBkColor(uint32_t newValue)
+{
+	BackGround_argb = newValue;
 }
 
 void Button::MoveTo(int x, int y, int xend, int yend, bool smoothly, double xVelocity, double yVelocity, const std::function<void()>& Callback)
@@ -198,80 +211,92 @@ void Button::MoveTo(int x, int y, int xend, int yend, bool smoothly, double xVel
 		move_timer.setDelay(1000 / 60);
 		move_timer.setPool(true);
 		move_timer.setCallBack([this, x, y, xend, yend, xVelocity, yVelocity, Callback]() {
-			//InvalidateRect(mywindows::main_hwnd, nullptr, false);
-			needFresh = true;
-			if (this->x < x ) {
-				this->x += xVelocity;
-				if (x < this->x)
+			__try {
+				if (set2::noSmoothUI)
+				{
 					this->x = x;
-				if (xend == -1) {
-					this->xE += xVelocity;
+					this->y = y;
+					this->xE = xend;
+					this->yE = yend;
+				}
+				//InvalidateRect(mywindows::main_hwnd, nullptr, false);
+				needFresh = true;
+				if (this->x < x) {
+					this->x += xVelocity;
 					if (x < this->x)
-						this->xE = xend;
+						this->x = x;
+					if (xend == -1) {
+						this->xE += xVelocity;
+						if (x < this->x)
+							this->xE = xend;
+					}
 				}
-			}
-			else if (this->x > x) {
-				this->x -= xVelocity;
-				if (x > this->x)
-					this->x = x;
-				if (xend == -1) {
-					this->xE -= xVelocity;
+				else if (this->x > x) {
+					this->x -= xVelocity;
 					if (x > this->x)
-						this->xE = xend;
+						this->x = x;
+					if (xend == -1) {
+						this->xE -= xVelocity;
+						if (x > this->x)
+							this->xE = xend;
+					}
 				}
-			}
-			if (this->y < y) {
-				this->y += yVelocity;
-				if (y < this->y)
-					this->y = y;
-				if (yend == -1) {
-					this->yE += yVelocity;
+				if (this->y < y) {
+					this->y += yVelocity;
 					if (y < this->y)
-						this->yE = yend;
+						this->y = y;
+					if (yend == -1) {
+						this->yE += yVelocity;
+						if (y < this->y)
+							this->yE = yend;
+					}
 				}
-			}
-			else if (this->y > y) {
-				this->y -= yVelocity;
-				if (y > this->y)
-					this->y = y;
-				if (yend == -1) {
-					this->yE += yVelocity;
+				else if (this->y > y) {
+					this->y -= yVelocity;
 					if (y > this->y)
 						this->y = y;
+					if (yend == -1) {
+						this->yE += yVelocity;
+						if (y > this->y)
+							this->y = y;
+					}
+				}
+				if (this->xE < xend AND xend != -1) {
+					this->xE += xVelocity;
+					if (xend < this->xE)
+						this->xE = xend;
+				}
+				else if (this->xE > xend AND xend != -1) {
+					this->xE -= xVelocity;
+					if (xend > this->xE)
+						this->xE = xend;
+				}
+				if (this->yE < yend AND yend != -1) {
+					this->yE += yVelocity;
+					if (yend < this->yE)
+						this->yE = yend;
+				}
+				else if (this->yE > yend AND yend != -1) {
+					this->yE -= yVelocity;
+					if (yend > this->yE)
+						this->yE = yend;
+				}
+				//检测是否在屏幕外
+				if ((this->x > mywindows::WW OR this->xE < 0)AND(this->y > mywindows::WH OR this->yE < 0))
+				{
+					this->x = x;
+					this->y = y;
+					this->xE = xend;
+					this->yE = yend;
+				}
+				if (int(this->x) == x AND int(this->y) == y AND(int(this->xE) == xend OR xend == -1) AND(int(this->yE) == yend OR yend == -1)) {
+					this->move_timer.stop();
+					Moving = false;
+					if (Callback)Callback();
 				}
 			}
-			if (this->xE < xend AND xend != -1) {
-				this->xE += xVelocity;
-				if (xend < this->xE)
-					this->xE = xend;
-			}
-			else if (this->xE > xend AND xend != -1) {
-				this->xE -= xVelocity;
-				if (xend > this->xE)
-					this->xE = xend;
-			}
-			if (this->yE < yend AND yend != -1) {
-				this->yE += yVelocity;
-				if (yend < this->yE)
-					this->yE = yend;
-			}
-			else if (this->yE > yend AND yend != -1) {
-				this->yE -= yVelocity;
-				if (yend > this->yE)
-					this->yE = yend;
-			}
-			//检测是否在屏幕外
-			if ((this->x > mywindows::WW OR this->xE < 0)AND(this->y > mywindows::WH OR this->yE < 0))
-			{
-				this->x = x;
-				this->y = y;
-				this->xE = xend;
-				this->yE = yend;
-			}
-			if (int(this->x) == x AND int(this->y) == y AND(int(this->xE) == xend OR xend == -1) AND(int(this->yE) == yend OR yend == -1)) {
-				this->move_timer.stop();
-				Moving = false;
-				if (Callback)Callback();
+			__except(EXCEPTION_EXECUTE_HANDLER){
+				return;
 			}
 		});
 		move_timer.init();
@@ -323,46 +348,6 @@ void Button::disConnect()
 	yEP = nullptr;
 }
 
-Button::Button(const Button& b)
-	: binded(b.binded),
-	font(b.font),
-	p(b.p),
-	x(b.x),
-	y(b.y),
-	xE(b.xE),
-	yE(b.yE),
-	xP(b.xP),
-	yP(b.yP),
-	xEP(b.xEP),
-	yEP(b.yEP),
-	xAdd(b.xAdd),
-	yAdd(b.yAdd),
-	xEAdd(b.xEAdd),
-	yEAdd(b.yEAdd),
-	TextW(b.TextW),
-	TextH(b.TextH),
-	x2WW(b.x2WW),
-	y2WH(b.y2WH),
-	xE2WW(b.xE2WW),
-	yE2WH(b.yE2WH),
-	R(b.R),
-	G(b.G),
-	B(b.B),
-	BmapC(b.BmapC),
-	FuncCounts(b.FuncCounts),
-	DisableBmap(b.DisableBmap),
-	DisableStr(b.DisableStr),
-	Disable(b.Disable),
-	Moving(b.Moving),
-	IsVertical(b.IsVertical),
-	text(b.text),
-	functions(b.functions),
-	music_string(b.music_string),
-	move_timer(b.move_timer)
-{
-	// 拷贝构造函数的主体可以为空，因为所有成员变量都已经在初始化列表中被正确复制
-}
-
 Button::Breturn Button::Binded() const
 {
 	if(binded!=nullptr){
@@ -400,51 +385,6 @@ bool Button::operator==(const Button& b) const
 		return true;
 	else
 		return false;
-}
-
-Button& Button::operator=(const Button& b)
-{
-	if (this == &b)
-		return *this; // 防止自我赋值
-
-	// 复制所有成员变量
-	binded = b.binded;
-	font = b.font;
-	p = b.p;
-	x = b.x;
-	y = b.y;
-	xE = b.xE;
-	yE = b.yE;
-	xP = b.xP;
-	yP = b.yP;
-	xEP = b.xEP;
-	yEP = b.yEP;
-	xAdd = b.xAdd;
-	yAdd = b.yAdd;
-	xEAdd = b.xEAdd;
-	yEAdd = b.yEAdd;
-	TextW = b.TextW;
-	TextH = b.TextH;
-	x2WW = b.x2WW;
-	y2WH = b.y2WH;
-	xE2WW = b.xE2WW;
-	yE2WH = b.yE2WH;
-	R = b.R;
-	G = b.G;
-	B = b.B;
-	BmapC = b.BmapC;
-	FuncCounts = b.FuncCounts;
-	DisableBmap = b.DisableBmap;
-	DisableStr = b.DisableStr;
-	Disable = b.Disable;
-	Moving = b.Moving;
-	IsVertical = b.IsVertical;
-	text = b.text;
-	functions = b.functions;
-	music_string = b.music_string;
-	move_timer = b.move_timer; // Timer 类的赋值运算符是隐式删除的，所以这里需要注意
-
-	return *this;
 }
 
 int Button::bind(const std::function<void()>& func, const int condition)

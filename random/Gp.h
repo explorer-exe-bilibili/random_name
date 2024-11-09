@@ -8,13 +8,16 @@
 #include "explorer.h"
 #pragma comment(lib,"gdiplus.lib")
 
+#define ARGB(a,r,g,b)	((uint32_t)(((BYTE)(b)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(r))<<16)|(((DWORD)(BYTE)(a))<<24)))
+
+
 class Gp
 {
 public:
 	struct StaticPaintInfo
 	{
 		int xDest, yDest;
-		unsigned char r, g, b;
+		uint32_t argb;
 		std::wstring str;
 		HFONT font;
 	};
@@ -28,15 +31,15 @@ private:
 
 	struct FontInfo
 	{
-		unsigned char R = 255, G = 255, B = 255;
-		HFONT font = 0;
+		uint32_t argb = 0xFFFFFFFF;
+		HFONT font = nullptr;
 		bool operator==(const FontInfo&) const;
 		bool operator!=(const FontInfo&) const;
 		operator bool() const;
 	}NowFontInfo, LastFontInfo;
 	HWND hwnd;
 	HDC hdc;
-	bool cachedHDC = 0, cachedGraphics = 0, cachedFont = 0, cachedBrush = 0;
+	bool cachedHDC = false, cachedGraphics = false, cachedFont = false, cachedBrush = false;
 	std::shared_ptr<Gdiplus::Graphics> graphic;
 	std::shared_ptr<Gdiplus::Bitmap> buffer;
 	explorer* ptr;
@@ -56,31 +59,23 @@ public:
 	void Paint(int xDest, int yDest, int number, unsigned char alpha_count = 255);
 	void Paint(int xDest, int yDest, int wDest, int hDest,
 		HBITMAP hbitmap, unsigned char alpha_count = 255);
-	void DrawString(const std::wstring& str, HFONT font, int x, int y,
-		unsigned char R = 255, unsigned char G = 255, unsigned char B = 255);
-	void DrawString(const std::string& str, HFONT font, int x, int y,
-		unsigned char R = 255, unsigned char G = 255, unsigned char B = 255);
-	void DrawStringBetween(const std::wstring& str, HFONT font, int x, int y, int xend, int yend,
-		unsigned char R = 255, unsigned char G = 255, unsigned char B = 255);
-	void DrawstringBetween(const std::string& str, HFONT font, int x, int y, int xend, int yend,
-		unsigned char R = 255, unsigned char G = 255, unsigned char B = 255);
-	void DrawVerticalString(const std::wstring& str, HFONT font, int x, int y,
-		unsigned char R = 255, unsigned char G = 255, unsigned char B = 255);
-	void DrawVerticalString(const std::string& str, HFONT font, int x, int y,
-		unsigned char R = 255, unsigned char G = 255, unsigned char B = 255);
-	void DrawVerticalStringBetween(const std::wstring& str, HFONT font, int x, int y, int xend, int yend,
-		unsigned char R = 255, unsigned char G = 255, unsigned char B = 255);
-	void DrawVerticalStringBetween(const std::string& str, HFONT font, int x, int y, int xend, int yend,
-		unsigned char R = 255, unsigned char G = 255, unsigned char B = 255);
-	void DrawChar(wchar_t ch, HFONT font, int x, int y,
-		unsigned char R = 255, unsigned char G = 255, unsigned char B = 255);
-	void DrawChar(char ch, HFONT font, int x, int y,
-		unsigned char R = 255, unsigned char G = 255, unsigned char B = 255);
+	void DrawString(const std::wstring& str, HFONT font, int x, int y,uint32_t argb=0xFFFFFFFF);
+	void DrawString(const std::string& str, HFONT font, int x, int y,uint32_t argb=0xFFFFFFFF);
+	void DrawStringBetween(const std::wstring& str, HFONT font, int x, int y, int xend, int yend,uint32_t argb=0xFFFFFFFF);
+	void DrawstringBetween(const std::string& str, HFONT font, int x, int y, int xend, int yend,uint32_t argb=0xFFFFFFFF);
+	void DrawVerticalString(const std::wstring& str, HFONT font, int x, int y,uint32_t argb=0xFFFFFFFF);
+	void DrawVerticalString(const std::string& str, HFONT font, int x, int y,uint32_t argb=0xFFFFFFFF);
+	void DrawVerticalStringBetween(const std::wstring& str, HFONT font, int x
+		, int y, int xend, int yend,uint32_t argb=0xFFFFFFFF);
+	void DrawVerticalStringBetween(const std::string& str, HFONT font, int x,
+		int y, int xend, int yend,uint32_t argb=0xFFFFFFFF);
+	void DrawChar(wchar_t ch, HFONT font, int x, int y,uint32_t argb=0xFFFFFFFF);
+	void DrawChar(char ch, HFONT font, int x, int y,uint32_t argb=0xFFFFFFFF);
 	void AddStaticPaintItem(const StaticPaintInfo& Item);
 	void ClearStaticPaintItem();
 	HDC GetDC();
 	void ReleaseDC(HDC hdc);
-	void DrawSquare(int xDest, int yDest, int xEnd, int yEnd, int R, int G, int B, bool filled);
+	void DrawSquare(int xDest, int yDest, int xEnd, int yEnd, uint32_t color, bool filled);
 	void LockWindowSize() const;
 	void UnlockWindowSize() const;
 };

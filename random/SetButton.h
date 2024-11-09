@@ -6,6 +6,7 @@
 
 class Gp;
 class Button;
+//class MyEditBox;
 
 class SetButton
 {
@@ -22,12 +23,15 @@ class SetButton
 	std::vector<point>  ButtonRect;
 	std::vector<Button> buttons;
 	Gp * p=nullptr;
-	HWND textboxHwnd = nullptr;
+	HWND textBoxhwnd=nullptr;
+	//MyEditBox* editBox = nullptr;
 	void OpenFile() const;
+	void ChooseColor_();
 	void ChooseFile() const;
 	void ChooseDir() const;
 	static void FullScreen();
 	void load();
+	//static MyEditBox* CreateEditBox(HWND hWndParent, int number, const point& rect, const wchar_t* words);
 	static HWND CreateEditBox(HWND hWndParent, int number, const point& rect, const wchar_t* words);
 	void EditBoxEditor(const std::wstring& tmp) const;
 public:
@@ -46,3 +50,22 @@ public:
 	static bool needReran, needReboot;
 };
 
+//class MyEditBox
+//{
+//public:
+//	MyEditBox(HWND parent, const RECT& rect, int id);
+//	HWND GetHwnd() const { return hwnd; }
+//	void SetText(const std::wstring& text) const;
+//	std::wstring GetText() const;
+//	void SetBackgroundColor(COLORREF color);
+//	void Show() const;
+//	void Unshow() const;
+//private:
+//	HWND hwnd,parent_hwnd;
+//	COLORREF bgColor;
+//	HBRUSH hBrush;
+//	RECT rect;
+//	int id;
+//	static LRESULT CALLBACK EditBoxProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam);
+//	static WNDPROC oldProc;
+//};

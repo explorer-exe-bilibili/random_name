@@ -22,7 +22,7 @@ class set2
 	std::vector<spage> pages;
 	std::vector<Button> buttons;
 public:
-	static bool offVideo, reran, offMusic, fullscreen, FloatWindow;
+	static bool offVideo, reran, offMusic, fullscreen, FloatWindow,noSmoothUI;
 	int page;
 	set2();
 	~set2();
@@ -39,7 +39,7 @@ public:
 private:
 	std::string G2U(const std::string& gbk);
 	std::string U2G(const std::string& utf8);
-	nlohmann::json rollback(std::string jsonpath);
+	nlohmann::json rollback(const std::string& jsonpath);
 	void changePage() const;
 	static void init();
 	void Load(const std::string& jsonpath);

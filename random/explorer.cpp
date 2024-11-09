@@ -212,7 +212,6 @@ void explorer::Load()
 	presses = 98;
 	mciSendString(L"open .\\files\\mp3\\result-list.mp3 alias list", nullptr, 0, nullptr);
 	presses = 100;
-	mciSendString(L"play bgm from 0 repeat", nullptr, 0, nullptr);
 	ShowWindow(mywindows::main_hwnd, SW_SHOW);
 }
 

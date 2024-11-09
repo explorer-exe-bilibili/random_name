@@ -123,27 +123,27 @@ void FirstScreen::regButtons()
 	buttons[EXITBUTTON].setBmapC(exitBu, 1);
 	buttons[EXITBUTTON].setMusic(ENTER);
 	buttons[EXITBUTTON].setxy2WWWH(0.9, 0.045, 0.93, 0.105);
-	buttons[HIS].bind([] {ui::HS->enter(); });
+	buttons[HIS].bind([] { HistoryScreen::enter(); });
 	buttons[HIS].setDisable(true);
 	buttons[HIS].setFont(&ui::text);
 	buttons[HIS].setMusic(ENTER);
 	buttons[HIS].setText(L"历史记录");
-	buttons[HIS].setTextColor(0, 0, 0);
+	buttons[HIS].setTextColor(ARGB(255,0,0,0));
 	buttons[HIS].setxy2WWWH(0.18, 0.85, 0.253, 0.886);
 	buttons[OFFVIDEO].bind([this]
 	{
-		ui::SS->offVideo = !ui::SS->offVideo;
+		set2::offVideo = !set2::offVideo;
 		InvalidateRect(mywindows::main_hwnd, nullptr, FALSE);
 	});
 	buttons[OFFVIDEO].setFont(&ui::text);
 	buttons[OFFVIDEO].setMusic(CLICK_MUSIC);
-	buttons[OFFVIDEO].setTextColor(0, 0, 0);
+	buttons[OFFVIDEO].setTextColor(ARGB(255,0,0,0));
 	buttons[OFFVIDEO].setxy2WWWH(0.1, 0.85, 0.173, 0.886);
-	buttons[SET].bind([] { ui::SS->enter(); });
+	buttons[SET].bind([] { set2::enter(); });
 	buttons[SET].setFont(&ui::icon_mid, 1);
 	buttons[SET].setMusic(ENTER);
 	buttons[SET].setText(SETICON);
-	buttons[SET].setTextColor(211, 188, 142);
+	buttons[SET].setTextColor(ARGB(255,211, 188, 142));
 	buttons[SET].setxy2WWWH(0.05, 0.85, 0.073, 0.886);
 	buttons[X1].bind([] { ui::NS->ShowName1(); });
 	buttons[X1].setBmapC(pink1, 1);
@@ -172,14 +172,14 @@ void FirstScreen::regButtons()
 void FirstScreen::enter()
 {
 	ui::ScreenMode = FIRST_SCREEN;
-	if (!ui::SS->offMusic)
+	if (!set2::offMusic)
 		mciSendString(L"play bgm repeat", nullptr, 0, nullptr);
 }
 
 void FirstScreen::paint()
 {
 	p->Paint(0, 0, mywindows::WW, mywindows::WH, BackGround);
-	if(ui::SS->offVideo)
+	if(set2::offVideo)
 	{
 		buttons[OFFVIDEO].setText(L"跳过视频:开");
 	}

@@ -10,6 +10,7 @@
 #include <thread>
 
 #include "Button.h"
+#include "getname.h"
 #include "Gp.h"
 #include "SetButton.h"
 
@@ -18,6 +19,7 @@ bool set2::reran = false;
 bool set2::offMusic = false;
 bool set2::fullscreen = false;
 bool set2::FloatWindow = false;
+bool set2::noSmoothUI = false;
 
 Log slog("files\\log\\set-json.log", true);
 using namespace std;
@@ -35,6 +37,11 @@ void set2::quit() const
 		if (choose == IDYES)
 			mywindows::reboot();
 		SetButton::needReboot = false;
+	}
+	if(SetButton::needReran)
+	{
+		for (auto i = 0; i <= 4; i++)
+			getname::getInstance()->ReRandom(i);
 	}
 	ui::ScreenMode = FIRST_SCREEN;
 	ui::ScreenModeChanged = true;
@@ -84,6 +91,7 @@ void set2::rereadConfig() {
 	fullscreen = config::getint(INWINDOW);
 	offVideo = config::getint(OFF_VIDEO);
 	FloatWindow = config::getint(FLOATWINDOW);
+	noSmoothUI = config::getint(NOSMOOTHUI);
 	if (offMusic)
 		mciSendString(L"stop bgm", nullptr, 0, nullptr);
 	else
@@ -99,7 +107,7 @@ void set2::paint() const
 	const int titlex = (mywindows::WW - stringWidth) / 2;
 	const int titley = mywindows::WH / 20;
 	p->DrawString(title, ui::text_mid, titlex, titley);
-	p->DrawString(t, ui::text_mid, mywindows::WW * 0.755, mywindows::WH * 0.91, 236, 229, 216);
+	p->DrawString(t, ui::text_mid, mywindows::WW * 0.755, mywindows::WH * 0.91, ARGB(255, 236, 229, 216));
 	for(auto&b:pages[page-1].buttons)
 	{
 		b->show();
@@ -164,6 +172,7 @@ void set2::Load(const string& jsonpath) {
 				t.IsEditBox = sItem.value("IsEditBox", 0);
 				t.IsSwitch = sItem.value("IsSwitch", 0);
 				t.IsDir = sItem.value("IsDir", 0);
+				t.IsColor = sItem.value("IsColor", 0);
 				t.Limit = sItem.value("Limit", NOLIMIT);
 				t.Number = sItem.value("Number", in);
 				t.BitmapNumber = sItem.value("BitmapNumber", 0);
@@ -191,6 +200,7 @@ void set2::Load(const string& jsonpath) {
 				t.IsEditBox = false;
 				t.IsSwitch = false;
 				t.IsDir = false;
+				t.IsColor = false;
 				t.Limit = NOLIMIT;
 				t.Number = in;
 				t.ConfigName = L"unknow";
@@ -265,7 +275,7 @@ void set2::regButton()
 	next.setText(L"c");
 	next.setDisableBmap(true);
 	next.setxy2WWWH(0.8, 0.91, 0.822, 0.95);
-	next.setTextColor(236, 229, 216);
+	next.setTextColor(ARGB(255,236, 229, 216));
 	next.setMusic(CLICK_MUSIC);
 	next.setFont(&ui::icon_mid);
 	next.bind([this]()

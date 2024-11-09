@@ -1,6 +1,7 @@
 #include "MenuItem.h"
 
 #include "explorer.h"
+#include "Gp.h"
 #include "mywindows.h"
 #include "ui.h"
 
@@ -90,7 +91,7 @@ void MenuItem::setButton()
 	button.setGp(p);
 	button.setText(name);
 	button.setVertical(true);
-	button.setTextColor(255, 255, 255);
+	button.setTextColor(ARGB(255, 255, 255, 255));
 	button.setFont(&ui::text_list);
 	button.setBmapC(star + 11);
 	button.setPoint(mywindows::WW, 0, mywindows::WW * 1.078, mywindows::WH);

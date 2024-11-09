@@ -36,15 +36,17 @@ protected:
 	Button *binded=nullptr;
 	HFONT* font=nullptr;
 	Gp *p=nullptr;
+	uint32_t Text_argb = 0xFFFFFFFF;
+	uint32_t BackGround_argb = 0xFFFFFFFF;
 	double x=0, y=0, xE=0, yE=0;
 	double* xP, * yP, * xEP, * yEP;
 	int xAdd=0, yAdd = 0, xEAdd = 0, yEAdd = 0;
 	int TextW=-1,TextH=-1;
 	double x2WW=0,y2WH=0,xE2WW=0,yE2WH=0;
-	unsigned char R= 255, G = 255, B = 255;
 	int BmapC = BUTTON;
 	int FuncCounts=0;
 	bool DisableBmap = false, DisableStr = false, Disable = false, Moving = false, IsVertical = false;
+	bool DisableBackGroundColor = true;
 	std::wstring text;
 	std::vector<std::function<void()>> functions;
 	std::string music_string;
@@ -53,7 +55,6 @@ public:
 	static bool needFresh;
 
 	Button(int x, int y, int xE, int yE,int BitmapC=BUTTON, const std::wstring& text=L"");
-	Button(const Button& b);
 	Button();
 	~Button();
 
@@ -63,17 +64,19 @@ public:
 
 
 	void setText(const std::wstring& NewText,int DisableBmap=-1);
-	void setTextColor(int R, int G, int B,int DisableBmap=-1);
+	void setTextColor(uint32_t argb,int DisableBmap=-1);
 	void setPoint(int x, int y, int xE, int yE);
 	void setxy2WWWH(double x2WW, double y2WH, double xE2WW=-1, double yE2WH=-1);
 	void setBmapC(int Bmapc,int DisableStr=-1);
 	void setFont(HFONT* font,int DisableBmap=-1);
 	void setDisableStr(bool newValue);
 	void setDisableBmap(bool newValue);
+	void setDisableBkColor(bool newValue);
 	void setMusic(const std::string& music_string);
 	void setGp(Gp *p);
 	void setDisable(bool newValue);
 	void setVertical(bool newValue);
+	void setBkColor(uint32_t newValue);
 
 	void MoveTo(int x, int y, int xend = -1, int yend = -1, bool smoothly = true
 	            , double xVelocity = 1, double yVelocity = 1, const std::function<void()>& Callback=nullptr);
@@ -86,7 +89,6 @@ public:
 
 	explicit operator bool() const;
 	bool operator==(const Button& b) const;
-	Button& operator=(const Button&);
 
 
 	int bind(const std::function<void()>& func,int condition = CLICK);

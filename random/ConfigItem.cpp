@@ -7,7 +7,7 @@
 #include <filesystem>
 
 using namespace std;
-
+#define ARGB(a,r,g,b)	((uint32_t)(((BYTE)(b)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(r))<<16)|(((DWORD)(BYTE)(a))<<24)))
 extern wstring configPath;
 
 //读取和补全配置项
@@ -31,9 +31,9 @@ int config::init() {
 		add(SPECIAL, L"0");
 		add(MODE, L"1");
 		add(MU, L"0.9");
-		add(TEXTR, L"0");
-		add(TEXTG, L"125");
-		add(TEXTB, L"125");
+		//add(TEXTR, L"0");
+		//add(TEXTG, L"125");
+		//add(TEXTB, L"125");
 		add(FPS, L"60");
 		add(UNSUITFONT, L"0");
 		add(DEBUG, L"0");
@@ -42,7 +42,10 @@ int config::init() {
 		add(FLOATWINDOW, L"1");
 		add(TYPICAL, L"0");
 		add(MEM, L"0");
+		add(NOSMOOTHUI, L"0");
 		add(SPEED_FIRST_SCREEN, L"50");
+		add(NAME_COLOR_6_STAR, ARGB(255, 0, 125, 125));
+		add(NAME_COLOR, ARGB(255, 0, 125, 125));
 		add(WINDOW_TITLE, L"祈愿");
 		add(OVER4, L"\\files\\imgs\\over4.jpg");
 		add(OVER3, L"\\files\\imgs\\over3.jpg");
@@ -98,17 +101,19 @@ int config::init() {
 		LogString = get(TYPICAL);
 		if (LogString == L"err")add(TYPICAL, L"0");
 		LogString = get(MU);
-		if (LogString == L"err")add(MU, L"0.9");
+		if (LogString == L"err")add(MU, L"0.9");/*
 		LogString = get(TEXTR);
 		if (LogString == L"err")add(TEXTR, L"0");
 		LogString = get(TEXTG);
 		if (LogString == L"err")add(TEXTG, L"125");
 		LogString = get(TEXTB);
-		if (LogString == L"err")add(TEXTB, L"125");
+		if (LogString == L"err")add(TEXTB, L"125");*/
 		LogString = get(FPS);
 		if (LogString == L"err")add(FPS, L"60");
 		LogString = get(MEM);
 		if (LogString == L"err")add(MEM, L"0");
+		LogString = get(NOSMOOTHUI);
+		if (LogString == L"err")add(NOSMOOTHUI, L"0");
 		LogString = get(SPEED_FIRST_SCREEN);
 		if (LogString == L"err")add(SPEED_FIRST_SCREEN, L"50");
 		LogString = get(FLOATX);

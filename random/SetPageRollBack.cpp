@@ -8,7 +8,7 @@
 using namespace std;
 using namespace nlohmann;
 
-json set2::rollback(string jsonpath) {
+json set2::rollback(const string& jsonpath) {
 	Log slog("files\\log\\set-json.log", 0);
 	slog << "try to rollback setting page" << endl;
 	// 创建JSON数据
@@ -44,14 +44,9 @@ json set2::rollback(string jsonpath) {
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("卡池4名单"); i[CONFIGNAME] = "namesfile4"; i[FILECHOOSE] = G2U("选择卡池4名单"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 4;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("抽卡时名字的R值(RGB)"); i[CONFIGNAME] = "text red"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 255; i[MIN] = 0;
-	i[OUTOFLIMIT] = G2U("输入一个0-255之间的数字"); i[NUMBER] = 5;
+	i[NAME] = G2U("抽卡时名字的颜色"); i[CONFIGNAME] = "name color"; i[ISCOLOR] = 1; i[NUMBER] = 5;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("抽卡时名字的G值(RGB)"); i[CONFIGNAME] = "text green"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 255; i[MIN] = 0;
-	i[OUTOFLIMIT] = G2U("输入一个0-255之间的数字"); i[NUMBER] = 6;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("抽卡时名字的B值(RGB)"); i[CONFIGNAME] = "text blue"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 255; i[MIN] = 0;
-	i[OUTOFLIMIT] = G2U("输入一个0-255之间的数字"); i[NUMBER] = 7;
+	i[NAME] = G2U("抽卡时6星名字的颜色"); i[CONFIGNAME] = "6 star name color"; i[ISCOLOR] = 1; i[NUMBER] = 6;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("抽背卡池"); i[CONFIGNAME] = "special"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 4; i[MIN] = 0;
 	i[OUTOFLIMIT] = G2U("输入一个0-4之间的数字（0表示禁用）"); i[NUMBER] = 11;
@@ -104,7 +99,7 @@ json set2::rollback(string jsonpath) {
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("标题"); i[CONFIGNAME] = "title name"; i[ISEDIT] = 1; i[LIMIT] = S_WINDOWTITLE; i[NUMBER] = 2;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("设置页面json文件开关"); i[CONFIGNAME] = "cancel setting json file"; i[ISSWITCH] = 1; i[NUMBER] = 3;
+	i[NAME] = G2U("设置页面不使用json文件"); i[CONFIGNAME] = "cancel setting json file"; i[ISSWITCH] = 1; i[NUMBER] = 3;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("字体兼容模式(出现字体错误再开)"); i[CONFIGNAME] = "the new font is unsuit"; i[ISSWITCH] = 1; i[NUMBER] = 4;
 	p["item"].push_back(i); i.clear();
@@ -113,6 +108,8 @@ json set2::rollback(string jsonpath) {
 	i[NAME] = G2U("调试模式"); i[ISSWITCH] = 1; i[NUMBER] = 5; i[CONFIGNAME] = "debug mode"; i[LIMIT] = REBOOT;
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("省内存模式"); i[ISSWITCH] = 1; i[NUMBER] = 6; i[CONFIGNAME] = "small memory"; i[LIMIT] = REBOOT;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("关闭动画"); i[ISSWITCH] = 1; i[NUMBER] = 8; i[CONFIGNAME] = "no smooth ui"; 
 	p["item"].push_back(i); i.clear();
 	i[NAME] = G2U("图片资源目录"); i[ISEDIT] = 1; i[NUMBER] = 7; i[CONFIGNAME] = "ImageDirectory"; i[LIMIT] = REBOOT; i[ISDIR] = 1;
 	p["item"].push_back(i); i.clear();

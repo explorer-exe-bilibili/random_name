@@ -13,7 +13,8 @@ enum limits
 	S_WINDOWTITLE = 1 << 2,
 	ISFILE = 1 << 3,
 	ISBITMAP = 1 << 4,
-	FLOATPIC = 1 << 5
+	FLOATPIC = 1 << 5,
+	RELOADCONFIG = 1 << 6
 };
 #define MAXWINDOWSIZE 1145141919
 #define BITMAPC "BitmapNumber"
@@ -23,6 +24,7 @@ enum limits
 #define ISEDIT "IsEditBox"
 #define ISSWITCH "IsSwitch"
 #define ISDIR "IsDir"
+#define ISCOLOR "IsColor"
 #define LIMIT "Limit"
 #define NAME "Name"
 #define NUMBER "Number"
@@ -36,6 +38,7 @@ struct sitem {
 	bool IsFile = false;
 	bool IsSwitch = false;
 	bool IsDir = false;
+	bool IsColor = false;
 	int Number = 0;
 	int max = 0;
 	int min = 0;
@@ -46,5 +49,4 @@ struct sitem {
 	std::wstring FileChooseWindowName;
 	std::string FileType;
 	std::string OutOfLimitOutPut;
-	bool needReload = false;
 };

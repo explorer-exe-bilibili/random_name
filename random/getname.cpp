@@ -1,10 +1,16 @@
-﻿#include "getname.h"
+﻿#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
+
+#include "getname.h"
+
+#include <codecvt>
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <ctime>
 #include <cstdlib>
 #include <random>
+
+#include<uchardet/uchardet.h>
 
 #include"mywindows.h"
 #include"config.h"
@@ -14,8 +20,9 @@
 using namespace std;
 
 getname* getname::instance = nullptr;
+std::string detectEncoding(const std::wstring& filename);
 
-getname::getname()
+getname::getname():fileerr(false)
 {
 	for(int i=0;i<config::getint(POOL_COUNT);i++)
 	{
@@ -97,25 +104,90 @@ std::string getname::Make(const std::string& input) {
 		return sth2sth::wstr2stru(trimmed);
 	}
 }
+//std::string getname::RandomLineFromFile(const std::wstring& filename)
+//{
+//	std::vector<std::string> lines;
+//	std::ifstream file(filename);
+//	if (!file)
+//	{
+//		mywindows::errlog("文件不存在");
+//		return "FOF";
+//	}
+//	std::string line = "";
+//	while (std::getline(file, line))
+//	{
+//		lines.push_back(line);
+//	}
+//	if (lines.empty())
+//	{
+//		mywindows::errlog("file is empty");
+//		return "File is empty";
+//	}
+//	// 随机选择一行
+//	int randomIndex;
+//	do {
+//		std::srand(static_cast<unsigned int>(std::time(nullptr)) * seed);
+//		int temp = rand();
+//		std::srand(((static_cast<unsigned int>(std::time(nullptr))) * seed + temp) * rand());
+//		randomIndex = std::rand() % lines.size();
+//		seed++;
+//	} while (lines[randomIndex].empty());
+//	return lines[randomIndex];
+//}
+
+
 std::string getname::RandomLineFromFile(const std::wstring& filename)
 {
 	std::vector<std::string> lines;
-	std::ifstream file(filename);
+	std::wifstream file(filename);
 	if (!file)
 	{
 		mywindows::errlog("文件不存在");
 		return "FOF";
 	}
-	std::string line = "";
+
+	// 自动检测文件编码
+	std::string encoding;
+	try {
+		encoding = detectEncoding(filename);
+	}
+	catch (const std::exception& e) {
+		mywindows::errlog(e.what());
+		return "FOF";
+	}
+
+	// 设置文件流的编码
+	if (encoding == "UTF-8")
+	{
+		file.imbue(std::locale(file.getloc(), new std::codecvt_utf8<wchar_t>));
+	}
+	else if (encoding == "GBK" || encoding == "GB2312" || encoding == "GB18030")
+	{
+		file.imbue(locale("zh_cn"));
+	}
+	else if (encoding == "windows-1252" || encoding == "ISO-8859-1")
+	{
+		file.imbue(std::locale("en_us"));
+	}
+	else if (encoding == "UTF-16")
+	{
+		file.imbue(std::locale(file.getloc(), new std::codecvt_utf16<wchar_t, 0x10ffff, std::little_endian>));
+	}
+	// 你可以根据需要添加更多的编码支持
+
+	std::wstring line;
 	while (std::getline(file, line))
 	{
-		lines.push_back(line);
+		// 将 wstring 转换为 UTF-8 编码的 string
+		std::wstring_convert<std::codecvt_utf8<wchar_t>> conv;
+		lines.push_back(conv.to_bytes(line));
 	}
 	if (lines.empty())
 	{
 		mywindows::errlog("file is empty");
 		return "File is empty";
 	}
+
 	// 随机选择一行
 	int randomIndex;
 	do {
@@ -127,6 +199,7 @@ std::string getname::RandomLineFromFile(const std::wstring& filename)
 	} while (lines[randomIndex].empty());
 	return lines[randomIndex];
 }
+
 int getname::randomIntegerBetween(const int min, const int max) {
 	// 初始化随机数生成器
 	srand(static_cast<unsigned int>(time(nullptr)) + seed2);
@@ -217,4 +290,24 @@ int getname::random_star()
 	else {
 		return 3;
 	}
+}
+
+
+std::string detectEncoding(const std::wstring& filename) {
+	std::ifstream file(filename, std::ios::binary);
+	if (!file) {
+		throw std::runtime_error("文件不存在");
+	}
+
+	std::vector<char> buffer((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+	uchardet_t ud = uchardet_new();
+	if (uchardet_handle_data(ud, buffer.data(), buffer.size()) != 0) {
+		uchardet_delete(ud);
+		throw std::runtime_error("无法检测文件编码");
+	}
+	uchardet_data_end(ud);
+	const char* encoding = uchardet_get_charset(ud);
+	std::string result(encoding);
+	uchardet_delete(ud);
+	return result;
 }

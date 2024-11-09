@@ -155,7 +155,7 @@ void HistoryScreen::show()
 	}
 	for (int j = 0; j < history[page].size(); j++)
 	{
-#define rgb 255,255,255
+#define rgb ARGB(255,255,255,255)
 		p->DrawString(history[page][j].time, ui::text_mid, xy[j].TimeX, xy[j].y, rgb);
 		p->DrawString(history[page][j].name, ui::text_mid, xy[j].x, xy[j].y, rgb);
 		p->DrawString(std::to_wstring(history[page][j].star), ui::text_mid, xy[j].starX, xy[j].y, rgb);

@@ -17,7 +17,7 @@ void NameButton::paint() const
 	p->Paint(x, y, xE - x, yE - y, hBitmap);
 	if (debug)
 	{
-		p->DrawSquare(x, y, xE, yE, 255, 0, 0, 0);
+		p->DrawSquare(x, y, xE, yE, ARGB(255,255,0,0), false);
 	}
 }
 

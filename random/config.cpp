@@ -1,6 +1,8 @@
 ﻿// ReSharper disable CppClangTidyConcurrencyMtUnsafe
+#define _SILENCE_CXX17_CODECVT_HEADER_DEPRECATION_WARNING
 #include "config.h"
 
+#include <codecvt>
 #include <sstream>
 
 #include"mywindows.h"
@@ -166,53 +168,68 @@ void config::add(const std::wstring& name, const std::wstring& value) {
 }
 void config::add(const std::wstring& name, const int value)
 {
-	Node* current = head;
-
-	while (current != nullptr) {
-		if (current->item.name == name) {
-			current->item.value = to_wstring(value);
-			return;
-		}
-		current = current->next;
-	}
-
-	ConfigItem newItem;
-	newItem.name = name;
-	newItem.value = std::to_wstring(value);
-
-	const auto newNode = new Node;
-	if (newNode == nullptr) {
-		mywindows::errlog(L"Memory allocation error(add)");
-		return;
-	}
-
-	newNode->item = newItem;
-	newNode->next = head;
-	head = newNode;
+	add(name,to_wstring(value));
 }
 
 // 读取配置文件并保存配置项到链表
+//void config::readFile() {
+//	std::wifstream file(configPath);
+//	if (!file.is_open()) {
+//		mywindows::errlog(L"Error opening file for reading");
+//		return;
+//	}
+//	file.imbue(std::locale(""));
+//	wstring line;
+//	while (std::getline(file, line)) {
+//		std::wistringstream iss(line);
+//		std::wstring currentOption, value;
+//		if (std::getline(iss, currentOption, L'=') && std::getline(iss, value))
+//		{
+//			add(currentOption, value);
+//		}
+//		else
+//		{
+//			wstring err = L"读取配置时遇到错误，配置项的名称是： " + wstring(currentOption) +
+//				L"请按是检查配置文件，或者按否删除配置文件以恢复默认设置修复错误，或者按取消关闭程序";
+//			switch (MessageBox(nullptr, err.c_str(), L"严重错误", MB_ICONERROR | MB_YESNOCANCEL))
+//			{
+//			case IDYES:
+//				ShellExecute(nullptr, L"open", configPath.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
+//				exit(-1);
+//				break;
+//			case IDNO:
+//				file.close();
+//				_wremove(configPath.c_str());
+//				mywindows::reboot();
+//				break;
+//			case IDCANCEL:
+//				exit(-1);
+//				break;
+//			default: ;
+//			}
+//		}
+//	}
+//	file.close();
+//}
+
 void config::readFile() {
 	std::wifstream file(configPath);
 	if (!file.is_open()) {
 		mywindows::errlog(L"Error opening file for reading");
 		return;
 	}
-	file.imbue(std::locale(""));
-	wstring line;
+	file.imbue(std::locale(file.getloc(), new codecvt_utf8<wchar_t>));
+	std::wstring line;
 	while (std::getline(file, line)) {
 		std::wistringstream iss(line);
 		std::wstring currentOption, value;
-		if (std::getline(iss, currentOption, L'=') && std::getline(iss, value))
-		{
+		if (std::getline(iss, currentOption, L'=') && std::getline(iss, value)) {
 			add(currentOption, value);
 		}
-		else
-		{
-			wstring err = L"读取配置时遇到错误，配置项的名称是： " + wstring(currentOption) +
+		else {
+			std::wstring err = L"读取配置时遇到错误，配置项的名称是： " + currentOption +
 				L"请按是检查配置文件，或者按否删除配置文件以恢复默认设置修复错误，或者按取消关闭程序";
-			switch (MessageBox(nullptr, err.c_str(), L"严重错误", MB_ICONERROR | MB_YESNOCANCEL))
-			{
+			switch (MessageBox(nullptr, err.c_str(), L"严重错误", MB_ICONERROR | MB_YESNOCANCEL)) {
 			case IDYES:
 				ShellExecute(nullptr, L"open", configPath.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
 				exit(-1);
@@ -225,33 +242,46 @@ void config::readFile() {
 			case IDCANCEL:
 				exit(-1);
 				break;
-			default: ;
+			default:
+				break;
 			}
 		}
 	}
 	file.close();
 }
 
-
-
-// 保存配置项到配置文件
 void config::saveFile() {
 	std::wofstream file(configPath);
-	if (!file.is_open())
-	{
+	if (!file.is_open()) {
 		mywindows::errlog(L"Error opening file for writing config");
 		return;
 	}
-	// 设置本地化，确保正确处理宽字符
-	file.imbue(std::locale(""));
+	file.imbue(std::locale(file.getloc(), new std::codecvt_utf8<wchar_t>));
 	const Node* current = head;
-	while(current!=nullptr)
-	{
+	while (current != nullptr) {
 		file << current->item.name << L"=" << current->item.value << L'\n';
 		current = current->next;
 	}
 	file.close();
 }
+// 保存配置项到配置文件
+//void config::saveFile() {
+//	std::wofstream file(configPath);
+//	if (!file.is_open())
+//	{
+//		mywindows::errlog(L"Error opening file for writing config");
+//		return;
+//	}
+//	// 设置本地化，确保正确处理宽字符
+//	file.imbue(std::locale(""));
+//	const Node* current = head;
+//	while(current!=nullptr)
+//	{
+//		file << current->item.name << L"=" << current->item.value << L'\n';
+//		current = current->next;
+//	}
+//	file.close();
+//}
 // 释放链表节点的内存
 void config::cleanup() {
 	const Node* current = head;

@@ -10,14 +10,14 @@ using namespace std;
 
 bool Gp::FontInfo::operator==(const FontInfo& newFont) const
 {
-	if (R == newFont.R && G == newFont.G && B == newFont.B && font == newFont.font)
+	if (argb == newFont.argb && font == newFont.font)
 		return true;
 	else return false;
 }
 
 bool Gp::FontInfo::operator!=(const FontInfo& newFont) const
 {
-	if (R != newFont.R || G != newFont.G || B != newFont.B || font != newFont.font)
+	if (argb!=newFont.argb || font != newFont.font)
 		return true;
 	else return false;
 }
@@ -45,7 +45,7 @@ struct Gp::TextNeeds Gp::getTextNeeds()
 	}
 	if (!cachedBrush)
 	{
-		TextNeeds.brush = make_shared<SolidBrush>(Color(255, NowFontInfo.R, NowFontInfo.G, NowFontInfo.B));
+		TextNeeds.brush = make_shared<SolidBrush>(Color(NowFontInfo.argb));
 		cachedBrush = true;
 	}
 	if(NowFontInfo!=LastFontInfo)
@@ -53,7 +53,8 @@ struct Gp::TextNeeds Gp::getTextNeeds()
 		TextNeeds.brush.reset();
 		TextNeeds.font.reset();
 		TextNeeds.font = make_shared<Font>(hdc, NowFontInfo.font);
-		TextNeeds.brush = make_shared<SolidBrush>(Color(255, NowFontInfo.R, NowFontInfo.G, NowFontInfo.B));
+		TextNeeds.brush = make_shared<SolidBrush>(Color(NowFontInfo.argb));
+		
 		LastFontInfo = NowFontInfo;
 	}
 	return TextNeeds;
@@ -71,18 +72,12 @@ void Gp::releaseTextNeeds()
 
 void Gp::PaintStaticItems()
 {
+	std::lock_guard lock(SizeChangeMutex);
 	for (auto& i : StaticPaintList)
 	{
 		if (IsBadReadPtr(i.str.c_str(), sizeof(wchar_t) * i.str.length()))continue;
 		if (i.str.empty())continue;
-		try
-		{
-			DrawString(i.str, i.font, i.xDest, i.yDest, i.r, i.g, i.b);
-		}
-		catch (exception e)
-		{
-			mywindows::errlogf << e.what() << endl;
-		}
+		DrawString(i.str, i.font, i.xDest, i.yDest, i.argb);
 	}
 }
 
@@ -97,7 +92,6 @@ Gp::Gp(HWND hwnd):hwnd(hwnd){
 }
 
 void Gp::Flush() {
-	std::lock_guard lock(SizeChangeMutex);
 	PaintStaticItems();
 	ReleaseDC(hdc);
 	releaseTextNeeds();
@@ -232,10 +226,10 @@ void Gp::Paint(int xDest, int yDest, int wDest, int hDest, HBITMAP hbitmap, unsi
 	DeleteDC(hdcMem);
 }
 
-void Gp::DrawString(const std::wstring& str, const HFONT font, const int x, const int y, unsigned const char R, unsigned const char G, unsigned const char B) {
+void Gp::DrawString(const std::wstring& str, const HFONT font, const int x, const int y,uint32_t argb) {
 	//std::lock_guard lock(SizeChangeMutex);
 	if (!font)return;
-	NowFontInfo = { R,G,B,font };
+	NowFontInfo = { argb,font };
 	const auto TextNeeds = getTextNeeds();
 	// 绘制文本
 	wstring wstr = str;
@@ -243,17 +237,16 @@ void Gp::DrawString(const std::wstring& str, const HFONT font, const int x, cons
 	TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), PointF(x, y), TextNeeds.brush.get());
 }
 
-void Gp::DrawString(const std::string& str, const HFONT font, const int x, const int y, unsigned const char R, unsigned const char G, unsigned const char B) {
+void Gp::DrawString(const std::string& str, const HFONT font, const int x, const int y,uint32_t argb) {
 	std::lock_guard lock(SizeChangeMutex);
-	NowFontInfo = { R,G,B,font };
+	NowFontInfo = { argb,font };
 	const auto TextNeeds = getTextNeeds();
 	const std::wstring wstr(str.begin(), str.end());
 	// 绘制文本
 	TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), PointF(x, y), TextNeeds.brush.get());
 }
 
-void Gp::DrawStringBetween(const std::wstring& str, HFONT font, int x, int y, int xend, int yend, unsigned char R,
-	unsigned char G, unsigned char B){
+void Gp::DrawStringBetween(const std::wstring& str, HFONT font, int x, int y, int xend, int yend, uint32_t argb){
 	// 创建一个GDI+ RectF对象，表示文本绘制的区域
 	std::lock_guard lock(SizeChangeMutex);
 	const RectF layoutRect(x, y, xend - x, yend - y);
@@ -262,13 +255,13 @@ void Gp::DrawStringBetween(const std::wstring& str, HFONT font, int x, int y, in
 	StringFormat format;
 	format.SetAlignment(StringAlignmentCenter);
 	format.SetLineAlignment(StringAlignmentCenter);
-	NowFontInfo = { R,G,B,font };
+	NowFontInfo = { argb,font };
 	const auto TextNeeds = getTextNeeds();
 	// 绘制文本
 	TextNeeds.hdc_graphics->DrawString(str.c_str(), -1, TextNeeds.font.get(), layoutRect, &format, TextNeeds.brush.get());
 }
 
-void Gp::DrawstringBetween(const std::string& str, HFONT font, int x, int y, int xend, int yend, unsigned char R, unsigned char G, unsigned char B)
+void Gp::DrawstringBetween(const std::string& str, HFONT font, int x, int y, int xend, int yend,uint32_t argb)
 {
 	std::lock_guard lock(SizeChangeMutex);
 	// 创建一个GDI+ RectF对象，表示文本绘制的区域
@@ -278,7 +271,7 @@ void Gp::DrawstringBetween(const std::string& str, HFONT font, int x, int y, int
 	StringFormat format;
 	format.SetAlignment(StringAlignmentCenter);
 	format.SetLineAlignment(StringAlignmentCenter);
-	NowFontInfo = { R,G,B,font };
+	NowFontInfo = { argb,font };
 	const auto TextNeeds = getTextNeeds();
 	// 绘制文本
 	const std::wstring wstr(str.begin(), str.end());
@@ -286,9 +279,9 @@ void Gp::DrawstringBetween(const std::string& str, HFONT font, int x, int y, int
 
 }
 
-void Gp::DrawVerticalString(const std::wstring& str, const HFONT font, const int x, const int y, unsigned const char R, unsigned const char G, unsigned const char B) {
+void Gp::DrawVerticalString(const std::wstring& str, const HFONT font, const int x, const int y,uint32_t argb) {
 	std::lock_guard lock(SizeChangeMutex);
-	NowFontInfo = { R,G,B,font };
+	NowFontInfo = { argb,font };
 	const auto TextNeeds = getTextNeeds();
 	// 绘制每个字符
 	int yOffset = y;
@@ -299,10 +292,10 @@ void Gp::DrawVerticalString(const std::wstring& str, const HFONT font, const int
 	}
 }
 
-void Gp::DrawVerticalString(const std::string& str, const HFONT font, const int x, const int y, unsigned const char R, unsigned const char G, unsigned const char B) {
+void Gp::DrawVerticalString(const std::string& str, const HFONT font, const int x, const int y,uint32_t argb) {
 
 	std::lock_guard lock(SizeChangeMutex);
-	NowFontInfo = { R,G,B,font };
+	NowFontInfo = { argb,font };
 	const auto TextNeeds = getTextNeeds();
 	// 绘制每个字符
 	int yOffset = y;
@@ -313,9 +306,9 @@ void Gp::DrawVerticalString(const std::string& str, const HFONT font, const int 
 	}
 }
 
-void Gp::DrawVerticalStringBetween(const std::wstring& str, const HFONT font, const int x, const int y, const int xend, const int yend, unsigned const char R, unsigned const char G, unsigned const char B) {
+void Gp::DrawVerticalStringBetween(const std::wstring& str, const HFONT font, const int x, const int y, const int xend, const int yend,uint32_t argb) {
 	std::lock_guard lock(SizeChangeMutex);
-	NowFontInfo = { R,G,B,font };
+	NowFontInfo = { argb,font };
 	const auto TextNeeds = getTextNeeds();
 	// 计算字符串的总高度
 	int totalHeight = 0;
@@ -332,14 +325,15 @@ void Gp::DrawVerticalStringBetween(const std::wstring& str, const HFONT font, co
 	// 绘制每个字符
 	for (const wchar_t& ch : str) {
 		std::wstring wstr(1, ch);
-		TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), PointF(xOffset, yOffset), TextNeeds.brush.get());
+		TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(),
+			PointF(xOffset, yOffset), TextNeeds.brush.get());
 		yOffset += TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get()); // 更新y偏移量
 	}
 }
 
-void Gp::DrawVerticalStringBetween(const std::string& str, const HFONT font, const int x, const int y, const int xend, const int yend, unsigned const char R, unsigned const char G, unsigned const char B) {
+void Gp::DrawVerticalStringBetween(const std::string& str, const HFONT font, const int x, const int y, const int xend, const int yend,uint32_t argb) {
 	std::lock_guard lock(SizeChangeMutex);
-	NowFontInfo = { R,G,B,font };
+	NowFontInfo = { argb,font };
 	const auto TextNeeds = getTextNeeds();
 	// 计算字符串的总高度
 	int totalHeight = 0;
@@ -356,26 +350,27 @@ void Gp::DrawVerticalStringBetween(const std::string& str, const HFONT font, con
 	// 绘制每个字符
 	for (const wchar_t& ch : str) {
 		std::wstring wstr(1, ch);
-		TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), PointF(xOffset, yOffset), TextNeeds.brush.get());
+		TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), 
+			PointF(xOffset, yOffset), TextNeeds.brush.get());
 		yOffset += TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get()); // 更新y偏移量
 	}
 }
 
-void Gp::DrawChar(const wchar_t ch, HFONT font, int x, int y, unsigned char R, unsigned char G, unsigned char B)
+void Gp::DrawChar(const wchar_t ch, HFONT font, int x, int y,uint32_t argb)
 {
 	std::lock_guard lock(SizeChangeMutex);
 	const std::wstring wstr(1, ch);
-	NowFontInfo = { R,G,B,font };
+	NowFontInfo = { argb,font };
 	const auto TextNeeds = getTextNeeds();
 	// 绘制文本
 	TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), PointF(x, y), TextNeeds.brush.get());
 }
 
-void Gp::DrawChar(const char ch, HFONT font, int x, int y, unsigned char R, unsigned char G, unsigned char B)
+void Gp::DrawChar(const char ch, HFONT font, int x, int y,uint32_t argb)
 {
 	std::lock_guard lock(SizeChangeMutex);
 	const std::wstring wstr(1, ch);
-	NowFontInfo = { R,G,B,font };
+	NowFontInfo = { argb,font };
 	const auto TextNeeds = getTextNeeds();
 	// 绘制文本
 	TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), PointF(x, y), TextNeeds.brush.get());
@@ -412,13 +407,13 @@ void Gp::ReleaseDC(const HDC hdc)
 	}
 }
 
-void Gp::DrawSquare(int xDest, int yDest, int xEnd, int yEnd, int R, int G, int B, bool filled)
+void Gp::DrawSquare(int xDest, int yDest, int xEnd, int yEnd, uint32_t color, bool filled)
 {
 	std::lock_guard lock(SizeChangeMutex);
 	hdc = GetDC();
 	if (filled) {
 		// 绘制实心矩形
-		const HBRUSH hBrush = CreateSolidBrush(RGB(R, G, B)); // 红色实心刷子
+		const HBRUSH hBrush = CreateSolidBrush(color&0x00FFFFFF); // 红色实心刷子
 		const HBRUSH hOldBrush = HBRUSH(SelectObject(hdc, hBrush));
 		Rectangle(hdc, xDest, yDest, xEnd, yEnd);
 		SelectObject(hdc, hOldBrush);
@@ -426,7 +421,7 @@ void Gp::DrawSquare(int xDest, int yDest, int xEnd, int yEnd, int R, int G, int 
 	}
 	else {
 		// 绘制空心矩形
-		const HPEN hPen = CreatePen(PS_SOLID, 2, RGB(R, G, B)); // 蓝色画笔
+		const HPEN hPen = CreatePen(PS_SOLID, 2, color&0x00FFFFFF); // 蓝色画笔
 		const HPEN hOldPen = HPEN(SelectObject(hdc, hPen));
 		const HBRUSH hNullBrush = HBRUSH(SelectObject(hdc, GetStockObject(NULL_BRUSH)));
 		Rectangle(hdc, xDest, yDest, xEnd, yEnd);

@@ -24,7 +24,6 @@ void MSGback::create()
 	QueryPerformanceCounter(&lastTime);
 	set2::reinit();
 	const HDC hdc = GetDC(nullptr);
-	init::music();
 	if (mywindows::float_hWnd != nullptr)
 		ShowWindow(mywindows::float_hWnd, SW_HIDE);
 	SetWindowPos(mywindows::main_hwnd, HWND_TOP, 0, 0, mywindows::WW, mywindows::WH, SWP_NOZORDER | SWP_FRAMECHANGED);
@@ -33,7 +32,9 @@ void MSGback::create()
 	ui::HS->setFile(L"./name.txt");
 	Pptr=new Gp(mywindows::main_hwnd);
 	init::resetPoint();
-	std::thread([] {while (true) { InvalidateRect(mywindows::main_hwnd, nullptr, FALSE);
+	std::thread([] {while (true) {
+		if(ui::ScreenMode!=SETTING)
+		InvalidateRect(mywindows::main_hwnd, nullptr, FALSE);
 	std::this_thread::sleep_for(std::chrono::milliseconds(300)); }}).detach();
 }
 bool _ = true;
@@ -58,7 +59,8 @@ void MSGback::paint()
 		loadWindow = nullptr;
 	}
 	if (set2::fullscreen&&_) {
-		SetWindowPos(mywindows::main_hwnd, nullptr, 0, 0, mywindows::screenWidth * 0.6, mywindows::screenHeight * 0.6, SWP_NOMOVE | SWP_NOZORDER);
+		SetWindowPos(mywindows::main_hwnd, nullptr, 0, 0, mywindows::screenWidth * 0.6
+			, mywindows::screenHeight * 0.6, SWP_NOMOVE | SWP_NOZORDER);
 	}
 	if(_)
 	{
@@ -83,7 +85,7 @@ void MSGback::paint()
 	}
 	updateFrameRate();
 	if (debug) {
-		Pptr->DrawString(("FPS:" + std::to_string(fps)), ui::text, 0, 0, 0, 0, 0);
+		Pptr->DrawString(("FPS:" + std::to_string(fps)), ui::text, 0, 0, ARGB(255 ,0, 0, 0));
 	}
 	Pptr->Flush();
 	mywindows::log("paint successfully");
@@ -165,7 +167,7 @@ void MSGback::showWindow(const WPARAM wParam)
 	{
 		ShowWindow(mywindows::float_hWnd, SW_SHOWNOACTIVATE);
 		if (!set2::offMusic)
-			explorer::getInstance()->stopMusic();
+			explorer::stopMusic();
 	}
 }
 

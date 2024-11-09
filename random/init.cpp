@@ -116,10 +116,8 @@ void init::main(WNDPROC w1, WNDPROC w2, WNDPROC w3)
 	set2::offMusic = config::getint(OFFMUSIC);
 	set2::FloatWindow = config::getint(FLOATWINDOW);
 	config();
-	DWORD threadId2;
-	CreateThread(nullptr, 0, LPTHREAD_START_ROUTINE(Upgrade), nullptr, 0, &threadId2);
-	mciSendString(L"open .\\files\\mp3\\backsound.mp3 alias bgm", nullptr, 0, nullptr);
-	// 打开 MP3 文件并创建一个别名 'bgm'
+	std::thread(Upgrade).detach();
+	music();
 }
 void init::music()
 {
