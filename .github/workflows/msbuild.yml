@@ -51,7 +51,7 @@ jobs:
         $filesPath = "${{ github.workspace }}\files"
         if (Test-Path $outputPath) {
           Compress-Archive -Path $outputPath\*, $filesPath\* -DestinationPath "${{ matrix.platform }}.zip"
-          echo "ARTIFACT_NAME=$artifactName.zip" >> $env:GITHUB_ENV
+          echo "ARTIFACT_NAME=${{ matrix.platform }}.zip" >> $env:GITHUB_ENV
         } else {
           Write-Error "The path '$outputPath' does not exist."
           exit 1
