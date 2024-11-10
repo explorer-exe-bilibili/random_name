@@ -44,15 +44,13 @@ jobs:
         VCPKG_ROOT: ${{ github.workspace }}/vcpkg
       run: |
         msbuild /m /p:Configuration=Release /p:RuntimeLibrary=MultiThreaded /p:Platform=${{ matrix.platform }} random.sln
-        tree
 
     - name: Package Artifact for ${{ matrix.platform }}
       run: |
-        $artifactName = "YourArtifact_${{ matrix.platform }}"
         $outputPath = "${{ github.workspace }}\${{ matrix.platform }}\Release"
         $filesPath = "${{ github.workspace }}\files"
         if (Test-Path $outputPath) {
-          Compress-Archive -Path $outputPath\*, $filesPath\* -DestinationPath $artifactName.zip
+          Compress-Archive -Path $outputPath\*, $filesPath\* -DestinationPath "${{ matrix.platform }}.zip"
           echo "ARTIFACT_NAME=$artifactName.zip" >> $env:GITHUB_ENV
         } else {
           Write-Error "The path '$outputPath' does not exist."
