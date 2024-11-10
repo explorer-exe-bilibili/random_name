@@ -38,6 +38,8 @@ jobs:
         set VCPKG_FEATURE_FLAGS=manifests
         .\vcpkg\vcpkg integrate install
         .\vcpkg\vcpkg install
+        .\vcpkg\vcpkg list
+        pwd
 
     - name: Build Solution for ${{ matrix.platform }}
       run: |
