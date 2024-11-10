@@ -58,11 +58,8 @@ jobs:
         $outputPath = "${{ github.workspace }}\${{ matrix.platform }}\Release"
         $filesPath = "${{ github.workspace }}\files"
         $platform_lower = "${{ matrix.platform }}".ToLower()
-        $platform_lower = "${{ matrix.platform }}".ToLower()
         if ($platform_lower -eq "x86") {
-          $outputPath = "${{ github.workspace }}\random\bin\Release\win32"
-        } else {
-          $outputPath = "${{ github.workspace }}\random\bin\Release\${platform_lower}"
+          $outputPath = "${{ github.workspace }}\win32\Release"
         }
         if (Test-Path $outputPath) {
           Compress-Archive -Path $outputPath\*, $filesPath\ -DestinationPath "${{ matrix.platform }}.zip"
