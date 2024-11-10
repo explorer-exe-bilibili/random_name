@@ -70,11 +70,11 @@ jobs:
         name: ${{ env.ARTIFACT_NAME }}
         path: ${{ env.ARTIFACT_NAME }}
   
-    # - name: Generate Inno Setup Installer
-    #   env:
-    #     GITHUB_ACTIONS: true
-    #   run: |
-    #     iscc installer\${{ matrix.platform }}.iss
+    - name: Generate Inno Setup Installer
+      env:
+        GITHUB_ACTIONS: true
+      run: |
+        iscc installer\${{ matrix.platform }}.iss
     
     - name: Upload Installer for ${{ matrix.platform }}
       uses: actions/upload-artifact@v3
