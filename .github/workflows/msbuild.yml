@@ -43,19 +43,21 @@ jobs:
       env:
         VCPKG_ROOT: ${{ github.workspace }}/vcpkg
       run: |
-        msbuild /m /p:Configuration=Release /p:RuntimeLibrary=MultiThreaded /p:Platform=${{ matrix.platform }} /p:VcpkgTriplet=${{ matrix.platform }}-windows /p:VcpkgEnabled=true random.sln /verbosity:diagnostic
+        msbuild /m /p:Configuration=Release /p:RuntimeLibrary=MultiThreaded /p:Platform=${{ matrix.platform }} random.sln
+        tree
 
     - name: Package Artifact for ${{ matrix.platform }}
       run: |
-          $artifactName = "YourArtifact_${{ matrix.platform }}"
-          $outputPath = "${{ github.workspace }}\random_name\bin\Release\${{ matrix.platform }}"
-          if (Test-Path $outputPath) {
-            Compress-Archive -Path $outputPath\* -DestinationPath $artifactName.zip
-            echo "ARTIFACT_NAME=$artifactName.zip" >> $env:GITHUB_ENV
-          } else {
-            Write-Error "The path '$outputPath' does not exist."
-            exit 1
-          }
+        $artifactName = "YourArtifact_${{ matrix.platform }}"
+        $outputPath = "${{ github.workspace }}\random_name\bin\Release\${{ matrix.platform }}"
+        $filesPath = "${{ github.workspace }}\files"
+        if (Test-Path $outputPath) {
+          Compress-Archive -Path $outputPath\*, $filesPath\* -DestinationPath $artifactName.zip
+          echo "ARTIFACT_NAME=$artifactName.zip" >> $env:GITHUB_ENV
+        } else {
+          Write-Error "The path '$outputPath' does not exist."
+          exit 1
+        }
     - name: Upload Artifact for ${{ matrix.platform }}
       uses: actions/upload-artifact@v3
       with:
