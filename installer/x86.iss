@@ -8,6 +8,9 @@
 #define MyAppAssocExt ".myp"
 #define MyAppAssocKey StringChange(MyAppAssocName, " ", "") + MyAppAssocExt
 
+#define MyAppSourceDir "D:\Users\explorer\Source\Repos\random_name"
+#define MyAppOutputDir "D:\Users\explorer\source\repos\random_name\release86\x86\"
+
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
@@ -20,9 +23,9 @@ ChangesAssociations=yes
 DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
-OutputDir=D:\Users\explorer\source\repos\random_name\release86\x86
+OutputDir={#MyAppOutputDir}
 OutputBaseFilename=random_namex86_setup
-SetupIconFile=D:\Users\explorer\source\repos\random_name\random\OIP-C.ico
+SetupIconFile={#MyAppSourceDir}\random\OIP-C.ico
 Compression=lzma
 SolidCompression=yes
 WizardStyle=modern
@@ -59,9 +62,9 @@ Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checked
 
 [Files]
-Source: "D:\Users\explorer\Source\Repos\random_name\Win32\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Users\explorer\Source\Repos\random_name\Win32\Release\upgrade.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Users\explorer\Source\Repos\random_name\Release86\files\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "{#MyAppSourceDir}\Win32\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#MyAppSourceDir}\Win32\Release\upgrade.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#MyAppSourceDir}\Release86\files\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Registry]
