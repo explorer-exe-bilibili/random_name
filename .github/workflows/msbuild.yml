@@ -42,6 +42,8 @@ jobs:
         pwd
 
     - name: Build Solution for ${{ matrix.platform }}
+      env:
+        VCPKG_ROOT: ${{ github.workspace }}/vcpkg
       run: |
         msbuild /m /p:Configuration=Release /p:RuntimeLibrary=MultiThreaded /p:Platform=${{ matrix.platform }} /p:VcpkgTriplet=${{ matrix.platform }}-windows /p:VcpkgEnabled=true random.sln /verbosity:diagnostic
 
