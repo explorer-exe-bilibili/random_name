@@ -30,7 +30,7 @@
         {
             "name": "curl",
             "default-features": false,
-            "features": ["static"]
+            "features": ["ssl", "non-http", "static"]
         },
         {
             "name": "zlib",
