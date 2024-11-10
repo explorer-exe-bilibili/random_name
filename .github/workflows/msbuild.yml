@@ -31,8 +31,8 @@ jobs:
     - name: Restore dependencies
       run: |
         set VCPKG_FEATURE_FLAGS=manifests
-        set VCPKG_CRT_LINKAGE = static
-        set VCPKG_LIBRARY_LINKAGE = static
+        # set VCPKG_CRT_LINKAGE = static
+        # set VCPKG_LIBRARY_LINKAGE = static
         set VCPKG_DEFAULT_TRIPLET = ${{ matrix.platform }}-windows-static
         .\vcpkg\vcpkg integrate install
         .\vcpkg\vcpkg install
