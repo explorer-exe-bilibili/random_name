@@ -33,6 +33,7 @@ bld/
 [Ll]og/
 [Ll]ogs/
 
+
 # Visual Studio 2015/2017 cache/options directory
 .vs/
 # Uncomment if you have tasks that create the project's static files in wwwroot
@@ -362,38 +363,9 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-files/
+/random/files
 /random/small.ico
 .zip
 /random/name.txt
 /Release86
-vcpkg_installed/x64-windows-static/vcpkg/info/vcpkg-cmake_2024-04-23_x64-windows.list
-vcpkg_installed/x64-windows-static/vcpkg/info/vcpkg-cmake-config_2024-05-23_x64-windows.list
-vcpkg_installed/x64-windows-static/vcpkg/info/zlib_1.3.1_x64-windows-static.list
-vcpkg_installed/x64-windows-static/vcpkg/updates/0000000000
-vcpkg_installed/x64-windows-static/vcpkg/updates/0000000001
-vcpkg_installed/x64-windows-static/vcpkg/updates/0000000002
-vcpkg_installed/x64-windows-static/vcpkg/updates/0000000003
-vcpkg_installed/x64-windows-static/vcpkg/updates/0000000004
-vcpkg_installed/x64-windows-static/vcpkg/updates/0000000005
-vcpkg_installed/x64-windows-static/x64-windows/share/vcpkg-cmake/copyright
-vcpkg_installed/x64-windows-static/x64-windows/share/vcpkg-cmake/vcpkg_abi_info.txt
-vcpkg_installed/x64-windows-static/x64-windows/share/vcpkg-cmake/vcpkg_cmake_build.cmake
-vcpkg_installed/x64-windows-static/x64-windows/share/vcpkg-cmake/vcpkg_cmake_configure.cmake
-vcpkg_installed/x64-windows-static/x64-windows/share/vcpkg-cmake/vcpkg_cmake_install.cmake
-vcpkg_installed/x64-windows-static/x64-windows/share/vcpkg-cmake/vcpkg-port-config.cmake
-vcpkg_installed/x64-windows-static/x64-windows/share/vcpkg-cmake/vcpkg.spdx.json
-vcpkg_installed/x64-windows-static/x64-windows/share/vcpkg-cmake-config/copyright
-vcpkg_installed/x64-windows-static/x64-windows/share/vcpkg-cmake-config/vcpkg_abi_info.txt
-vcpkg_installed/x64-windows-static/x64-windows/share/vcpkg-cmake-config/vcpkg_cmake_config_fixup.cmake
-vcpkg_installed/x64-windows-static/x64-windows/share/vcpkg-cmake-config/vcpkg-port-config.cmake
-vcpkg_installed/x64-windows-static/x64-windows/share/vcpkg-cmake-config/vcpkg.spdx.json
-vcpkg_installed/x64-windows-static/x64-windows-static/include/zconf.h
-vcpkg_installed/x64-windows-static/x64-windows-static/include/zlib.h
-vcpkg_installed/x64-windows-static/x64-windows-static/lib/zlib.lib
-vcpkg_installed/x64-windows-static/x64-windows-static/lib/pkgconfig/zlib.pc
-vcpkg_installed/x64-windows-static/x64-windows-static/share/zlib/copyright
-vcpkg_installed/x64-windows-static/x64-windows-static/share/zlib/usage
-vcpkg_installed/x64-windows-static/x64-windows-static/share/zlib/vcpkg_abi_info.txt
-vcpkg_installed/x64-windows-static/x64-windows-static/share/zlib/vcpkg-cmake-wrapper.cmake
-vcpkg_installed/x64-windows-static/x64-windows-static/share/zlib/vcpkg.spdx.json
+/vcpkg_installed/

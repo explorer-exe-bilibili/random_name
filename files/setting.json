@@ -1,0 +1,342 @@
+{
+    "pages": [
+        {
+            "Title": "图片",
+            "item": [
+                {
+                    "BitmapNumber": 0,
+                    "ConfigName": "over1",
+                    "FileChooseWindowName": "选择卡池1图片",
+                    "FileType": "picture",
+                    "Limit": 24,
+                    "Name": "卡池1图片",
+                    "Number": 1
+                },
+                {
+                    "BitmapNumber": 1,
+                    "ConfigName": "over2",
+                    "FileChooseWindowName": "选择卡池2图片",
+                    "FileType": "picture",
+                    "Limit": 24,
+                    "Name": "卡池2图片",
+                    "Number": 2
+                },
+                {
+                    "BitmapNumber": 2,
+                    "ConfigName": "over3",
+                    "FileChooseWindowName": "选择卡池3图片",
+                    "FileType": "picture",
+                    "Limit": 24,
+                    "Name": "卡池3图片",
+                    "Number": 3
+                },
+                {
+                    "BitmapNumber": 3,
+                    "ConfigName": "over4",
+                    "FileChooseWindowName": "选择卡池4图片",
+                    "FileType": "picture",
+                    "Limit": 24,
+                    "Name": "卡池4图片",
+                    "Number": 4
+                },
+                {
+                    "ConfigName": "first screen Picture speed",
+                    "IsEditBox": 1,
+                    "Limit": 1,
+                    "Name": "图片移动的速度",
+                    "Number": 11,
+                    "OutOfLimitOutPut": "输入一个0-10000之间的数字",
+                    "max": 10000,
+                    "min": 0
+                },
+                {
+                    "ConfigName": "off music",
+                    "IsSwitch": 1,
+                    "Name": "关闭音乐",
+                    "Number": 12
+                }
+            ]
+        },
+        {
+            "Title": "名单与卡池",
+            "item": [
+                {
+                    "ConfigName": "namesfile1",
+                    "FileChooseWindowName": "选择卡池1名单",
+                    "FileType": "nameFile",
+                    "Limit": 8,
+                    "Name": "卡池1名单",
+                    "Number": 1
+                },
+                {
+                    "ConfigName": "namesfile2",
+                    "FileChooseWindowName": "选择卡池2名单",
+                    "FileType": "nameFile",
+                    "Limit": 8,
+                    "Name": "卡池2名单",
+                    "Number": 2
+                },
+                {
+                    "ConfigName": "namesfile3",
+                    "FileChooseWindowName": "选择卡池3名单",
+                    "FileType": "nameFile",
+                    "Limit": 8,
+                    "Name": "卡池3名单",
+                    "Number": 3
+                },
+                {
+                    "ConfigName": "namesfile4",
+                    "FileChooseWindowName": "选择卡池4名单",
+                    "FileType": "nameFile",
+                    "Limit": 8,
+                    "Name": "卡池4名单",
+                    "Number": 4
+                },
+                {
+                    "ConfigName": "text red",
+                    "IsEditBox": 1,
+                    "Limit": 1,
+                    "Name": "抽卡时名字的R值(RGB)",
+                    "Number": 5,
+                    "OutOfLimitOutPut": "输入一个0-255之间的数字",
+                    "max": 255,
+                    "min": 0
+                },
+                {
+                    "ConfigName": "text green",
+                    "IsEditBox": 1,
+                    "Limit": 1,
+                    "Name": "抽卡时名字的G值(RGB)",
+                    "Number": 6,
+                    "OutOfLimitOutPut": "输入一个0-255之间的数字",
+                    "max": 255,
+                    "min": 0
+                },
+                {
+                    "ConfigName": "text blue",
+                    "IsEditBox": 1,
+                    "Limit": 1,
+                    "Name": "抽卡时名字的B值(RGB)",
+                    "Number": 7,
+                    "OutOfLimitOutPut": "输入一个0-255之间的数字",
+                    "max": 255,
+                    "min": 0
+                },
+                {
+                    "ConfigName": "6 star name color",
+                    "IsColor": 1,
+                    "IsEditBox": 1,
+                    "Name": "抽卡时6星名字的颜色",
+                    "Number": 17
+                },
+                {
+                    "ConfigName": "special",
+                    "IsEditBox": 1,
+                    "Limit": 1,
+                    "Name": "抽背卡池",
+                    "Number": 11,
+                    "OutOfLimitOutPut": "输入一个0-4之间的数字（0表示禁用）",
+                    "max": 4,
+                    "min": 0
+                },
+                {
+                    "ConfigName": "off music",
+                    "IsSwitch": 1,
+                    "Name": "关闭音乐",
+                    "Number": 12
+                }
+            ]
+        },
+        {
+            "Title": "视频",
+            "item": [
+                {
+                    "ConfigName": "signal 3star video",
+                    "FileChooseWindowName": "选择单发3星视频",
+                    "FileType": "video",
+                    "Limit": 8,
+                    "Name": "单发3星视频",
+                    "Number": 1
+                },
+                {
+                    "ConfigName": "signal 4star video",
+                    "FileChooseWindowName": "选择单发4星视频",
+                    "FileType": "video",
+                    "Limit": 8,
+                    "Name": "单发4星视频",
+                    "Number": 2
+                },
+                {
+                    "ConfigName": "signal 5star video",
+                    "FileChooseWindowName": "选择单发5星视频",
+                    "FileType": "video",
+                    "Limit": 8,
+                    "Name": "单发5星视频",
+                    "Number": 3
+                },
+                {
+                    "ConfigName": "group 4star video",
+                    "FileChooseWindowName": "选择十发4星视频",
+                    "FileType": "video",
+                    "Limit": 8,
+                    "Name": "十发4星视频",
+                    "Number": 4
+                },
+                {
+                    "ConfigName": "group 5star video",
+                    "FileChooseWindowName": "选择十发5星视频",
+                    "FileType": "video",
+                    "Limit": 8,
+                    "Name": "十发5星视频",
+                    "Number": 5
+                },
+                {
+                    "ConfigName": "off video",
+                    "IsSwitch": 1,
+                    "Name": "关闭视频",
+                    "Number": 11
+                },
+                {
+                    "ConfigName": "off music",
+                    "IsSwitch": 1,
+                    "Name": "关闭音乐",
+                    "Number": 12
+                }
+            ]
+        },
+        {
+            "Title": "悬浮窗(重启生效)",
+            "item": [
+                {
+                    "ConfigName": "open float window",
+                    "IsSwitch": 1,
+                    "Name": "悬浮窗",
+                    "Number": 1
+                },
+                {
+                    "ConfigName": "float window x",
+                    "IsEditBox": 1,
+                    "Limit": 3,
+                    "Name": "初始x坐标",
+                    "Number": 2,
+                    "OutOfLimitOutPut": "大小不能大于屏幕",
+                    "max": 1145141919,
+                    "min": 1
+                },
+                {
+                    "ConfigName": "float window y",
+                    "IsEditBox": 1,
+                    "Limit": 3,
+                    "Name": "初始y坐标",
+                    "Number": 3,
+                    "OutOfLimitOutPut": "大小不能大于屏幕",
+                    "max": 1145141919,
+                    "min": 1
+                },
+                {
+                    "ConfigName": "float window width",
+                    "IsEditBox": 1,
+                    "Limit": 3,
+                    "Name": "宽度",
+                    "Number": 4,
+                    "OutOfLimitOutPut": "大小不能大于屏幕",
+                    "max": 1145141919,
+                    "min": 1
+                },
+                {
+                    "ConfigName": "float window height",
+                    "IsEditBox": 1,
+                    "Limit": 3,
+                    "Name": "高度",
+                    "Number": 5,
+                    "OutOfLimitOutPut": "大小不能大于屏幕",
+                    "max": 1145141919,
+                    "min": 1
+                },
+                {
+                    "ConfigName": "float window Mu",
+                    "IsEditBox": 1,
+                    "Limit": 3,
+                    "Name": "滑动系数",
+                    "Number": 6,
+                    "OutOfLimitOutPut": "大小不能超过1或小于0",
+                    "max": 1,
+                    "min": 0
+                },
+                {
+                    "BitmapNumber": 32,
+                    "ConfigName": "float window picture",
+                    "FileChooseWindowName": "选择悬浮窗图片",
+                    "FileType": "picture",
+                    "Limit": 18,
+                    "Name": "悬浮窗图片",
+                    "Number": 11
+                },
+                {
+                    "ConfigName": "off music",
+                    "IsSwitch": 1,
+                    "Name": "关闭音乐",
+                    "Number": 12
+                }
+            ]
+        },
+        {
+            "Title": "杂项",
+            "item": [
+                {
+                    "ConfigName": "window mode(not full screen)",
+                    "IsSwitch": 1,
+                    "Name": "窗口模式",
+                    "Number": 1
+                },
+                {
+                    "ConfigName": "title name",
+                    "IsEditBox": 1,
+                    "Limit": 4,
+                    "Name": "标题",
+                    "Number": 2
+                },
+                {
+                    "ConfigName": "cancel setting json file",
+                    "IsSwitch": 1,
+                    "Name": "设置页面json文件开关",
+                    "Number": 3
+                },
+                {
+                    "ConfigName": "the new font is unsuit",
+                    "IsSwitch": 1,
+                    "Name": "字体兼容模式(出现字体错误再开)",
+                    "Number": 4
+                },
+                {
+                    "ConfigName": "off music",
+                    "IsSwitch": 1,
+                    "Name": "关闭音乐",
+                    "Number": 11
+                },
+                {
+                    "ConfigName": "debug mode",
+                    "IsSwitch": 1,
+                    "Limit": 2,
+                    "Name": "调试模式",
+                    "Number": 5
+                },
+                {
+                    "ConfigName": "small memory",
+                    "IsSwitch": 1,
+                    "Limit": 2,
+                    "Name": "省内存模式",
+                    "Number": 6
+                },
+                {
+                    "ConfigName": "ImageDirectory",
+                    "IsDir": 1,
+                    "IsEditBox": 1,
+                    "Limit": 2,
+                    "Name": "图片资源目录",
+                    "Number": 7
+                }
+            ]
+        }
+    ]
+}

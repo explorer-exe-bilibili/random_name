@@ -37,8 +37,6 @@ jobs:
       run: |
         set VCPKG_FEATURE_FLAGS=manifests
         .\vcpkg\vcpkg integrate install
-        .\vcpkg\vcpkg install
-        .\vcpkg\vcpkg list
         pwd
 
     - name: Build Solution for ${{ matrix.platform }}
@@ -50,7 +48,7 @@ jobs:
     - name: Package Artifact for ${{ matrix.platform }}
       run: |
           $artifactName = "YourArtifact_${{ matrix.platform }}"
-          $outputPath = "${{ github.workspace }}\YourProject\bin\Release\${{ matrix.platform }}"
+          $outputPath = "${{ github.workspace }}\random_name\bin\Release\${{ matrix.platform }}"
           if (Test-Path $outputPath) {
             Compress-Archive -Path $outputPath\* -DestinationPath $artifactName.zip
             echo "ARTIFACT_NAME=$artifactName.zip" >> $env:GITHUB_ENV
