@@ -8,8 +8,13 @@
 #define MyAppAssocExt ".myp"
 #define MyAppAssocKey StringChange(MyAppAssocName, " ", "") + MyAppAssocExt
 
+#ifdef GITHUB_ACTIONS
+#define MyAppSourceDir AddBackslash(ExpandConstant('{src}'))
+#define MyAppOutputDir AddBackslash(ExpandConstant('{src}')) + "installer\Output"
+#else
 #define MyAppSourceDir "D:\Users\explorer\Source\Repos\random_name"
 #define MyAppOutputDir "D:\Users\explorer\source\repos\random_name\release86\x86\"
+#endif
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -59,7 +64,7 @@ Name: "turkish"; MessagesFile: "compiler:Languages\Turkish.isl"
 Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 
 [Tasks]
-Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: checked
+Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
 
 [Files]
 Source: "{#MyAppSourceDir}\Win32\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion

@@ -50,7 +50,8 @@ jobs:
       run: |
         $platform_lower = "${{ matrix.platform }}".ToLower()
         $env:VCPKG_DEFAULT_TRIPLET="${platform_lower}-windows-static"
-        msbuild /m /p:Configuration=Release /p:RuntimeLibrary=MultiThreaded /p:Platform=${{ matrix.platform }} random.sln
+        msbuild /m /p:Configuration=Release /p:RuntimeLibrary=MultiThreaded /p:Platform=${platform_lower} random.sln
+
 
     - name: Package Artifact for ${{ matrix.platform }}
       run: |
@@ -68,3 +69,15 @@ jobs:
       with:
         name: ${{ env.ARTIFACT_NAME }}
         path: ${{ env.ARTIFACT_NAME }}
+  
+    # - name: Generate Inno Setup Installer
+    #   env:
+    #     GITHUB_ACTIONS: true
+    #   run: |
+    #     iscc installer\${{ matrix.platform }}.iss
+    
+    - name: Upload Installer for ${{ matrix.platform }}
+      uses: actions/upload-artifact@v3
+      with:
+          name: ${{ matrix.platform }}_installer
+          path: installer\Output\*.exe
