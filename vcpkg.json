@@ -2,12 +2,40 @@
     "name": "random-name",
     "version-string": "0.1.0",
     "dependencies": [
-        "uchardet",
-        "nlohmann-json",
-        "minizip",
-        "jsoncpp",
-        "libzip",
-        "curl",
-        "zlib"
+        {
+            "name": "uchardet",
+            "default-features": false,
+            "features": ["static"]
+        },
+        {
+            "name": "nlohmann-json",
+            "default-features": false,
+            "features": ["static"]
+        },
+        {
+            "name": "minizip",
+            "default-features": false,
+            "features": ["static"]
+        },
+        {
+            "name": "jsoncpp",
+            "default-features": false,
+            "features": ["static"]
+        },
+        {
+            "name": "libzip",
+            "default-features": false,
+            "features": ["static"]
+        },
+        {
+            "name": "curl",
+            "default-features": false,
+            "features": ["static"]
+        },
+        {
+            "name": "zlib",
+            "default-features": false,
+            "features": ["static"]
+        }
     ]
 }
