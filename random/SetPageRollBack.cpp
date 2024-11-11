@@ -1,4 +1,4 @@
-#include "set-json.h"
+ï»¿#include "set-json.h"
 #include "nlohmann/json.hpp"
 #include "log.h"
 #include "config.h"
@@ -11,117 +11,117 @@ using namespace nlohmann;
 json set2::rollback(const string& jsonpath) {
 	Log slog("files\\log\\set-json.log", 0);
 	slog << "try to rollback setting page" << endl;
-	// ´´½¨JSONÊý¾Ý
+	// åˆ›å»ºJSONæ•°æ®
 	json j;
 	json p;
 	json i;
-	p[TITLE] = G2U("Í¼Æ¬");
-	i[NAME] = G2U("¿¨³Ø1Í¼Æ¬"); i[CONFIGNAME] = "over1"; i[FILECHOOSE] = G2U("Ñ¡Ôñ¿¨³Ø1Í¼Æ¬");
+	p[TITLE] = G2U("å›¾ç‰‡");
+	i[NAME] = G2U("å¡æ± 1å›¾ç‰‡"); i[CONFIGNAME] = "over1"; i[FILECHOOSE] = G2U("é€‰æ‹©å¡æ± 1å›¾ç‰‡");
 	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP | ISFILE; i[NUMBER] = 1; i[BITMAPC] = 0;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("¿¨³Ø2Í¼Æ¬"); i[CONFIGNAME] = "over2"; i[FILECHOOSE] = G2U("Ñ¡Ôñ¿¨³Ø2Í¼Æ¬");
+	i[NAME] = G2U("å¡æ± 2å›¾ç‰‡"); i[CONFIGNAME] = "over2"; i[FILECHOOSE] = G2U("é€‰æ‹©å¡æ± 2å›¾ç‰‡");
 	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP | ISFILE; i[NUMBER] = 2; i[BITMAPC] = 1;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("¿¨³Ø3Í¼Æ¬"); i[CONFIGNAME] = "over3"; i[FILECHOOSE] = G2U("Ñ¡Ôñ¿¨³Ø3Í¼Æ¬");
+	i[NAME] = G2U("å¡æ± 3å›¾ç‰‡"); i[CONFIGNAME] = "over3"; i[FILECHOOSE] = G2U("é€‰æ‹©å¡æ± 3å›¾ç‰‡");
 	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP | ISFILE; i[NUMBER] = 3; i[BITMAPC] = 2;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("¿¨³Ø4Í¼Æ¬"); i[CONFIGNAME] = "over4"; i[FILECHOOSE] = G2U("Ñ¡Ôñ¿¨³Ø4Í¼Æ¬");
+	i[NAME] = G2U("å¡æ± 4å›¾ç‰‡"); i[CONFIGNAME] = "over4"; i[FILECHOOSE] = G2U("é€‰æ‹©å¡æ± 4å›¾ç‰‡");
 	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP | ISFILE; i[NUMBER] = 4; i[BITMAPC] = 3;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("Í¼Æ¬ÒÆ¶¯µÄËÙ¶È"); i[CONFIGNAME] = "first screen Picture speed"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 10000; i[MIN] = 0;
-	i[OUTOFLIMIT] = G2U("ÊäÈëÒ»¸ö0-10000Ö®¼äµÄÊý×Ö"); i[NUMBER] = 11;
+	i[NAME] = G2U("å›¾ç‰‡ç§»åŠ¨çš„é€Ÿåº¦"); i[CONFIGNAME] = "first screen Picture speed"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 10000; i[MIN] = 0;
+	i[OUTOFLIMIT] = G2U("è¾“å…¥ä¸€ä¸ª0-10000ä¹‹é—´çš„æ•°å­—"); i[NUMBER] = 11;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("¹Ø±ÕÒôÀÖ"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 12;
+	i[NAME] = G2U("å…³é—­éŸ³ä¹"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 12;
 	p["item"].push_back(i); i.clear();
 
 	j["pages"].push_back(p); p.clear();
-	p[TITLE] = G2U("Ãûµ¥Óë¿¨³Ø");
-	i[NAME] = G2U("¿¨³Ø1Ãûµ¥"); i[CONFIGNAME] = "namesfile1"; i[FILECHOOSE] = G2U("Ñ¡Ôñ¿¨³Ø1Ãûµ¥"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 1;
+	p[TITLE] = G2U("åå•ä¸Žå¡æ± ");
+	i[NAME] = G2U("å¡æ± 1åå•"); i[CONFIGNAME] = "namesfile1"; i[FILECHOOSE] = G2U("é€‰æ‹©å¡æ± 1åå•"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 1;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("¿¨³Ø2Ãûµ¥"); i[CONFIGNAME] = "namesfile2"; i[FILECHOOSE] = G2U("Ñ¡Ôñ¿¨³Ø2Ãûµ¥"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 2;
+	i[NAME] = G2U("å¡æ± 2åå•"); i[CONFIGNAME] = "namesfile2"; i[FILECHOOSE] = G2U("é€‰æ‹©å¡æ± 2åå•"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 2;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("¿¨³Ø3Ãûµ¥"); i[CONFIGNAME] = "namesfile3"; i[FILECHOOSE] = G2U("Ñ¡Ôñ¿¨³Ø3Ãûµ¥"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 3;
+	i[NAME] = G2U("å¡æ± 3åå•"); i[CONFIGNAME] = "namesfile3"; i[FILECHOOSE] = G2U("é€‰æ‹©å¡æ± 3åå•"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 3;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("¿¨³Ø4Ãûµ¥"); i[CONFIGNAME] = "namesfile4"; i[FILECHOOSE] = G2U("Ñ¡Ôñ¿¨³Ø4Ãûµ¥"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 4;
+	i[NAME] = G2U("å¡æ± 4åå•"); i[CONFIGNAME] = "namesfile4"; i[FILECHOOSE] = G2U("é€‰æ‹©å¡æ± 4åå•"); i[FILETYPE] = "nameFile"; i[LIMIT] = ISFILE; i[NUMBER] = 4;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("³é¿¨Ê±Ãû×ÖµÄÑÕÉ«"); i[CONFIGNAME] = "name color"; i[ISCOLOR] = 1; i[NUMBER] = 5;
+	i[NAME] = G2U("æŠ½å¡æ—¶åå­—çš„é¢œè‰²"); i[CONFIGNAME] = "name color"; i[ISCOLOR] = 1; i[NUMBER] = 5;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("³é¿¨Ê±6ÐÇÃû×ÖµÄÑÕÉ«"); i[CONFIGNAME] = "6 star name color"; i[ISCOLOR] = 1; i[NUMBER] = 6;
+	i[NAME] = G2U("æŠ½å¡æ—¶6æ˜Ÿåå­—çš„é¢œè‰²"); i[CONFIGNAME] = "6 star name color"; i[ISCOLOR] = 1; i[NUMBER] = 6;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("³é±³¿¨³Ø"); i[CONFIGNAME] = "special"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 4; i[MIN] = 0;
-	i[OUTOFLIMIT] = G2U("ÊäÈëÒ»¸ö0-4Ö®¼äµÄÊý×Ö£¨0±íÊ¾½ûÓÃ£©"); i[NUMBER] = 11;
+	i[NAME] = G2U("æŠ½èƒŒå¡æ± "); i[CONFIGNAME] = "special"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT; i[MAX] = 4; i[MIN] = 0;
+	i[OUTOFLIMIT] = G2U("è¾“å…¥ä¸€ä¸ª0-4ä¹‹é—´çš„æ•°å­—ï¼ˆ0è¡¨ç¤ºç¦ç”¨ï¼‰"); i[NUMBER] = 11;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("¹Ø±ÕÒôÀÖ"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 12;
-	p["item"].push_back(i); i.clear();
-	j["pages"].push_back(p); p.clear();
-	p[TITLE] = G2U("ÊÓÆµ");
-	i[NAME] = G2U("µ¥·¢3ÐÇÊÓÆµ"); i[CONFIGNAME] = "signal 3star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("Ñ¡Ôñµ¥·¢3ÐÇÊÓÆµ"); i[FILETYPE] = "video"; i[NUMBER] = 1;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("µ¥·¢4ÐÇÊÓÆµ"); i[CONFIGNAME] = "signal 4star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("Ñ¡Ôñµ¥·¢4ÐÇÊÓÆµ"); i[FILETYPE] = "video"; i[NUMBER] = 2;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("µ¥·¢5ÐÇÊÓÆµ"); i[CONFIGNAME] = "signal 5star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("Ñ¡Ôñµ¥·¢5ÐÇÊÓÆµ"); i[FILETYPE] = "video"; i[NUMBER] = 3;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("Ê®·¢4ÐÇÊÓÆµ"); i[CONFIGNAME] = "group 4star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("Ñ¡ÔñÊ®·¢4ÐÇÊÓÆµ"); i[FILETYPE] = "video"; i[NUMBER] = 4;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("Ê®·¢5ÐÇÊÓÆµ"); i[CONFIGNAME] = "group 5star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("Ñ¡ÔñÊ®·¢5ÐÇÊÓÆµ"); i[FILETYPE] = "video"; i[NUMBER] = 5;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("¹Ø±ÕÊÓÆµ"); i[CONFIGNAME] = "off video"; i[ISSWITCH] = 1; i[NUMBER] = 11;
-	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("¹Ø±ÕÒôÀÖ"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 12;
+	i[NAME] = G2U("å…³é—­éŸ³ä¹"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 12;
 	p["item"].push_back(i); i.clear();
 	j["pages"].push_back(p); p.clear();
-	p[TITLE] = G2U("Ðü¸¡´°(ÖØÆôÉúÐ§)");
-	i[NAME] = G2U("Ðü¸¡´°"); i[CONFIGNAME] = "open float window"; i[ISSWITCH] = 1; i[NUMBER] = 1;
+	p[TITLE] = G2U("è§†é¢‘");
+	i[NAME] = G2U("å•å‘3æ˜Ÿè§†é¢‘"); i[CONFIGNAME] = "signal 3star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("é€‰æ‹©å•å‘3æ˜Ÿè§†é¢‘"); i[FILETYPE] = "video"; i[NUMBER] = 1;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("³õÊ¼x×ø±ê"); i[CONFIGNAME] = "float window x"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT | REBOOT; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
-	i[OUTOFLIMIT] = G2U("´óÐ¡²»ÄÜ´óÓÚÆÁÄ»"); i[NUMBER] = 2;
+	i[NAME] = G2U("å•å‘4æ˜Ÿè§†é¢‘"); i[CONFIGNAME] = "signal 4star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("é€‰æ‹©å•å‘4æ˜Ÿè§†é¢‘"); i[FILETYPE] = "video"; i[NUMBER] = 2;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("³õÊ¼y×ø±ê"); i[CONFIGNAME] = "float window y"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT | REBOOT; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
-	i[OUTOFLIMIT] = G2U("´óÐ¡²»ÄÜ´óÓÚÆÁÄ»"); i[NUMBER] = 3;
+	i[NAME] = G2U("å•å‘5æ˜Ÿè§†é¢‘"); i[CONFIGNAME] = "signal 5star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("é€‰æ‹©å•å‘5æ˜Ÿè§†é¢‘"); i[FILETYPE] = "video"; i[NUMBER] = 3;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("¿í¶È"); i[CONFIGNAME] = "float window width"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT | REBOOT; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
-	i[OUTOFLIMIT] = G2U("´óÐ¡²»ÄÜ´óÓÚÆÁÄ»"); i[NUMBER] = 4;
+	i[NAME] = G2U("åå‘4æ˜Ÿè§†é¢‘"); i[CONFIGNAME] = "group 4star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("é€‰æ‹©åå‘4æ˜Ÿè§†é¢‘"); i[FILETYPE] = "video"; i[NUMBER] = 4;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("¸ß¶È"); i[CONFIGNAME] = "float window height"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT | REBOOT; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
-	i[OUTOFLIMIT] = G2U("´óÐ¡²»ÄÜ´óÓÚÆÁÄ»"); i[NUMBER] = 5;
+	i[NAME] = G2U("åå‘5æ˜Ÿè§†é¢‘"); i[CONFIGNAME] = "group 5star video"; i[LIMIT] = ISFILE; i[FILECHOOSE] = G2U("é€‰æ‹©åå‘5æ˜Ÿè§†é¢‘"); i[FILETYPE] = "video"; i[NUMBER] = 5;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("»¬¶¯ÏµÊý"); i[CONFIGNAME] = "float window Mu"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT | REBOOT; i[MAX] = 1; i[MIN] = 0;
-	i[OUTOFLIMIT] = G2U("´óÐ¡²»ÄÜ³¬¹ý1»òÐ¡ÓÚ0"); i[NUMBER] = 6;
+	i[NAME] = G2U("å…³é—­è§†é¢‘"); i[CONFIGNAME] = "off video"; i[ISSWITCH] = 1; i[NUMBER] = 11;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("Ðü¸¡´°Í¼Æ¬"); i[CONFIGNAME] = "float window picture"; i[FILECHOOSE] = G2U("Ñ¡ÔñÐü¸¡´°Í¼Æ¬");
+	i[NAME] = G2U("å…³é—­éŸ³ä¹"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 12;
+	p["item"].push_back(i); i.clear();
+	j["pages"].push_back(p); p.clear();
+	p[TITLE] = G2U("æ‚¬æµ®çª—(é‡å¯ç”Ÿæ•ˆ)");
+	i[NAME] = G2U("æ‚¬æµ®çª—"); i[CONFIGNAME] = "open float window"; i[ISSWITCH] = 1; i[NUMBER] = 1;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("åˆå§‹xåæ ‡"); i[CONFIGNAME] = "float window x"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT | REBOOT; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
+	i[OUTOFLIMIT] = G2U("å¤§å°ä¸èƒ½å¤§äºŽå±å¹•"); i[NUMBER] = 2;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("åˆå§‹yåæ ‡"); i[CONFIGNAME] = "float window y"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT | REBOOT; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
+	i[OUTOFLIMIT] = G2U("å¤§å°ä¸èƒ½å¤§äºŽå±å¹•"); i[NUMBER] = 3;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("å®½åº¦"); i[CONFIGNAME] = "float window width"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT | REBOOT; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
+	i[OUTOFLIMIT] = G2U("å¤§å°ä¸èƒ½å¤§äºŽå±å¹•"); i[NUMBER] = 4;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("é«˜åº¦"); i[CONFIGNAME] = "float window height"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT | REBOOT; i[MAX] = MAXWINDOWSIZE; i[MIN] = 1;
+	i[OUTOFLIMIT] = G2U("å¤§å°ä¸èƒ½å¤§äºŽå±å¹•"); i[NUMBER] = 5;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("æ»‘åŠ¨ç³»æ•°"); i[CONFIGNAME] = "float window Mu"; i[ISEDIT] = 1; i[LIMIT] = BETWEENCOUNT | REBOOT; i[MAX] = 1; i[MIN] = 0;
+	i[OUTOFLIMIT] = G2U("å¤§å°ä¸èƒ½è¶…è¿‡1æˆ–å°äºŽ0"); i[NUMBER] = 6;
+	p["item"].push_back(i); i.clear();
+	i[NAME] = G2U("æ‚¬æµ®çª—å›¾ç‰‡"); i[CONFIGNAME] = "float window picture"; i[FILECHOOSE] = G2U("é€‰æ‹©æ‚¬æµ®çª—å›¾ç‰‡");
 	i[FILETYPE] = "picture"; i[LIMIT] = ISBITMAP | REBOOT; i[NUMBER] = 11; i[BITMAPC] = FLOATPIC;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("¹Ø±ÕÒôÀÖ"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 12;
+	i[NAME] = G2U("å…³é—­éŸ³ä¹"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 12;
 	p["item"].push_back(i); i.clear();
 	j["pages"].push_back(p); p.clear();
-	p[TITLE] = G2U("ÔÓÏî");
-	i[NAME] = G2U("´°¿ÚÄ£Ê½"); i[CONFIGNAME] = "window mode(not full screen)"; i[ISSWITCH] = 1; i[NUMBER] = 1;
+	p[TITLE] = G2U("æ‚é¡¹");
+	i[NAME] = G2U("çª—å£æ¨¡å¼"); i[CONFIGNAME] = "window mode(not full screen)"; i[ISSWITCH] = 1; i[NUMBER] = 1;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("±êÌâ"); i[CONFIGNAME] = "title name"; i[ISEDIT] = 1; i[LIMIT] = S_WINDOWTITLE; i[NUMBER] = 2;
+	i[NAME] = G2U("æ ‡é¢˜"); i[CONFIGNAME] = "title name"; i[ISEDIT] = 1; i[LIMIT] = S_WINDOWTITLE; i[NUMBER] = 2;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("ÉèÖÃÒ³Ãæ²»Ê¹ÓÃjsonÎÄ¼þ"); i[CONFIGNAME] = "cancel setting json file"; i[ISSWITCH] = 1; i[NUMBER] = 3;
+	i[NAME] = G2U("è®¾ç½®é¡µé¢ä¸ä½¿ç”¨jsonæ–‡ä»¶"); i[CONFIGNAME] = "cancel setting json file"; i[ISSWITCH] = 1; i[NUMBER] = 3;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("×ÖÌå¼æÈÝÄ£Ê½(³öÏÖ×ÖÌå´íÎóÔÙ¿ª)"); i[CONFIGNAME] = "the new font is unsuit"; i[ISSWITCH] = 1; i[NUMBER] = 4;
+	i[NAME] = G2U("å­—ä½“å…¼å®¹æ¨¡å¼(å‡ºçŽ°å­—ä½“é”™è¯¯å†å¼€)"); i[CONFIGNAME] = "the new font is unsuit"; i[ISSWITCH] = 1; i[NUMBER] = 4;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("¹Ø±ÕÒôÀÖ"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 11;
+	i[NAME] = G2U("å…³é—­éŸ³ä¹"); i[CONFIGNAME] = "off music"; i[ISSWITCH] = 1; i[NUMBER] = 11;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("µ÷ÊÔÄ£Ê½"); i[ISSWITCH] = 1; i[NUMBER] = 5; i[CONFIGNAME] = "debug mode"; i[LIMIT] = REBOOT;
+	i[NAME] = G2U("è°ƒè¯•æ¨¡å¼"); i[ISSWITCH] = 1; i[NUMBER] = 5; i[CONFIGNAME] = "debug mode"; i[LIMIT] = REBOOT;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("Ê¡ÄÚ´æÄ£Ê½"); i[ISSWITCH] = 1; i[NUMBER] = 6; i[CONFIGNAME] = "small memory"; i[LIMIT] = REBOOT;
+	i[NAME] = G2U("çœå†…å­˜æ¨¡å¼"); i[ISSWITCH] = 1; i[NUMBER] = 6; i[CONFIGNAME] = "small memory"; i[LIMIT] = REBOOT;
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("¹Ø±Õ¶¯»­"); i[ISSWITCH] = 1; i[NUMBER] = 8; i[CONFIGNAME] = "no smooth ui"; 
+	i[NAME] = G2U("å…³é—­åŠ¨ç”»"); i[ISSWITCH] = 1; i[NUMBER] = 8; i[CONFIGNAME] = "no smooth ui"; 
 	p["item"].push_back(i); i.clear();
-	i[NAME] = G2U("Í¼Æ¬×ÊÔ´Ä¿Â¼"); i[ISEDIT] = 1; i[NUMBER] = 7; i[CONFIGNAME] = "ImageDirectory"; i[LIMIT] = REBOOT; i[ISDIR] = 1;
+	i[NAME] = G2U("å›¾ç‰‡èµ„æºç›®å½•"); i[ISEDIT] = 1; i[NUMBER] = 7; i[CONFIGNAME] = "ImageDirectory"; i[LIMIT] = REBOOT; i[ISDIR] = 1;
 	p["item"].push_back(i); i.clear();
 	j["pages"].push_back(p); p.clear();
-	// Ð´ÈëJSONÎÄ¼þ
+	// å†™å…¥JSONæ–‡ä»¶
 	if (!config::getint(NOSETTINGFILE)) {
 		std::ofstream file(jsonpath);
 		if (file.is_open()) {
 			try
 			{
 				slog << slog.pt() << "[INFO]begin to write json items";
-				file << j.dump(4); // ½«JSONÊý¾ÝÐ´ÈëÎÄ¼þ£¬4±íÊ¾Ëõ½ø4¸ö¿Õ¸ñ
+				file << j.dump(4); // å°†JSONæ•°æ®å†™å…¥æ–‡ä»¶ï¼Œ4è¡¨ç¤ºç¼©è¿›4ä¸ªç©ºæ ¼
 				file.close();
 				slog << "[INFO]JSON data written to" << jsonpath << endl;
 			}
@@ -137,11 +137,11 @@ json set2::rollback(const string& jsonpath) {
 	}
 	return j;
 }
-// UTF8×Ö·û´®×ª³ÉGBK×Ö·û´®
+// UTF8å­—ç¬¦ä¸²è½¬æˆGBKå­—ç¬¦ä¸²
 std::string set2::U2G(const std::string& utf8)
 {
 	int nwLen = MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), -1, NULL, 0);
-	wchar_t* pwBuf = new wchar_t[nwLen + 1];//¼Ó1ÓÃÓÚ½Ø¶Ï×Ö·û´® 
+	wchar_t* pwBuf = new wchar_t[nwLen + 1];//åŠ 1ç”¨äºŽæˆªæ–­å­—ç¬¦ä¸² 
 	memset(pwBuf, 0, nwLen * 2 + 2);
 
 	MultiByteToWideChar(CP_UTF8, 0, utf8.c_str(), utf8.length(), pwBuf, nwLen);
@@ -163,12 +163,12 @@ std::string set2::U2G(const std::string& utf8)
 
 	return retStr;
 }
-// GBK×Ö·û´®×ª³ÉjsonÊ¶±ðµÄUTF8×Ö·û´®
+// GBKå­—ç¬¦ä¸²è½¬æˆjsonè¯†åˆ«çš„UTF8å­—ç¬¦ä¸²
 std::string set2::G2U(const std::string& gbk)
 {
 	int nwLen = ::MultiByteToWideChar(CP_ACP, 0, gbk.c_str(), -1, NULL, 0);
 
-	wchar_t* pwBuf = new wchar_t[nwLen + 1];//¼Ó1ÓÃÓÚ½Ø¶Ï×Ö·û´® 
+	wchar_t* pwBuf = new wchar_t[nwLen + 1];//åŠ 1ç”¨äºŽæˆªæ–­å­—ç¬¦ä¸² 
 	ZeroMemory(pwBuf, nwLen * 2 + 2);
 
 	::MultiByteToWideChar(CP_ACP, 0, gbk.c_str(), gbk.length(), pwBuf, nwLen);

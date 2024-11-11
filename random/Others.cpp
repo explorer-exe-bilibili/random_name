@@ -1,4 +1,4 @@
-#include <windows.h>
+О╩©#include <windows.h>
 
 #include "config.h"
 #include "ConfigItem.h"
@@ -7,7 +7,7 @@
 void trySetMEMMode()
 {
 	if (config::get(MEM) == L"1")return;
-	int i = MessageBox(NULL, L"йсф╣╪стьй╖╟эё╛©идэйгсисздз╢Ф╡╩вЦё╛йг╥Я©╙фТдз╢Ф╫зй║дёй╫ё╛©╙фТ╨С©идэ╩АтЛЁийсф╣╡╔╥е╣дясЁытЖ╪с", L"╢МнС", MB_ICONERROR | MB_YESNO);
+	int i = MessageBox(NULL, L"Х╖├И╒▒Е┼═Х╫╫Е╓╠Х╢╔О╪▄Е▐╞Х┐╫Ф≤╞Г■╠Д╨▌Е├┘Е╜≤Д╦█Х╤ЁО╪▄Ф≤╞Е░╕Е╪─Е░╞Е├┘Е╜≤Х┼┌Г°│Ф╗║Е╪▐О╪▄Е╪─Е░╞Е░▌Е▐╞Х┐╫Д╪ И─═Ф┬░Х╖├И╒▒Ф▓╜Ф■╬Г └Е╩╤Х©÷Е╒·Е┼═", L"И■≥Х╞╞", MB_ICONERROR | MB_YESNO);
 	if (i == IDYES)
 	{
 		config::replace(MEM, L"1");

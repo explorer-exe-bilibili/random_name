@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include<Windows.h>
 #include<string>
 
@@ -9,8 +9,8 @@ namespace init
 	void main(WNDPROC w1, WNDPROC w2, WNDPROC w3);
 	void MainWindow();
 	void regWindow(WNDPROC w1, WNDPROC w2, WNDPROC w3);
-	DWORD WINAPI RegWindows(); // ÐÞ¸ÄÕâÀï
-	DWORD WINAPI Upgrade();    // ÐÞ¸ÄÕâÀï
+	DWORD WINAPI RegWindows(); // ä¿®æ”¹è¿™é‡Œ
+	DWORD WINAPI Upgrade();    // ä¿®æ”¹è¿™é‡Œ
 	bool checkIsFontInstalled(const std::wstring& fontName);
 	void music();
 	void config();

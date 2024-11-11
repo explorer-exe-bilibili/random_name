@@ -1,4 +1,4 @@
-#include "explorer.h"
+ï»¿#include "explorer.h"
 
 #include <stdexcept>
 #include <filesystem>
@@ -123,7 +123,7 @@ std::string presses_str;
 void explorer::Load()
 {
 	presses = 0;
-	presses_str = "ÕýÔÚ¼ÓÔØÊÓÆµ";
+	presses_str = "æ­£åœ¨åŠ è½½è§†é¢‘";
 	video = VideoPlayer::getInstance();
 	if (!config::getint(MEM)) {
 		video->load(GROUPSTAR4, config::getpath(GROUPSTAR4));
@@ -137,7 +137,7 @@ void explorer::Load()
 		video->load(SIGNALSTAR5, config::getpath(SIGNALSTAR5));
 	}
 	presses = 50;
-	presses_str = "¼ÓÔØÍ¼Æ¬ÖÐ";
+	presses_str = "åŠ è½½å›¾ç‰‡ä¸­";
 	for (char t = 1; t <= config::getint(POOL_COUNT); t++)
 	{
 		std::wstring configName = L"over" + std::to_wstring(t);
@@ -177,7 +177,7 @@ void explorer::Load()
 	{
 		if(i->GetLastStatus()!=Gdiplus::Status::Ok)
 		{
-			mywindows::errlog(L"Í¼Æ¬¼ÓÔØÊ§°Ü");
+			mywindows::errlog(L"å›¾ç‰‡åŠ è½½å¤±è´¥");
 		}
 		HBITMAP temp;
 		i->GetHBITMAP(Gdiplus::Color(0, 0, 0), &temp);
@@ -197,7 +197,7 @@ void explorer::Load()
 		presses += 0.1;
 	}
 	presses = 75;
-	presses_str = "¼ÓÔØÆäËüÒôÀÖºÍÒôÐ§";
+	presses_str = "åŠ è½½å…¶å®ƒéŸ³ä¹å’ŒéŸ³æ•ˆ";
 	mciSendString(L"open .\\files\\mp3\\reveal-3star.mp3 alias star3", nullptr, 0, nullptr);
 	presses = 78;
 	mciSendString(L"open .\\files\\mp3\\reveal-4star.mp3 alias star4", nullptr, 0, nullptr);
@@ -253,8 +253,8 @@ void explorer::reloadBitmap(int number)
 	Gdiplus::Bitmap* t_gb = new Gdiplus::Bitmap(path.c_str());
 	if (t_gb->GetLastStatus() != Gdiplus::Status::Ok)
 	{
-		std::wstring message = L"¼ÓÔØÍ¼Æ¬³ö´í£¬Çë¼ì²éÎÄ¼þÂ·¾¶£¬±¨´íÂëÎª£¨gdiplus£©£º" + t_gb->GetLastStatus();
-		MessageBox(nullptr, message.c_str(), L"´íÎó", MB_ICONERROR);
+		std::wstring message = L"åŠ è½½å›¾ç‰‡å‡ºé”™ï¼Œè¯·æ£€æŸ¥æ–‡ä»¶è·¯å¾„ï¼ŒæŠ¥é”™ç ä¸ºï¼ˆgdiplusï¼‰ï¼š" + t_gb->GetLastStatus();
+		MessageBox(nullptr, message.c_str(), L"é”™è¯¯", MB_ICONERROR);
 		mywindows::errlog(message.c_str());
 		return;
 	}

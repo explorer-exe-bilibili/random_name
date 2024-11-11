@@ -1,9 +1,9 @@
-#pragma once
+ï»¿#pragma once
 #include<Windows.h>
 class floatwindow
 {
 public:
-	// È«¾Ö±äÁ¿,±£´æÔ­Ê¼´°¿Ú¹ı³ÌÖ¸Õë
+	// å…¨å±€å˜é‡,ä¿å­˜åŸå§‹çª—å£è¿‡ç¨‹æŒ‡é’ˆ
 	static WNDPROC g_OrigFloatWndProc;
 	static void open();
 	static void stop();

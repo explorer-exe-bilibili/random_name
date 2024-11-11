@@ -1,4 +1,4 @@
-#include "Button.h"
+ï»¿#include "Button.h"
 
 #include "configitem.h"
 #include "explorer.h"
@@ -81,7 +81,7 @@ void Button::paint() const
 	if(!DisableBmap)
 		p->Paint(x, y, xE-x, yE-y,BmapC);
 	if (!DisableStr) {
-		// »æÖÆÎÄ±¾
+		// ç»˜åˆ¶æ–‡æœ¬
 		if (IsVertical)
 		{
 			if (font != nullptr)
@@ -281,7 +281,7 @@ void Button::MoveTo(int x, int y, int xend, int yend, bool smoothly, double xVel
 					if (yend > this->yE)
 						this->yE = yend;
 				}
-				//¼ì²âÊÇ·ñÔÚÆÁÄ»Íâ
+				//æ£€æµ‹æ˜¯å¦åœ¨å±å¹•å¤–
 				if ((this->x > mywindows::WW OR this->xE < 0)AND(this->y > mywindows::WH OR this->yE < 0))
 				{
 					this->x = x;

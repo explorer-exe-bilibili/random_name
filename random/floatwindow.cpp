@@ -1,4 +1,4 @@
-#include "floatwindow.h"
+ï»¿#include "floatwindow.h"
 #include<thread>
 #include <chrono>
 
@@ -45,22 +45,22 @@ void floatwindow::paint()
 	EndPaint(mywindows::float_hWnd, &ps);
 }
 void floatwindow::createWindow() {
-	// ¼ÆËãĞü¸¡´°¿ÚµÄÎ»ÖÃºÍ´óĞ¡
+	// è®¡ç®—æ‚¬æµ®çª—å£çš„ä½ç½®å’Œå¤§å°
 	const int floatWndWidth = config::getScreen(FLOATW);
 	const int floatWndHeight = config::getScreen(FLOATH);
 	const int floatWndX = config::getScreen(FLOATX);
 	const int floatWndY = config::getScreen(FLOATY);
 
-	// ´´½¨Ğü¸¡´°¿Ú
+	// åˆ›å»ºæ‚¬æµ®çª—å£
 	mywindows::float_hWnd = CreateWindowEx(
 		WS_EX_LAYERED | WS_EX_TOPMOST| WS_EX_TOOLWINDOW,
 		L"FLOAT",L"Float Window", WS_POPUPWINDOW,
 		floatWndX, floatWndY, floatWndWidth, floatWndHeight,
 		nullptr, nullptr, mywindows::hinstance, nullptr);
 
-	// ÉèÖÃĞü¸¡´°¿ÚµÄ³õÊ¼Í¸Ã÷¶È
+	// è®¾ç½®æ‚¬æµ®çª—å£çš„åˆå§‹é€æ˜åº¦
 	SetLayeredWindowAttributes(mywindows::float_hWnd, 0, 128, LWA_ALPHA);
-	// ÏÔÊ¾Ğü¸¡´°¿Ú
+	// æ˜¾ç¤ºæ‚¬æµ®çª—å£
 	ShowWindow(mywindows::float_hWnd, SW_SHOWNOACTIVATE);
 	UpdateWindow(mywindows::float_hWnd);
 	constexpr int x = 0;
@@ -107,7 +107,7 @@ void floatwindow::lbuttondown(const WPARAM wParam)
 	if (wParam == HTCLIENT)
 	{
 		showQuitWindow();
-		GetCursorPos(&p); //»ñÈ¡Êó±êÎ»ÖÃ
+		GetCursorPos(&p); //è·å–é¼ æ ‡ä½ç½®
 		is_mouse_dragging = true;
 		GetCursorPos(&last_mouse_pos);
 		start = std::chrono::high_resolution_clock::now();
@@ -185,7 +185,7 @@ void floatwindow::lbuttonup()
 	if (is_mouse_dragging)
 	{
 		hideQuitWindow();
-		GetCursorPos(&p1); //»ñÈ¡Êó±êÎ»ÖÃ
+		GetCursorPos(&p1); //è·å–é¼ æ ‡ä½ç½®
 		is_mouse_dragging = false;
 		ReleaseCapture();
 		if (-3 <= (p.x - p1.x)AND(p.x - p1.x) <= 3 AND - 3 <= (p.y - p1.y)AND(p.y - p1.y) <= 3)
@@ -215,7 +215,7 @@ void floatwindow::lbuttonclick(const WPARAM wParam)
 {
 	if (wParam == HTCLIENT)
 	{
-		// Ë«»÷´°¿ÚÄÚ²¿ÇøÓòÊ±µÄ²Ù×÷£¬ÀıÈçÏÔÊ¾/Òş²ØÖ÷´°¿Ú
+		// åŒå‡»çª—å£å†…éƒ¨åŒºåŸŸæ—¶çš„æ“ä½œï¼Œä¾‹å¦‚æ˜¾ç¤º/éšè—ä¸»çª—å£
 		ShowWindow(mywindows::main_hwnd, SW_SHOW);
 		ShowWindow(mywindows::float_hWnd, SW_HIDE);
 	}

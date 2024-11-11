@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include"Gp.h"
 class GpManager {
 public:
@@ -8,8 +8,8 @@ public:
     }
 
     static void reset() {
-        Gp temp; // ´´½¨Ò»¸öĞÂµÄ Gp ÊµÀı
-        GpManager::instance = std::move(temp); // Ê¹ÓÃ std::move À´×ªÒÆËùÓĞÈ¨
+        Gp temp; // åˆ›å»ºä¸€ä¸ªæ–°çš„ Gp å®ä¾‹
+        GpManager::instance = std::move(temp); // ä½¿ç”¨ std::move æ¥è½¬ç§»æ‰€æœ‰æƒ
     }
 private:
     static Gp instance;

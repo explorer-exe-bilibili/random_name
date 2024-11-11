@@ -1,4 +1,4 @@
-#include "ConfigItem.h"
+ï»¿#include "ConfigItem.h"
 
 #include "mywindows.h"
 #include "sth2sth.h"
@@ -10,7 +10,7 @@ using namespace std;
 #define ARGB(a,r,g,b)	((uint32_t)(((BYTE)(b)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(r))<<16)|(((DWORD)(BYTE)(a))<<24)))
 extern wstring configPath;
 
-//¶ÁÈ¡ºÍ²¹È«ÅäÖÃÏî
+//è¯»å–å’Œè¡¥å…¨é…ç½®é¡¹
 int config::init() {
 	mywindows::log("initing config start");
 	configPath = Log::wrunpath;
@@ -46,7 +46,7 @@ int config::init() {
 		add(SPEED_FIRST_SCREEN, L"50");
 		add(NAME_COLOR_6_STAR, ARGB(255, 0, 125, 125));
 		add(NAME_COLOR, ARGB(255, 0, 125, 125));
-		add(WINDOW_TITLE, L"ÆíÔ¸");
+		add(WINDOW_TITLE, L"ç¥ˆæ„¿");
 		add(OVER4, L"\\files\\imgs\\over4.jpg");
 		add(OVER3, L"\\files\\imgs\\over3.jpg");
 		add(OVER2, L"\\files\\imgs\\over2.jpg");
@@ -71,7 +71,7 @@ int config::init() {
 		LogString = get(OFF_VIDEO);
 		if (LogString == L"err")add(OFF_VIDEO, L"0");
 		LogString = get(WINDOW_TITLE);
-		if (LogString == L"err")add(WINDOW_TITLE,L"Ô­Éñ");
+		if (LogString == L"err")add(WINDOW_TITLE,L"åŽŸç¥ž");
 		LogString = get(NAMES1);
 		if (LogString == L"err")add(NAMES1, L"\\names1.txt");
 		LogString = get(NAMES2);

@@ -1,4 +1,4 @@
-#include "MSGback.h"
+ï»¿#include "MSGback.h"
 
 #include "ConfigItem.h"
 #include "FirstScreen.h"
@@ -157,13 +157,13 @@ void MSGback::close()
 }
 void MSGback::showWindow(const WPARAM wParam)
 {
-	if (wParam) // Ö÷´°¿ÚÏÔÊ¾
+	if (wParam) // ä¸»çª—å£æ˜¾ç¤º
 	{
 		ShowWindow(mywindows::float_hWnd, SW_HIDE);
 		if (!set2::offMusic)
 			mciSendString(L"play bgm repeat from 0", nullptr, 0, nullptr);
 	}
-	else // Ö÷´°¿ÚÒş²Ø
+	else // ä¸»çª—å£éšè—
 	{
 		ShowWindow(mywindows::float_hWnd, SW_SHOWNOACTIVATE);
 		if (!set2::offMusic)

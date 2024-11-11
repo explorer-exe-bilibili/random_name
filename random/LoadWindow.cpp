@@ -1,4 +1,4 @@
-#include "LoadWindow.h"
+ï»¿#include "LoadWindow.h"
 
 #include "mywindows.h"
 #include "resource.h"
@@ -84,23 +84,23 @@ LRESULT CALLBACK LoadWindowProc(const HWND hWnd, const UINT message, const WPARA
 
 void LoadWindow::init()
 {
-	WNDCLASS wndcls; //´´½¨Ò»¸ö´°ÌåÀà
-	wndcls.cbClsExtra = 0;//ÀàµÄ¶îÍâÄÚ´æ£¬Ä¬ÈÏÎª0¼´¿É
-	wndcls.cbWndExtra = 0;//´°¿ÚµÄ¶îÍâÄÚ´æ£¬Ä¬ÈÏÎª0¼´¿É
-	wndcls.hbrBackground = HBRUSH(GetStockObject(WHITE_BRUSH));//»ñÈ¡»­Ë¢¾ä±ú£¨½«·µ»ØµÄHGDIOBJ½øĞĞÇ¿ÖÆÀàĞÍ×ª»»£©
-	wndcls.hCursor = LoadCursorW(nullptr, IDC_ARROW);//ÉèÖÃ¹â±ê
-	wndcls.hIcon = LoadIconW(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_ICON1));//ÉèÖÃ´°Ìå×óÉÏ½ÇµÄÍ¼±ê
-	wndcls.hInstance = GetModuleHandle(nullptr);//ÉèÖÃ´°ÌåËùÊôµÄÓ¦ÓÃ³ÌĞòÊµÀı
-	wndcls.lpfnWndProc = LoadWindowProc;//WinSunProc;//ÉèÖÃ´°ÌåµÄ»Øµ÷º¯Êı£¬ÔİÊ±Ã»Ğ´£¬ÏÈÉèÖÃÎªNULL£¬ºóÃæ²¹ÉÏ
-	wndcls.lpszClassName = L"LoadWindow";//ÉèÖÃ´°ÌåµÄÀàÃû
-	wndcls.lpszMenuName = nullptr;//ÉèÖÃ´°ÌåµÄ²Ëµ¥,Ã»ÓĞ£¬ÌîNULL
-	wndcls.style = CS_HREDRAW | CS_VREDRAW;//ÉèÖÃ´°Ìå·ç¸ñÎªË®Æ½ÖØ»­ºÍ´¹Ö±ÖØ»­
-	RegisterClass(&wndcls);//Ïò²Ù×÷ÏµÍ³×¢²á´°Ìå
+	WNDCLASS wndcls; //åˆ›å»ºä¸€ä¸ªçª—ä½“ç±»
+	wndcls.cbClsExtra = 0;//ç±»çš„é¢å¤–å†…å­˜ï¼Œé»˜è®¤ä¸º0å³å¯
+	wndcls.cbWndExtra = 0;//çª—å£çš„é¢å¤–å†…å­˜ï¼Œé»˜è®¤ä¸º0å³å¯
+	wndcls.hbrBackground = HBRUSH(GetStockObject(WHITE_BRUSH));//è·å–ç”»åˆ·å¥æŸ„ï¼ˆå°†è¿”å›çš„HGDIOBJè¿›è¡Œå¼ºåˆ¶ç±»å‹è½¬æ¢ï¼‰
+	wndcls.hCursor = LoadCursorW(nullptr, IDC_ARROW);//è®¾ç½®å…‰æ ‡
+	wndcls.hIcon = LoadIconW(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_ICON1));//è®¾ç½®çª—ä½“å·¦ä¸Šè§’çš„å›¾æ ‡
+	wndcls.hInstance = GetModuleHandle(nullptr);//è®¾ç½®çª—ä½“æ‰€å±çš„åº”ç”¨ç¨‹åºå®ä¾‹
+	wndcls.lpfnWndProc = LoadWindowProc;//WinSunProc;//è®¾ç½®çª—ä½“çš„å›è°ƒå‡½æ•°ï¼Œæš‚æ—¶æ²¡å†™ï¼Œå…ˆè®¾ç½®ä¸ºNULLï¼Œåé¢è¡¥ä¸Š
+	wndcls.lpszClassName = L"LoadWindow";//è®¾ç½®çª—ä½“çš„ç±»å
+	wndcls.lpszMenuName = nullptr;//è®¾ç½®çª—ä½“çš„èœå•,æ²¡æœ‰ï¼Œå¡«NULL
+	wndcls.style = CS_HREDRAW | CS_VREDRAW;//è®¾ç½®çª—ä½“é£æ ¼ä¸ºæ°´å¹³é‡ç”»å’Œå‚ç›´é‡ç”»
+	RegisterClass(&wndcls);//å‘æ“ä½œç³»ç»Ÿæ³¨å†Œçª—ä½“
 	const int desiredPixelHeight = mywindows::screenWidth * 0.02;
-	// »ñÈ¡Éè±¸ÉÏÏÂÎÄµÄ DPI
-	const HDC hdc = GetDC(nullptr); // »ñÈ¡×ÀÃæÉè±¸ÉÏÏÂÎÄ
+	// è·å–è®¾å¤‡ä¸Šä¸‹æ–‡çš„ DPI
+	const HDC hdc = GetDC(nullptr); // è·å–æ¡Œé¢è®¾å¤‡ä¸Šä¸‹æ–‡
 	const int dpi = GetDeviceCaps(hdc, LOGPIXELSY);
-	// ¼ÆËãÂß¼­µ¥Î»¸ß¶È
+	// è®¡ç®—é€»è¾‘å•ä½é«˜åº¦
 	const int Height = MulDiv(desiredPixelHeight, 72, dpi);
 	const int width = Height * 0.77;
 	LoadWindowFont = CreateFontW(Height, width, 0, 0, FW_NORMAL, 0, 0, 0, 
@@ -197,15 +197,15 @@ LoadWindowPainter::LoadWindowPainter(const HWND hwnd)
 	this->hwnd = hwnd;
 	ptr = LoadWindowExplorer::getInstance();
 	ReleaseDC(hdc);
-	// »ñÈ¡´°¿ÚµÄ¿Í»§Çø´óĞ¡
+	// è·å–çª—å£çš„å®¢æˆ·åŒºå¤§å°
 	RECT rc;
 	GetClientRect(mywindows::main_hwnd, &rc);
 	int width = rc.right - rc.left;
 	int height = rc.bottom - rc.top;
 
-	// ÖØĞÂ´´½¨Ò»¸öÓë´°¿Ú¿Í»§Çø´óĞ¡ÏàÍ¬µÄBitmap×÷ÎªÀëÆÁ»º³åÇø
+	// é‡æ–°åˆ›å»ºä¸€ä¸ªä¸çª—å£å®¢æˆ·åŒºå¤§å°ç›¸åŒçš„Bitmapä½œä¸ºç¦»å±ç¼“å†²åŒº
 	buffer = make_shared<Bitmap>(width, height, PixelFormat32bppARGB);
-	// ÖØĞÂ´´½¨Graphics¶ÔÏóÓÃÓÚ»æÖÆµ½ÀëÆÁ»º³åÇø
+	// é‡æ–°åˆ›å»ºGraphicså¯¹è±¡ç”¨äºç»˜åˆ¶åˆ°ç¦»å±ç¼“å†²åŒº
 	graphic = make_shared<Graphics>(buffer.get());
 }
 
@@ -234,31 +234,31 @@ void LoadWindowPainter::Flush()
 {
 	if (cachedHDC)
 		ReleaseDC(hdc);
-	// »ñÈ¡´°¿ÚµÄÉè±¸ÉÏÏÂÎÄ
+	// è·å–çª—å£çš„è®¾å¤‡ä¸Šä¸‹æ–‡
 	const HDC hdcWindow = ::GetDC(hwnd);
 
-	// ´´½¨Ò»¸öÀëÆÁDC
+	// åˆ›å»ºä¸€ä¸ªç¦»å±DC
 	const HDC hdcOffscreen = CreateCompatibleDC(hdcWindow);
 
-	// ´´½¨Ò»¸öÓë´°¿Ú´óĞ¡ÏàÍ¬µÄÎ»Í¼
+	// åˆ›å»ºä¸€ä¸ªä¸çª—å£å¤§å°ç›¸åŒçš„ä½å›¾
 	const HBITMAP hBitmap = CreateCompatibleBitmap(hdcWindow, buffer->GetWidth(), buffer->GetHeight());
 
-	// ½«Î»Í¼Ñ¡ÈëÀëÆÁDC
+	// å°†ä½å›¾é€‰å…¥ç¦»å±DC
 	const auto hOldBitmap = HBITMAP(SelectObject(hdcOffscreen, hBitmap));
 
-	// ½«ÀëÆÁ»º³åÇøµÄÄÚÈİ»æÖÆµ½ÀëÆÁDCÉÏ
+	// å°†ç¦»å±ç¼“å†²åŒºçš„å†…å®¹ç»˜åˆ¶åˆ°ç¦»å±DCä¸Š
 	Gdiplus::Graphics graphicsOffscreen(hdcOffscreen);
 	graphicsOffscreen.DrawImage(buffer.get(), 0, 0);
 
-	// ½«ÀëÆÁDCµÄÄÚÈİ»æÖÆµ½´°¿ÚÉÏ
+	// å°†ç¦»å±DCçš„å†…å®¹ç»˜åˆ¶åˆ°çª—å£ä¸Š
 	BitBlt(hdcWindow, 0, 0, buffer->GetWidth(), buffer->GetHeight(), hdcOffscreen, 0, 0, SRCCOPY);
 
-	// ÊÍ·Å×ÊÔ´
+	// é‡Šæ”¾èµ„æº
 	SelectObject(hdcOffscreen, hOldBitmap);
 	DeleteObject(hBitmap);
 	DeleteDC(hdcOffscreen);
 
-	// ÊÍ·ÅÉè±¸ÉÏÏÂÎÄ
+	// é‡Šæ”¾è®¾å¤‡ä¸Šä¸‹æ–‡
 	::ReleaseDC(hwnd, hdcWindow);
 }
 
@@ -272,12 +272,12 @@ void LoadWindowPainter::Paint(const int xDest, const int yDest, const int wDest,
 	const int w = t_bitmap->bmWidth;
 	const int h = t_bitmap->bmHeight;
 	SelectObject(hdcMem, t_hbtiamp);
-	// ÉèÖÃ»ìºÏº¯Êı
+	// è®¾ç½®æ··åˆå‡½æ•°
 	BLENDFUNCTION blendFunc;
 	blendFunc.BlendOp = AC_SRC_OVER;
 	blendFunc.BlendFlags = 0;
-	blendFunc.SourceConstantAlpha = 255; // 255 = ²»Í¸Ã÷£¬0 = ÍêÈ«Í¸Ã÷
-	blendFunc.AlphaFormat = AC_SRC_ALPHA; // Ê¹ÓÃÔ´Í¼ÏñµÄAlphaÍ¨µÀ
+	blendFunc.SourceConstantAlpha = 255; // 255 = ä¸é€æ˜ï¼Œ0 = å®Œå…¨é€æ˜
+	blendFunc.AlphaFormat = AC_SRC_ALPHA; // ä½¿ç”¨æºå›¾åƒçš„Alphaé€šé“
 
 	AlphaBlend(hdc, xDest, yDest, wDest, hDest, hdcMem, 0, 0, w, h, blendFunc);
 	DeleteDC(hdcMem);
@@ -293,12 +293,12 @@ void LoadWindowPainter::Paint(const int xDest, const int yDest, const int number
 	const int w = t_bitmap->bmWidth;
 	const int h = t_bitmap->bmHeight;
 	SelectObject(hdcMem, t_hbtiamp);
-	// ÉèÖÃ»ìºÏº¯Êı
+	// è®¾ç½®æ··åˆå‡½æ•°
 	BLENDFUNCTION blendFunc;
 	blendFunc.BlendOp = AC_SRC_OVER;
 	blendFunc.BlendFlags = 0;
-	blendFunc.SourceConstantAlpha = 255; // 255 = ²»Í¸Ã÷£¬0 = ÍêÈ«Í¸Ã÷
-	blendFunc.AlphaFormat = AC_SRC_ALPHA; // Ê¹ÓÃÔ´Í¼ÏñµÄAlphaÍ¨µÀ
+	blendFunc.SourceConstantAlpha = 255; // 255 = ä¸é€æ˜ï¼Œ0 = å®Œå…¨é€æ˜
+	blendFunc.AlphaFormat = AC_SRC_ALPHA; // ä½¿ç”¨æºå›¾åƒçš„Alphaé€šé“
 
 	AlphaBlend(hdc, xDest, yDest, w, h, hdcMem, 0, 0, w, h, blendFunc);
 	DeleteDC(hdcMem);
@@ -309,25 +309,25 @@ void LoadWindowPainter::DrawStringBetween(const std::wstring& str, const HFONT f
 {
 	if (!cachedHDC)
 		hdc = GetDC();
-	// ´´½¨Ò»¸öGDI+ Graphics¶ÔÏó
+	// åˆ›å»ºä¸€ä¸ªGDI+ Graphicså¯¹è±¡
 	Graphics graphics(hdc);
-	// ÉèÖÃÎÄ±¾äÖÈ¾Ä£Ê½Îª¿¹¾â³İ
+	// è®¾ç½®æ–‡æœ¬æ¸²æŸ“æ¨¡å¼ä¸ºæŠ—é”¯é½¿
 	graphics.SetTextRenderingHint(TextRenderingHintAntiAlias);
 
-	// ´´½¨Ò»¸öGDI+ Font¶ÔÏó
+	// åˆ›å»ºä¸€ä¸ªGDI+ Fontå¯¹è±¡
 	const Font gdiPlusFont(hdc, font);
-	// ´´½¨Ò»¸öGDI+ SolidBrush¶ÔÏó
+	// åˆ›å»ºä¸€ä¸ªGDI+ SolidBrushå¯¹è±¡
 	const SolidBrush brush(Color(255, R, G, B));
 
-	// ´´½¨Ò»¸öGDI+ RectF¶ÔÏó£¬±íÊ¾ÎÄ±¾»æÖÆµÄÇøÓò
+	// åˆ›å»ºä¸€ä¸ªGDI+ RectFå¯¹è±¡ï¼Œè¡¨ç¤ºæ–‡æœ¬ç»˜åˆ¶çš„åŒºåŸŸ
 	const RectF layoutRect(x, y, xend - x, yend - y);
 
-	// ´´½¨Ò»¸öGDI+ StringFormat¶ÔÏó£¬ÓÃÓÚÉèÖÃÎÄ±¾¸ñÊ½
+	// åˆ›å»ºä¸€ä¸ªGDI+ StringFormatå¯¹è±¡ï¼Œç”¨äºè®¾ç½®æ–‡æœ¬æ ¼å¼
 	StringFormat format;
 	format.SetAlignment(StringAlignmentCenter);
 	format.SetLineAlignment(StringAlignmentCenter);
 
-	// »æÖÆÎÄ±¾
+	// ç»˜åˆ¶æ–‡æœ¬
 	graphics.DrawString(str.c_str(), -1, &gdiPlusFont, layoutRect, &format, &brush);
 }
 
@@ -336,25 +336,25 @@ void LoadWindowPainter::DrawStringBetween(std::string str, const HFONT font, con
 {
 	if (!cachedHDC)
 		hdc = GetDC();
-	// ´´½¨Ò»¸öGDI+ Graphics¶ÔÏó
+	// åˆ›å»ºä¸€ä¸ªGDI+ Graphicså¯¹è±¡
 	Graphics graphics(hdc);
-	// ÉèÖÃÎÄ±¾äÖÈ¾Ä£Ê½Îª¿¹¾â³İ
+	// è®¾ç½®æ–‡æœ¬æ¸²æŸ“æ¨¡å¼ä¸ºæŠ—é”¯é½¿
 	graphics.SetTextRenderingHint(TextRenderingHintAntiAlias);
 
-	// ´´½¨Ò»¸öGDI+ Font¶ÔÏó
+	// åˆ›å»ºä¸€ä¸ªGDI+ Fontå¯¹è±¡
 	const Font gdiPlusFont(hdc, font);
-	// ´´½¨Ò»¸öGDI+ SolidBrush¶ÔÏó
+	// åˆ›å»ºä¸€ä¸ªGDI+ SolidBrushå¯¹è±¡
 	const SolidBrush brush(Color(255, R, G, B));
 
-	// ´´½¨Ò»¸öGDI+ RectF¶ÔÏó£¬±íÊ¾ÎÄ±¾»æÖÆµÄÇøÓò
+	// åˆ›å»ºä¸€ä¸ªGDI+ RectFå¯¹è±¡ï¼Œè¡¨ç¤ºæ–‡æœ¬ç»˜åˆ¶çš„åŒºåŸŸ
 	const RectF layoutRect(x, y, xend - x, yend - y);
 
-	// ´´½¨Ò»¸öGDI+ StringFormat¶ÔÏó£¬ÓÃÓÚÉèÖÃÎÄ±¾¸ñÊ½
+	// åˆ›å»ºä¸€ä¸ªGDI+ StringFormatå¯¹è±¡ï¼Œç”¨äºè®¾ç½®æ–‡æœ¬æ ¼å¼
 	StringFormat format;
 	format.SetAlignment(StringAlignmentCenter);
 	format.SetLineAlignment(StringAlignmentCenter);
 
-	// »æÖÆÎÄ±¾
+	// ç»˜åˆ¶æ–‡æœ¬
 	const std::wstring wstr(str.begin(), str.end());
 	graphics.DrawString(wstr.c_str(), -1, &gdiPlusFont, layoutRect, &format, &brush);
 }
@@ -363,16 +363,16 @@ void LoadWindowPainter::DrawSquare(const int xDest, const int yDest, const int x
 {
 	hdc = GetDC();
 	if (filled) {
-		// »æÖÆÊµĞÄ¾ØĞÎ
-		const HBRUSH hBrush = CreateSolidBrush(RGB(R, G, B)); // ºìÉ«ÊµĞÄË¢×Ó
+		// ç»˜åˆ¶å®å¿ƒçŸ©å½¢
+		const HBRUSH hBrush = CreateSolidBrush(RGB(R, G, B)); // çº¢è‰²å®å¿ƒåˆ·å­
 		const HBRUSH hOldBrush = HBRUSH(SelectObject(hdc, hBrush));
 		Rectangle(hdc, xDest, yDest, xEnd, yEnd);
 		SelectObject(hdc, hOldBrush);
 		DeleteObject(hBrush);
 	}
 	else {
-		// »æÖÆ¿ÕĞÄ¾ØĞÎ
-		const HPEN hPen = CreatePen(PS_SOLID, 2, RGB(R, G, B)); // À¶É«»­±Ê
+		// ç»˜åˆ¶ç©ºå¿ƒçŸ©å½¢
+		const HPEN hPen = CreatePen(PS_SOLID, 2, RGB(R, G, B)); // è“è‰²ç”»ç¬”
 		const HPEN hOldPen = HPEN(SelectObject(hdc, hPen));
 		const HBRUSH hNullBrush = HBRUSH(SelectObject(hdc, GetStockObject(NULL_BRUSH)));
 		Rectangle(hdc, xDest, yDest, xEnd, yEnd);

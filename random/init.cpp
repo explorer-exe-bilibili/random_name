@@ -1,4 +1,4 @@
-#include<Windows.h>
+ï»¿#include<Windows.h>
 #include<filesystem>
 #include<thread>
 #include <dshow.h>
@@ -19,10 +19,10 @@ WNDPROC w2_, w3_;
 void init::font()
 {
 	const int desiredPixelHeight = mywindows::WW * 0.17;
-	// »ñÈ¡Éè±¸ÉÏÏÂÎÄµÄ DPI
-	const HDC hdc = GetDC(nullptr); // »ñÈ¡×ÀÃæÉè±¸ÉÏÏÂÎÄ
+	// è·å–è®¾å¤‡ä¸Šä¸‹æ–‡çš„ DPI
+	const HDC hdc = GetDC(nullptr); // è·å–æ¡Œé¢è®¾å¤‡ä¸Šä¸‹æ–‡
 	const int dpi = GetDeviceCaps(hdc, LOGPIXELSY);
-	// ¼ÆËãÂß¼­µ¥Î»¸ß¶È
+	// è®¡ç®—é€»è¾‘å•ä½é«˜åº¦
 	const int logicalHeight = MulDiv(desiredPixelHeight, 72, dpi);
 	const int logicalWidth = logicalHeight * 0.77;
 	bool isInstall = checkIsFontInstalled(L"genshin-icon");
@@ -32,8 +32,8 @@ void init::font()
 		ui::icon = CreateFontW(logicalHeight * 0.2299, logicalWidth * 0.3008, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
 	}
 	else {
-		MessageBox(nullptr, L"Çë°²×°×ÖÌå", L"´íÎó", MB_ICONERROR);
-		mywindows::errlogf << R"("genshin - icon"×ÖÌåÎ´°²×°)" << std::endl;
+		MessageBox(nullptr, L"è¯·å®‰è£…å­—ä½“", L"é”™è¯¯", MB_ICONERROR);
+		mywindows::errlogf << R"("genshin - icon"å­—ä½“æœªå®‰è£…)" << std::endl;
 		system("files\\ttfs\\icon.ttf");
 		mywindows::reboot();
 	}
@@ -44,19 +44,19 @@ void init::font()
 		ui::text_list = CreateFontW(logicalHeight * 0.7, logicalWidth * 0.7, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
 	}
 	else {
-		MessageBox(nullptr, L"Çë°²×°×ÖÌå", L"´íÎó", MB_ICONERROR);
-		mywindows::errlogf << R"(SDK_SC_Web×ÖÌåÎ´°²×°)" << std::endl;
+		MessageBox(nullptr, L"è¯·å®‰è£…å­—ä½“", L"é”™è¯¯", MB_ICONERROR);
+		mywindows::errlogf << R"(SDK_SC_Webå­—ä½“æœªå®‰è£…)" << std::endl;
 		system("files\\ttfs\\text.ttf");
 		mywindows::reboot();
 	}
 	if (!config::getint(UNSUITFONT)) {
-		isInstall = checkIsFontInstalled(L"AaÆáÊé");
+		isInstall = checkIsFontInstalled(L"Aaæ¼†ä¹¦");
 		if (isInstall) {
-			ui::text_big = CreateFontW(logicalHeight*1.3, logicalWidth*1.3, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"AaÆáÊé");
+			ui::text_big = CreateFontW(logicalHeight*1.3, logicalWidth*1.3, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"Aaæ¼†ä¹¦");
 		}
 		else {
-			MessageBox(nullptr, L"Çë°²×°×ÖÌå", L"´íÎó", MB_ICONERROR);
-			mywindows::errlogf << R"(AaÆáÊé×ÖÌåÎ´°²×°)" << std::endl;
+			MessageBox(nullptr, L"è¯·å®‰è£…å­—ä½“", L"é”™è¯¯", MB_ICONERROR);
+			mywindows::errlogf << R"(Aaæ¼†ä¹¦å­—ä½“æœªå®‰è£…)" << std::endl;
 			system("files\\ttfs\\QS.ttf");
 			mywindows::reboot();
 		}
@@ -70,7 +70,7 @@ void init::resetPoint()
 {
 	RECT rect;
 	GetClientRect(mywindows::main_hwnd, &rect);
-	// ¼ÆËã´°¿ÚµÄ¿í¶ÈºÍ¸ß¶È
+	// è®¡ç®—çª—å£çš„å®½åº¦å’Œé«˜åº¦
 	mywindows::windowTop = rect.left;
 	mywindows::windowLeft = rect.top;
 	int width = rect.right - rect.left;
@@ -94,7 +94,7 @@ void init::resetPoint()
 void init::main(WNDPROC w1, WNDPROC w2, WNDPROC w3)
 {
 	std::thread([w1, w2, w3] { regWindow(w1, w2, w3); }).detach();
-	SetConsoleOutputCP(65001); // ÉèÖÃÎªUTF-8±àÂë
+	SetConsoleOutputCP(65001); // è®¾ç½®ä¸ºUTF-8ç¼–ç 
 	CHAR run[260] = {};
 	GetModuleFileNameA(nullptr, run, MAX_PATH);
 	const int len = MultiByteToWideChar(CP_ACP, 0, run, -1, nullptr, 0);
@@ -131,9 +131,9 @@ void init::music()
 		mciSendString(str.c_str(), nullptr, 0, nullptr);
 
 		once = false;
-	}// ´ò¿ª²¢²¥·Å±³¾°ÒôÀÖ
+	}// æ‰“å¼€å¹¶æ’­æ”¾èƒŒæ™¯éŸ³ä¹
 	if (!set2::offMusic)
-		mciSendString(L"play bgm repeat", nullptr, 0, nullptr); // Ê¹ÓÃ±ğÃû 'bgm' ²¥·ÅÒôÀÖ£¬²¢ÉèÖÃÎªÑ­»·²¥·Å
+		mciSendString(L"play bgm repeat", nullptr, 0, nullptr); // ä½¿ç”¨åˆ«å 'bgm' æ’­æ”¾éŸ³ä¹ï¼Œå¹¶è®¾ç½®ä¸ºå¾ªç¯æ’­æ”¾
 }
 
 void init::config()
@@ -158,45 +158,45 @@ void init::MainWindow()
 void init::regWindow(const WNDPROC w1, const WNDPROC w2, const WNDPROC w3)
 {
 	w2_ = w2; w3_ = w3;
-	WNDCLASS wndcls; //´´½¨Ò»¸ö´°ÌåÀà
-	wndcls.cbClsExtra = 0;//ÀàµÄ¶îÍâÄÚ´æ£¬Ä¬ÈÏÎª0¼´¿É
-	wndcls.cbWndExtra = 0;//´°¿ÚµÄ¶îÍâÄÚ´æ£¬Ä¬ÈÏÎª0¼´¿É
-	wndcls.hbrBackground = HBRUSH(GetStockObject(NULL_BRUSH));//»ñÈ¡»­Ë¢¾ä±ú£¨½«·µ»ØµÄHGDIOBJ½øĞĞÇ¿ÖÆÀàĞÍ×ª»»£©
-	wndcls.hCursor = LoadCursorW(nullptr, IDC_ARROW);//ÉèÖÃ¹â±ê
-	wndcls.hIcon = LoadIconW(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_ICON1));//ÉèÖÃ´°Ìå×óÉÏ½ÇµÄÍ¼±ê
-	wndcls.hInstance = GetModuleHandle(nullptr);;//ÉèÖÃ´°ÌåËùÊôµÄÓ¦ÓÃ³ÌĞòÊµÀı
-	wndcls.lpfnWndProc = w1;//WinSunProc;//ÉèÖÃ´°ÌåµÄ»Øµ÷º¯Êı£¬ÔİÊ±Ã»Ğ´£¬ÏÈÉèÖÃÎªNULL£¬ºóÃæ²¹ÉÏ
-	wndcls.lpszClassName = L"main";//ÉèÖÃ´°ÌåµÄÀàÃû
-	wndcls.lpszMenuName = nullptr;//ÉèÖÃ´°ÌåµÄ²Ëµ¥,Ã»ÓĞ£¬ÌîNULL
-	wndcls.style = CS_HREDRAW | CS_VREDRAW;//ÉèÖÃ´°Ìå·ç¸ñÎªË®Æ½ÖØ»­ºÍ´¹Ö±ÖØ»­
-	RegisterClass(&wndcls);//Ïò²Ù×÷ÏµÍ³×¢²á´°Ìå
+	WNDCLASS wndcls; //åˆ›å»ºä¸€ä¸ªçª—ä½“ç±»
+	wndcls.cbClsExtra = 0;//ç±»çš„é¢å¤–å†…å­˜ï¼Œé»˜è®¤ä¸º0å³å¯
+	wndcls.cbWndExtra = 0;//çª—å£çš„é¢å¤–å†…å­˜ï¼Œé»˜è®¤ä¸º0å³å¯
+	wndcls.hbrBackground = HBRUSH(GetStockObject(NULL_BRUSH));//è·å–ç”»åˆ·å¥æŸ„ï¼ˆå°†è¿”å›çš„HGDIOBJè¿›è¡Œå¼ºåˆ¶ç±»å‹è½¬æ¢ï¼‰
+	wndcls.hCursor = LoadCursorW(nullptr, IDC_ARROW);//è®¾ç½®å…‰æ ‡
+	wndcls.hIcon = LoadIconW(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_ICON1));//è®¾ç½®çª—ä½“å·¦ä¸Šè§’çš„å›¾æ ‡
+	wndcls.hInstance = GetModuleHandle(nullptr);;//è®¾ç½®çª—ä½“æ‰€å±çš„åº”ç”¨ç¨‹åºå®ä¾‹
+	wndcls.lpfnWndProc = w1;//WinSunProc;//è®¾ç½®çª—ä½“çš„å›è°ƒå‡½æ•°ï¼Œæš‚æ—¶æ²¡å†™ï¼Œå…ˆè®¾ç½®ä¸ºNULLï¼Œåé¢è¡¥ä¸Š
+	wndcls.lpszClassName = L"main";//è®¾ç½®çª—ä½“çš„ç±»å
+	wndcls.lpszMenuName = nullptr;//è®¾ç½®çª—ä½“çš„èœå•,æ²¡æœ‰ï¼Œå¡«NULL
+	wndcls.style = CS_HREDRAW | CS_VREDRAW;//è®¾ç½®çª—ä½“é£æ ¼ä¸ºæ°´å¹³é‡ç”»å’Œå‚ç›´é‡ç”»
+	RegisterClass(&wndcls);//å‘æ“ä½œç³»ç»Ÿæ³¨å†Œçª—ä½“
 	DWORD threadId;
 	CreateThread(nullptr, 0, PTHREAD_START_ROUTINE(RegWindows), nullptr, 0, &threadId);
 }
 DWORD WINAPI init::RegWindows() {
-	WNDCLASS Fwndcls; //´´½¨Ò»¸ö´°ÌåÀà
-	Fwndcls.cbClsExtra = 0;//ÀàµÄ¶îÍâÄÚ´æ£¬Ä¬ÈÏÎª0¼´¿É
-	Fwndcls.cbWndExtra = 0;//´°¿ÚµÄ¶îÍâÄÚ´æ£¬Ä¬ÈÏÎª0¼´¿É
-	Fwndcls.hbrBackground = HBRUSH(GetStockObject(NULL_BRUSH));//»ñÈ¡»­Ë¢¾ä±ú£¨½«·µ»ØµÄHGDIOBJ½øĞĞÇ¿ÖÆÀàĞÍ×ª»»£©
-	Fwndcls.hCursor = LoadCursorW(nullptr, IDC_ARROW);//ÉèÖÃ¹â±ê
-	Fwndcls.hIcon = LoadIconW(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_ICON1));//ÉèÖÃ´°Ìå×óÉÏ½ÇµÄÍ¼±ê
-	Fwndcls.hInstance = GetModuleHandle(nullptr);;//ÉèÖÃ´°ÌåËùÊôµÄÓ¦ÓÃ³ÌĞòÊµÀı
-	Fwndcls.lpfnWndProc = w2_;//WinSunProc;//ÉèÖÃ´°ÌåµÄ»Øµ÷º¯Êı£¬ÔİÊ±Ã»Ğ´£¬ÏÈÉèÖÃÎªNULL£¬ºóÃæ²¹ÉÏ
-	Fwndcls.lpszClassName = L"FLOAT";//ÉèÖÃ´°ÌåµÄÀàÃû
-	Fwndcls.lpszMenuName = nullptr;//ÉèÖÃ´°ÌåµÄ²Ëµ¥,Ã»ÓĞ£¬ÌîNULL
-	Fwndcls.style = CS_HREDRAW | CS_VREDRAW;//ÉèÖÃ´°Ìå·ç¸ñÎªË®Æ½ÖØ»­ºÍ´¹Ö±ÖØ»­
-	RegisterClass(&Fwndcls);//Ïò²Ù×÷ÏµÍ³×¢²á´°Ìå
-	Fwndcls.cbClsExtra = 0;//ÀàµÄ¶îÍâÄÚ´æ£¬Ä¬ÈÏÎª0¼´¿É
-	Fwndcls.cbWndExtra = 0;//´°¿ÚµÄ¶îÍâÄÚ´æ£¬Ä¬ÈÏÎª0¼´¿É
-	Fwndcls.hbrBackground = HBRUSH(GetStockObject(WHITE_BRUSH));//»ñÈ¡»­Ë¢¾ä±ú£¨½«·µ»ØµÄHGDIOBJ½øĞĞÇ¿ÖÆÀàĞÍ×ª»»£©
-	Fwndcls.hCursor = LoadCursorW(nullptr, IDC_ARROW);//ÉèÖÃ¹â±ê
-	Fwndcls.hIcon = LoadIconW(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_ICON1));//ÉèÖÃ´°Ìå×óÉÏ½ÇµÄÍ¼±ê
-	Fwndcls.hInstance = GetModuleHandle(nullptr);;//ÉèÖÃ´°ÌåËùÊôµÄÓ¦ÓÃ³ÌĞòÊµÀı
-	Fwndcls.lpfnWndProc = w3_;//WinSunProc;//ÉèÖÃ´°ÌåµÄ»Øµ÷º¯Êı£¬ÔİÊ±Ã»Ğ´£¬ÏÈÉèÖÃÎªNULL£¬ºóÃæ²¹ÉÏ
-	Fwndcls.lpszClassName = L"QUIT";//ÉèÖÃ´°ÌåµÄÀàÃû
-	Fwndcls.lpszMenuName = nullptr;//ÉèÖÃ´°ÌåµÄ²Ëµ¥,Ã»ÓĞ£¬ÌîNULL
-	Fwndcls.style = CS_HREDRAW | CS_VREDRAW;//ÉèÖÃ´°Ìå·ç¸ñÎªË®Æ½ÖØ»­ºÍ´¹Ö±ÖØ»­
-	RegisterClass(&Fwndcls);//Ïò²Ù×÷ÏµÍ³×¢²á´°Ìå
+	WNDCLASS Fwndcls; //åˆ›å»ºä¸€ä¸ªçª—ä½“ç±»
+	Fwndcls.cbClsExtra = 0;//ç±»çš„é¢å¤–å†…å­˜ï¼Œé»˜è®¤ä¸º0å³å¯
+	Fwndcls.cbWndExtra = 0;//çª—å£çš„é¢å¤–å†…å­˜ï¼Œé»˜è®¤ä¸º0å³å¯
+	Fwndcls.hbrBackground = HBRUSH(GetStockObject(NULL_BRUSH));//è·å–ç”»åˆ·å¥æŸ„ï¼ˆå°†è¿”å›çš„HGDIOBJè¿›è¡Œå¼ºåˆ¶ç±»å‹è½¬æ¢ï¼‰
+	Fwndcls.hCursor = LoadCursorW(nullptr, IDC_ARROW);//è®¾ç½®å…‰æ ‡
+	Fwndcls.hIcon = LoadIconW(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_ICON1));//è®¾ç½®çª—ä½“å·¦ä¸Šè§’çš„å›¾æ ‡
+	Fwndcls.hInstance = GetModuleHandle(nullptr);;//è®¾ç½®çª—ä½“æ‰€å±çš„åº”ç”¨ç¨‹åºå®ä¾‹
+	Fwndcls.lpfnWndProc = w2_;//WinSunProc;//è®¾ç½®çª—ä½“çš„å›è°ƒå‡½æ•°ï¼Œæš‚æ—¶æ²¡å†™ï¼Œå…ˆè®¾ç½®ä¸ºNULLï¼Œåé¢è¡¥ä¸Š
+	Fwndcls.lpszClassName = L"FLOAT";//è®¾ç½®çª—ä½“çš„ç±»å
+	Fwndcls.lpszMenuName = nullptr;//è®¾ç½®çª—ä½“çš„èœå•,æ²¡æœ‰ï¼Œå¡«NULL
+	Fwndcls.style = CS_HREDRAW | CS_VREDRAW;//è®¾ç½®çª—ä½“é£æ ¼ä¸ºæ°´å¹³é‡ç”»å’Œå‚ç›´é‡ç”»
+	RegisterClass(&Fwndcls);//å‘æ“ä½œç³»ç»Ÿæ³¨å†Œçª—ä½“
+	Fwndcls.cbClsExtra = 0;//ç±»çš„é¢å¤–å†…å­˜ï¼Œé»˜è®¤ä¸º0å³å¯
+	Fwndcls.cbWndExtra = 0;//çª—å£çš„é¢å¤–å†…å­˜ï¼Œé»˜è®¤ä¸º0å³å¯
+	Fwndcls.hbrBackground = HBRUSH(GetStockObject(WHITE_BRUSH));//è·å–ç”»åˆ·å¥æŸ„ï¼ˆå°†è¿”å›çš„HGDIOBJè¿›è¡Œå¼ºåˆ¶ç±»å‹è½¬æ¢ï¼‰
+	Fwndcls.hCursor = LoadCursorW(nullptr, IDC_ARROW);//è®¾ç½®å…‰æ ‡
+	Fwndcls.hIcon = LoadIconW(GetModuleHandle(nullptr), MAKEINTRESOURCE(IDI_ICON1));//è®¾ç½®çª—ä½“å·¦ä¸Šè§’çš„å›¾æ ‡
+	Fwndcls.hInstance = GetModuleHandle(nullptr);;//è®¾ç½®çª—ä½“æ‰€å±çš„åº”ç”¨ç¨‹åºå®ä¾‹
+	Fwndcls.lpfnWndProc = w3_;//WinSunProc;//è®¾ç½®çª—ä½“çš„å›è°ƒå‡½æ•°ï¼Œæš‚æ—¶æ²¡å†™ï¼Œå…ˆè®¾ç½®ä¸ºNULLï¼Œåé¢è¡¥ä¸Š
+	Fwndcls.lpszClassName = L"QUIT";//è®¾ç½®çª—ä½“çš„ç±»å
+	Fwndcls.lpszMenuName = nullptr;//è®¾ç½®çª—ä½“çš„èœå•,æ²¡æœ‰ï¼Œå¡«NULL
+	Fwndcls.style = CS_HREDRAW | CS_VREDRAW;//è®¾ç½®çª—ä½“é£æ ¼ä¸ºæ°´å¹³é‡ç”»å’Œå‚ç›´é‡ç”»
+	RegisterClass(&Fwndcls);//å‘æ“ä½œç³»ç»Ÿæ³¨å†Œçª—ä½“
 	return 0;
 }
 DWORD WINAPI init::Upgrade(){
@@ -208,10 +208,10 @@ DWORD WINAPI init::Upgrade(){
 			std::getline(file, file_version);
 		}
 
-		const std::string CURRENT_VERSION = "1.9.0"; // ¼ÙÉèµ±Ç°°æ±¾ºÅÊÇ "1.2.3"
+		const std::string CURRENT_VERSION = "1.9.0"; // å‡è®¾å½“å‰ç‰ˆæœ¬å·æ˜¯ "1.2.3"
 
 		if (file_version.empty() || file_version != CURRENT_VERSION) {
-			mywindows::logf << "°æ±¾ºÅ²»Í¬" << file_version << "->" << CURRENT_VERSION << std::endl;
+			mywindows::logf << "ç‰ˆæœ¬å·ä¸åŒ" << file_version << "->" << CURRENT_VERSION << std::endl;
 			remove("files\\setting.json");
 			file.clear();
 			std::ofstream output_file("version", std::ios::trunc);
@@ -232,7 +232,7 @@ DWORD WINAPI init::Upgrade(){
 
 bool init::checkIsFontInstalled(const std::wstring& fontName) {
 	using namespace Gdiplus;
-	// Òª¼ì²éµÄ×ÖÌåÃû³Æ
+	// è¦æ£€æŸ¥çš„å­—ä½“åç§°
 	bool isFontInstalled = false;
 	const InstalledFontCollection installedFontCollection;
 	INT          found = 0;

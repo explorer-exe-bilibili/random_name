@@ -1,4 +1,4 @@
-#include "Gp.h"
+ï»¿#include "Gp.h"
 
 #include <filesystem>
 #include "mywindows.h"
@@ -95,31 +95,31 @@ void Gp::Flush() {
 	PaintStaticItems();
 	ReleaseDC(hdc);
 	releaseTextNeeds();
-    // »ñÈ¡´°¿ÚµÄÉè±¸ÉÏÏÂÎÄ
+    // è·å–çª—å£çš„è®¾å¤‡ä¸Šä¸‹æ–‡
 	const HDC hdcWindow = ::GetDC(hwnd);
 
-    // ´´½¨Ò»¸öÀëÆÁDC
+    // åˆ›å»ºä¸€ä¸ªç¦»å±DC
 	const HDC hdcOffscreen = CreateCompatibleDC(hdcWindow);
 
-    // ´´½¨Ò»¸öÓë´°¿Ú´óĞ¡ÏàÍ¬µÄÎ»Í¼
+    // åˆ›å»ºä¸€ä¸ªä¸çª—å£å¤§å°ç›¸åŒçš„ä½å›¾
 	const HBITMAP hBitmap = CreateCompatibleBitmap(hdcWindow, buffer->GetWidth(), buffer->GetHeight());
 
-    // ½«Î»Í¼Ñ¡ÈëÀëÆÁDC
+    // å°†ä½å›¾é€‰å…¥ç¦»å±DC
 	const HBITMAP hOldBitmap = HBITMAP(SelectObject(hdcOffscreen, hBitmap));
 
-    // ½«ÀëÆÁ»º³åÇøµÄÄÚÈİ»æÖÆµ½ÀëÆÁDCÉÏ
+    // å°†ç¦»å±ç¼“å†²åŒºçš„å†…å®¹ç»˜åˆ¶åˆ°ç¦»å±DCä¸Š
     Graphics graphicsOffscreen(hdcOffscreen);
     graphicsOffscreen.DrawImage(buffer.get(), 0, 0);
 
-    // ½«ÀëÆÁDCµÄÄÚÈİ»æÖÆµ½´°¿ÚÉÏ
+    // å°†ç¦»å±DCçš„å†…å®¹ç»˜åˆ¶åˆ°çª—å£ä¸Š
     BitBlt(hdcWindow, 0, 0, buffer->GetWidth(), buffer->GetHeight(), hdcOffscreen, 0, 0, SRCCOPY);
 
-    // ÊÍ·Å×ÊÔ´
+    // é‡Šæ”¾èµ„æº
     SelectObject(hdcOffscreen, hOldBitmap);
     DeleteObject(hBitmap);
     DeleteDC(hdcOffscreen);
 
-    // ÊÍ·ÅÉè±¸ÉÏÏÂÎÄ
+    // é‡Šæ”¾è®¾å¤‡ä¸Šä¸‹æ–‡
     ::ReleaseDC(hwnd, hdcWindow);
 }
 
@@ -128,15 +128,15 @@ void Gp::SizeChanged()
 	std::lock_guard lock(SizeChangeMutex);
 	if (cachedHDC)
 		ReleaseDC(hdc);
-	// »ñÈ¡´°¿ÚµÄ¿Í»§Çø´óĞ¡
+	// è·å–çª—å£çš„å®¢æˆ·åŒºå¤§å°
 	RECT rc;
 	GetClientRect(mywindows::main_hwnd, &rc);
 	int width = rc.right - rc.left;
 	int height = rc.bottom - rc.top;
 
-	// ÖØĞÂ´´½¨Ò»¸öÓë´°¿Ú¿Í»§Çø´óĞ¡ÏàÍ¬µÄBitmap×÷ÎªÀëÆÁ»º³åÇø
+	// é‡æ–°åˆ›å»ºä¸€ä¸ªä¸çª—å£å®¢æˆ·åŒºå¤§å°ç›¸åŒçš„Bitmapä½œä¸ºç¦»å±ç¼“å†²åŒº
 	buffer = make_shared<Bitmap>(width, height, PixelFormat32bppARGB);
-	// ÖØĞÂ´´½¨Graphics¶ÔÏóÓÃÓÚ»æÖÆµ½ÀëÆÁ»º³åÇø
+	// é‡æ–°åˆ›å»ºGraphicså¯¹è±¡ç”¨äºç»˜åˆ¶åˆ°ç¦»å±ç¼“å†²åŒº
 	graphic = make_shared<Graphics>(buffer.get());
 	releaseTextNeeds();
 	cachedBrush = false;
@@ -173,12 +173,12 @@ void Gp::Paint(int xDest, int yDest, int wDest, int hDest, int number, unsigned 
 	const int w = t_bitmap->bmWidth;
 	const int h = t_bitmap->bmHeight;
 	SelectObject(hdcMem, t_hbtiamp);
-	// ÉèÖÃ»ìºÏº¯Êı
+	// è®¾ç½®æ··åˆå‡½æ•°
 	BLENDFUNCTION blendFunc;
 	blendFunc.BlendOp = AC_SRC_OVER;
 	blendFunc.BlendFlags = 0;
-	blendFunc.SourceConstantAlpha = alpha_count; // 255 = ²»Í¸Ã÷£¬0 = ÍêÈ«Í¸Ã÷
-	blendFunc.AlphaFormat = AC_SRC_ALPHA; // Ê¹ÓÃÔ´Í¼ÏñµÄAlphaÍ¨µÀ
+	blendFunc.SourceConstantAlpha = alpha_count; // 255 = ä¸é€æ˜ï¼Œ0 = å®Œå…¨é€æ˜
+	blendFunc.AlphaFormat = AC_SRC_ALPHA; // ä½¿ç”¨æºå›¾åƒçš„Alphaé€šé“
 
 	AlphaBlend(hdc, xDest, yDest, wDest, hDest, hdcMem, 0, 0, w, h, blendFunc);
 	DeleteDC(hdcMem);
@@ -193,12 +193,12 @@ void Gp::Paint(int xDest, int yDest, int number, unsigned char alpha_count)
 	const int w = t_bitmap->bmWidth;
 	const int h = t_bitmap->bmHeight;
 	SelectObject(hdcMem, t_hbtiamp);
-	// ÉèÖÃ»ìºÏº¯Êı
+	// è®¾ç½®æ··åˆå‡½æ•°
 	BLENDFUNCTION blendFunc;
 	blendFunc.BlendOp = AC_SRC_OVER;
 	blendFunc.BlendFlags = 0;
-	blendFunc.SourceConstantAlpha = alpha_count; // 255 = ²»Í¸Ã÷£¬0 = ÍêÈ«Í¸Ã÷
-	blendFunc.AlphaFormat = AC_SRC_ALPHA; // Ê¹ÓÃÔ´Í¼ÏñµÄAlphaÍ¨µÀ
+	blendFunc.SourceConstantAlpha = alpha_count; // 255 = ä¸é€æ˜ï¼Œ0 = å®Œå…¨é€æ˜
+	blendFunc.AlphaFormat = AC_SRC_ALPHA; // ä½¿ç”¨æºå›¾åƒçš„Alphaé€šé“
 
 	AlphaBlend(hdc, xDest, yDest, w, h, hdcMem, 0, 0, w, h, blendFunc);
 	DeleteDC(hdcMem);
@@ -215,12 +215,12 @@ void Gp::Paint(int xDest, int yDest, int wDest, int hDest, HBITMAP hbitmap, unsi
 	const int w = t_bitmap.bmWidth;
 	const int h = t_bitmap.bmHeight;
 	SelectObject(hdcMem, t_hbtiamp);
-	// ÉèÖÃ»ìºÏº¯Êı
+	// è®¾ç½®æ··åˆå‡½æ•°
 	BLENDFUNCTION blendFunc;
 	blendFunc.BlendOp = AC_SRC_OVER;
 	blendFunc.BlendFlags = 0;
-	blendFunc.SourceConstantAlpha = alpha_count; // 255 = ²»Í¸Ã÷£¬0 = ÍêÈ«Í¸Ã÷
-	blendFunc.AlphaFormat = AC_SRC_ALPHA; // Ê¹ÓÃÔ´Í¼ÏñµÄAlphaÍ¨µÀ
+	blendFunc.SourceConstantAlpha = alpha_count; // 255 = ä¸é€æ˜ï¼Œ0 = å®Œå…¨é€æ˜
+	blendFunc.AlphaFormat = AC_SRC_ALPHA; // ä½¿ç”¨æºå›¾åƒçš„Alphaé€šé“
 
 	AlphaBlend(hdc, xDest, yDest, wDest, hDest, hdcMem, 0, 0, w, h, blendFunc);
 	DeleteDC(hdcMem);
@@ -231,7 +231,7 @@ void Gp::DrawString(const std::wstring& str, const HFONT font, const int x, cons
 	if (!font)return;
 	NowFontInfo = { argb,font };
 	const auto TextNeeds = getTextNeeds();
-	// »æÖÆÎÄ±¾
+	// ç»˜åˆ¶æ–‡æœ¬
 	wstring wstr = str;
 	if (wstr.empty())wstr = L" ";
 	TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), PointF(x, y), TextNeeds.brush.get());
@@ -242,38 +242,38 @@ void Gp::DrawString(const std::string& str, const HFONT font, const int x, const
 	NowFontInfo = { argb,font };
 	const auto TextNeeds = getTextNeeds();
 	const std::wstring wstr(str.begin(), str.end());
-	// »æÖÆÎÄ±¾
+	// ç»˜åˆ¶æ–‡æœ¬
 	TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), PointF(x, y), TextNeeds.brush.get());
 }
 
 void Gp::DrawStringBetween(const std::wstring& str, HFONT font, int x, int y, int xend, int yend, uint32_t argb){
-	// ´´½¨Ò»¸öGDI+ RectF¶ÔÏó£¬±íÊ¾ÎÄ±¾»æÖÆµÄÇøÓò
+	// åˆ›å»ºä¸€ä¸ªGDI+ RectFå¯¹è±¡ï¼Œè¡¨ç¤ºæ–‡æœ¬ç»˜åˆ¶çš„åŒºåŸŸ
 	std::lock_guard lock(SizeChangeMutex);
 	const RectF layoutRect(x, y, xend - x, yend - y);
 
-	// ´´½¨Ò»¸öGDI+ StringFormat¶ÔÏó£¬ÓÃÓÚÉèÖÃÎÄ±¾¸ñÊ½
+	// åˆ›å»ºä¸€ä¸ªGDI+ StringFormatå¯¹è±¡ï¼Œç”¨äºè®¾ç½®æ–‡æœ¬æ ¼å¼
 	StringFormat format;
 	format.SetAlignment(StringAlignmentCenter);
 	format.SetLineAlignment(StringAlignmentCenter);
 	NowFontInfo = { argb,font };
 	const auto TextNeeds = getTextNeeds();
-	// »æÖÆÎÄ±¾
+	// ç»˜åˆ¶æ–‡æœ¬
 	TextNeeds.hdc_graphics->DrawString(str.c_str(), -1, TextNeeds.font.get(), layoutRect, &format, TextNeeds.brush.get());
 }
 
 void Gp::DrawstringBetween(const std::string& str, HFONT font, int x, int y, int xend, int yend,uint32_t argb)
 {
 	std::lock_guard lock(SizeChangeMutex);
-	// ´´½¨Ò»¸öGDI+ RectF¶ÔÏó£¬±íÊ¾ÎÄ±¾»æÖÆµÄÇøÓò
+	// åˆ›å»ºä¸€ä¸ªGDI+ RectFå¯¹è±¡ï¼Œè¡¨ç¤ºæ–‡æœ¬ç»˜åˆ¶çš„åŒºåŸŸ
 	const RectF layoutRect(x, y, xend - x, yend - y);
 
-	// ´´½¨Ò»¸öGDI+ StringFormat¶ÔÏó£¬ÓÃÓÚÉèÖÃÎÄ±¾¸ñÊ½
+	// åˆ›å»ºä¸€ä¸ªGDI+ StringFormatå¯¹è±¡ï¼Œç”¨äºè®¾ç½®æ–‡æœ¬æ ¼å¼
 	StringFormat format;
 	format.SetAlignment(StringAlignmentCenter);
 	format.SetLineAlignment(StringAlignmentCenter);
 	NowFontInfo = { argb,font };
 	const auto TextNeeds = getTextNeeds();
-	// »æÖÆÎÄ±¾
+	// ç»˜åˆ¶æ–‡æœ¬
 	const std::wstring wstr(str.begin(), str.end());
 	TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), layoutRect, &format, TextNeeds.brush.get());
 
@@ -283,12 +283,12 @@ void Gp::DrawVerticalString(const std::wstring& str, const HFONT font, const int
 	std::lock_guard lock(SizeChangeMutex);
 	NowFontInfo = { argb,font };
 	const auto TextNeeds = getTextNeeds();
-	// »æÖÆÃ¿¸ö×Ö·û
+	// ç»˜åˆ¶æ¯ä¸ªå­—ç¬¦
 	int yOffset = y;
 	for (const wchar_t& ch : str) {
 		std::wstring wstr(1, ch);
 		TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), PointF(x, yOffset), TextNeeds.brush.get());
-		yOffset += TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get()); // ¸üĞÂyÆ«ÒÆÁ¿
+		yOffset += TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get()); // æ›´æ–°yåç§»é‡
 	}
 }
 
@@ -297,12 +297,12 @@ void Gp::DrawVerticalString(const std::string& str, const HFONT font, const int 
 	std::lock_guard lock(SizeChangeMutex);
 	NowFontInfo = { argb,font };
 	const auto TextNeeds = getTextNeeds();
-	// »æÖÆÃ¿¸ö×Ö·û
+	// ç»˜åˆ¶æ¯ä¸ªå­—ç¬¦
 	int yOffset = y;
 	for (const wchar_t& ch : str) {
 		std::wstring wstr(1, ch);
 		TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), PointF(x, yOffset), TextNeeds.brush.get());
-		yOffset += TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get()); // ¸üĞÂyÆ«ÒÆÁ¿
+		yOffset += TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get()); // æ›´æ–°yåç§»é‡
 	}
 }
 
@@ -310,24 +310,24 @@ void Gp::DrawVerticalStringBetween(const std::wstring& str, const HFONT font, co
 	std::lock_guard lock(SizeChangeMutex);
 	NowFontInfo = { argb,font };
 	const auto TextNeeds = getTextNeeds();
-	// ¼ÆËã×Ö·û´®µÄ×Ü¸ß¶È
+	// è®¡ç®—å­—ç¬¦ä¸²çš„æ€»é«˜åº¦
 	int totalHeight = 0;
 	for (const wchar_t& ch : str) {
 		totalHeight += TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get());
 	}
 
-	// ¼ÆËãÆğÊ¼yÆ«ÒÆÁ¿£¬Ê¹×Ö·û´®ÔÚ´¹Ö±·½Ïò¾ÓÖĞ
+	// è®¡ç®—èµ·å§‹yåç§»é‡ï¼Œä½¿å­—ç¬¦ä¸²åœ¨å‚ç›´æ–¹å‘å±…ä¸­
 	int yOffset = y + (yend - y - totalHeight) / 2;
 
-	// ¼ÆËãÆğÊ¼xÆ«ÒÆÁ¿£¬Ê¹×Ö·û´®ÔÚË®Æ½·½Ïò¾ÓÖĞ
+	// è®¡ç®—èµ·å§‹xåç§»é‡ï¼Œä½¿å­—ç¬¦ä¸²åœ¨æ°´å¹³æ–¹å‘å±…ä¸­
 	const int xOffset = x + (xend - x - TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get())) / 2;
 
-	// »æÖÆÃ¿¸ö×Ö·û
+	// ç»˜åˆ¶æ¯ä¸ªå­—ç¬¦
 	for (const wchar_t& ch : str) {
 		std::wstring wstr(1, ch);
 		TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(),
 			PointF(xOffset, yOffset), TextNeeds.brush.get());
-		yOffset += TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get()); // ¸üĞÂyÆ«ÒÆÁ¿
+		yOffset += TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get()); // æ›´æ–°yåç§»é‡
 	}
 }
 
@@ -335,24 +335,24 @@ void Gp::DrawVerticalStringBetween(const std::string& str, const HFONT font, con
 	std::lock_guard lock(SizeChangeMutex);
 	NowFontInfo = { argb,font };
 	const auto TextNeeds = getTextNeeds();
-	// ¼ÆËã×Ö·û´®µÄ×Ü¸ß¶È
+	// è®¡ç®—å­—ç¬¦ä¸²çš„æ€»é«˜åº¦
 	int totalHeight = 0;
 	for (const wchar_t& ch : str) {
 		totalHeight += TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get());
 	}
 
-	// ¼ÆËãÆğÊ¼yÆ«ÒÆÁ¿£¬Ê¹×Ö·û´®ÔÚ´¹Ö±·½Ïò¾ÓÖĞ
+	// è®¡ç®—èµ·å§‹yåç§»é‡ï¼Œä½¿å­—ç¬¦ä¸²åœ¨å‚ç›´æ–¹å‘å±…ä¸­
 	int yOffset = y + (yend - y - totalHeight) / 2;
 
-	// ¼ÆËãÆğÊ¼xÆ«ÒÆÁ¿£¬Ê¹×Ö·û´®ÔÚË®Æ½·½Ïò¾ÓÖĞ
+	// è®¡ç®—èµ·å§‹xåç§»é‡ï¼Œä½¿å­—ç¬¦ä¸²åœ¨æ°´å¹³æ–¹å‘å±…ä¸­
 	const int xOffset = x + (xend - x - TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get())) / 2;
 
-	// »æÖÆÃ¿¸ö×Ö·û
+	// ç»˜åˆ¶æ¯ä¸ªå­—ç¬¦
 	for (const wchar_t& ch : str) {
 		std::wstring wstr(1, ch);
 		TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), 
 			PointF(xOffset, yOffset), TextNeeds.brush.get());
-		yOffset += TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get()); // ¸üĞÂyÆ«ÒÆÁ¿
+		yOffset += TextNeeds.font->GetHeight(TextNeeds.hdc_graphics.get()); // æ›´æ–°yåç§»é‡
 	}
 }
 
@@ -362,7 +362,7 @@ void Gp::DrawChar(const wchar_t ch, HFONT font, int x, int y,uint32_t argb)
 	const std::wstring wstr(1, ch);
 	NowFontInfo = { argb,font };
 	const auto TextNeeds = getTextNeeds();
-	// »æÖÆÎÄ±¾
+	// ç»˜åˆ¶æ–‡æœ¬
 	TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), PointF(x, y), TextNeeds.brush.get());
 }
 
@@ -372,7 +372,7 @@ void Gp::DrawChar(const char ch, HFONT font, int x, int y,uint32_t argb)
 	const std::wstring wstr(1, ch);
 	NowFontInfo = { argb,font };
 	const auto TextNeeds = getTextNeeds();
-	// »æÖÆÎÄ±¾
+	// ç»˜åˆ¶æ–‡æœ¬
 	TextNeeds.hdc_graphics->DrawString(wstr.c_str(), -1, TextNeeds.font.get(), PointF(x, y), TextNeeds.brush.get());
 }
 
@@ -412,16 +412,16 @@ void Gp::DrawSquare(int xDest, int yDest, int xEnd, int yEnd, uint32_t color, bo
 	std::lock_guard lock(SizeChangeMutex);
 	hdc = GetDC();
 	if (filled) {
-		// »æÖÆÊµĞÄ¾ØĞÎ
-		const HBRUSH hBrush = CreateSolidBrush(color&0x00FFFFFF); // ºìÉ«ÊµĞÄË¢×Ó
+		// ç»˜åˆ¶å®å¿ƒçŸ©å½¢
+		const HBRUSH hBrush = CreateSolidBrush(color&0x00FFFFFF); // çº¢è‰²å®å¿ƒåˆ·å­
 		const HBRUSH hOldBrush = HBRUSH(SelectObject(hdc, hBrush));
 		Rectangle(hdc, xDest, yDest, xEnd, yEnd);
 		SelectObject(hdc, hOldBrush);
 		DeleteObject(hBrush);
 	}
 	else {
-		// »æÖÆ¿ÕĞÄ¾ØĞÎ
-		const HPEN hPen = CreatePen(PS_SOLID, 2, color&0x00FFFFFF); // À¶É«»­±Ê
+		// ç»˜åˆ¶ç©ºå¿ƒçŸ©å½¢
+		const HPEN hPen = CreatePen(PS_SOLID, 2, color&0x00FFFFFF); // è“è‰²ç”»ç¬”
 		const HPEN hOldPen = HPEN(SelectObject(hdc, hPen));
 		const HBRUSH hNullBrush = HBRUSH(SelectObject(hdc, GetStockObject(NULL_BRUSH)));
 		Rectangle(hdc, xDest, yDest, xEnd, yEnd);
@@ -433,24 +433,24 @@ void Gp::DrawSquare(int xDest, int yDest, int xEnd, int yEnd, uint32_t color, bo
 
 void Gp::LockWindowSize() const
 {
-	// »ñÈ¡µ±Ç°´°¿ÚÑùÊ½
+	// è·å–å½“å‰çª—å£æ ·å¼
 	LONG style = GetWindowLong(hwnd, GWL_STYLE);
-	// ÒÆ³ı¿Éµ÷Õû´óĞ¡ºÍ×î´ó»¯°´Å¥µÄÑùÊ½
+	// ç§»é™¤å¯è°ƒæ•´å¤§å°å’Œæœ€å¤§åŒ–æŒ‰é’®çš„æ ·å¼
 	style &= ~(WS_THICKFRAME | WS_MAXIMIZEBOX);
-	// ÉèÖÃĞÂµÄ´°¿ÚÑùÊ½
+	// è®¾ç½®æ–°çš„çª—å£æ ·å¼
 	SetWindowLong(hwnd, GWL_STYLE, style);
-	// Ç¿ÖÆ´°¿ÚÖØĞÂ»æÖÆÒÔÓ¦ÓÃĞÂµÄÑùÊ½
+	// å¼ºåˆ¶çª—å£é‡æ–°ç»˜åˆ¶ä»¥åº”ç”¨æ–°çš„æ ·å¼
 	SetWindowPos(hwnd, nullptr, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
 }
 
 void Gp::UnlockWindowSize() const
 {
-	// »ñÈ¡µ±Ç°´°¿ÚÑùÊ½
+	// è·å–å½“å‰çª—å£æ ·å¼
 	LONG style = GetWindowLong(hwnd, GWL_STYLE);
-	// Ìí¼Ó¿Éµ÷Õû´óĞ¡ºÍ×î´ó»¯°´Å¥µÄÑùÊ½
+	// æ·»åŠ å¯è°ƒæ•´å¤§å°å’Œæœ€å¤§åŒ–æŒ‰é’®çš„æ ·å¼
 	style |= (WS_THICKFRAME | WS_MAXIMIZEBOX);
-	// ÉèÖÃĞÂµÄ´°¿ÚÑùÊ½
+	// è®¾ç½®æ–°çš„çª—å£æ ·å¼
 	SetWindowLong(hwnd, GWL_STYLE, style);
-	// Ç¿ÖÆ´°¿ÚÖØĞÂ»æÖÆÒÔÓ¦ÓÃĞÂµÄÑùÊ½
+	// å¼ºåˆ¶çª—å£é‡æ–°ç»˜åˆ¶ä»¥åº”ç”¨æ–°çš„æ ·å¼
 	SetWindowPos(hwnd, nullptr, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
 }
