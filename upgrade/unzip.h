@@ -1,4 +1,4 @@
-#ifndef UNZIP_H
+ï»¿#ifndef UNZIP_H
 #define UNZIP_H
 #pragma once
 #include "Log.h"
@@ -7,14 +7,14 @@ class unzip
 {
 public:
     static std::string upgraderfile;
-    // ½«×Ö·û´®ÄÚµÄold_valueÌæ»»³Énew_value
+    // å°†å­—ç¬¦ä¸²å†…çš„old_valueæ›¿æ¢æˆnew_value
     static std::string& replace_all(std::string& str, const std::string& old_value, const std::string& new_value);
-    // ´´½¨¶à¼¶Ä¿Â¼
+    // åˆ›å»ºå¤šçº§ç›®å½•
     static bool CreatedMultipleDirectory(const std::string& direct);
     /*
-    * º¯Êı¹¦ÄÜ : µİ¹é½âÑ¹ÎÄ¼şÄ¿Â¼
-    * ±¸    ×¢ : strFilePath Ñ¹Ëõ°üÂ·¾¶
-    *      strTempPath ½âÑ¹µ½
+    * å‡½æ•°åŠŸèƒ½ : é€’å½’è§£å‹æ–‡ä»¶ç›®å½•
+    * å¤‡    æ³¨ : strFilePath å‹ç¼©åŒ…è·¯å¾„
+    *      strTempPath è§£å‹åˆ°
     */
     static void UnzipFile(const std::string& strFilePath, const std::string& strTempPath);
 };

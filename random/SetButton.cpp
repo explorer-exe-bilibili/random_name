@@ -1,4 +1,4 @@
-#include "SetButton.h"
+ï»¿#include "SetButton.h"
 
 #include <shtypes.h>
 #include <windowsx.h>
@@ -51,26 +51,26 @@ void SetButton::ChooseColor_()
 void SetButton::ChooseFile() const
 {
 	OPENFILENAMEW ofn = {};
-	wchar_t strFilename[MAX_PATH] = {}; // ÓÃÓÚ½ÓÊÕÎÄ¼şÃû
+	wchar_t strFilename[MAX_PATH] = {}; // ç”¨äºæ¥æ”¶æ–‡ä»¶å
 
-	ofn.lStructSize = sizeof(OPENFILENAMEW); // ½á¹¹Ìå´óĞ¡
-	ofn.hwndOwner = mywindows::main_hwnd; // ÓµÓĞÕß´°¿Ú¾ä±ú,ÎªNULL±íÊ¾¶Ô»°¿òÊÇ·ÇÄ£Ì¬µÄ,Êµ¼ÊÓ¦ÓÃÖĞÒ»°ã¶¼ÒªÓĞÕâ¸ö¾ä±ú
+	ofn.lStructSize = sizeof(OPENFILENAMEW); // ç»“æ„ä½“å¤§å°
+	ofn.hwndOwner = mywindows::main_hwnd; // æ‹¥æœ‰è€…çª—å£å¥æŸ„,ä¸ºNULLè¡¨ç¤ºå¯¹è¯æ¡†æ˜¯éæ¨¡æ€çš„,å®é™…åº”ç”¨ä¸­ä¸€èˆ¬éƒ½è¦æœ‰è¿™ä¸ªå¥æŸ„
 	if (item.FileType == "All")
-		ofn.lpstrFilter = L"ËùÓĞÎÄ¼ş\0 *.*\0\0";
+		ofn.lpstrFilter = L"æ‰€æœ‰æ–‡ä»¶\0 *.*\0\0";
 	else if (item.FileType == "bmp")
-		ofn.lpstrFilter = L"bmpÍ¼Æ¬ÎÄ¼ş(*.bmp)\0 * .bmp\0\0";
+		ofn.lpstrFilter = L"bmpå›¾ç‰‡æ–‡ä»¶(*.bmp)\0 * .bmp\0\0";
 	else if (item.FileType == "nameFile")
-		ofn.lpstrFilter = L"ĞÕÃûÎÄ¼ş(*.txt)\0 * .txt\0\0";
+		ofn.lpstrFilter = L"å§“åæ–‡ä»¶(*.txt)\0 * .txt\0\0";
 	else if (item.FileType == "video")
-		ofn.lpstrFilter = L"ÊÓÆµÎÄ¼ş(*.avi; *.mpg; *.mpeg; *.m2v; *.vob; *.mp4; *.m4v; *.mp4v; *.3gp; *.3gp2; *.wmv; *.asf; *.mov; *.qt; *.rm; *.rmvb; *.flv; *.f4v)\0 *.avi; *.mpg; *.mpeg; *.m2v; *.vob; *.mp4; *.m4v; *.mp4v; *.3gp; *.3gp2; *.wmv; *.asf; *.mov; *.qt; *.rm; *.rmvb; *.flv; *.f4v\0\0";
+		ofn.lpstrFilter = L"è§†é¢‘æ–‡ä»¶(*.avi; *.mpg; *.mpeg; *.m2v; *.vob; *.mp4; *.m4v; *.mp4v; *.3gp; *.3gp2; *.wmv; *.asf; *.mov; *.qt; *.rm; *.rmvb; *.flv; *.f4v)\0 *.avi; *.mpg; *.mpeg; *.m2v; *.vob; *.mp4; *.m4v; *.mp4v; *.3gp; *.3gp2; *.wmv; *.asf; *.mov; *.qt; *.rm; *.rmvb; *.flv; *.f4v\0\0";
 	else if (item.FileType == "picture")
-		ofn.lpstrFilter = L"Í¼Æ¬ÎÄ¼ş(*.jpg;*.jpeg;*.bmp;*.png;*.tif;*.tiff;*.gif;*.wmf;*.emf)\0*.jpg;*.jpeg;*.bmp;*.png;*.tif;*.tiff;*.gif;*.wmf;*.emf\0\0";
-	ofn.nFilterIndex = 1; // ¹ıÂËÆ÷Ë÷Òı
-	ofn.lpstrFile = strFilename; // ½ÓÊÕ·µ»ØµÄÎÄ¼şÃû,×¢ÒâµÚÒ»¸ö×Ö·ûĞèÒªÎªNULL
-	ofn.nMaxFile = sizeof(strFilename); // »º³åÇø³¤¶È
-	ofn.lpstrInitialDir = nullptr; // ³õÊ¼Ä¿Â¼ÎªÄ¬ÈÏ
-	ofn.lpstrTitle = item.FileChooseWindowName.c_str(); // Ê¹ÓÃÏµÍ³Ä¬ÈÏ±êÌâÁô¿Õ¼´¿É
-	ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY; // ÎÄ¼ş¡¢Ä¿Â¼±ØĞë´æÔÚ,Òş²ØÖ»¶ÁÑ¡Ïî
+		ofn.lpstrFilter = L"å›¾ç‰‡æ–‡ä»¶(*.jpg;*.jpeg;*.bmp;*.png;*.tif;*.tiff;*.gif;*.wmf;*.emf)\0*.jpg;*.jpeg;*.bmp;*.png;*.tif;*.tiff;*.gif;*.wmf;*.emf\0\0";
+	ofn.nFilterIndex = 1; // è¿‡æ»¤å™¨ç´¢å¼•
+	ofn.lpstrFile = strFilename; // æ¥æ”¶è¿”å›çš„æ–‡ä»¶å,æ³¨æ„ç¬¬ä¸€ä¸ªå­—ç¬¦éœ€è¦ä¸ºNULL
+	ofn.nMaxFile = sizeof(strFilename); // ç¼“å†²åŒºé•¿åº¦
+	ofn.lpstrInitialDir = nullptr; // åˆå§‹ç›®å½•ä¸ºé»˜è®¤
+	ofn.lpstrTitle = item.FileChooseWindowName.c_str(); // ä½¿ç”¨ç³»ç»Ÿé»˜è®¤æ ‡é¢˜ç•™ç©ºå³å¯
+	ofn.Flags = OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY; // æ–‡ä»¶ã€ç›®å½•å¿…é¡»å­˜åœ¨,éšè—åªè¯»é€‰é¡¹
 	if (GetOpenFileNameW(&ofn))
 	{
 		const std::wstring filename(strFilename);
@@ -131,7 +131,7 @@ void SetButton::load()
 		Button b1;
 		b1.setBmapC(setbutton);
 		b1.setxy2WWWH(ButtonRect[0].x, ButtonRect[0].y, ButtonRect[0].xend, ButtonRect[0].yend);
-		b1.setText(L"Ñ¡Ôñ");
+		b1.setText(L"é€‰æ‹©");
 		b1.setTextColor(ARGB(255,0,0,0));
 		b1.bind([this] ()
 		{
@@ -152,7 +152,7 @@ void SetButton::load()
 		b1.setFont(&ui::text_mid);
 		b1.refresh();
 		b2.setxy2WWWH(ButtonRect[1].x, ButtonRect[1].y, ButtonRect[1].xend, ButtonRect[1].yend);
-		b2.setText(L"´ò¿ª");
+		b2.setText(L"æ‰“å¼€");
 		b2.bind([this]() {OpenFile(); });
 		b2.setFont(&ui::text_mid);
 		b2.setMusic(CLICK_MUSIC);
@@ -175,11 +175,11 @@ void SetButton::load()
 			{
 				needReboot = true;
 			}
-			buttons[0].setText(config::getint(item.ConfigName) == 1 ? L"¿ª" : L"¹Ø");
+			buttons[0].setText(config::getint(item.ConfigName) == 1 ? L"å¼€" : L"å…³");
 			set2::rereadConfig();
 			InvalidateRect(mywindows::main_hwnd, nullptr, false);			
 		});
-		b.setText(config::getint(item.ConfigName) == 1 ? L"¿ª" : L"¹Ø");
+		b.setText(config::getint(item.ConfigName) == 1 ? L"å¼€" : L"å…³");
 		b.setTextColor(ARGB(255,0,0,0));
 		b.setMusic(CLICK_MUSIC);
 		buttons.push_back(b);
@@ -205,7 +205,7 @@ void SetButton::load()
 			ChooseColor_();
 			InvalidateRect(mywindows::main_hwnd, nullptr, false);	
 		});
-		b1.setText(L"Ñ¡ÔñÑÕÉ«");
+		b1.setText(L"é€‰æ‹©é¢œè‰²");
 		b1.setTextColor(ARGB(255,0,0,0));
 		b1.setMusic(CLICK_MUSIC);
 		buttons.push_back(b1);
@@ -214,37 +214,37 @@ void SetButton::load()
 }
 
 //MyEditBox* SetButton::CreateEditBox(const HWND hWndParent, const int number, const point& rect, const wchar_t* words) {
-//	// ´´½¨EDIT¿Ø¼şµÄÑùÊ½
+//	// åˆ›å»ºEDITæ§ä»¶çš„æ ·å¼
 //	constexpr DWORD editStyle = ES_AUTOHSCROLL | (WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | ES_LEFT | WS_BORDER);
 //
-//	// ´´½¨EDIT¿Ø¼şµÄ¸½¼ÓÑùÊ½£¨¿ÉÑ¡£©
+//	// åˆ›å»ºEDITæ§ä»¶çš„é™„åŠ æ ·å¼ï¼ˆå¯é€‰ï¼‰
 //	constexpr DWORD editExStyle = WS_EX_CLIENTEDGE;
 //	const int x = rect.x * mywindows::WW;
 //	const int y = rect.y * mywindows::WH;
 //	const int w = rect.xend * mywindows::WW - x;
 //	const int h = rect.yend * mywindows::WH - y;
-//	// ´´½¨ÎÄ±¾¿ò
+//	// åˆ›å»ºæ–‡æœ¬æ¡†
 //	MyEditBox* pEdit = new MyEditBox(hWndParent, { x,y,x + w,y + h },number);
 //	pEdit->SetText(words);
 //	pEdit->Show();
-//	// ·µ»ØÎÄ±¾¿ò¾ä±ú
+//	// è¿”å›æ–‡æœ¬æ¡†å¥æŸ„
 //	return pEdit;
 //}
 
 HWND SetButton::CreateEditBox(const HWND hWndParent, const int number, const point& rect, const wchar_t* words) {
-	// ´´½¨EDIT¿Ø¼şµÄÑùÊ½
+	// åˆ›å»ºEDITæ§ä»¶çš„æ ·å¼
 	constexpr DWORD editStyle = ES_AUTOHSCROLL | (WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | ES_LEFT | WS_BORDER);
 
-	// ´´½¨EDIT¿Ø¼şµÄ¸½¼ÓÑùÊ½£¨¿ÉÑ¡£©
+	// åˆ›å»ºEDITæ§ä»¶çš„é™„åŠ æ ·å¼ï¼ˆå¯é€‰ï¼‰
 	constexpr DWORD editExStyle = WS_EX_CLIENTEDGE;
 	const int x = rect.x * mywindows::WW;
 	const int y = rect.y * mywindows::WH;
 	const int w = rect.xend * mywindows::WW - x;
 	const int h = rect.yend * mywindows::WH - y;
-	// ´´½¨ÎÄ±¾¿ò
+	// åˆ›å»ºæ–‡æœ¬æ¡†
 	HWND hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, L"EDIT", words, editStyle
 		, x, y, w, h, hWndParent, HMENU(number), nullptr, nullptr);
-	// ·µ»ØÎÄ±¾¿ò¾ä±ú
+	// è¿”å›æ–‡æœ¬æ¡†å¥æŸ„
 	return hwnd;
 }
 
@@ -265,12 +265,12 @@ void SetButton::EditBoxEditor(const std::wstring& tmp) const
 		catch (const std::exception& e)
 		{
 			mywindows::errlogf << "[ERROR]meet a error :" << e.what() << '\n';
-			MessageBox(nullptr, L"ÇëÊäÈëÊı×Ö", L"´íÎó", MB_ICONERROR);
+			MessageBox(nullptr, L"è¯·è¾“å…¥æ•°å­—", L"é”™è¯¯", MB_ICONERROR);
 			return;
 		}
 		if (value<item.min || value>item.max)
 		{
-			MessageBoxA(nullptr, sth2sth::UTF_82ASCII(item.OutOfLimitOutPut).c_str(), R"(´íÎó)", MB_ICONERROR);
+			MessageBoxA(nullptr, sth2sth::UTF_82ASCII(item.OutOfLimitOutPut).c_str(), R"(é”™è¯¯)", MB_ICONERROR);
 			return;
 		}
 	}
@@ -443,10 +443,10 @@ void SetButton::EditBoxUpgrade(const int number) const
 //MyEditBox::MyEditBox(HWND parent, const RECT& rect, int id)
 //	: hwnd(nullptr), parent_hwnd(parent), bgColor(RGB(255, 255, 255)), hBrush(nullptr), rect(rect), id(id)
 //{
-//	// ´´½¨EDIT¿Ø¼şµÄÑùÊ½
+//	// åˆ›å»ºEDITæ§ä»¶çš„æ ·å¼
 //	constexpr DWORD editStyle = ES_AUTOHSCROLL | (WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | ES_LEFT | WS_BORDER);
 //
-//	// ´´½¨EDIT¿Ø¼şµÄ¸½¼ÓÑùÊ½£¨¿ÉÑ¡£©
+//	// åˆ›å»ºEDITæ§ä»¶çš„é™„åŠ æ ·å¼ï¼ˆå¯é€‰ï¼‰
 //	constexpr DWORD editExStyle = WS_EX_CLIENTEDGE;
 //	if (hwnd != nullptr)return;
 //	int x = rect.left;

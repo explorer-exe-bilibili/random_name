@@ -1,4 +1,4 @@
-#include "local.h"
+ï»¿#include "local.h"
 #include <algorithm>
 Log llog("upgrade.log", 1);
 
@@ -22,7 +22,7 @@ bool local::isupdated(string online)
 std::string local::findMaxVersion(const std::vector<std::string>& versions) {
 	std::vector<std::string> numericParts;
 
-	// ÌáÈ¡ËùÓĞ°æ±¾ºÅµÄÊı×Ö²¿·Ö
+	// æå–æ‰€æœ‰ç‰ˆæœ¬å·çš„æ•°å­—éƒ¨åˆ†
 	for (const auto& version : versions) {
 		std::string numericPart;
 		for (char c : version) {
@@ -36,25 +36,25 @@ std::string local::findMaxVersion(const std::vector<std::string>& versions) {
 		numericParts.push_back(numericPart);
 	}
 
-	// ÕÒµ½×î´óµÄÊı×Ö²¿·Ö
+	// æ‰¾åˆ°æœ€å¤§çš„æ•°å­—éƒ¨åˆ†
 	std::sort(numericParts.begin(), numericParts.end(), std::greater<>());
 	std::string maxNumericPart = removeAfterpoint(numericParts.front());
 
-	// ÔÚÔ­Ê¼°æ±¾ºÅÖĞ²éÕÒº¬ÓĞ×î´óÊı×Ö²¿·ÖµÄ°æ±¾ºÅ
+	// åœ¨åŸå§‹ç‰ˆæœ¬å·ä¸­æŸ¥æ‰¾å«æœ‰æœ€å¤§æ•°å­—éƒ¨åˆ†çš„ç‰ˆæœ¬å·
 	for (const auto& version : versions) {
 		if (version.find(maxNumericPart) != std::string::npos) {
 			return version;
 		}
 	}
-	return ""; // Î´ÕÒµ½Æ¥ÅäµÄ°æ±¾ºÅ
+	return ""; // æœªæ‰¾åˆ°åŒ¹é…çš„ç‰ˆæœ¬å·
 }
 
 std::string local::removeAfterpoint(const std::string& input) {
-	// ÕÒµ½µÚÒ»¸ö "."
+	// æ‰¾åˆ°ç¬¬ä¸€ä¸ª "."
 	size_t dashPos;
 	dashPos = input.find_last_of(".");
 	if (dashPos != std::string::npos && dashPos < input.length()) {
-		// Èç¹ûÕÒµ½ÁË ".", ²ÃÇĞµô "." ºóÃæµÄÄÚÈİ
+		// å¦‚æœæ‰¾åˆ°äº† ".", è£åˆ‡æ‰ "." åé¢çš„å†…å®¹
 		std::string m = input.substr(0, dashPos);
 		dashPos = m.find("-");
 		if (dashPos != std::string::npos) {
@@ -64,7 +64,7 @@ std::string local::removeAfterpoint(const std::string& input) {
 		else return m;
 	}
 	else {
-		// Èç¹ûÎ´ÕÒµ½ ".", Ö±½Ó·µ»ØÔ­×Ö·û´®
+		// å¦‚æœæœªæ‰¾åˆ° ".", ç›´æ¥è¿”å›åŸå­—ç¬¦ä¸²
 		return input;
 	}
 }

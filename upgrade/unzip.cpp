@@ -1,4 +1,4 @@
-//#define ZLIB_WINAPI
+ï»¿//#define ZLIB_WINAPI
 #include "unzip.h"
 
 #include <iostream>
@@ -12,7 +12,7 @@ using namespace std;
 
 string unzip::upgraderfile = "";
 Log mlog("upgrade.log", 1);
-// ½«×Ö·û´®ÄÚµÄold_valueÌæ»»³Énew_value
+// å°†å­—ç¬¦ä¸²å†…çš„old_valueæ›¿æ¢æˆnew_value
 std::string& unzip::replace_all(std::string& str, const std::string& old_value, const std::string& new_value)
 {
 	while (true)
@@ -26,7 +26,7 @@ std::string& unzip::replace_all(std::string& str, const std::string& old_value, 
 	return str;
 }
 
-// ´´½¨¶à¼¶Ä¿Â¼
+// åˆ›å»ºå¤šçº§ç›®å½•
 bool unzip::CreatedMultipleDirectory(const std::string& direct)
 {
 	std::string Directoryname = direct;
@@ -58,9 +58,9 @@ bool unzip::CreatedMultipleDirectory(const std::string& direct)
 }
 
 /*
-* º¯Êı¹¦ÄÜ : µİ¹é½âÑ¹ÎÄ¼şÄ¿Â¼
-* ±¸    ×¢ : strFilePath Ñ¹Ëõ°üÂ·¾¶
-*      strTempPath ½âÑ¹µ½
+* å‡½æ•°åŠŸèƒ½ : é€’å½’è§£å‹æ–‡ä»¶ç›®å½•
+* å¤‡    æ³¨ : strFilePath å‹ç¼©åŒ…è·¯å¾„
+*      strTempPath è§£å‹åˆ°
 */
 void unzip::UnzipFile(const std::string& strFilePath, const std::string& strTempPath)
 {
@@ -69,45 +69,45 @@ void unzip::UnzipFile(const std::string& strFilePath, const std::string& strTemp
 	string srcFilePath(strFilePath);
 	string destFilePath;
 
-	// ´ò¿ªzipÎÄ¼ş
+	// æ‰“å¼€zipæ–‡ä»¶
 	unzFile unzfile = unzOpen(srcFilePath.c_str());
 	if (unzfile == NULL)
 	{
 		return;
 	}
 
-	// »ñÈ¡zipÎÄ¼şµÄĞÅÏ¢
+	// è·å–zipæ–‡ä»¶çš„ä¿¡æ¯
 	unz_global_info* pGlobalInfo = new unz_global_info;
 	nReturnValue = unzGetGlobalInfo(unzfile, pGlobalInfo);
 	if (nReturnValue != UNZ_OK)
 	{
 #ifdef _DEBUG
-		cout << "Ñ¹Ëõ°ü: " << pGlobalInfo->number_entry << endl;
+		cout << "å‹ç¼©åŒ…: " << pGlobalInfo->number_entry << endl;
 #else
-		mlog << "Ñ¹Ëõ°ü: " << pGlobalInfo->number_entry << mlog.nl();
+		mlog << "å‹ç¼©åŒ…: " << pGlobalInfo->number_entry << mlog.nl();
 
 #endif // DEBUG
 
 		return;
 	}
 
-	// ½âÎözipÎÄ¼ş
+	// è§£æzipæ–‡ä»¶
 	unz_file_info* pFileInfo = new unz_file_info;
 	char szZipFName[MAX_PATH] = { 0 };
 	char szExtraName[MAX_PATH] = { 0 };
 	char szCommName[MAX_PATH] = { 0 };
 
-	// ´æ·Å´ÓzipÖĞ½âÎö³öÀ´µÄÄÚ²¿ÎÄ¼şÃû
+	// å­˜æ”¾ä»zipä¸­è§£æå‡ºæ¥çš„å†…éƒ¨æ–‡ä»¶å
 	for (unsigned int i = 0; i < pGlobalInfo->number_entry; i++)
 	{
-		// ½âÎöµÃµ½zipÖĞµÄÎÄ¼şĞÅÏ¢
+		// è§£æå¾—åˆ°zipä¸­çš„æ–‡ä»¶ä¿¡æ¯
 		nReturnValue = unzGetCurrentFileInfo(unzfile, pFileInfo, szZipFName, MAX_PATH, szExtraName, MAX_PATH, szCommName, MAX_PATH);
 		if (nReturnValue != UNZ_OK)
 			return;
 #ifdef _DEBUG
-		cout << "½âÑ¹ÎÄ¼şÃû: " << szZipFName;
+		cout << "è§£å‹æ–‡ä»¶å: " << szZipFName;
 #else
-		mlog << "½âÑ¹ÎÄ¼şÃû: " << szZipFName<<mlog.nl();
+		mlog << "è§£å‹æ–‡ä»¶å: " << szZipFName<<mlog.nl();
 #endif // DEBUG
 
 		string strZipFName = szZipFName;
@@ -119,17 +119,17 @@ void unzip::UnzipFile(const std::string& strFilePath, const std::string& strTemp
 				strZipFName = "upgrade_temp.exe";
 			}
 		}
-		// Èç¹ûÊÇÄ¿Â¼ÔòÖ´ĞĞ´´½¨µİ¹éÄ¿Â¼Ãû
+		// å¦‚æœæ˜¯ç›®å½•åˆ™æ‰§è¡Œåˆ›å»ºé€’å½’ç›®å½•å
 		if (pFileInfo->external_fa == FILE_ATTRIBUTE_DIRECTORY || (strZipFName.rfind('/') == strZipFName.length() - 1))
 		{
 			destFilePath = strTempPath + "//" + szZipFName;
 			CreateDirectoryA(destFilePath.c_str(), NULL);
 		}
 
-		// Èç¹ûÊÇÎÄ¼şÔò½âÑ¹Ëõ²¢´´½¨
+		// å¦‚æœæ˜¯æ–‡ä»¶åˆ™è§£å‹ç¼©å¹¶åˆ›å»º
 		else
 		{
-			// ´´½¨ÎÄ¼ş ±£´æÍêÕûÂ·¾¶
+			// åˆ›å»ºæ–‡ä»¶ ä¿å­˜å®Œæ•´è·¯å¾„
 			string strFullFilePath;
 			tempFilePath = strTempPath + "/" + strZipFName.c_str();
 			strFullFilePath = tempFilePath;
@@ -145,9 +145,9 @@ void unzip::UnzipFile(const std::string& strFilePath, const std::string& strTemp
 
 			if (!PathIsDirectoryA(destFilePath.c_str()))
 			{
-				// ½«Â·¾¶¸ñÊ½Í³Ò»
+				// å°†è·¯å¾„æ ¼å¼ç»Ÿä¸€
 				destFilePath = replace_all(destFilePath, "/", "\\");
-				// ´´½¨¶à¼¶Ä¿Â¼
+				// åˆ›å»ºå¤šçº§ç›®å½•
 				int bRet = CreatedMultipleDirectory(destFilePath);
 			}
 			strFullFilePath = replace_all(strFullFilePath, "/", "\\");
@@ -160,7 +160,7 @@ void unzip::UnzipFile(const std::string& strFilePath, const std::string& strTemp
 				return;
 			}
 
-			// ´ò¿ªÎÄ¼ş
+			// æ‰“å¼€æ–‡ä»¶
 			nReturnValue = unzOpenCurrentFile(unzfile);
 			if (nReturnValue != UNZ_OK)
 			{
@@ -168,7 +168,7 @@ void unzip::UnzipFile(const std::string& strFilePath, const std::string& strTemp
 				return;
 			}
 
-			// ¶ÁÈ¡ÎÄ¼ş
+			// è¯»å–æ–‡ä»¶
 			uLong BUFFER_SIZE = pFileInfo->uncompressed_size;;
 			void* szReadBuffer = NULL;
 			szReadBuffer = (char*)malloc(BUFFER_SIZE);
@@ -185,21 +185,21 @@ void unzip::UnzipFile(const std::string& strFilePath, const std::string& strTemp
 
 					nReadFileSize = unzReadCurrentFile(unzfile, szReadBuffer, BUFFER_SIZE);
 
-					// ¶ÁÈ¡ÎÄ¼şÊ§°Ü
+					// è¯»å–æ–‡ä»¶å¤±è´¥
 					if (nReadFileSize < 0)
 					{
 						unzCloseCurrentFile(unzfile);
 						CloseHandle(hFile);
 						return;
 					}
-					// ¶ÁÈ¡ÎÄ¼şÍê±Ï
+					// è¯»å–æ–‡ä»¶å®Œæ¯•
 					else if (nReadFileSize == 0)
 					{
 						unzCloseCurrentFile(unzfile);
 						CloseHandle(hFile);
 						break;
 					}
-					// Ğ´Èë¶ÁÈ¡µÄÄÚÈİ
+					// å†™å…¥è¯»å–çš„å†…å®¹
 					else
 					{
 						DWORD dWrite = 0;
@@ -221,7 +221,7 @@ void unzip::UnzipFile(const std::string& strFilePath, const std::string& strTemp
 	delete pFileInfo;
 	delete pGlobalInfo;
 
-	// ¹Ø±Õ
+	// å…³é—­
 	if (unzfile)
 	{
 		unzClose(unzfile);

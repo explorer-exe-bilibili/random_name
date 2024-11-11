@@ -1,11 +1,11 @@
-#ifndef LOG_H
+ï»¿#ifndef LOG_H
 #define LOG_H
 #pragma once
 #include <iostream>
 #include <fstream>
 #include <string>
 #define INSIDEINT 1143221
-// ¶¨ÒåÈÕÖ¾¼¶±ðÃ¶¾Ù
+// å®šä¹‰æ—¥å¿—çº§åˆ«æžšä¸¾
 
 class Log {
 private:
@@ -17,7 +17,7 @@ public:
 
     Log& operator<<(const std::string& str);
     Log& operator<<(long double value);
-    // ¿ÉÒÔ¸ù¾ÝÐèÒªÖØÔØ¸ü¶àÆäËûÀàÐÍµÄ<<ÔËËã·ûº¯Êý
+    // å¯ä»¥æ ¹æ®éœ€è¦é‡è½½æ›´å¤šå…¶ä»–ç±»åž‹çš„<<è¿ç®—ç¬¦å‡½æ•°
     int nl();
     int pt();
 private:
