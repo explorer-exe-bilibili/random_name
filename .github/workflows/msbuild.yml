@@ -20,6 +20,16 @@ jobs:
       with:
         submodules: true
 
+
+    - name: Set up PowerShell locale
+      run: |
+        Set-WinUILanguageOverride -Language zh-CN
+        Set-WinSystemLocale -SystemLocale zh-CN
+        Set-WinUserLanguageList -LanguageList zh-CN -Force
+        Set-Culture zh-CN
+        Set-WinHomeLocation -GeoId 45
+
+
     - name: Install Inno Setup
       run: choco install innosetup --yes
 
