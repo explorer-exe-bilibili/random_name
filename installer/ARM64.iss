@@ -8,14 +8,9 @@
 #define MyAppAssocExt ".myp"
 #define MyAppAssocKey StringChange(MyAppAssocName, " ", "") + MyAppAssocExt
 
-#expr IsGitHubActions = (GetEnv('GITHUB_ACTIONS') <> '')
-#if IsGitHubActions
-#define MyAppSourceDir GetEnv('SOURCE_DIR')
-#define MyAppOutputDir GetEnv('OUTPUT_DIR')
-#else
 #define MyAppSourceDir "D:\Users\explorer\Source\Repos\random_name"
 #define MyAppOutputDir "D:\Users\explorer\source\repos\random_name\release86\ARM64\"
-#endif
+
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
