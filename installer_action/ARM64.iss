@@ -27,6 +27,7 @@ OutputDir={#MyAppOutputDir}
 OutputBaseFilename=random_nameARM64_setup
 SetupIconFile={#MyAppSourceDir}\OIP-C.ico
 Compression=lzma
+
 SolidCompression=yes
 WizardStyle=modern
 
