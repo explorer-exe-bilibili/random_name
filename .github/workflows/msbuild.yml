@@ -77,6 +77,8 @@ jobs:
     - name: Generate Inno Setup Installer
       env:
         GITHUB_ACTIONS: true
+        SURCE_DIR: ${{ github.workspace }}
+        OUTPUT_DIR: ${{ github.workspace }}/installer/Output
       run: |
         iscc installer\${{ matrix.platform }}.iss
     

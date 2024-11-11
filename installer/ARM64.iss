@@ -9,8 +9,8 @@
 #define MyAppAssocKey StringChange(MyAppAssocName, " ", "") + MyAppAssocExt
 
 #ifdef GITHUB_ACTIONS
-#define MyAppSourceDir ExpandConstant('{src}')+"\.."
-#define MyAppOutputDir AddBackslash(ExpandConstant('{src}')) + "installer\Output"
+#define MyAppSourceDir GetEnv('SOURCE_DIR')
+#define MyAppOutputDir GetEnv('OUTPUT_DIR')
 #else
 #define MyAppSourceDir "D:\Users\explorer\Source\Repos\random_name"
 #define MyAppOutputDir "D:\Users\explorer\source\repos\random_name\release86\ARM64\"
