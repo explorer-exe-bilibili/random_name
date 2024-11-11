@@ -12,7 +12,7 @@
 #define MyAppSourceDir "D:\Users\explorer\Source\Repos\random_name"
 #define MyAppOutputDir "D:\Users\explorer\source\repos\random_name\release\x64"
 
-#define IsGitHubActions Defined(GetEnv('GITHUB_ACTIONS'))
+#define IsGitHubActions (GetEnv('GITHUB_ACTIONS') <> '')
 
 #if IsGitHubActions
 #define MyAppSourceDir GetEnv('SOURCE_DIR')
