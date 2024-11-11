@@ -8,8 +8,7 @@
 #define MyAppAssocExt ".myp"
 #define MyAppAssocKey StringChange(MyAppAssocName, " ", "") + MyAppAssocExt
 
-#define IsGitHubActions (GetEnv('GITHUB_ACTIONS') <> '')
-
+#expr IsGitHubActions = GetEnv('GITHUB_ACTIONS') <> ''
 #if IsGitHubActions
 #define MyAppSourceDir GetEnv('SOURCE_DIR')
 #define MyAppOutputDir GetEnv('OUTPUT_DIR')
