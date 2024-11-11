@@ -23,6 +23,11 @@ jobs:
     - name: Install Inno Setup
       run: choco install innosetup --yes
 
+
+    - name: Download ChineseSimplified.isl
+      run: |
+        Invoke-WebRequest -Uri "https://raw.github.com/jrsoftware/issrc/main/Files/Languages/Unofficial/ChineseSimplified.isl" -OutFile "C:\Program Files (x86)\Inno Setup 6\Languages\ChineseSimplified.isl"
+   
     - name: Install vcpkg
       run: |
         git clone https://github.com/microsoft/vcpkg.git
