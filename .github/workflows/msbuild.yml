@@ -57,17 +57,16 @@ jobs:
       run: |
         $outputPath = "${{ github.workspace }}\${{ matrix.platform }}\Release"
         $filesPath = "${{ github.workspace }}\files"
+        $tempPath = "${{ github.workspace }}\temp"
         $platform_lower = "${{ matrix.platform }}".ToLower()
         if ($platform_lower -eq "x86") {
           $outputPath = "${{ github.workspace }}\win32\Release"
         }
-        if (Test-Path $outputPath) {
-          Compress-Archive -Path $outputPath\*, $filesPath\ -DestinationPath "${{ matrix.platform }}.zip"
-          echo "ARTIFACT_NAME=${{ matrix.platform }}.zip" >> $env:GITHUB_ENV
-        } else {
-          Write-Error "The path '$outputPath' does not exist."
-          exit 1
-        }
+        New-Item -ItemType Directory -Force -Path $tempPath
+        Copy-Item -Path "$outputPath\*" -Destination $tempPath -Recurse -Exclude *.pdb
+        Copy-Item -Path "$filesPath" -Destination $tempPath -Recurse
+        Compress-Archive -Path "$tempPath\*" -DestinationPath "$artifactName.zip"
+        echo "ARTIFACT_NAME=$artifactName.zip" >> $env:GITHUB_ENV
     - name: Upload Artifact for ${{ matrix.platform }}
       uses: actions/upload-artifact@v3
       with:
@@ -78,8 +77,10 @@ jobs:
       env:
         GITHUB_ACTIONS: true
         SURCE_DIR: ${{ github.workspace }}
-        OUTPUT_DIR: ${{ github.workspace }}/installer/Output
+        OUTPUT_DIR: ${{ github.workspace }}\installer\Output
       run: |
+        dir $env:SURCE_DIR
+        dir $env:SURCE_DIR\random
         iscc installer\${{ matrix.platform }}.iss
     
     - name: Upload Installer for ${{ matrix.platform }}
