@@ -13,7 +13,7 @@
 #define MyAppOutputDir "D:\Users\explorer\source\repos\random_name\release\x64"
 
 #ifdef GITHUB_ACTIONS
-#define MyAppSourceDir ExpandConstant('{src}')
+#define MyAppSourceDir ExpandConstant('{src}')+"\.."
 #define MyAppOutputDir AddBackslash(ExpandConstant('{src}')) + "installer\Output"
 #else
 #define MyAppSourceDir "D:\Users\explorer\Source\Repos\random_name"

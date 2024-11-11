@@ -369,3 +369,5 @@ FodyWeavers.xsd
 /random/name.txt
 /Release86
 /vcpkg_installed/
+config.txt
+setting.json
