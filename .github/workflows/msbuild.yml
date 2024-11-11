@@ -21,13 +21,13 @@ jobs:
         submodules: true
 
 
-    - name: Set up PowerShell locale
-      run: |
-        Set-WinUILanguageOverride -Language zh-CN
-        Set-WinSystemLocale -SystemLocale zh-CN
-        Set-WinUserLanguageList -LanguageList @("zh-CN") -Force
-        Set-Culture zh-CN
-        Set-WinHomeLocation -GeoId 45
+    # - name: Set up PowerShell locale
+    #   run: |
+    #     Set-WinUILanguageOverride -Language zh-CN
+    #     Set-WinSystemLocale -SystemLocale zh-CN
+    #     Set-WinUserLanguageList -LanguageList zh-CN -Force
+    #     Set-Culture zh-CN
+    #     Set-WinHomeLocation -GeoId 45
 
 
     - name: Install Inno Setup
@@ -63,9 +63,11 @@ jobs:
       env:
         VCPKG_ROOT: ${{ github.workspace }}/vcpkg
       run: |
+        chcp
+        chcp 65001
         $platform_lower = "${{ matrix.platform }}".ToLower()
         $env:VCPKG_DEFAULT_TRIPLET="${platform_lower}-windows-static"
-        msbuild /m /p:Configuration=Release /p:RuntimeLibrary=MultiThreaded /p:Platform=${platform_lower} /p:VcpkgTriplet=${platform_lower}-windows-static random.sln
+        msbuild /source-charset:utf-8 /execution-charset:gb2312 /m /p:Configuration=Release /p:RuntimeLibrary=MultiThreaded /p:Platform=${platform_lower} /p:VcpkgTriplet=${platform_lower}-windows-static random.sln
 
 
     - name: Package Artifact for ${{ matrix.platform }}
