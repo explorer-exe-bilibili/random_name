@@ -40,6 +40,7 @@ int config::init() {
 		add(INWINDOW, L"0");
 		add(OFFMUSIC, L"0");
 		add(FLOATWINDOW, L"1");
+		add(NOSETTINGFILE, L"1");
 		add(TYPICAL, L"0");
 		add(MEM, L"0");
 		add(NOSMOOTHUI, L"0");
@@ -94,6 +95,8 @@ int config::init() {
 		if (LogString == L"err")add(INWINDOW, L"0");
 		LogString = get(FLOATWINDOW);
 		if (LogString == L"err")add(FLOATWINDOW, L"1");
+		LogString = get(NOSETTINGFILE);
+		if (LogString == L"err")add(NOSETTINGFILE, L"1");
 		LogString = get(UNSUITFONT);
 		if (LogString == L"err")add(UNSUITFONT, L"0");
 		LogString = get(DEBUG);
