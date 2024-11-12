@@ -113,9 +113,12 @@ jobs:
       id: create_release
       uses: softprops/action-gh-release@v2.0.8
       with:
+        accept: application/vnd.github+json
+        owner: explorer-exe-bilibili
+        repo: random_name
         files: |
           ${{ env.ARTIFACT_NAME }}
-          installer\Output\*.exe
+          ${{ github.workspace }}\installer\Output\*.exe
         prerelease: true
         make_latest: false
         name: "Release action${{ github.ref_name }}"
