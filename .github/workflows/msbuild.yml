@@ -37,7 +37,7 @@ jobs:
           ${{ github.workspace }}/vcpkg
         key: ${{ runner.os }}-vcpkg-${{ matrix.platform }}-${{ hashFiles('**/vcpkg.json') }}
         restore-keys: |
-          ${{ runner.os }}-vcpkg-${{ matrix.platform }}-
+          ${{ runner.os }}-vcpkg-${{ matrix.platform }}-${{ hashFiles('**/vcpkg.json') }}
         
     - name: Install vcpkg
       if: steps.cache.outputs.cache-hit != 'true'
@@ -109,15 +109,9 @@ jobs:
           name: ${{ matrix.platform }}_installer
           path: installer\Output\*.exe
 
-
-
-    - name: Create Tag
-      id: create_tag
-      run: |
-        git tag -a action${{ github.run_number }} -m "Release action${{ github.run_number }}"
-        git push master action${{ github.run_number }}
     - name: Create Release
       id: create_release
+      if: startsWith(github.ref, 'refs/tags/')
       uses: softprops/action-gh-release@v2.0.8
       with:
         files: |
@@ -125,13 +119,13 @@ jobs:
           installer\Output\*.exe
         prerelease: true
         make_latest: false
-        name: "Release ${{ github.sha }}"
+        name: "Release ${{ github.ref_name }}"
         body: |
-          - Changes: ${{ github.event.head_commit.message }}
           Release from github actions
           This is a pre-release for the current build.
           - Platform: ${{ matrix.platform }}
           - Commit: ${{ github.sha }}
-        tag_name: action-${{ github.run_number }}
+          - Changes: ${{ github.event.head_commit.message }}
+        tag_name: ${{ github.ref_name }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
