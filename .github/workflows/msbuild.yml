@@ -107,34 +107,33 @@ jobs:
           name: ${{ matrix.platform }}_installer
           path: installer\Output\*.exe
 
-
     - name: Create Release
       id: create_release
       uses: actions/create-release@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
-        release_name: Release ${{ github.ref }}
-        draft: false
-        prerelease: true
-    
-    - name: Upload ZIP to Release
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ${{ env.ARTIFACT_NAME }}
-        asset_name: ${{ env.ARTIFACT_NAME }}
-        asset_content_type: application/zip
+          tag_name: ${{ steps.extract_branch.outputs.branch }}-${{ github.run_number }}
+          release_name: Release for ${{ steps.extract_branch.outputs.branch }} at ${{ github.sha }}
+          draft: false
+          prerelease: true
 
-    - name: Upload Installer to Release
+    - name: Upload Release Asset 1
       uses: actions/upload-release-asset@v1
       env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: installer\Output\*.exe
-        asset_name: ${{ matrix.platform }}_installer.exe
-        asset_content_type: application/octet-stream
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ${{ env.ARTIFACT_NAME }}
+          asset_name: ${{ env.ARTIFACT_NAME }}
+          asset_content_type: application/zip
+
+    - name: Upload Release Asset 1
+      uses: actions/upload-release-asset@v1
+      env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: installer\Output\*.exe
+          asset_name: ${{ matrix.platform }}_installer.exe
+          asset_content_type: application/octet-stream
