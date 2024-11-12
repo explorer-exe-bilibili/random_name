@@ -70,7 +70,7 @@ jobs:
         chcp 65001
         $platform_lower = "${{ matrix.platform }}".ToLower()
         $env:VCPKG_DEFAULT_TRIPLET="${platform_lower}-windows-static"
-        msbuild /m /p:Configuration=Release /p:RuntimeLibrary=MultiThreaded /p:Platform=${platform_lower} /p:VcpkgTriplet=${platform_lower}-windows-static random.sln
+        msbuild /m /p:AdditionalOptions="/utf-8" /p:Configuration=Release /p:RuntimeLibrary=MultiThreaded /p:Platform=${platform_lower} /p:VcpkgTriplet=${platform_lower}-windows-static random.sln
 
 
     - name: Package Artifact for ${{ matrix.platform }}
