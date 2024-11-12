@@ -28,7 +28,19 @@ jobs:
       run: |
         Invoke-WebRequest -Uri "https://raw.github.com/jrsoftware/issrc/main/Files/Languages/Unofficial/ChineseSimplified.isl" -OutFile "C:\Program Files (x86)\Inno Setup 6\Languages\ChineseSimplified.isl"
    
+
+
+    - name: Cache vcpkg
+      uses: actions/cache@v2
+      with:
+        path: |
+          ${{ github.workspace }}/vcpkg
+        key: ${{ runner.os }}-vcpkg-${{ matrix.platform }}-${{ hashFiles('**/vcpkg.json') }}
+        restore-keys: |
+          ${{ runner.os }}-vcpkg-${{ matrix.platform }}-
+        
     - name: Install vcpkg
+      if: steps.cache.outputs.cache-hit != 'true'
       run: |
         git clone https://github.com/microsoft/vcpkg.git
         .\vcpkg\bootstrap-vcpkg.bat
@@ -98,6 +110,12 @@ jobs:
           path: installer\Output\*.exe
 
 
+
+    - name: Create Tag
+      id: create_tag
+      run: |
+        git tag -a action${{ github.run_number }} -m "Release action${{ github.run_number }}"
+        git push master action${{ github.run_number }}
     - name: Create Release
       id: create_release
       uses: softprops/action-gh-release@v2.0.8
@@ -114,5 +132,6 @@ jobs:
           This is a pre-release for the current build.
           - Platform: ${{ matrix.platform }}
           - Commit: ${{ github.sha }}
+        tag_name: action-${{ github.run_number }}
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
