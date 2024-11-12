@@ -1,4 +1,4 @@
-#include "web.h"
+ï»¿#include "web.h"
 #include"json.h"
 #include<curl/curl.h>
 #include <sstream>
@@ -53,13 +53,13 @@ string web::getdownloadurl() {
 		curl_easy_setopt(curl, CURLOPT_WRITEDATA, &getdata);
 		res = curl_easy_perform(curl);
 		if (!jsonreader.parse(getdata, getvalue)) {
-			weblog << "JSON½âÎöÊ§°Ü" << weblog.nl();
+			weblog << "JSONè§£æå¤±è´¥" << weblog.nl();
 			isok = 0;
 			curl_easy_cleanup(curl);
 			return "err";
 		}
 		else if (getvalue["code"].asInt() == 200) {
-			// ·ÃÎÊdata¶ÔÏóµÄcontentÊı×é
+			// è®¿é—®dataå¯¹è±¡çš„contentæ•°ç»„
 #ifdef _DEBUG
 			cout << jsonwriter.write(getvalue) << endl;
 #else
@@ -80,9 +80,9 @@ string web::getdownloadurl() {
 			}
 			else {
 #ifdef _DEBUG
-				cout << "Óöµ½Î´Öª´íÎó" << endl;
+				cout << "é‡åˆ°æœªçŸ¥é”™è¯¯" << endl;
 #else
-				weblog << "Óöµ½Î´Öª´íÎó" << weblog.nl();
+				weblog << "é‡åˆ°æœªçŸ¥é”™è¯¯" << weblog.nl();
 #endif // _DEBUG
 				isok = 0;
 				curl_easy_cleanup(curl);
@@ -112,10 +112,10 @@ std::string web::version()
 	return versionfile;
 }
 std::string web::removeAfterpoint(const std::string& input) {
-	// ÕÒµ½µÚÒ»¸ö "."
+	// æ‰¾åˆ°ç¬¬ä¸€ä¸ª "."
 	size_t dashPos = input.find_last_of(".");
 	if (dashPos != std::string::npos) {
-		// Èç¹ûÕÒµ½ÁË ".", ²ÃÇĞµô "." ºóÃæµÄÄÚÈİ
+		// å¦‚æœæ‰¾åˆ°äº† ".", è£åˆ‡æ‰ "." åé¢çš„å†…å®¹
 		string m = input.substr(0, dashPos);
 		dashPos = m.find("-");
 		if (dashPos != std::string::npos) {
@@ -125,21 +125,21 @@ std::string web::removeAfterpoint(const std::string& input) {
 		else return m;
 	}
 	else {
-		// Èç¹ûÎ´ÕÒµ½ ".", Ö±½Ó·µ»ØÔ­×Ö·û´®
+		// å¦‚æœæœªæ‰¾åˆ° ".", ç›´æ¥è¿”å›åŸå­—ç¬¦ä¸²
 		return input;
 	}
 }
 std::vector<std::string> web::departfilename(std::string& input_) {
 	string input = input_;
-	// ÕıÔò±í´ïÊ½£¬Æ¥Åä¸ñÊ½Îª "Êı×Ö.Êı×Ö.Êı×Ö.zip" µÄ×Ö·û´®
+	// æ­£åˆ™è¡¨è¾¾å¼ï¼ŒåŒ¹é…æ ¼å¼ä¸º "æ•°å­—.æ•°å­—.æ•°å­—.zip" çš„å­—ç¬¦ä¸²
 	std::regex pattern(R"(\d+\.\d+\.\d+(-\w+)?\.zip)");
 
-	// Ê¹ÓÃÕıÔò±í´ïÊ½²éÕÒËùÓĞÆ¥ÅäµÄÆ¬¶Î
+	// ä½¿ç”¨æ­£åˆ™è¡¨è¾¾å¼æŸ¥æ‰¾æ‰€æœ‰åŒ¹é…çš„ç‰‡æ®µ
 	std::sregex_iterator begin(input.begin(), input.end(), pattern);
 	std::sregex_iterator end;
 	std::vector<std::string> matches;
 
-	// ±éÀúËùÓĞÆ¥ÅäÏî£¬²¢½«ËüÃÇÌí¼Óµ½matchesÏòÁ¿ÖĞ
+	// éå†æ‰€æœ‰åŒ¹é…é¡¹ï¼Œå¹¶å°†å®ƒä»¬æ·»åŠ åˆ°matcheså‘é‡ä¸­
 	for (std::sregex_iterator i = begin; i != end; ++i) {
 		string m = i->str();
 		matches.push_back(m);
@@ -176,13 +176,13 @@ std::vector<std::string> web::listpath(string path) {
 	}
 	curl_easy_cleanup(curl);
 	if (!jsonreader.parse(getdata, getvalue)) {
-		weblog << "JSON½âÎöÊ§°Ü" << weblog.nl();
+		weblog << "JSONè§£æå¤±è´¥" << weblog.nl();
 		returns.push_back("err");
 		isok = 0;
 		return returns;
 	}
 	else if (getvalue["code"].asInt() == 200) {
-		// ·ÃÎÊdata¶ÔÏóµÄcontentÊı×é
+		// è®¿é—®dataå¯¹è±¡çš„contentæ•°ç»„
 		if (getvalue.isMember("data") && getvalue["data"].isObject() && getvalue["data"]["content"].isArray()) {
 			const Json::Value& contentArray = getvalue["data"]["content"];
 			for (const auto& item : contentArray) {
@@ -221,7 +221,7 @@ string web::token() {
 		return token_value;
 	else return"err";
 }
-// ½ø¶È»Øµ÷º¯Êı
+// è¿›åº¦å›è°ƒå‡½æ•°
 int web::progress_callback(void* clientp, double dltotal, double dlnow, double ultotal, double ulnow) {
 	static const char* spinner = "|/-\\";
 	static int spin_pos = 0,ms;
@@ -336,7 +336,7 @@ int web::progress_callback(void* clientp, double dltotal, double dlnow, double u
 
 	return 0;
 }
-// ÓÃÓÚĞ´ÈëÏÂÔØÊı¾İµÄ»Øµ÷º¯Êı
+// ç”¨äºå†™å…¥ä¸‹è½½æ•°æ®çš„å›è°ƒå‡½æ•°
 size_t web::write_data(void* ptr, size_t size, size_t nmemb, FILE* stream) {
 	size_t written = fwrite(ptr, size, nmemb, stream);
 	return written;
@@ -346,51 +346,51 @@ int web::downloadzip(const char* url, const char* filename) {
 	FILE* fp;
 	CURLcode res;
 
-	// ³õÊ¼»¯libcurl
+	// åˆå§‹åŒ–libcurl
 	curl = curl_easy_init();
 	if (curl) {
-		// ´ò¿ªÎÄ¼şÓÃÓÚĞ´ÈëÏÂÔØÊı¾İ
+		// æ‰“å¼€æ–‡ä»¶ç”¨äºå†™å…¥ä¸‹è½½æ•°æ®
 		fp = fopen(filename, "wb");
 		if (fp) {
-			// ÉèÖÃÏÂÔØURL
+			// è®¾ç½®ä¸‹è½½URL
 			curl_easy_setopt(curl, CURLOPT_URL, url);
-			// ²»ÏÔÊ¾Í·ĞÅÏ¢
+			// ä¸æ˜¾ç¤ºå¤´ä¿¡æ¯
 			curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
-			// ÉèÖÃĞ´Èë»Øµ÷º¯Êı
+			// è®¾ç½®å†™å…¥å›è°ƒå‡½æ•°
 			curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, write_data);
-			// ÉèÖÃĞ´ÈëÎÄ¼ş¾ä±ú
+			// è®¾ç½®å†™å…¥æ–‡ä»¶å¥æŸ„
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
-			// ÉèÖÃ½ø¶È»Øµ÷º¯Êı
+			// è®¾ç½®è¿›åº¦å›è°ƒå‡½æ•°
 			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
 			curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
-			// Ö´ĞĞÏÂÔØ
+			// æ‰§è¡Œä¸‹è½½
 			res = curl_easy_perform(curl);
-			// ¹Ø±ÕÎÄ¼ş
+			// å…³é—­æ–‡ä»¶
 #ifdef _DEBUG
-			std::cout << std::endl << "ÏÂÔØÍê³É";
+			std::cout << std::endl << "ä¸‹è½½å®Œæˆ";
 #else
-			weblog << weblog.nl() << weblog.pt() << "ÏÂÔØÍê³É";
+			weblog << weblog.nl() << weblog.pt() << "ä¸‹è½½å®Œæˆ";
 #endif // _DEBUG
 
 			fclose(fp);
 		}
 		else {
 #ifdef _DEBUG
-			std::cerr << "ÎŞ·¨´ò¿ªÎÄ¼ş: " << filename << std::endl;
+			std::cerr << "æ— æ³•æ‰“å¼€æ–‡ä»¶: " << filename << std::endl;
 #else
-			weblog << weblog.pt() << "ÎŞ·¨´ò¿ªÎÄ¼ş: " << filename << weblog.nl();
+			weblog << weblog.pt() << "æ— æ³•æ‰“å¼€æ–‡ä»¶: " << filename << weblog.nl();
 #endif // _DEBUG
 			isok = 0;
 			return 1;
 		}
-		// ÇåÀílibcurl
+		// æ¸…ç†libcurl
 		curl_easy_cleanup(curl);
 	}
 	else {
 #ifdef _DEBUG
-		std::cerr << "ÎŞ·¨³õÊ¼»¯libcurl" << std::endl;
+		std::cerr << "æ— æ³•åˆå§‹åŒ–libcurl" << std::endl;
 #else
-		weblog << weblog.pt() << "ÎŞ·¨³õÊ¼»¯libcurl" << weblog.nl();
+		weblog << weblog.pt() << "æ— æ³•åˆå§‹åŒ–libcurl" << weblog.nl();
 #endif// _DEBUG
 		isok = 0;
 		return 1;
@@ -398,9 +398,9 @@ int web::downloadzip(const char* url, const char* filename) {
 
 	if (res != CURLE_OK) {
 #ifdef _DEBUG
-		std::cerr << "ÏÂÔØÊ§°Ü: " << curl_easy_strerror(res) << std::endl;
+		std::cerr << "ä¸‹è½½å¤±è´¥: " << curl_easy_strerror(res) << std::endl;
 #else
-		weblog << "ÏÂÔØÊ§°Ü: " << curl_easy_strerror(res) << weblog.nl();
+		weblog << "ä¸‹è½½å¤±è´¥: " << curl_easy_strerror(res) << weblog.nl();
 
 #endif // _DEBUG
 		isok = 0;
@@ -456,9 +456,9 @@ string web::gettoken(string username, string password) {
 	weblog << getdata << weblog.nl();
 	if (!jsonreader.parse(getdata, jsonvalue)) {
 #ifdef _DEBUG
-		cout << "JSON½âÎöÊ§°Ü" << endl;
+		cout << "JSONè§£æå¤±è´¥" << endl;
 #else
-		weblog << "JSON½âÎöÊ§°Ü" << weblog.nl();
+		weblog << "JSONè§£æå¤±è´¥" << weblog.nl();
 
 #endif // _DEBUG
 		isok = 0;
@@ -485,7 +485,7 @@ size_t web::WriteCallback(void* contents, size_t size, size_t nmemb, void* userp
 std::string web::findMaxVersion(const std::vector<std::string>& versions) {
 	std::vector<std::string> numericParts;
 
-	// ÌáÈ¡ËùÓĞ°æ±¾ºÅµÄÊı×Ö²¿·Ö
+	// æå–æ‰€æœ‰ç‰ˆæœ¬å·çš„æ•°å­—éƒ¨åˆ†
 	for (const auto& version : versions) {
 		std::string numericPart;
 		for (char c : version) {
@@ -499,17 +499,17 @@ std::string web::findMaxVersion(const std::vector<std::string>& versions) {
 		numericParts.push_back(numericPart);
 	}
 
-	// ÕÒµ½×î´óµÄÊı×Ö²¿·Ö
+	// æ‰¾åˆ°æœ€å¤§çš„æ•°å­—éƒ¨åˆ†
 	if (numericParts.empty())return "";
 	std::sort(numericParts.begin(), numericParts.end(), std::greater<>());
 	std::string maxNumericPart = removeAfterpoint(numericParts.front());
 
-	// ÔÚÔ­Ê¼°æ±¾ºÅÖĞ²éÕÒº¬ÓĞ×î´óÊı×Ö²¿·ÖµÄ°æ±¾ºÅ
+	// åœ¨åŸå§‹ç‰ˆæœ¬å·ä¸­æŸ¥æ‰¾å«æœ‰æœ€å¤§æ•°å­—éƒ¨åˆ†çš„ç‰ˆæœ¬å·
 	for (const auto& version : versions) {
 		if (version.find(maxNumericPart) != std::string::npos) {
 			return version;
 		}
 	}
 	isok = 0;
-	return ""; // Î´ÕÒµ½Æ¥ÅäµÄ°æ±¾ºÅ
+	return ""; // æœªæ‰¾åˆ°åŒ¹é…çš„ç‰ˆæœ¬å·
 }

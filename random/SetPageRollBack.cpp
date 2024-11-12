@@ -11,7 +11,7 @@ using namespace nlohmann;
 json set2::rollback(const string& jsonpath) {
 	Log slog("files\\log\\set-json.log", 0);
 	slog << "try to rollback setting page" << endl;
-	// 创建JSON数据
+	// 创建JSON数据a
 	json j;
 	json p;
 	json i;

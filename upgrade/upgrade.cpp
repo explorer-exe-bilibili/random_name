@@ -40,7 +40,7 @@ bool upgrade(string url) {
 			// 如果传入目录不存在则创建
 			if (!::PathFileExistsA(tempdir.c_str())) {
 				unzip::CreatedMultipleDirectory(tempdir);
-				mlog2 << mlog2.pt() << "创建了临时目录" << mlog2.nl();
+				mlog2 << mlog2.pt() << u8"创建了临时目录" << mlog2.nl();
 			}
 			// 调用解压函数
 			unzip::UnzipFile(srcFilePath, tempdir);
@@ -53,7 +53,7 @@ bool upgrade(string url) {
 			return 1;
 		}
 		else {
-			mlog2 << "已经是最高版本\n";
+			mlog2 << u8"已经是最高版本\n";
 			return 0;
 		}
 	}
@@ -65,7 +65,7 @@ int main()
 	if (!upgrade("http://my-alist.me/")) {
 		if (!upgrade("http://my-alist.me:5244/")) {
 			if (!upgrade("http://23.224.111.147:5244/"))
-				mlog2 << "服务器不在线，请稍后再试";
+				mlog2 << u8"服务器不在线，请稍后再试";
 		}
 	}
 	return 0;
