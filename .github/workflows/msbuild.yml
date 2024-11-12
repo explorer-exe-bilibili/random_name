@@ -20,16 +20,6 @@ jobs:
       with:
         submodules: true
 
-
-    # - name: Set up PowerShell locale
-    #   run: |
-    #     Set-WinUILanguageOverride -Language zh-CN
-    #     Set-WinSystemLocale -SystemLocale zh-CN
-    #     Set-WinUserLanguageList -LanguageList zh-CN -Force
-    #     Set-Culture zh-CN
-    #     Set-WinHomeLocation -GeoId 45
-
-
     - name: Install Inno Setup
       run: choco install innosetup --yes
 
@@ -107,33 +97,22 @@ jobs:
           name: ${{ matrix.platform }}_installer
           path: installer\Output\*.exe
 
+
     - name: Create Release
       id: create_release
-      uses: actions/create-release@v1
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      uses: softprops/action-gh-release@v2.0.8
       with:
-          tag_name: ${{ steps.extract_branch.outputs.branch }}-${{ github.run_number }}
-          release_name: Release for ${{ steps.extract_branch.outputs.branch }} at ${{ github.sha }}
-          draft: false
-          prerelease: true
-
-    - name: Upload Release Asset 1
-      uses: actions/upload-release-asset@v1
+        files: |
+          ${{ env.ARTIFACT_NAME }}
+          installer\Output\*.exe
+        prerelease: true
+        make_latest: false
+        name: "Release ${{ github.sha }}"
+        body: |
+          - Changes: ${{ github.event.head_commit.message }}
+          Release from github actions
+          This is a pre-release for the current build.
+          - Platform: ${{ matrix.platform }}
+          - Commit: ${{ github.sha }}
       env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: ${{ env.ARTIFACT_NAME }}
-          asset_name: ${{ env.ARTIFACT_NAME }}
-          asset_content_type: application/zip
-
-    - name: Upload Release Asset 1
-      uses: actions/upload-release-asset@v1
-      env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }}
-          asset_path: installer\Output\*.exe
-          asset_name: ${{ matrix.platform }}_installer.exe
-          asset_content_type: application/octet-stream
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
