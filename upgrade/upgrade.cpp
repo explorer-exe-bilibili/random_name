@@ -66,6 +66,7 @@ int main()
 		if (!upgrade("http://my-alist.me:5244/")) {
 			if (!upgrade("http://23.224.111.147:5244/"))
 				mlog2 << "服务器不在线，请稍后再试";
+		}
 	}
-	return 0;
+		return 0;
 }
