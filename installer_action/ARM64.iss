@@ -24,7 +24,7 @@ DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 OutputDir={#MyAppOutputDir}
-OutputBaseFilename=random_nameARM64_setup
+OutputBaseFilename=random_name_arm64-setup
 SetupIconFile={#MyAppSourceDir}\OIP-C.ico
 Compression=lzma
 

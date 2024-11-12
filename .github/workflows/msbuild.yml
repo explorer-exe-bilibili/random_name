@@ -119,14 +119,13 @@ jobs:
         repo: random_name
         files: |
           ${{ env.ARTIFACT_NAME }}
-          ${{ github.workspace }}\installer\Output\*
+          ${{ github.workspace }}\installer\Output\random_name_${{ matrix.platform }}-setup.exe
         prerelease: true
         make_latest: false
         name: "Release action${{ github.ref_name }}"
         body: |
           Release from github actions
           This is a pre-release for the current build.
-          - Platform: ${{ matrix.platform }}
           - Commit: ${{ github.sha }}
           - Changes: ${{ github.event.head_commit.message }}
         tag_name: action${{ github.ref_name }}
