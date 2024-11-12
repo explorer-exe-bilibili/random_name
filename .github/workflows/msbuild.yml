@@ -35,6 +35,7 @@ jobs:
       with:
         path: |
           ${{ github.workspace }}/vcpkg
+          ${{ github.workspace }}/vcpkg_installed
         key: ${{ runner.os }}-vcpkg-${{ matrix.platform }}-${{ hashFiles('**/vcpkg.json') }}
         restore-keys: |
           ${{ runner.os }}-vcpkg-${{ matrix.platform }}-${{ hashFiles('**/vcpkg.json') }}
@@ -118,7 +119,7 @@ jobs:
         repo: random_name
         files: |
           ${{ env.ARTIFACT_NAME }}
-          ${{ github.workspace }}\installer\Output\*.exe
+          ${{ github.workspace }}\installer\Output\*
         prerelease: true
         make_latest: false
         name: "Release action${{ github.ref_name }}"
