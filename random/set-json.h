@@ -37,7 +37,7 @@ public:
 	void setGp(Gp* p);
 	static void rereadConfig();
 private:
-	std::string G2U(const std::string& gbk);
+	std::string G2U(const std::wstring& gbk);
 	std::string U2G(const std::string& utf8);
 	nlohmann::json rollback(const std::string& jsonpath);
 	void changePage() const;
