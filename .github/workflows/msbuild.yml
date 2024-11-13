@@ -25,7 +25,7 @@ jobs:
         Set-WinSystemLocale zh-CN
         Set-WinUserLanguageList zh-CN -Force
         Set-Culture zh-CN
-        Set-WinHomeLocation 2052
+        
       shell: powershell
     - name: Install Inno Setup
       run: choco install innosetup --yes
