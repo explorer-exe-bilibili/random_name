@@ -23,7 +23,6 @@ jobs:
     - name: Set system locale to Simplified Chinese
       run: |
         Set-WinSystemLocale zh-CN
-        Set-WinUserLanguageList zh-CN -Force
         Set-Culture zh-CN
         
     - name: Download ChineseSimplified.isl
