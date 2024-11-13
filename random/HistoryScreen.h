@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 #include "Gp.h"
 #include <string>
 #include <vector>

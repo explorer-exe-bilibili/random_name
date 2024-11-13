@@ -14,21 +14,25 @@ jobs:
     strategy:
       matrix:
         platform: ['x64','x86','arm64']
-
     steps:
     - uses: actions/checkout@v2
       with:
         submodules: true
 
+
+    - name: Set system locale to Simplified Chinese
+      run: |
+        Set-WinSystemLocale zh-CN
+        Set-WinUserLanguageList zh-CN -Force
+        Set-Culture zh-CN
+        Set-WinHomeLocation 2052
+      shell: powershell
     - name: Install Inno Setup
       run: choco install innosetup --yes
-
 
     - name: Download ChineseSimplified.isl
       run: |
         Invoke-WebRequest -Uri "https://raw.github.com/jrsoftware/issrc/main/Files/Languages/Unofficial/ChineseSimplified.isl" -OutFile "C:\Program Files (x86)\Inno Setup 6\Languages\ChineseSimplified.isl"
-   
-
 
     - name: Cache vcpkg
       uses: actions/cache@v2
@@ -56,11 +60,8 @@ jobs:
         VCPKG_LIBRARY_LINKAGE: static
         VCPKG_ROOT: ${{ github.workspace }}\vcpkg
       run: |
-        $platform_lower = "${{ matrix.platform }}".ToLower()
-        $env:VCPKG_DEFAULT_TRIPLET="${platform_lower}-windows-static"
         set VCPKG_FEATURE_FLAGS=manifests
         .\vcpkg\vcpkg integrate install
-        pwd
 
     - name: Build Solution for ${{ matrix.platform }}
       env:
@@ -68,9 +69,8 @@ jobs:
       run: |
         chcp
         chcp 65001
-        $platform_lower = "${{ matrix.platform }}".ToLower()
-        $env:VCPKG_DEFAULT_TRIPLET="${platform_lower}-windows-static"
-        msbuild /m /p:AdditionalOptions="/utf-8" /p:Configuration=Release /p:RuntimeLibrary=MultiThreaded /p:Platform=${platform_lower} /p:VcpkgTriplet=${platform_lower}-windows-static random.sln
+        $env:VCPKG_DEFAULT_TRIPLET="${{ matrix.platform }}-windows-static"
+        msbuild /m /p:AdditionalOptions="/utf-8" /p:Configuration=Release /p:RuntimeLibrary=MultiThreaded /p:Platform=${{ matrix.platform }} /p:VcpkgTriplet=${platform_lower}-windows-static random.sln
 
 
     - name: Package Artifact for ${{ matrix.platform }}
@@ -100,8 +100,6 @@ jobs:
         SOURCE_DIR: ${{ github.workspace }}
         OUTPUT_DIR: ${{ github.workspace }}\installer\Output
       run: |
-        dir $env:SOURCE_DIR
-        dir $env:SOURCE_DIR\random
         iscc installer_action\${{ matrix.platform }}.iss
     
     - name: Upload Installer for ${{ matrix.platform }}
@@ -114,9 +112,6 @@ jobs:
       id: create_release
       uses: softprops/action-gh-release@v2.0.8
       with:
-        accept: application/vnd.github+json
-        owner: explorer-exe-bilibili
-        repo: random_name
         files: |
           ${{ env.ARTIFACT_NAME }}
           ${{ github.workspace }}\installer\Output\random_name_${{ matrix.platform }}-setup.exe

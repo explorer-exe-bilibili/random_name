@@ -1,4 +1,4 @@
-#include "NameButton.h"
+﻿#include "NameButton.h"
 
 #include "configitem.h"
 #include "Gp.h"
