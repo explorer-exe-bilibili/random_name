@@ -26,10 +26,6 @@ jobs:
         Set-WinUserLanguageList zh-CN -Force
         Set-Culture zh-CN
         
-      shell: powershell
-    - name: Install Inno Setup
-      run: choco install innosetup --yes
-
     - name: Download ChineseSimplified.isl
       run: |
         Invoke-WebRequest -Uri "https://raw.github.com/jrsoftware/issrc/main/Files/Languages/Unofficial/ChineseSimplified.isl" -OutFile "C:\Program Files (x86)\Inno Setup 6\Languages\ChineseSimplified.isl"
@@ -66,7 +62,6 @@ jobs:
     - name: Check MSVC version
       run: |
         msbuild /version
-        cl.exe
     
     - name: Build Solution for ${{ matrix.platform }}
       env:
