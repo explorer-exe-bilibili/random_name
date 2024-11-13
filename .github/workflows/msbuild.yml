@@ -63,12 +63,17 @@ jobs:
         set VCPKG_FEATURE_FLAGS=manifests
         .\vcpkg\vcpkg integrate install
 
+    - name: Check MSVC version
+      run: |
+        msbuild /version
+        cl.exe
+    
     - name: Build Solution for ${{ matrix.platform }}
       env:
         VCPKG_ROOT: ${{ github.workspace }}/vcpkg
       run: |
         chcp
-        chcp 936
+        chcp 65001
         $platform_lower = "${{ matrix.platform }}".ToLower()
         $env:VCPKG_DEFAULT_TRIPLET="${platform_lower}-windows-static"
         msbuild /m /p:AdditionalOptions="/utf-8" /p:Configuration=Release /p:RuntimeLibrary=MultiThreaded /p:Platform=${{ matrix.platform }} /p:VcpkgTriplet=${platform_lower}-windows-static random.sln

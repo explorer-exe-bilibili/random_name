@@ -9,7 +9,7 @@ using namespace std;
 using namespace nlohmann;
 
 json set2::rollback(const string& jsonpath) {
-	setlocale(LC_ALL,"chs");
+	setlocale(LC_ALL, "zh-CN.UTF-8");
 	Log slog("files\\log\\set-json.log", 0);
 	slog << "try to rollback setting page" << endl;
 	// 创建JSON数据a
