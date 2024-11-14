@@ -169,10 +169,10 @@ std::string set2::G2U(const std::wstring& gbk)
 {
 	int nLen = WideCharToMultiByte(CP_ACP, 0, gbk.c_str(), -1, NULL, NULL, NULL, NULL);
 
-	char* pBuf = new char[nLen + 1];
-	memset(pBuf, 0, nLen + 1);
+	char* pBuf = new char[129];
+	memset(pBuf, 0, 128 + 1);
 
-	WideCharToMultiByte(CP_UTF8, 0, gbk.c_str(), gbk.length(), pBuf, nLen, NULL, NULL);
+	WideCharToMultiByte(CP_UTF8, 0, gbk.c_str(), -1, pBuf, 128, NULL, NULL);
 
 	std::string retStr = pBuf;
 
