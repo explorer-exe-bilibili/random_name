@@ -167,11 +167,14 @@ std::string set2::U2G(const std::string& utf8)
 // GBK字符串转成json识别的UTF8字符串
 std::string set2::G2U(const std::wstring& gbk)
 {
-	char* pBuf = new char[gbk.size() + 1];
-	ZeroMemory(pBuf, gbk.size() + 1);
-	WideCharToMultiByte(CP_UTF8, 0, gbk.c_str(), gbk.size(), pBuf, gbk.size(), NULL, NULL);
+	int nLen = WideCharToMultiByte(CP_ACP, 0, gbk.c_str(), -1, NULL, NULL, NULL, NULL);
 
-	std::string retStr(pBuf);
+	char* pBuf = new char[nLen + 1];
+	memset(pBuf, 0, nLen + 1);
+
+	WideCharToMultiByte(CP_UTF8, 0, gbk.c_str(), gbk.length(), pBuf, nLen, NULL, NULL);
+
+	std::string retStr = pBuf;
 
 	delete[]pBuf;
 
