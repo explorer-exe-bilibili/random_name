@@ -1,6 +1,6 @@
 {
     "name": "random-name",
-    "version-string": "0.1.0",
+    "version-string": "1.6.0",
     "dependencies": [
         "uchardet",
         "nlohmann-json",
