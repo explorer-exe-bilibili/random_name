@@ -4,6 +4,7 @@
 #include <memory>
 #include<string>
 #include <mutex>
+#include <GL/gl.h>
 
 #include "explorer.h"
 #pragma comment(lib,"gdiplus.lib")
@@ -39,6 +40,8 @@ private:
 	}NowFontInfo, LastFontInfo;
 	HWND hwnd;
 	HDC hdc;
+	HDC hDC;
+	HGLRC hRC = NULL;
 	bool cachedHDC = false, cachedGraphics = false, cachedFont = false, cachedBrush = false;
 	std::shared_ptr<Gdiplus::Graphics> graphic;
 	std::shared_ptr<Gdiplus::Bitmap> buffer;
@@ -51,6 +54,8 @@ private:
 public:
 	~Gp();
 	Gp(HWND hwnd);
+	bool initOpenGL(HWND hwnd);
+	void RenderOpenGL();
 	void Flush();
 	void SizeChanged();
 	void Paint(int xDest, int yDest, Gdiplus::Bitmap* image);
@@ -78,4 +83,19 @@ public:
 	void DrawSquare(int xDest, int yDest, int xEnd, int yEnd, uint32_t color, bool filled);
 	void LockWindowSize() const;
 	void UnlockWindowSize() const;
+
+
+
+
+private:
+	// FPS 相关变量
+	int frameCount = 0;
+	int lastCount = 0;
+	double fps = 0.0;
+	std::chrono::time_point<std::chrono::steady_clock> lastTime;
+	GLuint base = 0;
+
+	void initFont();
+	void renderBitmapString(float x, float y, void* font, const char* string);
+
 };

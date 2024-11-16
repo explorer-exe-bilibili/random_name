@@ -22,6 +22,9 @@
     <Filter Include="源文件\前端\设置界面">
       <UniqueIdentifier>{faea4ab6-4bad-45b4-a2ec-35fdf8b98ad5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\底层渲染">
+      <UniqueIdentifier>{8934f45f-79de-4b22-8aa9-9516cad89fdc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mywindows.h">
@@ -111,6 +114,9 @@
     <ClInclude Include="Screen.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="FontManager.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="random.cpp">
@@ -155,9 +161,6 @@
     <ClCompile Include="floatwindow.cpp">
       <Filter>源文件\前端</Filter>
     </ClCompile>
-    <ClCompile Include="Gp.cpp">
-      <Filter>源文件\前端</Filter>
-    </ClCompile>
     <ClCompile Include="NameScreen.cpp">
       <Filter>源文件\前端</Filter>
     </ClCompile>
@@ -199,6 +202,12 @@
     </ClCompile>
     <ClCompile Include="NameButton.cpp">
       <Filter>源文件\前端</Filter>
+    </ClCompile>
+    <ClCompile Include="Gp.cpp">
+      <Filter>源文件\底层渲染</Filter>
+    </ClCompile>
+    <ClCompile Include="FontManager.cpp">
+      <Filter>源文件</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

@@ -234,6 +234,7 @@
     <ClInclude Include="Button.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="ConfigItem.h" />
+    <ClInclude Include="FontManager.h" />
     <ClInclude Include="Screen.h" />
     <ClInclude Include="VideoPlayer.h" />
     <ClInclude Include="floatwindow.h" />
@@ -264,6 +265,7 @@
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="ConfigItem.cpp" />
+    <ClCompile Include="FontManager.cpp" />
     <ClCompile Include="Screen.cpp" />
     <ClCompile Include="VideoPlayer.cpp" />
     <ClCompile Include="floatwindow.cpp" />

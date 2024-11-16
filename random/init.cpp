@@ -27,7 +27,7 @@ void init::font()
 	const int logicalWidth = logicalHeight * 0.77;
 	bool isInstall = checkIsFontInstalled(L"genshin-icon");
 	if (isInstall) {
-		ui::NS->icon_star = CreateFontW(logicalHeight * 0.0862, logicalWidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
+		//ui::NS->icon_star = CreateFontW(logicalHeight * 0.0862, logicalWidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
 		ui::icon_mid = CreateFontW(logicalHeight * 0.16, logicalWidth * 0.22, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
 		ui::icon = CreateFontW(logicalHeight * 0.2299, logicalWidth * 0.3008, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
 	}
@@ -94,30 +94,30 @@ void init::resetPoint()
 void init::main(WNDPROC w1, WNDPROC w2, WNDPROC w3)
 {
 	std::thread([w1, w2, w3] { regWindow(w1, w2, w3); }).detach();
-	SetConsoleOutputCP(65001); // 设置为UTF-8编码
-	CHAR run[260] = {};
-	GetModuleFileNameA(nullptr, run, MAX_PATH);
-	const int len = MultiByteToWideChar(CP_ACP, 0, run, -1, nullptr, 0);
-	wchar_t* run_ = new wchar_t[len];
-	MultiByteToWideChar(CP_ACP, 0, run, -1, run_, len);
-	Log::wrunpath = run_;
-	mywindows::log("getting run path \n%s", run);
-	mywindows::log(L"getting run path \n%s", run_);
-	mywindows::removeFileNameFromPath(run);
-	Log::wrunpath = run_;
-	mywindows::removeFileNameFromPath(Log::wrunpath);
-	Log::runpath = run;
-	config::init();
-	ui::FS = new FirstScreen();
-	ui::NS = new NameScreen();
-	ui::HS = new HistoryScreen();
-	ui::SS = new set2();
-	ui::MS = new MenuScreen();
-	set2::offMusic = config::getint(OFFMUSIC);
-	set2::FloatWindow = config::getint(FLOATWINDOW);
-	config();
-	std::thread(Upgrade).detach();
-	music();
+	//SetConsoleOutputCP(65001); // 设置为UTF-8编码
+	//CHAR run[260] = {};
+	//GetModuleFileNameA(nullptr, run, MAX_PATH);
+	//const int len = MultiByteToWideChar(CP_ACP, 0, run, -1, nullptr, 0);
+	//wchar_t* run_ = new wchar_t[len];
+	//MultiByteToWideChar(CP_ACP, 0, run, -1, run_, len);
+	//Log::wrunpath = run_;
+	//mywindows::log("getting run path \n%s", run);
+	//mywindows::log(L"getting run path \n%s", run_);
+	//mywindows::removeFileNameFromPath(run);
+	//Log::wrunpath = run_;
+	//mywindows::removeFileNameFromPath(Log::wrunpath);
+	//Log::runpath = run;
+	//config::init();
+	//ui::FS = new FirstScreen();
+	//ui::NS = new NameScreen();
+	//ui::HS = new HistoryScreen();
+	//ui::SS = new set2();
+	//ui::MS = new MenuScreen();
+	//set2::offMusic = config::getint(OFFMUSIC);
+	//set2::FloatWindow = config::getint(FLOATWINDOW);
+	//config();
+	//std::thread(Upgrade).detach();
+	//music();
 }
 void init::music()
 {
@@ -148,16 +148,17 @@ void init::config()
 
 void init::MainWindow()
 {
-	if (set2::fullscreen)mywindows::main_hwnd = CreateWindowW(L"main", config::get(WINDOW_TITLE).c_str(), WS_CLIPSIBLINGS | WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_THICKFRAME, 0, 0, mywindows::WW, mywindows::WH, NULL, NULL, GetModuleHandle(NULL), NULL); 
-	else {
-		mywindows::WW = mywindows::screenWidth;
-		mywindows::WH = mywindows::screenHeight;
-		mywindows::main_hwnd = CreateWindowW(L"main", config::get(WINDOW_TITLE).c_str(), WS_POPUP | WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN, 0, 0, mywindows::WW, mywindows::WH, NULL, NULL, GetModuleHandle(NULL), NULL);
-	}
+	mywindows::main_hwnd = CreateWindowW(L"main", config::get(WINDOW_TITLE).c_str(), WS_POPUP | WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN, 0, 0, mywindows::WW, mywindows::WH, NULL, NULL, GetModuleHandle(NULL), NULL);
+	//if (set2::fullscreen)mywindows::main_hwnd = CreateWindowW(L"main", config::get(WINDOW_TITLE).c_str(), WS_CLIPSIBLINGS | WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN | WS_THICKFRAME, 0, 0, mywindows::WW, mywindows::WH, NULL, NULL, GetModuleHandle(NULL), NULL); 
+	//else {
+	//	mywindows::WW = mywindows::screenWidth;
+	//	mywindows::WH = mywindows::screenHeight;
+	//	mywindows::main_hwnd = CreateWindowW(L"main", config::get(WINDOW_TITLE).c_str(), WS_POPUP | WS_CLIPSIBLINGS | WS_OVERLAPPED | WS_CLIPCHILDREN, 0, 0, mywindows::WW, mywindows::WH, NULL, NULL, GetModuleHandle(NULL), NULL);
+	//}
 }
 void init::regWindow(const WNDPROC w1, const WNDPROC w2, const WNDPROC w3)
 {
-	w2_ = w2; w3_ = w3;
+	//w2_ = w2; w3_ = w3;
 	WNDCLASS wndcls; //创建一个窗体类
 	wndcls.cbClsExtra = 0;//类的额外内存，默认为0即可
 	wndcls.cbWndExtra = 0;//窗口的额外内存，默认为0即可
@@ -170,8 +171,8 @@ void init::regWindow(const WNDPROC w1, const WNDPROC w2, const WNDPROC w3)
 	wndcls.lpszMenuName = nullptr;//设置窗体的菜单,没有，填NULL
 	wndcls.style = CS_HREDRAW | CS_VREDRAW;//设置窗体风格为水平重画和垂直重画
 	RegisterClass(&wndcls);//向操作系统注册窗体
-	DWORD threadId;
-	CreateThread(nullptr, 0, PTHREAD_START_ROUTINE(RegWindows), nullptr, 0, &threadId);
+	//DWORD threadId;
+	//CreateThread(nullptr, 0, PTHREAD_START_ROUTINE(RegWindows), nullptr, 0, &threadId);
 }
 DWORD WINAPI init::RegWindows() {
 	WNDCLASS Fwndcls; //创建一个窗体类

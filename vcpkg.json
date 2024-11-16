@@ -8,7 +8,10 @@
         "jsoncpp",
         "libzip",
         "curl",
-        "zlib"
+        "zlib",
+		"opengl",
+		"freetype",
+		"glm"
     ]
     
 }

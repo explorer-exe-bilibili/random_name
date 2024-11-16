@@ -17,85 +17,93 @@ LARGE_INTEGER MSGback::frequency;
 LARGE_INTEGER MSGback::lastTime;
 int MSGback::frameCount = 0;
 float MSGback::fps = 0.0f;
-
+extern Gp* p;
 void MSGback::create()
+
 {
-	QueryPerformanceFrequency(&frequency);
-	QueryPerformanceCounter(&lastTime);
-	set2::reinit();
-	const HDC hdc = GetDC(nullptr);
-	if (mywindows::float_hWnd != nullptr)
-		ShowWindow(mywindows::float_hWnd, SW_HIDE);
+	//QueryPerformanceFrequency(&frequency);
+	//QueryPerformanceCounter(&lastTime);
+	//set2::reinit();
+	//const HDC hdc = GetDC(nullptr);
+	//if (mywindows::float_hWnd != nullptr)
+	//	ShowWindow(mywindows::float_hWnd, SW_HIDE);
 	SetWindowPos(mywindows::main_hwnd, HWND_TOP, 0, 0, mywindows::WW, mywindows::WH, SWP_NOZORDER | SWP_FRAMECHANGED);
-	ShowWindow(mywindows::main_hwnd, SW_HIDE);
-	ReleaseDC(nullptr,hdc);
-	ui::HS->setFile(L"./name.txt");
-	Pptr=new Gp(mywindows::main_hwnd);
-	init::resetPoint();
-	std::thread([] {while (true) {
-		if(ui::ScreenMode!=SETTING)
-		InvalidateRect(mywindows::main_hwnd, nullptr, FALSE);
-	std::this_thread::sleep_for(std::chrono::milliseconds(300)); }}).detach();
+	ShowWindow(mywindows::main_hwnd, SW_SHOW);
+	//ShowWindow(mywindows::main_hwnd, SW_HIDE);
+	//ReleaseDC(nullptr,hdc);
+	//ui::HS->setFile(L"./name.txt");
+	//Pptr=new Gp(mywindows::main_hwnd);
+	//init::resetPoint();
+	//std::thread([] {while (true) {
+	//	if(ui::ScreenMode!=SETTING)
+	//	InvalidateRect(mywindows::main_hwnd, nullptr, FALSE);
+	//std::this_thread::sleep_for(std::chrono::milliseconds(300)); }}).detach();
+	if (p!=nullptr)
+	p->initOpenGL(mywindows::main_hwnd);
 }
 bool _ = true;
 
 
 void MSGback::size()
 {
+	if (p!=nullptr)
+	p->initOpenGL(mywindows::main_hwnd);/*
 	ui::ScreenModeChanged = true;
 	if (Pptr != nullptr) {
 		init::resetPoint();
 		Pptr->SizeChanged();
-	}
+	}*/
 }
-
 
 void MSGback::paint()
 {
-	static bool debug=config::getint(DEBUG);
-	if(extern LoadWindow* loadWindow; loadWindow)
-	{
-		loadWindow->destroy();
-		loadWindow = nullptr;
-	}
-	if (set2::fullscreen&&_) {
-		SetWindowPos(mywindows::main_hwnd, nullptr, 0, 0, mywindows::screenWidth * 0.6
-			, mywindows::screenHeight * 0.6, SWP_NOMOVE | SWP_NOZORDER);
-	}
-	if(_)
-	{
-		init::resetPoint();
-	}
-	_ = false;
-	PAINTSTRUCT ps;
-	const HDC hdc = BeginPaint(mywindows::main_hwnd, &ps);
-	ui::HS->setGp(Pptr);
-	ui::FS->setGp(Pptr);
-	ui::NS->setGp(Pptr);
-	ui::SS->setGp(Pptr);
-	ui::MS->setGp(Pptr);
-	switch (ui::ScreenMode)
-	{
-	case FIRST_SCREEN:ui::FS->paint(); break;
-	case namescreen:ui::NS->paint();break;
-	case SETTING: ui::SS->paint(); break;
-	case HISTORY: ui::HS->paint(); break;
-	case MENU:ui::MS->paint(); break;
-	default: break;
-	}
-	updateFrameRate();
-	if (debug) {
-		Pptr->DrawString(("FPS:" + std::to_string(fps)), ui::text, 0, 0, ARGB(255 ,0, 0, 0));
-	}
-	Pptr->Flush();
-	mywindows::log("paint successfully");
-	DeleteDC(hdc);
-	EndPaint(mywindows::main_hwnd, &ps);
-	if(Button::needFresh)
-	{
-		InvalidateRect(mywindows::main_hwnd, nullptr, 0);
-		Button::needFresh = false;
-	}
+	//p->initOpenGL(mywindows::main_hwnd);
+	p->RenderOpenGL();
+	InvalidateRect(mywindows::main_hwnd, NULL, false);
+	//static bool debug=config::getint(DEBUG);
+	//if(extern LoadWindow* loadWindow; loadWindow)
+	//{
+	//	loadWindow->destroy();
+	//	loadWindow = nullptr;
+	//}
+	//if (set2::fullscreen&&_) {
+	//	SetWindowPos(mywindows::main_hwnd, nullptr, 0, 0, mywindows::screenWidth * 0.6
+	//		, mywindows::screenHeight * 0.6, SWP_NOMOVE | SWP_NOZORDER);
+	//}
+	//if(_)
+	//{
+	//	init::resetPoint();
+	//}
+	//_ = false;
+	//PAINTSTRUCT ps;
+	//const HDC hdc = BeginPaint(mywindows::main_hwnd, &ps);
+	//ui::HS->setGp(Pptr);
+	//ui::FS->setGp(Pptr);
+	//ui::NS->setGp(Pptr);
+	//ui::SS->setGp(Pptr);
+	//ui::MS->setGp(Pptr);
+	//switch (ui::ScreenMode)
+	//{
+	//case FIRST_SCREEN:ui::FS->paint(); break;
+	//case namescreen:ui::NS->paint();break;
+	//case SETTING: ui::SS->paint(); break;
+	//case HISTORY: ui::HS->paint(); break;
+	//case MENU:ui::MS->paint(); break;
+	//default: break;
+	//}
+	//updateFrameRate();
+	//if (debug) {
+	//	Pptr->DrawString(("FPS:" + std::to_string(fps)), ui::text, 0, 0, ARGB(255 ,0, 0, 0));
+	//}
+	//Pptr->Flush();
+	//mywindows::log("paint successfully");
+	//DeleteDC(hdc);
+	//EndPaint(mywindows::main_hwnd, &ps);
+	//if(Button::needFresh)
+	//{
+	//	InvalidateRect(mywindows::main_hwnd, nullptr, 0);
+	//	Button::needFresh = false;
+	//}
 }
 
 void MSGback::click(const LPARAM lParam)
