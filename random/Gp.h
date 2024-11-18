@@ -1,16 +1,17 @@
 ﻿#pragma once
 #include<Windows.h>
-#include<gdiplus.h>
 #include <memory>
 #include<string>
 #include <mutex>
 #include <GL/gl.h>
+#include <glm/vec3.hpp>
 
 #include "explorer.h"
-#pragma comment(lib,"gdiplus.lib")
 
 #define ARGB(a,r,g,b)	((uint32_t)(((BYTE)(b)|((WORD)((BYTE)(g))<<8))|(((DWORD)(BYTE)(r))<<16)|(((DWORD)(BYTE)(a))<<24)))
 
+
+class My_Font;
 
 class Gp
 {
@@ -48,6 +49,7 @@ private:
 	explorer* ptr;
 	std::mutex SizeChangeMutex;
 	std::vector<StaticPaintInfo> StaticPaintList;
+	void RenderText(const std::wstring& text, My_Font font, float x, float y, float scale, const glm::vec3& color);
 	struct TextNeeds getTextNeeds();
 	void releaseTextNeeds();
 	void PaintStaticItems();

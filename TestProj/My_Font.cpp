@@ -1,4 +1,4 @@
-ï»¿#include "FontManager.h"
+#include "My_Font.h"
 
 #include <GL/glext.h>
 
@@ -27,26 +27,26 @@ void My_Font::resetSize()
 	FT_Set_Char_Size(face, 0, 16 * 64, 300, 300);
 }
 
-void My_Font::load(std::string fontPath,int fontSize)
+void My_Font::load(std::string fontPath, int fontSize)
 {
 
-	// å°† wchar_t è½¬æ¢ä¸ºå¤šå­—èŠ‚å­—ç¬¦ä¸²è·¯å¾„
+	// ½« wchar_t ×ª»»Îª¶à×Ö½Ú×Ö·û´®Â·¾¶
 	const std::string fontPathA(fontPath.begin(), fontPath.end());
 	if (FT_New_Face(library, fontPathA.c_str(), 0, &face))return;
 
 	FT_Set_Pixel_Sizes(face, 0, fontSize);
 
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // ç¦ç”¨å­—èŠ‚å¯¹é½
-	// é¢„åŠ è½½å¸¸ç”¨çš„ä¸­æ–‡å­—ç¬¦ï¼Œæˆ–æ ¹æ®éœ€è¦åŠ¨æ€åŠ è½½
-	for (wchar_t c = 0x4E00; c <= 0x9FA5; c++) { // å¸¸ç”¨æ±‰å­—èŒƒå›´
-		// åŠ è½½å­—ç¬¦
+	glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // ½ûÓÃ×Ö½Ú¶ÔÆë
+	// Ô¤¼ÓÔØ³£ÓÃµÄÖĞÎÄ×Ö·û£¬»ò¸ù¾İĞèÒª¶¯Ì¬¼ÓÔØ
+	for (wchar_t c = 0x4E00; c <= 0x9FA5; c++) { // ³£ÓÃºº×Ö·¶Î§
+		// ¼ÓÔØ×Ö·û
 		if (FT_Load_Char(face, c, FT_LOAD_RENDER))
 		{
 			triedChars.push_back(c);
 			continue;
 		}
 
-		// ç”Ÿæˆçº¹ç†
+		// Éú³ÉÎÆÀí
 		GLuint texture;
 		glGenTextures(1, &texture);
 		glBindTexture(GL_TEXTURE_2D, texture);
@@ -62,13 +62,13 @@ void My_Font::load(std::string fontPath,int fontSize)
 			face->glyph->bitmap.buffer
 		);
 
-		// è®¾ç½®çº¹ç†é€‰é¡¹
+		// ÉèÖÃÎÆÀíÑ¡Ïî
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-		// ä¿å­˜å­—ç¬¦ä¿¡æ¯
+		// ±£´æ×Ö·ûĞÅÏ¢
 		Character character = {
 			texture,
 			face->glyph->bitmap.width,
@@ -83,11 +83,11 @@ void My_Font::load(std::string fontPath,int fontSize)
 
 My_Font::Character My_Font::getCharacter(wchar_t wChar)
 {
-	for(const auto a:triedChars)
+	for (const auto a : triedChars)
 		if (a == wChar)
 			return getDefaultCharacter(wChar);
 	const auto it = Characters.find(wChar);
-	if (it == Characters.end())		// è·³è¿‡æœªåŠ è½½çš„å­—ç¬¦
+	if (it == Characters.end())		// Ìø¹ıÎ´¼ÓÔØµÄ×Ö·û
 		return getDefaultCharacter(wChar);
 	return it->second;
 }

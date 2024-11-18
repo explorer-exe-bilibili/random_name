@@ -1,4 +1,4 @@
-ï»¿#pragma once
+#pragma once
 #include<windows.h>
 #include <GL/gl.h>
 #include <ft2build.h>
@@ -12,14 +12,14 @@
 class My_Font
 {
 public:
-	// ç»“æ„ä½“ä¿å­˜æ¯ä¸ªå­—ç¬¦çš„çº¹ç†å’Œç›¸å…³ä¿¡æ¯
+	// ½á¹¹Ìå±£´æÃ¿¸ö×Ö·ûµÄÎÆÀíºÍÏà¹ØĞÅÏ¢
 	struct Character {
-		GLuint TextureID;   // å­—ç¬¦çº¹ç†ID
-		unsigned int SizeX;          // å­—ç¬¦å®½åº¦
-		unsigned int SizeY;          // å­—ç¬¦é«˜åº¦
-		int BearingX;       // å­—ç¬¦å·¦ä¾§çš„åŸºçº¿åç§»
-		int BearingY;       // å­—ç¬¦é¡¶éƒ¨çš„åŸºçº¿åç§»
-		long Advance;       // å­—ç¬¦çš„æ°´å¹³å‰è¿›é‡
+		GLuint TextureID;   // ×Ö·ûÎÆÀíID
+		unsigned int SizeX;          // ×Ö·û¿í¶È
+		unsigned int SizeY;          // ×Ö·û¸ß¶È
+		int BearingX;       // ×Ö·û×ó²àµÄ»ùÏßÆ«ÒÆ
+		int BearingY;       // ×Ö·û¶¥²¿µÄ»ùÏßÆ«ÒÆ
+		long Advance;       // ×Ö·ûµÄË®Æ½Ç°½øÁ¿
 	};
 	std::vector<wchar_t> triedChars;
 private:
@@ -38,4 +38,5 @@ public:
 	static void InitDefaultFont();
 
 };
+
 
