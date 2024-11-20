@@ -11,6 +11,8 @@
 #include <glm/vec2.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+#include "My_Font.h"
 #include "sth2sth.h"
 
 // 链接OpenGL库
@@ -74,20 +76,26 @@ Gp::~Gp() {
         glDeleteTextures(1, &it->second.TextureID);
     }
 }
+LoadText* lt = nullptr;
 
 void Gp::RenderOpenGL() {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-    // 设置颜色
-    glm::vec3 textColor(1.0f, 1.0f, 1.0f); // 白色
-    if (textShader)
-    // 渲染文本
-    renderBitmapString(*textShader, "Hello, FreeType!", 25.0f, 550.0f, 1.0f, textColor, 800, 600); // 根据窗口大小调整
-
+    // 在这里添加OpenGL绘图代码
+// 例如，绘制一个三角形
+    glBegin(GL_TRIANGLES);
+    glColor3f(1, 0, 0);
+    glVertex3f(0.0f, 1.0f, -5.0f);
+    glColor3f(0, 1, 0);
+    glVertex3f(-1.0f, -1.0f, -5.0f);
+    glColor3f(0, 0, 1);
+    glVertex3f(1.0f, -1.0f, -5.0f);
+    glEnd();
+    lt->drawText();
     SwapBuffers(hDC);
 }
 bool Gp::initOpenGL(HWND hWnd)
 {
+
     PIXELFORMATDESCRIPTOR pfd = {
         sizeof(PIXELFORMATDESCRIPTOR),
         1,
@@ -141,11 +149,12 @@ bool Gp::initOpenGL(HWND hWnd)
     // 初始化字体
     initFont();
 
-
     if (glewInit() != GLEW_OK) {
         return false;
     }
 
+    lt = new LoadText("");
+    lt->loadText(L"你", 0.1f, 0.1f);
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
 
