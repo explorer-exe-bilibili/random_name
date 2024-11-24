@@ -1,90 +1,92 @@
 #include "Shader.h"
-#include <fstream>
-#include <sstream>
 #include <iostream>
+#include <glad/glad.h>
+#include<glm/glm.hpp>
 
-Shader::Shader(const char* vertexPath, const char* fragmentPath) {
-    // 读取着色器代码
-    std::string vertexCode;
-    std::string fragmentCode;
-    std::ifstream vShaderFile;
-    std::ifstream fShaderFile;
+using namespace std;
 
-    // 确保ifstream对象可以抛出异常
-    vShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    fShaderFile.exceptions(std::ifstream::failbit | std::ifstream::badbit);
-    try {
-        // 打开文件
-        vShaderFile.open(vertexPath);
-        fShaderFile.open(fragmentPath);
-        std::stringstream vShaderStream, fShaderStream;
 
-        // 读取文件缓冲到流
-        vShaderStream << vShaderFile.rdbuf();
-        fShaderStream << fShaderFile.rdbuf();
+#define ASSERT(x) if (!(x)) __debugbreak()
 
-        // 关闭文件
-        vShaderFile.close();
-        fShaderFile.close();
+#define GLCall(a) GLClearError();\
+	a;\
+	ASSERT(GLLogCall(#a,__FILE__,__LINE__))
 
-        // 转换为字符串
-        vertexCode = vShaderStream.str();
-        fragmentCode = fShaderStream.str();
-    }
-    catch (std::ifstream::failure& e) {
-        std::cerr << "ERROR::SHADER::FILE_NOT_SUCCESFULLY_READ" << std::endl;
-    }
-    const char* vShaderCode = vertexCode.c_str();
-    const char* fShaderCode = fragmentCode.c_str();
 
-    // 编译着色器
-    GLuint vertex, fragment;
-    GLint success;
-    GLchar infoLog[512];
-
-    // 顶点着色器
-    vertex = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vertex, 1, &vShaderCode, NULL);
-    glCompileShader(vertex);
-    // 检查编译错误
-    glGetShaderiv(vertex, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(vertex, 512, NULL, infoLog);
-        std::cerr << "ERROR::SHADER::VERTEX::COMPILATION_FAILED\n"
-            << infoLog << std::endl;
-    };
-
-    // 片段着色器
-    fragment = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fragment, 1, &fShaderCode, NULL);
-    glCompileShader(fragment);
-    // 检查编译错误
-    glGetShaderiv(fragment, GL_COMPILE_STATUS, &success);
-    if (!success) {
-        glGetShaderInfoLog(fragment, 512, NULL, infoLog);
-        std::cerr << "ERROR::SHADER::FRAGMENT::COMPILATION_FAILED\n"
-            << infoLog << std::endl;
-    };
-
-    // 着色器程序
-    ID = glCreateProgram();
-    glAttachShader(ID, vertex);
-    glAttachShader(ID, fragment);
-    glLinkProgram(ID);
-    // 检查链接错误
-    glGetProgramiv(ID, GL_LINK_STATUS, &success);
-    if (!success) {
-        glGetProgramInfoLog(ID, 512, NULL, infoLog);
-        std::cerr << "ERROR::SHADER::PROGRAM::LINKING_FAILED\n"
-            << infoLog << std::endl;
-    }
-
-    // 删除着色器
-    glDeleteShader(vertex);
-    glDeleteShader(fragment);
+static void GLClearError() {
+	while (glGetError() != GL_NO_ERROR);
 }
 
-void Shader::use() {
+static bool GLLogCall(const char* function, const char* file, int line) {
+	while (GLenum error = glGetError()) {
+		std::cout << "[OpenGL Error] (" << error << ")" << function << " " << file << ":" << line << std::endl;
+		return false;
+	}
+	return true;
+}
+
+
+static unsigned int CompileShader(unsigned int type, const std::string& source) {
+	GLCall(unsigned int id = glCreateShader(type));
+	const char* src = source.c_str();
+	GLCall(glShaderSource(id, 1, &src, nullptr));
+	GLCall(glCompileShader(id));
+	int result;
+	GLCall(glGetShaderiv(id, GL_COMPILE_STATUS, &result));
+	if (result == GL_FALSE) {
+		int length;
+		GLCall(glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length));
+		char* message = (char*)_malloca(length * sizeof(char));
+		GLCall(glGetShaderInfoLog(id, length, &length, message));
+		std::cout << "Failed to compile " << (type == GL_VERTEX_SHADER ? "vertex" : "fragment") << "shader!" << std::endl;
+		std::cout << message << std::endl;
+		GLCall(glDeleteShader(id));
+		_freea(message);
+		return 0;
+	}
+	return id;
+}
+
+static unsigned int CreateShader(const std::string& vertexShader, const std::string& fragmentShader) {
+	GLCall(unsigned int program = glCreateProgram());
+	unsigned int vs = CompileShader(GL_VERTEX_SHADER, vertexShader);
+	unsigned int fs = CompileShader(GL_FRAGMENT_SHADER, fragmentShader);
+	GLCall(glAttachShader(program, vs));
+	GLCall(glAttachShader(program, fs));
+	GLCall(glLinkProgram(program));
+	GLCall(glValidateProgram(program));
+	GLCall(glDeleteShader(vs));
+	GLCall(glDeleteShader(fs));
+	return program;
+}
+
+Shader::Shader(const string& VertexShader,const string& fragmentShader) {
+	init(VertexShader, fragmentShader);
+}
+
+Shader::Shader(const Shader& old)
+{
+	init(old.VertexShader, old.fragmentShader);
+}
+
+Shader::Shader()
+{
+	ID = 0;
+}
+
+Shader::~Shader() {
+	glDeleteProgram(ID);
+}
+
+void Shader::init(const std::string& VertexShader, const std::string& fragmentShader)
+{
+	this->VertexShader = VertexShader;
+	this->fragmentShader = fragmentShader;
+	ID = CreateShader(VertexShader, fragmentShader);
+}
+
+void Shader::use() const
+{
     glUseProgram(ID);
 }
 
@@ -104,6 +106,72 @@ void Shader::setVec3(const std::string& name, const glm::vec3& value) const {
     glUniform3fv(glGetUniformLocation(ID, name.c_str()), 1, &value[0]);
 }
 
+void Shader::setVec4(const std::string& name, const glm::vec4& value) const
+{
+	int location = glGetUniformLocation(ID, name.c_str());
+	GLCall(glUniform4fv(location, 1, &value[0]));
+}
+
 void Shader::setMat4(const std::string& name, const glm::mat4& mat) const {
     glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);
+}
+
+bool Shader::getBool(const std::string& name) const
+{
+	int value;
+	glGetUniformiv(ID, glGetUniformLocation(ID, name.c_str()), &value);
+	return value;
+}
+
+int Shader::getInt(const std::string& name) const
+{
+	int value;
+	glGetUniformiv(ID, glGetUniformLocation(ID, name.c_str()), &value);
+	return value;
+}
+
+unsigned int Shader::getUInt(const std::string& name) const
+{
+	GLuint value;
+	GLCall(glGetUniformuiv(ID, glGetUniformLocation(ID, name.c_str()), &value));
+	return value;
+}
+
+float Shader::getFloat(const std::string& name) const
+{
+	float value;
+	glGetUniformfv(ID, glGetUniformLocation(ID, name.c_str()), &value);
+	return value;
+}
+
+glm::vec3 Shader::getVec3(const std::string& name) const
+{
+	glm::vec3 value;
+	glGetUniformfv(ID, glGetUniformLocation(ID, name.c_str()), &value[0]);
+	return value;
+}
+
+glm::vec4 Shader::getVec4(const std::string& name) const
+{
+	glm::vec4 value;
+	glGetUniformfv(ID, glGetUniformLocation(ID, name.c_str()), &value[0]);
+	return value;
+}
+
+glm::mat4 Shader::getMat4(const std::string& name) const
+{
+	glm::mat4 value;
+	glGetUniformfv(ID, glGetUniformLocation(ID, name.c_str()), &value[0][0]);
+	return value;
+}
+
+Shader& Shader::operator=(const Shader& old)
+{
+	init(old.VertexShader, old.fragmentShader);
+	return *this;
+}
+
+Shader::operator bool() const
+{
+	return ID;
 }

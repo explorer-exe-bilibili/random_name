@@ -13,7 +13,9 @@
 		"freetype",
 		"glm",
 		"glew",
-		"glfw3"
+		"glfw3",
+		"stb",
+		"glad"
     ]
     
 }

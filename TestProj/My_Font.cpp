@@ -9,6 +9,7 @@
 
 #include<wchar.h>
 #include <glm/ext/matrix_clip_space.hpp>
+#include<glm/glm.hpp>
 
 #pragma comment(lib, "opengl32.lib")
 #pragma comment(lib, "glu32.lib")

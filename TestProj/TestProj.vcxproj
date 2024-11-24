@@ -132,21 +132,25 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="framework.h" />
-    <ClInclude Include="Gp.h" />
+    <ClInclude Include="Bitmap.h" />
+    <ClInclude Include="EasyGL.h" />
     <ClInclude Include="My_Font.h" />
+    <ClInclude Include="OpenGLBase.h" />
     <ClInclude Include="Resource.h" />
     <ClInclude Include="Shader.h" />
     <ClInclude Include="sth2sth.h" />
-    <ClInclude Include="targetver.h" />
     <ClInclude Include="TestProj.h" />
+    <ClInclude Include="VertexBuffer.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Gp.cpp" />
+    <ClCompile Include="Bitmap.cpp" />
+    <ClCompile Include="EasyGL.cpp" />
     <ClCompile Include="My_Font.cpp" />
+    <ClCompile Include="OpenGLBase.cpp" />
     <ClCompile Include="Shader.cpp" />
     <ClCompile Include="sth2sth.cpp" />
     <ClCompile Include="TestProj.cpp" />
+    <ClCompile Include="VertexBuffer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="TestProj.rc" />
