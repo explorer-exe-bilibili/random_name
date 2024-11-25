@@ -12,7 +12,7 @@ class Bitmap
 	int width = 0, height = 0;
 	int channels = 0;
 	unsigned int texture = 0;
-	unsigned int VBO = 0, VAO = 0, EBO = 0;
+	static unsigned int VBO, VAO, EBO;
 	static std::string vertexShaderSource, fragmentShaderSource;
 	static std::shared_ptr<Shader> shader;
 
@@ -21,6 +21,8 @@ public:
 	~Bitmap();
 	bool LoadFromFile(const std::string& path);
 	void Draw(const glm::vec3& position,float angle=0) const;
+
+	void Draw(const glm::vec3& position, const glm::vec3& end_position, float angle) const;
 
 	static void init();
 

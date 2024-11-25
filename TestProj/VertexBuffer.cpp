@@ -1,99 +1,82 @@
 #include "VertexBuffer.h"
-//#include <GL/glew.h>
 #include <glad/glad.h>
-#include <cstring>
-#include <stdexcept>
 
 VertexBuffer::VertexBuffer()
-	: rendererID(0), size(0),data(nullptr)
+	: rendererID(0), size(0)
 {
-	this->data = nullptr;
+	glGenBuffers(1, &rendererID);
 }
 
 VertexBuffer::VertexBuffer(const void* data, unsigned int size)
-    : size(size)
+	: rendererID(0), size(size)
 {
-    glGenBuffers(1, &rendererID);
-    glBindBuffer(GL_ARRAY_BUFFER, rendererID);
-    glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
-
-    this->data = new char[size];
-    std::memcpy(this->data, data, size);
+	glGenBuffers(1, &rendererID);
+	Bind();
+	glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
 }
 
 VertexBuffer::VertexBuffer(const VertexBuffer& vb)
-    : size(vb.size)
+	: rendererID(0), size(vb.size)
 {
-    glGenBuffers(1, &rendererID);
-    glBindBuffer(GL_ARRAY_BUFFER, rendererID);
-    glBufferData(GL_ARRAY_BUFFER, size, vb.data, GL_STATIC_DRAW);
-
-    this->data = new char[size];
-    std::memcpy(this->data, vb.data, size);
+	glGenBuffers(1, &rendererID);
+	glBindBuffer(GL_COPY_READ_BUFFER, vb.rendererID);
+	glBindBuffer(GL_COPY_WRITE_BUFFER, rendererID);
+	glBufferData(GL_COPY_WRITE_BUFFER, size, nullptr, GL_STATIC_DRAW);
+	glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, size);
 }
 
 VertexBuffer::~VertexBuffer()
 {
-    delete[] data;
-	data = nullptr;
 	glDeleteBuffers(1, &rendererID);
-    size = 0;
-	rendererID = 0;
-}
-
-VertexBuffer& VertexBuffer::operator=(const VertexBuffer& vb)
-{
-	if (this == &vb)
-		return *this;
-	delete[] data;
-	size = vb.size;
-	glGenBuffers(1, &rendererID);
-	glBindBuffer(GL_ARRAY_BUFFER, rendererID);
-	glBufferData(GL_ARRAY_BUFFER, size, vb.data, GL_STATIC_DRAW);
-	this->data = new char[size];
-	std::memcpy(this->data, vb.data, size);
-	return *this;
 }
 
 void VertexBuffer::Bind() const
 {
-    glBindBuffer(GL_ARRAY_BUFFER, rendererID);
-}
-
-void VertexBuffer::enableIndexBuffer(unsigned int index, unsigned int size, unsigned int type, unsigned int stride,
-	unsigned int offset)
-{
-	glEnableVertexAttribArray(index);
-	glVertexAttribPointer(index, size, type, GL_FALSE, stride, (const void*)offset);
-	//glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 2, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, rendererID);
 }
 
 void VertexBuffer::Unbind()
 {
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
+	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
-IndexBuffer::IndexBuffer() :rendererID(0),data(nullptr),count(0){}
+VertexBuffer& VertexBuffer::operator=(const VertexBuffer& vb)
+{
+	if (this != &vb)
+	{
+		// 复制新的缓冲区
+		size = vb.size;
+		glGenBuffers(1, &rendererID);
+		glBindBuffer(GL_COPY_READ_BUFFER, vb.rendererID);
+		glBindBuffer(GL_COPY_WRITE_BUFFER, rendererID);
+		glBufferData(GL_COPY_WRITE_BUFFER, size, nullptr, GL_STATIC_DRAW);
+		glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, size);
+	}
+	return *this;
+}
 
-IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int count)
+IndexBuffer::IndexBuffer()
+	: rendererID(0), count(0)
 {
 	glGenBuffers(1, &rendererID);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rendererID);
+}
+
+IndexBuffer::IndexBuffer(const unsigned int* data, unsigned int count)
+	: rendererID(0), count(count)
+{
+	glGenBuffers(1, &rendererID);
+	Bind();
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * sizeof(unsigned int), data, GL_STATIC_DRAW);
-	this->data = new unsigned int[count];
-	std::memcpy(this->data, data, count * sizeof(unsigned int));
-	this->count = count;
 }
 
 IndexBuffer::IndexBuffer(const IndexBuffer& ib)
+	: rendererID(0), count(ib.count)
 {
 	glGenBuffers(1, &rendererID);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rendererID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, ib.count * sizeof(unsigned int), ib.data, GL_STATIC_DRAW);
-	this->VBs = ib.VBs;
-	this->data = new unsigned int[ib.count];
-	std::memcpy(this->data, ib.data, ib.count * sizeof(unsigned int));
-	this->count = ib.count;
+	glBindBuffer(GL_COPY_READ_BUFFER, ib.rendererID);
+	glBindBuffer(GL_COPY_WRITE_BUFFER, rendererID);
+	glBufferData(GL_COPY_WRITE_BUFFER, count * sizeof(unsigned int), nullptr, GL_STATIC_DRAW);
+	glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, count * sizeof(unsigned int));
 }
 
 IndexBuffer::~IndexBuffer()
@@ -104,59 +87,38 @@ IndexBuffer::~IndexBuffer()
 void IndexBuffer::Bind() const
 {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rendererID);
-
-	try { VBs.at(using_name).Bind(); }
-	catch (std::out_of_range) { VBs.begin()->second.Bind(); }
 }
 
 void IndexBuffer::Unbind()
 {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-	VertexBuffer::Unbind();
-}
-
-void IndexBuffer::BindVertexBuffer(std::string name, VertexBuffer& vb)
-{
-	VBs.insert(std::pair(name, vb));
-}
-
-void IndexBuffer::unBindVertexBuffer(std::string name)
-{
-	VBs.erase(name);
-}
-
-void IndexBuffer::useVertexBuffer(std::string name)
-{
-	using_name = name;
-	VBs[using_name].Bind();
 }
 
 IndexBuffer& IndexBuffer::operator=(const IndexBuffer& ib)
 {
-	if (this == &ib)
-		return *this;
-	delete[] data;
-	glGenBuffers(1, &rendererID);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, rendererID);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, ib.count * sizeof(unsigned int), ib.data, GL_STATIC_DRAW);
-	this->data = new unsigned int[ib.count];
-	std::memcpy(this->data, ib.data, ib.count * sizeof(unsigned int));
-	this->count = ib.count;
-	this->VBs = ib.VBs;
+	if (this != &ib)
+	{
+		glDeleteBuffers(1, &rendererID);
+
+		count = ib.count;
+		glGenBuffers(1, &rendererID);
+		glBindBuffer(GL_COPY_READ_BUFFER, ib.rendererID);
+		glBindBuffer(GL_COPY_WRITE_BUFFER, rendererID);
+		glBufferData(GL_COPY_WRITE_BUFFER, count * sizeof(unsigned int), nullptr, GL_STATIC_DRAW);
+		glCopyBufferSubData(GL_COPY_READ_BUFFER, GL_COPY_WRITE_BUFFER, 0, 0, count * sizeof(unsigned int));
+	}
 	return *this;
 }
 
 VertexArray::VertexArray()
 {
 	glGenVertexArrays(1, &rendererID);
-	glBindVertexArray(rendererID);
 }
 
 VertexArray::VertexArray(const VertexArray& va)
 {
+	// VAO 通常不需要复制，因为其状态保存在 OpenGL 上下文中
 	glGenVertexArrays(1, &rendererID);
-	bindIBs = va.bindIBs;
-	bindVBs = va.bindVBs;
 }
 
 VertexArray::~VertexArray()
@@ -164,42 +126,31 @@ VertexArray::~VertexArray()
 	glDeleteVertexArrays(1, &rendererID);
 }
 
-void VertexArray::AddBuffer(const VertexBuffer& vb, const IndexBuffer& ib) const
-{
-	GLint BindingID;
-	glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &BindingID);
-	glBindVertexArray(rendererID);
-	vb.Bind();
-	ib.Bind();
-	VertexBuffer::enableIndexBuffer(0, 2, GL_FLOAT, 2 * sizeof(float), 0);
-	glBindVertexArray(BindingID);
-}
-
 void VertexArray::Bind() const
 {
 	glBindVertexArray(rendererID);
-	for (auto& vb : bindVBs)
-		vb.Bind();
-	for (auto& ib : bindIBs)
-		ib.Bind();
 }
 
-void VertexArray::unbind()
+void VertexArray::Unbind()
 {
 	glBindVertexArray(0);
-	VertexBuffer::Unbind();
-	IndexBuffer::Unbind();
+}
+
+void VertexArray::AddBuffer(const VertexBuffer& vb, unsigned int index, unsigned int size, unsigned int type, bool normalized, unsigned int stride, const void* pointer)
+{
+	Bind();
+	vb.Bind();
+	glEnableVertexAttribArray(index);
+	glVertexAttribPointer(index, size, type, normalized ? GL_TRUE : GL_FALSE, stride, pointer);
+	Unbind();
 }
 
 VertexArray& VertexArray::operator=(const VertexArray& va)
 {
-	if (this == &va)
-		return *this;
-	glDeleteVertexArrays(1, &rendererID);
-	glGenVertexArrays(1, &rendererID);
-	bindIBs = va.bindIBs;
-	bindVBs = va.bindVBs;
+	if (this != &va)
+	{
+		glDeleteVertexArrays(1, &rendererID);
+		glGenVertexArrays(1, &rendererID);
+	}
 	return *this;
 }
-
-

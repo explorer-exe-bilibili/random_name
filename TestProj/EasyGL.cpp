@@ -1,4 +1,4 @@
-#include "EasyGL.h"
+ï»¿#include "EasyGL.h"
 
 #include <cmath>
 #include <iostream>
@@ -29,7 +29,7 @@ void FpsCounter::newFrame()
 {
 	double currentTime = glfwGetTime();
 	nbFrames++;
-	if (currentTime - lastTime >= 1.0) { // Èç¹û³¬¹ı1Ãë
+	if (currentTime - lastTime >= 1.0) { // å¦‚æœè¶…è¿‡1ç§’
 		FPS = nbFrames;
 		nbFrames = 0;
 		lastTime = currentTime;
@@ -304,7 +304,7 @@ void EasyGL::DrawSector(float x, float y, float radius, float startAngle, float 
 
 //void EasyGL::Draw_text(float x, float y, Font font, const char* text, color RGBA, bool filled)
 //{
-////TODO:ÎÄ±¾»æÖÆ
+////TODO:æ–‡æœ¬ç»˜åˆ¶
 //}
 //
 void EasyGL::DrawBitmap(float x, float y, Bitmap bitmap, float angle)
@@ -314,25 +314,25 @@ void EasyGL::DrawBitmap(float x, float y, Bitmap bitmap, float angle)
 
 void EasyGL::DrawBitmap(float x, float y, float width, float height, Bitmap bitmap, float angle)
 {
-	//TODO:Î»Í¼»æÖÆ2
+	//TODO:ä½å›¾ç»˜åˆ¶2
 }
 
 void EasyGL::DrawVAO(unsigned int vao, unsigned int point_count) const
 {
-	if (!isInit)return;
-	// ±£´æµ±Ç°µÄ×ÅÉ«Æ÷³ÌĞòºÍ VAO
-	int previousVAO;
+	if (!isInit) return;
+
+	// ä¿å­˜å½“å‰ç»‘å®šçš„ VAO
+	GLint previousVAO = 0;
 	glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &previousVAO);
 
-	// °ó¶¨ĞÂµÄ×ÅÉ«Æ÷³ÌĞòºÍ VAO
+	// ç»‘å®šæ–°çš„ VAO
 	GLCall(glBindVertexArray(vao));
 
-	// »æÖÆ²Ù×÷
+	// ç»˜åˆ¶æ“ä½œ
 	GLCall(glDrawElements(GL_TRIANGLES, point_count, GL_UNSIGNED_INT, nullptr));
 
-	// »Ö¸´Ö®Ç°µÄ×ÅÉ«Æ÷³ÌĞòºÍ VAO
+	// æ¢å¤ä¹‹å‰ç»‘å®šçš„ VAO
 	glBindVertexArray(previousVAO);
-
 }
 
 void EasyGL::SetShader(const std::string& name, const Shader& new_shader)

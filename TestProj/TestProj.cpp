@@ -157,28 +157,33 @@ int main()
 	easyGL.SetShader("default", Shader(vertexShader, fragmentShader));
 	easyGL.useShader("default");
 	//// 渲染
-	float position[] = {
-		-0.5f,-0.5f,
-		-0.5f,0.5f,
-		0.5f,-0.5f,
-		0.5f,0.5f,
+	float vertices[] = {
+		// 位置          // 颜色
+		 0.5f,  0.5f,    1.0f, 0.0f, 0.0f,  // 右上
+		 0.5f, -0.5f,    0.0f, 1.0f, 0.0f,  // 右下
+		-0.5f, -0.5f,    0.0f, 0.0f, 1.0f,  // 左下
+		-0.5f,  0.5f,    1.0f, 1.0f, 0.0f   // 左上
 	};
 	unsigned int indices[] = {
 		0,1,2,
 		1,2,3
 	};
 
+	VertexArray va;
+	VertexBuffer vb(vertices, sizeof(vertices));
+	IndexBuffer ib(indices, 6);
 
-	//VertexArray va;
-	//VertexBuffer vb(position, sizeof(float) * 2 * 4);
-	//IndexBuffer ib(indices, 6);
-	//ib.BindVertexBuffer("position", vb);
-	//ib.useVertexBuffer("position");
-	//va.AddBuffer(vb, ib);
-	//va.unbind();
+	va.Bind();
+
+	// 位置属性
+	va.AddBuffer(vb, 0, 2, GL_FLOAT, false, 5 * sizeof(float), (void*)0);
+	// 颜色属性
+	va.AddBuffer(vb, 1, 3, GL_FLOAT, false, 5 * sizeof(float), (void*)(2 * sizeof(float)));
+
+	ib.Bind();
+	Bitmap::init();
 	Bitmap bitmap;
 	bitmap.LoadFromFile("test.jpg");
-	//VertexBuffer::enableIndexBuffer(2, 2, GL_FLOAT, 2 * sizeof(float), 0);
 
 	FpsCounter fpsCounter;
 	
@@ -190,9 +195,12 @@ int main()
 		DispatchMessageW(&msg);
 		EasyGL::clear();
 		//easyGL.GetShader("default").setVec4("u_Color", glm::vec4(r, 0.3, 1-r, 1));
-		//easyGL.DrawVAO(va.getRendererID(),6);
+		// 渲染循环中
+		va.Bind();
+		ib.Bind();
+		glDrawElements(GL_TRIANGLES, ib.getCount(), GL_UNSIGNED_INT, nullptr);
 		easyGL.DrawCircle(0, 0, 0.5, color(0, r, 1, 1), 0);
-		bitmap.Draw(glm::vec3(-0.5, -0.5, 0));
+		bitmap.Draw(glm::vec3(0,0, 0),glm::vec3(1,1,0),45);
 		easyGL.DrawRectangle(0, 0, 0.5, 0.5, color(1, 0, 0, 1), 1);
 		easyGL.flush();
 		fpsCounter.newFrame();
@@ -336,6 +344,256 @@ int main()
 //        glfwSwapBuffers(window);
 //        glfwPollEvents();
 //    }
+//
+//    glfwTerminate();
+//    return 0;
+//}
+
+//// C++
+//#include <glad/glad.h>
+//#include <GLFW/glfw3.h>
+//#include <stb_image.h>
+//#include <iostream>
+//
+//// 引入GLM头文件
+//#include <glm/glm.hpp>
+//#include <glm/gtc/matrix_transform.hpp>
+//#include <glm/gtc/type_ptr.hpp>
+//
+//// 顶点着色器源码
+//const char* vertexShaderSource = R"(
+//#version 330 core
+//layout (location = 0) in vec3 aPos;
+//layout (location = 1) in vec2 aTexCoord;
+//
+//uniform mat4 transform;
+//
+//out vec2 TexCoord;
+//
+//void main()
+//{
+//    gl_Position = transform * vec4(aPos, 1.0);
+//    TexCoord = aTexCoord;
+//}
+//)";
+//
+//// 片段着色器源码
+//const char* fragmentShaderSource = R"(
+//#version 330 core
+//out vec4 FragColor;
+//
+//in vec2 TexCoord;
+//
+//// 纹理采样器
+//uniform sampler2D texture1;
+//
+//void main()
+//{
+//    FragColor = texture(texture1, TexCoord);
+//}
+//)";
+//
+//// 处理键盘输入，调整x和y的位置
+//void processInput(GLFWwindow* window, float& x, float& y, float deltaTime)
+//{
+//    float speed = 0.5f * deltaTime; // 移动速度
+//
+//    if (glfwGetKey(window, GLFW_KEY_UP) == GLFW_PRESS)
+//        y += speed;
+//    if (glfwGetKey(window, GLFW_KEY_DOWN) == GLFW_PRESS)
+//        y -= speed;
+//    if (glfwGetKey(window, GLFW_KEY_LEFT) == GLFW_PRESS)
+//        x -= speed;
+//    if (glfwGetKey(window, GLFW_KEY_RIGHT) == GLFW_PRESS)
+//        x += speed;
+//}
+//
+//int main() {
+//    // 初始化GLFW
+//    if (!glfwInit()) {
+//        std::cerr << "Failed to initialize GLFW" << std::endl;
+//        return -1;
+//    }
+//
+//    // 设置OpenGL版本 (3.3 Core)
+//    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+//    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+//    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+//
+//    // 创建窗口
+//    GLFWwindow* window = glfwCreateWindow(800, 600, "OpenGL Image with FPS and Movement", nullptr, nullptr);
+//    if (!window) {
+//        glfwTerminate();
+//        return -1;
+//    }
+//    glfwMakeContextCurrent(window);
+//
+//    // 初始化GLAD
+//    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+//        return -1;
+//    }
+//
+//    // 设置视口
+//    glViewport(0, 0, 800, 600);
+//    glfwSetFramebufferSizeCallback(window, [](GLFWwindow*, int width, int height) {
+//        glViewport(0, 0, width, height);
+//        });
+//
+//    // 编译顶点着色器
+//    GLuint vertexShader = glCreateShader(GL_VERTEX_SHADER);
+//    glShaderSource(vertexShader, 1, &vertexShaderSource, nullptr);
+//    glCompileShader(vertexShader);
+//    // 检查编译错误
+//    int success;
+//    char infoLog[512];
+//    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+//    if (!success) {
+//        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+//        std::cerr << "顶点着色器编译失败:\n" << infoLog << std::endl;
+//    }
+//
+//    // 编译片段着色器
+//    GLuint fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+//    glShaderSource(fragmentShader, 1, &fragmentShaderSource, nullptr);
+//    glCompileShader(fragmentShader);
+//    // 检查编译错误
+//    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+//    if (!success) {
+//        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+//        std::cerr << "片段着色器编译失败:\n" << infoLog << std::endl;
+//    }
+//
+//    // 链接着色器程序
+//    GLuint shaderProgram = glCreateProgram();
+//    glAttachShader(shaderProgram, vertexShader);
+//    glAttachShader(shaderProgram, fragmentShader);
+//    glLinkProgram(shaderProgram);
+//    // 检查链接错误
+//    glGetProgramiv(shaderProgram, GL_LINK_STATUS, &success);
+//    if (!success) {
+//        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+//        std::cerr << "着色器程序链接失败:\n" << infoLog << std::endl;
+//    }
+//    glDeleteShader(vertexShader);
+//    glDeleteShader(fragmentShader);
+//
+//    // 设置顶点数据和缓冲，并配置顶点属性
+//    float vertices[] = {
+//        // 位置          // 纹理坐标
+//         0.5f,  0.5f, 0.0f, 1.0f, 1.0f, // 右上
+//         0.5f, -0.5f, 0.0f, 1.0f, 0.0f, // 右下
+//        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, // 左下
+//        -0.5f,  0.5f, 0.0f, 0.0f, 1.0f  // 左上
+//    };
+//    unsigned int indices[] = {
+//        0, 1, 3, // 第一三角形
+//        1, 2, 3  // 第二三角形
+//    };
+//    GLuint VBO, VAO, EBO;
+//    glGenVertexArrays(1, &VAO);
+//    glGenBuffers(1, &VBO);
+//    glGenBuffers(1, &EBO);
+//
+//    glBindVertexArray(VAO);
+//
+//    glBindBuffer(GL_ARRAY_BUFFER, VBO);
+//    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+//
+//    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
+//    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+//
+//    // 位置属性
+//    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)0);
+//    glEnableVertexAttribArray(0);
+//    // 纹理坐标属性
+//    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void*)(3 * sizeof(float)));
+//    glEnableVertexAttribArray(1);
+//
+//    // 加载并创建纹理
+//    GLuint texture;
+//    glGenTextures(1, &texture);
+//    glBindTexture(GL_TEXTURE_2D, texture);
+//    // 设置纹理参数
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+//    // 加载图片
+//    int width, height, nrChannels;
+//    stbi_set_flip_vertically_on_load(true); // 翻转图片
+//    unsigned char* data = stbi_load("test.jpg", &width, &height, &nrChannels, 0);
+//    if (data) {
+//        GLenum format = (nrChannels == 4) ? GL_RGBA : GL_RGB;
+//        glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+//        glGenerateMipmap(GL_TEXTURE_2D);
+//    }
+//    else {
+//        std::cerr << "Failed to load texture" << std::endl;
+//    }
+//    stbi_image_free(data);
+//
+//    // 使用着色器程序
+//    glUseProgram(shaderProgram);
+//    glUniform1i(glGetUniformLocation(shaderProgram, "texture1"), 0);
+//
+//    // 获取变换矩阵的位置
+//    GLuint transformLoc = glGetUniformLocation(shaderProgram, "transform");
+//
+//    // 帧率计算变量
+//    double lastTime = glfwGetTime();
+//    int nbFrames = 0;
+//
+//    // 位置变量
+//    float x = 0.0f;
+//    float y = 0.0f;
+//
+//    // 上一帧时间
+//    double previousTime = glfwGetTime();
+//
+//    // 渲染循环
+//    while (!glfwWindowShouldClose(window)) {
+//        // 帧率计算
+//        double currentTime = glfwGetTime();
+//        nbFrames++;
+//        double deltaTime = currentTime - previousTime;
+//        previousTime = currentTime;
+//        if (currentTime - lastTime >= 1.0) { // 如果超过1秒
+//            std::cout << "FPS: " << nbFrames << std::endl;
+//            nbFrames = 0;
+//            lastTime += 1.0;
+//        }
+//
+//        // 处理输入
+//        processInput(window, x, y, static_cast<float>(deltaTime));
+//
+//        // 清空颜色缓冲
+//        glClear(GL_COLOR_BUFFER_BIT);
+//
+//        // 创建平移矩阵
+//        glm::mat4 transform = glm::mat4(1.0f); // 初始化为单位矩阵
+//        transform = glm::translate(transform, glm::vec3(x, y, 0.0f));
+//
+//        // 传递矩阵到着色器
+//        glUniformMatrix4fv(transformLoc, 1, GL_FALSE, glm::value_ptr(transform));
+//
+//        // 绑定纹理
+//        glActiveTexture(GL_TEXTURE0);
+//        glBindTexture(GL_TEXTURE_2D, texture);
+//
+//        // 绘制矩形
+//        glBindVertexArray(VAO);
+//        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+//
+//        // 交换缓冲区和查询IO事件
+//        glfwSwapBuffers(window);
+//        glfwPollEvents();
+//    }
+//
+//    // 释放资源
+//    glDeleteVertexArrays(1, &VAO);
+//    glDeleteBuffers(1, &VBO);
+//    glDeleteBuffers(1, &EBO);
+//    glDeleteProgram(shaderProgram);
 //
 //    glfwTerminate();
 //    return 0;
