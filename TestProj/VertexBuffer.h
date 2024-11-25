@@ -48,7 +48,8 @@ public:
 	void Bind() const;
 	static void Unbind();
 
-	void AddBuffer(const VertexBuffer& vb, unsigned int index, unsigned int size, unsigned int type, bool normalized, unsigned int stride, const void* pointer);
+	// 添加缓冲区并设置属性指针
+	void AddBuffer(const VertexBuffer& vb, unsigned int index, unsigned int size, unsigned int type, bool normalized, unsigned int stride, const void* pointer) const;
 
 	inline unsigned int getRendererID() const { return rendererID; }
 

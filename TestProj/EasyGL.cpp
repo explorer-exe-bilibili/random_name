@@ -1,393 +1,181 @@
 ﻿#include "EasyGL.h"
-
-#include <cmath>
-#include <iostream>
-//#include <GL/glew.h>
 #include <glad/glad.h>
-#include <GL/gl.h>
-#include <GLFW/glfw3.h>
+#include <gl/GL.h>
+#include <iostream>
+#include <glm/gtc/matrix_transform.hpp>
 
 #include "Bitmap.h"
-#include"OpenGLBase.h"
-#include "Shader.h"
+#include "VertexBuffer.h"
 
-color& color::operator=(unsigned int RGBA)
+EasyGL::EasyGL()
 {
-	R = (RGBA & 0xff) / 255.0f;
-	G = ((RGBA >> 8) & 0xff) / 255.0f;
-	B = ((RGBA >> 16) & 0xff) / 255.0f;
-	A = ((RGBA >> 24) & 0xff) / 255.0f;
-	return *this;
-}
-
-color::operator unsigned int() const
-{
-	return (int(A * 255) << 24) + (int(B * 255) << 16) + (int(G * 255) << 8) + int(R * 255);
-}
-
-void FpsCounter::newFrame()
-{
-	double currentTime = glfwGetTime();
-	nbFrames++;
-	if (currentTime - lastTime >= 1.0) { // 如果超过1秒
-		FPS = nbFrames;
-		nbFrames = 0;
-		lastTime = currentTime;
-	}
 }
 
 EasyGL::~EasyGL()
 {
-	CleanupOpenGL();
-	for (auto& i : shaders)
-	{
-		i.second.~Shader();
-	}
+    Cleanup();
 }
 
-bool EasyGL::init(const HWND hwnd)
+bool EasyGL::Init(HWND hwnd)
 {
-	this->hwnd = hwnd;
-	PIXELFORMATDESCRIPTOR pfd = {
-	sizeof(PIXELFORMATDESCRIPTOR),
-	1,
-	PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER,
-	PFD_TYPE_RGBA,
-	32,
-	0,0,0,0,0,0,
-	0,
-	0,
-	0,
-	0,0,0,0,
-	24,
-	8,
-	0,
-	PFD_MAIN_PLANE,
-	0,
-	0,0,0
-	};
-	hDC = GetDC(hwnd);
-	int pixelFormat = ChoosePixelFormat(hDC, &pfd);
-	if (pixelFormat == 0) return false;
+    // 获取设备上下文
+    hDC = GetDC(hwnd);
+    if (!hDC)
+    {
+        std::cerr << "获取设备上下文失败！" << std::endl;
+        return false;
+    }
 
-	if (!SetPixelFormat(hDC, pixelFormat, &pfd)) return false;
+    // 设置像素格式
+    PIXELFORMATDESCRIPTOR pfd = { sizeof(PIXELFORMATDESCRIPTOR) };
+    pfd.nVersion = 1;
+    pfd.dwFlags = PFD_DRAW_TO_WINDOW | PFD_SUPPORT_OPENGL | PFD_DOUBLEBUFFER; // 支持双缓冲
+    pfd.iPixelType = PFD_TYPE_RGBA;
+    pfd.cColorBits = 32;
 
-	hRC = wglCreateContext(hDC);
-	//if (glewInit() != GLEW_OK) {
-	//	std::cerr << "Failed to initialize GLEW." << std::endl;
-	//	return false;
-	//}
-	if (hRC == NULL) return false;
+    int pixelFormat = ChoosePixelFormat(hDC, &pfd);
+    if (!pixelFormat)
+    {
+        std::cerr << "选择像素格式失败！" << std::endl;
+        return false;
+    }
 
-	if (!wglMakeCurrent(hDC, hRC)) return false;
-	initOpenGLAfterWindow();
-	std::string vertexShader = R"(
-	#version 330 core
-	layout(location = 0) in vec4 position;
-	void main()
-	{
-		gl_Position = position;
-	}
-	)";
-	std::string fragmentShader = R"(
-	#version 330 core
-	layout(location = 0) out vec4 color;
-	uniform vec4 u_Color;
-		void main()
-	{
-		color = u_Color;
-	}
-	)";
+    if (!SetPixelFormat(hDC, pixelFormat, &pfd))
+    {
+        std::cerr << "设置像素格式失败！" << std::endl;
+        return false;
+    }
 
-	defaultShader.init(vertexShader, fragmentShader);
-	isInit= true;
-	RECT rect;
-	GetClientRect(hwnd, &rect);
-	WHRatio = double(rect.right-rect.left) / double(rect.bottom-rect.top);
-	return true;
+    // 创建 OpenGL 渲染上下文
+    hRC = wglCreateContext(hDC);
+    if (!hRC)
+    {
+        std::cerr << "创建 OpenGL 渲染上下文失败！" << std::endl;
+        return false;
+    }
+
+    if (!wglMakeCurrent(hDC, hRC))
+    {
+        std::cerr << "激活当前 OpenGL 渲染上下文失败！" << std::endl;
+        return false;
+    }
+
+    // 初始化 GLAD
+    if (!gladLoadGL())
+    {
+        std::cerr << "初始化 GLAD 失败！" << std::endl;
+        return false;
+    }
+
+    // 设置视口
+    RECT rect;
+    GetClientRect(hwnd, &rect);
+    windowWidth = rect.right - rect.left;
+    windowHeight = rect.bottom - rect.top;
+    glViewport(0, 0, windowWidth, windowHeight);
+
+    // 启用 Alpha 混合
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+
+    isInit = true;
+    return true;
 }
 
-void EasyGL::CleanupOpenGL()
+void EasyGL::Cleanup()
 {
-	if (!isInit)return;
-	if (hRC) {
-		wglMakeCurrent(NULL, NULL);
-		wglDeleteContext(hRC);
-		hRC = NULL;
-	}
-	if (hDC) {
-		ReleaseDC(NULL, hDC);
-		hDC = NULL;
-	}
+    if (hRC)
+    {
+        wglMakeCurrent(nullptr, nullptr);
+        wglDeleteContext(hRC);
+        hRC = nullptr;
+    }
+    if (hDC)
+    {
+        ReleaseDC(WindowFromDC(hDC), hDC);
+        hDC = nullptr;
+    }
+    isInit = false;
 }
 
-void EasyGL::ChangeSize()
+void EasyGL::BeginRender() const
 {
-	if (!isInit)return;
-	CleanupOpenGL();
-	init(hwnd);
+    if (!isInit) return;
+
+    // 清除颜色缓冲区
+    glClearColor(clearColor.R, clearColor.G, clearColor.B, clearColor.A);
+    glClear(GL_COLOR_BUFFER_BIT);
+
+    // 设置视口
+    glViewport(0, 0, windowWidth, windowHeight);
 }
 
-void EasyGL::DrawCircle(float x, float y, float radius, color RGBA, bool filled)
+void EasyGL::EndRender() const
 {
-	if (!isInit)return;
-	defaultShader.use();
-	defaultShader.setVec4("u_Color", glm::vec4(RGBA.R, RGBA.G, RGBA.B, RGBA.A));
-	if (filled) {
-		glBegin(GL_POLYGON);
-	}
-	else
-	{
-		glBegin(GL_LINE_LOOP);
-	}
-	for (int i = 0; i < 360; i++)
-	{
-		float angle = i * 3.1415926 / 180;
-		glVertex2f(x + radius * cos(angle), y + radius * sin(angle) *WHRatio);
-	}
-	glEnd();
-	shaders[usingShaderName].use();
+    if (!isInit) return;
+
+    // 交换前后缓冲区
+    SwapBuffers(hDC);
 }
 
-void EasyGL::DrawRectangle(float x, float y, float width, float height, color RGBA, bool filled)
+void EasyGL::Resize(int width, int height)
 {
-	if (!isInit)return;
-	defaultShader.use();
-	defaultShader.setVec4("u_Color", glm::vec4(RGBA.R, RGBA.G, RGBA.B, RGBA.A));
-	if (filled) {
-		glBegin(GL_QUADS);
-	}
-	else
-	{
-		glBegin(GL_LINE_LOOP);
-	}
-	glVertex2f(x, y);
-	glVertex2f(x + width, y);
-	glVertex2f(x + width, y + height);
-	glVertex2f(x, y + height);
-	glEnd();
-	shaders[usingShaderName].use();
+    if (!isInit) return;
+
+    windowWidth = width;
+    windowHeight = height;
+    glViewport(0, 0, windowWidth, windowHeight);
 }
 
-void EasyGL::DrawLine(float x1, float y1, float x2, float y2, color RGBA)
+void EasyGL::DrawBitmap(float x, float y, const Bitmap& bitmap, float angle) const
 {
-	if (!isInit)return;
-	defaultShader.use();
-	defaultShader.setVec4("u_Color", glm::vec4(RGBA.R, RGBA.G, RGBA.B, RGBA.A));
-	glBegin(GL_LINES);
-	glVertex2f(x1, y1);
-	glVertex2f(x2, y2);
-	glEnd();
-	shaders[usingShaderName].use();
+    if (!isInit) return;
+
+    // 默认绘制大小为纹理大小，这里可以根据需要调整
+    float width = 100.0f;
+    float height = 100.0f;
+    DrawBitmap(x, y, width, height, bitmap, angle);
 }
 
-void EasyGL::DrawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, color RGBA, bool filled)
+void EasyGL::DrawBitmap(float x, float y, float width, float height, const Bitmap& bitmap, float angle) const
 {
-	if (!isInit)return;
-	defaultShader.use();
-	defaultShader.setVec4("u_Color", glm::vec4(RGBA.R, RGBA.G, RGBA.B, RGBA.A));
-	if (filled) {
-		glBegin(GL_TRIANGLES);
-	}
-	else
-	{
-		glBegin(GL_LINE_LOOP);
-	}
-	glVertex2f(x1, y1);
-	glVertex2f(x2, y2);
-	glVertex2f(x3, y3);
-	glEnd();
-	shaders[usingShaderName].use();
+    if (!isInit) return;
+
+    // 将屏幕坐标转换为 OpenGL 坐标（NDC）
+    auto screenToNDC = [this](float sx, float sy) {
+        float ndcX = (sx / windowWidth) * 2.0f - 1.0f;
+        float ndcY = 1.0f - (sy / windowHeight) * 2.0f;
+        return glm::vec3(ndcX, ndcY, 0.0f);
+        };
+
+    // 左上角和右下角坐标
+    glm::vec3 topLeft = screenToNDC(x, y);
+    glm::vec3 bottomRight = screenToNDC(x + width, y + height);
+
+    // 绘制位图
+    bitmap.Draw(topLeft, bottomRight, angle);
 }
 
-void EasyGL::DrawPoint(float x, float y, color RGBA, bool filled)
+void EasyGL::DrawVAO(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const
 {
-	if (!isInit)return;
-	defaultShader.use();
-	defaultShader.setVec4("u_Color", glm::vec4(RGBA.R, RGBA.G, RGBA.B, RGBA.A));
-	if (filled) {
-		glBegin(GL_POINTS);
-	}
-	else
-	{
-		glBegin(GL_POINT);
-	}
-	glVertex2f(x, y);
-	glEnd();
-	shaders[usingShaderName].use();
+    if (!isInit) return;
+
+    // 使用指定的着色器
+    shader.use();
+
+    // 绑定 VAO 和 IBO
+    va.Bind();
+    ib.Bind();
+
+    // 绘制操作
+    glDrawElements(GL_TRIANGLES, ib.getCount(), GL_UNSIGNED_INT, nullptr);
+
+    // 解绑 VAO 和 IBO
+    VertexArray::Unbind();
+    IndexBuffer::Unbind();
 }
 
-void EasyGL::DrawEllipse(float x, float y, float a, float b, color RGBA, bool filled)
+void EasyGL::SetClearColor(const color& color)
 {
-	if (!isInit)return;
-	defaultShader.use();
-	defaultShader.setVec4("u_Color", glm::vec4(RGBA.R, RGBA.G, RGBA.B, RGBA.A));
-	if (filled) {
-		glBegin(GL_POLYGON);
-	}
-	else
-	{
-		glBegin(GL_LINE_LOOP);
-	}
-	for (int i = 0; i < 360; i++)
-	{
-		float angle = i * 3.1415926 / 180;
-		glVertex2f(x + a * cos(angle), y + b * sin(angle) * WHRatio);
-	}
-	glEnd();
-	shaders[usingShaderName].use();
-}
-
-void EasyGL::DrawPolygon(float x[], float y[], int n, color RGBA, bool filled)
-{
-	if (!isInit)return;
-	defaultShader.use();
-	defaultShader.setVec4("u_Color", glm::vec4(RGBA.R, RGBA.G, RGBA.B, RGBA.A));
-	if (filled) {
-		glBegin(GL_POLYGON);
-	}
-	else
-	{
-		glBegin(GL_LINE_LOOP);
-	}
-	for (int i = 0; i < n; i++)
-	{
-		glVertex2f(x[i], y[i]);
-	}
-	glEnd();
-	shaders[usingShaderName].use();
-}
-
-void EasyGL::DrawArc(float x, float y, float radius, float startAngle, float endAngle, color RGBA, bool filled)
-{
-	if (!isInit)return;
-	defaultShader.use();
-	defaultShader.setVec4("u_Color", glm::vec4(RGBA.R, RGBA.G, RGBA.B, RGBA.A));
-	if (filled) {
-		glBegin(GL_POLYGON);
-	}
-	else
-	{
-		glBegin(GL_LINE_LOOP);
-	}
-	for (int i = startAngle; i < endAngle; i++)
-	{
-		float angle = i * 3.1415926 / 180;
-		glVertex2f(x + radius * cos(angle), y + radius * sin(angle) * WHRatio);
-	}
-	glEnd();
-	shaders[usingShaderName].use();
-}
-
-void EasyGL::DrawSector(float x, float y, float radius, float startAngle, float endAngle, color RGBA, bool filled)
-{
-	if (!isInit)return;
-	defaultShader.use();
-	defaultShader.setVec4("u_Color", glm::vec4(RGBA.R, RGBA.G, RGBA.B, RGBA.A));
-	if (filled) {
-		glBegin(GL_POLYGON);
-	}
-	else
-	{
-		glBegin(GL_LINE_LOOP);
-	}
-	glVertex2f(x, y);
-	for (int i = startAngle; i < endAngle; i++)
-	{
-		float angle = i * 3.1415926 / 180;
-		glVertex2f(x + radius * cos(angle), y + radius * sin(angle) * WHRatio);
-	}
-	glVertex2f(x, y);
-	glEnd();
-	shaders[usingShaderName].use();
-}
-
-//void EasyGL::Draw_text(float x, float y, Font font, const char* text, color RGBA, bool filled)
-//{
-////TODO:文本绘制
-//}
-//
-void EasyGL::DrawBitmap(float x, float y, Bitmap bitmap, float angle)
-{
-	bitmap.Draw(glm::vec3(x, y, 0), angle);
-}
-
-void EasyGL::DrawBitmap(float x, float y, float width, float height, Bitmap bitmap, float angle)
-{
-	//TODO:位图绘制2
-}
-
-void EasyGL::DrawVAO(unsigned int vao, unsigned int point_count) const
-{
-	if (!isInit) return;
-
-	// 保存当前绑定的 VAO
-	GLint previousVAO = 0;
-	glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &previousVAO);
-
-	// 绑定新的 VAO
-	GLCall(glBindVertexArray(vao));
-
-	// 绘制操作
-	GLCall(glDrawElements(GL_TRIANGLES, point_count, GL_UNSIGNED_INT, nullptr));
-
-	// 恢复之前绑定的 VAO
-	glBindVertexArray(previousVAO);
-}
-
-void EasyGL::SetShader(const std::string& name, const Shader& new_shader)
-{
-	try{
-		shaders[name] = new_shader;
-	}
-	catch (std::exception)
-	{
-		shaders.insert(std::pair<std::string, Shader>(name, new_shader));
-	}
-}
-
-Shader& EasyGL::GetShader(const std::string& name)
-{
-	return shaders[name];
-}
-
-inline Shader& EasyGL::GetUsingShader()
-{
-	return shaders[usingShaderName];
-}
-
-
-void EasyGL::useShader(const std::string& name)
-{
-	usingShaderName = name;
-	shaders[usingShaderName].use();
-}
-
-void EasyGL::clear()
-{
-	glClear(GL_COLOR_BUFFER_BIT);
-}
-
-void EasyGL::flush() const
-{
-	SwapBuffers(hDC);
-}
-
-void EasyGL::initOpenGLBeforeWindow()
-{
-	glfwInit();
-
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-}
-
-void EasyGL::initOpenGLAfterWindow()
-{
-	//if (glewInit() != GLEW_OK) {
-	//	std::cerr << "Failed to initialize GLEW." << std::endl;
-	//}
-	if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-		std::cerr << "Failed to initialize GLAD." << std::endl;
-	}
+    clearColor = color;
 }

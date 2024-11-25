@@ -117,7 +117,6 @@ VertexArray::VertexArray()
 
 VertexArray::VertexArray(const VertexArray& va)
 {
-	// VAO 通常不需要复制，因为其状态保存在 OpenGL 上下文中
 	glGenVertexArrays(1, &rendererID);
 }
 
@@ -136,13 +135,12 @@ void VertexArray::Unbind()
 	glBindVertexArray(0);
 }
 
-void VertexArray::AddBuffer(const VertexBuffer& vb, unsigned int index, unsigned int size, unsigned int type, bool normalized, unsigned int stride, const void* pointer)
+void VertexArray::AddBuffer(const VertexBuffer& vb, unsigned int index, unsigned int size, unsigned int type, bool normalized, unsigned int stride, const void* pointer) const
 {
 	Bind();
 	vb.Bind();
 	glEnableVertexAttribArray(index);
 	glVertexAttribPointer(index, size, type, normalized ? GL_TRUE : GL_FALSE, stride, pointer);
-	Unbind();
 }
 
 VertexArray& VertexArray::operator=(const VertexArray& va)
