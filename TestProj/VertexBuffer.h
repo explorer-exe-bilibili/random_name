@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 
 class VertexBuffer
 {
@@ -12,6 +12,9 @@ public:
 
 	void Bind() const;
 	static void Unbind();
+
+	void BufferData(const void* data, unsigned int size);
+	void BufferSubData(unsigned int offset, unsigned int size, const void* data) const;
 
 	inline unsigned int getRendererID() const { return rendererID; }
 
@@ -48,7 +51,7 @@ public:
 	void Bind() const;
 	static void Unbind();
 
-	// Ìí¼Ó»º³åÇø²¢ÉèÖÃÊôĞÔÖ¸Õë
+	// æ·»åŠ ç¼“å†²åŒºå¹¶è®¾ç½®å±æ€§æŒ‡é’ˆ
 	void AddBuffer(const VertexBuffer& vb, unsigned int index, unsigned int size, unsigned int type, bool normalized, unsigned int stride, const void* pointer) const;
 
 	inline unsigned int getRendererID() const { return rendererID; }

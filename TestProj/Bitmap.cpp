@@ -1,22 +1,22 @@
-#define STB_IMAGE_IMPLEMENTATION
+ï»¿#define STB_IMAGE_IMPLEMENTATION
 #include "Bitmap.h"
 #include <stb_image.h>
 #include <glad/glad.h>
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
-// ¾²Ì¬³ÉÔ±±äÁ¿³õÊ¼»¯
+// é™æ€æˆå‘˜å˜é‡åˆå§‹åŒ–
 std::shared_ptr<Shader> Bitmap::shader = nullptr;
 VertexBuffer* Bitmap::vb = nullptr;
 IndexBuffer* Bitmap::ib = nullptr;
 VertexArray* Bitmap::va = nullptr;
 
 float Bitmap::vertices[20] = {
-    // Î»ÖÃ           // ÎÆÀí×ø±ê
-    -0.5f,  0.5f, 0.0f,   0.0f, 1.0f, // ×óÉÏ
-     0.5f,  0.5f, 0.0f,   1.0f, 1.0f, // ÓÒÉÏ
-     0.5f, -0.5f, 0.0f,   1.0f, 0.0f, // ÓÒÏÂ
-    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f  // ×óÏÂ
+    // ä½ç½®           // çº¹ç†åæ ‡
+    -0.5f,  0.5f, 0.0f,   0.0f, 1.0f, // å·¦ä¸Š
+     0.5f,  0.5f, 0.0f,   1.0f, 1.0f, // å³ä¸Š
+     0.5f, -0.5f, 0.0f,   1.0f, 0.0f, // å³ä¸‹
+    -0.5f, -0.5f, 0.0f,   0.0f, 0.0f  // å·¦ä¸‹
 };
 
 unsigned int Bitmap::indices[6] = {
@@ -57,23 +57,23 @@ void Bitmap::init()
 {
     va = new VertexArray;
 
-    // ³õÊ¼»¯×ÅÉ«Æ÷
+    // åˆå§‹åŒ–ç€è‰²å™¨
     shader = std::make_shared<Shader>(vertexShaderSource, fragmentShaderSource);
 
-    // ´´½¨²¢°ó¶¨ VAO
+    // åˆ›å»ºå¹¶ç»‘å®š VAO
     va->Bind();
 
-    // ´´½¨ VertexBuffer ²¢Ìî³äÊı¾İ
+    // åˆ›å»º VertexBuffer å¹¶å¡«å……æ•°æ®
     vb = new VertexBuffer(vertices, sizeof(vertices));
 
-    // ´´½¨ IndexBuffer ²¢Ìî³äÊı¾İ
+    // åˆ›å»º IndexBuffer å¹¶å¡«å……æ•°æ®
     ib = new IndexBuffer(indices, 6);
 
-    // ÉèÖÃ¶¥µãÊôĞÔ
-    va->AddBuffer(*vb, 0, 3, GL_FLOAT, false, 5 * sizeof(float), (void*)0);                 // Î»ÖÃÊôĞÔ
-    va->AddBuffer(*vb, 1, 2, GL_FLOAT, false, 5 * sizeof(float), (void*)(3 * sizeof(float))); // ÎÆÀí×ø±êÊôĞÔ
+    // è®¾ç½®é¡¶ç‚¹å±æ€§
+    va->AddBuffer(*vb, 0, 3, GL_FLOAT, false, 5 * sizeof(float), (void*)0);                 // ä½ç½®å±æ€§
+    va->AddBuffer(*vb, 1, 2, GL_FLOAT, false, 5 * sizeof(float), (void*)(3 * sizeof(float))); // çº¹ç†åæ ‡å±æ€§
 
-    // ½â°ó VAO
+    // è§£ç»‘ VAO
     VertexArray::Unbind();
 }
 
@@ -92,7 +92,7 @@ bool Bitmap::LoadFromFile(const std::string& path)
     unsigned char* data = stbi_load(path.c_str(), &width, &height, &channels, 0);
     if (!data)
     {
-        std::cerr << "ÎŞ·¨¼ÓÔØÎÆÀíÍ¼Æ¬£º" << path << std::endl;
+        std::cerr << "æ— æ³•åŠ è½½çº¹ç†å›¾ç‰‡ï¼š" << path << std::endl;
         return false;
     }
 
@@ -107,17 +107,17 @@ bool Bitmap::LoadFromFile(const std::string& path)
     glGenTextures(1, &texture);
     glBindTexture(GL_TEXTURE_2D, texture);
 
-    // ÉèÖÃÎÆÀí²ÎÊı
+    // è®¾ç½®çº¹ç†å‚æ•°
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    // ¼ÓÔØÎÆÀíÊı¾İ
+    // åŠ è½½çº¹ç†æ•°æ®
     glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
     glGenerateMipmap(GL_TEXTURE_2D);
 
-    // ÊÍ·ÅÍ¼ÏñÊı¾İ
+    // é‡Šæ”¾å›¾åƒæ•°æ®
     stbi_image_free(data);
     IsLoad = true;
 
@@ -129,33 +129,33 @@ void Bitmap::Draw(const glm::vec3& topLeft, const glm::vec3& bottomRight, float 
     if (!IsLoad)
         return;
 
-    // Ê¹ÓÃ×ÅÉ«Æ÷
+    // ä½¿ç”¨ç€è‰²å™¨
     shader->use();
 
-    // ¼ÆËã³ß´çºÍÖĞĞÄµã
+    // è®¡ç®—å°ºå¯¸å’Œä¸­å¿ƒç‚¹
     glm::vec3 size = bottomRight - topLeft;
     glm::vec3 center = topLeft + size * 0.5f;
 
-    // ´´½¨±ä»»¾ØÕó
+    // åˆ›å»ºå˜æ¢çŸ©é˜µ
     glm::mat4 transform = glm::mat4(1.0f);
     transform = glm::translate(transform, center);
     if (angle != 0.0f)
         transform = glm::rotate(transform, glm::radians(angle), glm::vec3(0, 0, 1));
     transform = glm::scale(transform, glm::vec3(size.x, size.y, 1.0f));
 
-    // ÉèÖÃ±ä»»¾ØÕó
+    // è®¾ç½®å˜æ¢çŸ©é˜µ
     shader->setMat4("transform", transform);
 
-    // °ó¶¨ÎÆÀí
+    // ç»‘å®šçº¹ç†
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, texture);
     shader->setInt("texture1", 0);
 
-    // »æÖÆ
+    // ç»˜åˆ¶
     va->Bind();
     ib->Bind();
     glDrawElements(GL_TRIANGLES, ib->getCount(), GL_UNSIGNED_INT, nullptr);
-    // ½â°ó VAO ºÍ IBO
+    // è§£ç»‘ VAO å’Œ IBO
     VertexArray::Unbind();
     IndexBuffer::Unbind();
 }

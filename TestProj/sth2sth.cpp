@@ -132,7 +132,7 @@ std::wstring sth2sth::str2wstru(const std::string& str)
 	TCHAR* buffer = new TCHAR[(size_t)len + 1];
 	//多字节编码转换成宽字节编码
 	MultiByteToWideChar(CP_UTF8, 0, str.c_str(), static_cast<int>(str.size()), buffer, len);
-	buffer[len] = '\0';             //添加字符串结尾
+	buffer[len] = '\0';//添加字符串结尾
 	//删除缓冲区并返回值
 	result.append(buffer);
 	delete[] buffer;

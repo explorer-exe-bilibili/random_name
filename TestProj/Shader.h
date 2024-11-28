@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <string>
 #include <glm/fwd.hpp>
 #include <glm/vec3.hpp>
@@ -10,7 +10,7 @@ class Shader {
     std::string VertexShader;
 	std::string fragmentShader;
 public:
-    // ¹¹Ôìº¯Êı¶ÁÈ¡²¢±àÒë×ÅÉ«Æ÷
+    // æ„é€ å‡½æ•°è¯»å–å¹¶ç¼–è¯‘ç€è‰²å™¨
     Shader(const std::string& VertexShader, const std::string& fragmentShader);
 	Shader(const Shader&);
     Shader();
@@ -18,10 +18,10 @@ public:
 
 	void init(const std::string& VertexShader, const std::string& fragmentShader);
 
-    // Ê¹ÓÃ³ÌĞò
+    // ä½¿ç”¨ç¨‹åº
     void use() const;
 
-    // ÉèÖÃuniform±äÁ¿
+    // è®¾ç½®uniformå˜é‡
     void setBool(const std::string& name, bool value) const;
     void setInt(const std::string& name, int value) const;
     void setFloat(const std::string& name, float value) const;
@@ -29,7 +29,7 @@ public:
     void setVec4(const std::string& name, const glm::vec4& value) const;
     void setMat4(const std::string& name, const glm::mat4& mat) const;
 
-    //»ñÈ¡uniform±äÁ¿
+    //è·å–uniformå˜é‡
 	bool getBool(const std::string& name) const;
 	int getInt(const std::string& name) const;
 	unsigned int getUInt(const std::string& name) const;
@@ -37,7 +37,7 @@ public:
 	glm::vec3 getVec3(const std::string& name) const;
 	glm::vec4 getVec4(const std::string& name) const;
 	glm::mat4 getMat4(const std::string& name) const;
-	// ÖØÔØ¸³ÖµÔËËã·û
+	// é‡è½½èµ‹å€¼è¿ç®—ç¬¦
 	Shader& operator=(const Shader&);
 	operator bool() const;
 };

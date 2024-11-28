@@ -1,4 +1,4 @@
-#include "Shader.h"
+﻿#include "Shader.h"
 #include <iostream>
 #include <glad/glad.h>
 #include<glm/glm.hpp>
@@ -87,7 +87,7 @@ void Shader::init(const std::string& VertexShader, const std::string& fragmentSh
 
 void Shader::use() const
 {
-    glUseProgram(ID);
+	glUseProgram(ID);
 }
 
 void Shader::setBool(const std::string& name, bool value) const {

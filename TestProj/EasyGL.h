@@ -1,7 +1,8 @@
-#pragma once
+ï»¿#pragma once
 #include <Windows.h>
 #include <map>
 #include <memory>
+#include <mutex>
 #include <string>
 
 #include "Shader.h"
@@ -18,14 +19,17 @@ class color
 {
 public:
 	float R, G, B, A;
-	color(float r, float g, float b, float a) :R(r), G(g), B(b), A(a) {}
-	color() :R(0), G(0), B(0), A(0) {}
+	color(const double r, const double g, const double b, const double a = 1) :R(float(r)), G(float(g)), B(float(b)), A(float(a)) {}
+	color(const int r, const int g, const int b, const int a = 255)
+		:R(float(r) / 255.0f), G(float(g) / 255.0f), B(float(b) / 255.0f), A(float(a) / 255.0f) {
+	}
+	color() : R(0), G(0), B(0), A(0) {}
 	color& operator=(unsigned int RGBA);
 	operator unsigned int() const;
 };
 class FpsCounter
 {
-	// Ö¡ÂÊ¼ÆËã±äÁ¿
+	// å¸§ç‡è®¡ç®—å˜é‡
     double lastTime =0;
 	int nbFrames = 0;
 	std::atomic<int> FPS = 0;
@@ -40,38 +44,104 @@ public:
     EasyGL();
     ~EasyGL();
 
-    // ³õÊ¼»¯ OpenGL ÉÏÏÂÎÄ
+    // åˆå§‹åŒ– OpenGL ä¸Šä¸‹æ–‡
     bool Init(HWND hwnd);
-    // ÇåÀí×ÊÔ´
+    // æ¸…ç†èµ„æº
     void Cleanup();
 
-    // ¿ªÊ¼äÖÈ¾
+    // å¼€å§‹æ¸²æŸ“
     void BeginRender() const;
-    // ½áÊøäÖÈ¾
+    // ç»“æŸæ¸²æŸ“
     void EndRender() const;
-    // µ÷ÕûÊÓ¿Ú´óĞ¡
+    // è°ƒæ•´è§†å£å¤§å°
     void Resize(int width, int height);
 
-    // »æÖÆÎ»Í¼
+    //ç»˜åˆ¶åœ†å½¢
+	void DrawCircle(float x, float y, float radius, color RGBA, bool filled = 1) const;
+	//ç»˜åˆ¶çŸ©å½¢
+	void DrawRectangle(float x, float y, float width, float height, color RGBA, bool filled = 1) const;
+	//ç»˜åˆ¶çº¿æ®µ
+	void DrawLine(float x1, float y1, float x2, float y2, color RGBA) const;
+	//ç»˜åˆ¶ä¸‰è§’å½¢
+	void DrawTriangle(float x1, float y1, float x2, float y2, float x3, float y3, color RGBA, bool filled = 1) const;
+	//ç»˜åˆ¶ç‚¹
+	void DrawPoint(float x, float y, color RGBA) const;
+	//ç»˜åˆ¶æ¤­åœ†
+	void DrawEllipse(float x, float y, float a, float b, color RGBA, bool filled = 1) const;
+	//ç»˜åˆ¶å¤šè¾¹å½¢
+	void DrawPolygon(const float* x, const float* y, int n, color RGBA, bool filled = 1) const;
+	//ç»˜åˆ¶å¼§çº¿
+	void DrawArc(float x, float y, float radius, float startAngle, float endAngle, color RGBA) const;
+	//ç»˜åˆ¶æ‰‡å½¢
+	void DrawSector(float x, float y, float radius, float startAngle, float endAngle, color RGBA, bool filled = 1) const;
+	//ç»˜åˆ¶æ–‡å­—
+	void Draw_text(float x, float y, int size, Font& font, const std::wstring& text, color RGBA) const;
+    // ç»˜åˆ¶ä½å›¾
     void DrawBitmap(float x, float y, const Bitmap& bitmap, float angle = 0.0f) const;
     void DrawBitmap(float x, float y, float width, float height, const Bitmap& bitmap, float angle = 0.0f) const;
 
-    // »æÖÆ VAO
+    // ç»˜åˆ¶ VAO
     void DrawVAO(const VertexArray& va, const IndexBuffer& ib, const Shader& shader) const;
 
-    // ÉèÖÃÇå³ıÑÕÉ«
+	void DrawString(const std::string& str, Font& font, int x, int y, int size, color RGBA) const;
+	void DrawString(const std::wstring& str, Font& font, int x, int y, int size, color RGBA)const;
+	void DrawStringBetween(const std::wstring& str, Font& font, int x, int y, int xend, int yend, int size, color RGBA) const;
+	void DrawStringBetween(const std::string& str, Font& font, int x, int y, int xend, int yend, int size, color RGBA) const;
+	void DrawVerticalString(const std::wstring& str, Font& font, int x, int y, int size, color RGBA) const;
+	void DrawVerticalString(const std::string& str, Font& font, int x, int y, int size, color RGBA) const;
+	void DrawVerticalStringBetween(const std::wstring& str, Font& font, int x, int y, int xend, int yend, int size, color RGBA) const;
+	void DrawVerticalStringBetween(const std::string& str, Font& font, int x, int y, int xend, int yend, int size, color RGBA) const;
+
+    // è®¾ç½®æ¸…é™¤é¢œè‰²
     void SetClearColor(const color& color);
 
-    // ÊÇ·ñ³õÊ¼»¯³É¹¦
+    // æ˜¯å¦åˆå§‹åŒ–æˆåŠŸ
     bool IsInitialized() const { return isInit; }
 
+
+	void SetShader(const std::string& name, const Shader& new_shader);
+	Shader& GetShader(const std::string& name);
+	Shader& GetUsingShader();
+	void useShader(const std::string& name);
+
 private:
-    HDC hDC = nullptr;       // Éè±¸ÉÏÏÂÎÄ
-    HGLRC hRC = nullptr;     // äÖÈ¾ÉÏÏÂÎÄ
-    bool isInit = false;     // ÊÇ·ñ³õÊ¼»¯³É¹¦
+    HDC hDC = nullptr;       // è®¾å¤‡ä¸Šä¸‹æ–‡
+    HGLRC hRC = nullptr;     // æ¸²æŸ“ä¸Šä¸‹æ–‡
+    bool isInit = false;     // æ˜¯å¦åˆå§‹åŒ–æˆåŠŸ
 
-    int windowWidth = 800;   // ´°¿Ú¿í¶È
-    int windowHeight = 600;  // ´°¿Ú¸ß¶È
+    int windowWidth = 800;   // çª—å£å®½åº¦
+    int windowHeight = 600;  // çª—å£é«˜åº¦
 
-    color clearColor = { 0.1f, 0.1f, 0.1f, 1.0f }; // Çå³ıÑÕÉ«
+    color clearColor = { 0.1f, 0.1f, 0.1f, 1.0f }; // æ¸…é™¤é¢œè‰²
+
+	std::map<std::string, Shader> shaders; // ç€è‰²å™¨
+	std::string usingShaderName = "default"; // å½“å‰ä½¿ç”¨çš„ç€è‰²å™¨åç§°
+	double WHRatio = 0; // çª—å£å®½é«˜æ¯”
+	static Shader defaultShader; // é»˜è®¤ç€è‰²å™¨
+	FpsCounter fpsCounter; // å¸§ç‡è®¡æ•°å™¨
+
+	glm::vec2 ScreenToNDC(float x, float y) const;
+	void InitDefaultShader();
+
 };
+
+inline void EasyGL::SetShader(const std::string& name, const Shader& new_shader)
+{
+	shaders[name] = new_shader;
+}
+
+inline Shader& EasyGL::GetShader(const std::string& name)
+{
+	return shaders[name];
+}
+
+inline Shader& EasyGL::GetUsingShader()
+{
+	return shaders[usingShaderName];
+}
+
+inline void EasyGL::useShader(const std::string& name)
+{
+	usingShaderName = name;
+	shaders[usingShaderName].use();
+}

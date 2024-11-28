@@ -60,6 +60,7 @@
     "*.rh": "cpp",
     "ios": "cpp",
     "chrono": "cpp",
-    "valarray": "cpp"
+    "valarray": "cpp",
+    "stack": "cpp"
   }
 }

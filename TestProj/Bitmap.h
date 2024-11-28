@@ -1,8 +1,9 @@
-#pragma once
+ï»¿#pragma once
 
 #include <string>
 #include <memory>
 #include <glm/glm.hpp>
+
 #include "Shader.h"
 #include "VertexBuffer.h"
 
@@ -12,7 +13,7 @@ class Bitmap
     unsigned int texture = 0;
     static std::shared_ptr<Shader> shader;
 
-    // Ê¹ÓÃ×Ô¶¨ÒåµÄ»º³åÇøÀà
+    // ä½¿ç”¨è‡ªå®šä¹‰çš„ç¼“å†²åŒºç±»
     static VertexBuffer* vb;
     static IndexBuffer* ib;
     static VertexArray* va;
@@ -20,19 +21,19 @@ class Bitmap
 public:
     Bitmap() = default;
     ~Bitmap();
-    // ¼ÓÔØÍ¼Æ¬
+    // åŠ è½½å›¾ç‰‡
     bool LoadFromFile(const std::string& path);
-    // »æÖÆÍ¼Æ¬£¬Ö¸¶¨×óÉÏ½ÇºÍÓÒÏÂ½Ç×ø±ê
+    // ç»˜åˆ¶å›¾ç‰‡ï¼ŒæŒ‡å®šå·¦ä¸Šè§’å’Œå³ä¸‹è§’åæ ‡
     void Draw(const glm::vec3& topLeft, const glm::vec3& bottomRight, float angle = 0.0f) const;
-    // ³õÊ¼»¯×ÅÉ«Æ÷ºÍ»º³å¶ÔÏó
+    // åˆå§‹åŒ–ç€è‰²å™¨å’Œç¼“å†²å¯¹è±¡
     static void init();
 
 private:
-    // ¶¥µãÊı¾İºÍË÷ÒıÊı¾İ
+    // é¡¶ç‚¹æ•°æ®å’Œç´¢å¼•æ•°æ®
     static float vertices[20];
     static unsigned int indices[6];
 
-    // ×ÅÉ«Æ÷Ô´Âë
+    // ç€è‰²å™¨æºç 
     static const char* vertexShaderSource;
     static const char* fragmentShaderSource;
 };

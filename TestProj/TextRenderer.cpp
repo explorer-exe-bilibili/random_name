@@ -1,17 +1,17 @@
-#include "TextRenderer.h"
+ï»¿#include "TextRenderer.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <iostream>
 
 TextRenderer::TextRenderer(unsigned int width, unsigned int height)
 {
-    // ³õÊ¼»¯²¢±àÒë×ÅÉ«Æ÷
+    // åˆå§‹åŒ–å¹¶ç¼–è¯‘ç€è‰²å™¨
     TextShader = Shader("text.vs", "text.fs");
     TextShader.use();
     glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(width),
         0.0f, static_cast<float>(height));
     TextShader.setMat4("projection", projection);
 
-    // ÅäÖÃ VAO/VBO for texture quads
+    // é…ç½® VAO/VBO for texture quads
     glGenVertexArrays(1, &VAO);
     glGenBuffers(1, &VBO);
     glBindVertexArray(VAO);
@@ -25,7 +25,7 @@ TextRenderer::TextRenderer(unsigned int width, unsigned int height)
 
 void TextRenderer::Load(const std::string& font, unsigned int fontSize)
 {
-    // ³õÊ¼»¯ FreeType
+    // åˆå§‹åŒ– FreeType
     FT_Library ft;
     if (FT_Init_FreeType(&ft)) {
         std::cerr << "ERROR::FREETYPE: Could not init FreeType Library" << std::endl;
@@ -41,19 +41,19 @@ void TextRenderer::Load(const std::string& font, unsigned int fontSize)
 
     FT_Set_Pixel_Sizes(face, 0, fontSize);
 
-    // ½ûÓÃ×Ö½Ú¶ÔÆë
+    // ç¦ç”¨å­—èŠ‚å¯¹é½
     glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 
-    // ¼ÓÔØ ASCII ×Ö·û
+    // åŠ è½½ ASCII å­—ç¬¦
     for (unsigned char c = 0; c < 128; c++)
     {
-        // ¼ÓÔØ×Ö·û
+        // åŠ è½½å­—ç¬¦
         if (FT_Load_Char(face, c, FT_LOAD_RENDER))
         {
             std::cerr << "ERROR::FREETYTPE: Failed to load Glyph " << c << std::endl;
             continue;
         }
-        // Éú³ÉÎÆÀí
+        // ç”Ÿæˆçº¹ç†
         GLuint texture;
         glGenTextures(1, &texture);
         glBindTexture(GL_TEXTURE_2D, texture);
@@ -68,12 +68,12 @@ void TextRenderer::Load(const std::string& font, unsigned int fontSize)
             GL_UNSIGNED_BYTE,
             face->glyph->bitmap.buffer
         );
-        // ÉèÖÃÎÆÀíÑ¡Ïî
+        // è®¾ç½®çº¹ç†é€‰é¡¹
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
         glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-        // ´æ´¢×Ö·ûĞÅÏ¢
+        // å­˜å‚¨å­—ç¬¦ä¿¡æ¯
         Character character = {
             texture,
             glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
@@ -88,13 +88,13 @@ void TextRenderer::Load(const std::string& font, unsigned int fontSize)
 
 void TextRenderer::RenderText(const std::string& text, float x, float y, float scale, glm::vec3 color)
 {
-    // ¼¤»î¶ÔÓ¦µÄäÖÈ¾×´Ì¬	
+    // æ¿€æ´»å¯¹åº”çš„æ¸²æŸ“çŠ¶æ€	
     TextShader.use();
     TextShader.setVec3("textColor", color);
     glActiveTexture(GL_TEXTURE0);
     glBindVertexArray(VAO);
 
-    // ±éÀúÃ¿¸ö×Ö·û
+    // éå†æ¯ä¸ªå­—ç¬¦
     std::string::const_iterator c;
     for (c = text.begin(); c != text.end(); c++)
     {
@@ -105,7 +105,7 @@ void TextRenderer::RenderText(const std::string& text, float x, float y, float s
 
         float w = ch.Size.x * scale;
         float h = ch.Size.y * scale;
-        // ¸üĞÂ VBO for each character
+        // æ›´æ–° VBO for each character
         float vertices[6][4] = {
             { xpos,     ypos + h,   0.0f, 0.0f },
             { xpos,     ypos,       0.0f, 1.0f },
@@ -115,16 +115,16 @@ void TextRenderer::RenderText(const std::string& text, float x, float y, float s
             { xpos + w, ypos,       1.0f, 1.0f },
             { xpos + w, ypos + h,   1.0f, 0.0f }
         };
-        // äÖÈ¾ glyph texture over quad
+        // æ¸²æŸ“ glyph texture over quad
         glBindTexture(GL_TEXTURE_2D, ch.TextureID);
-        // ¸üĞÂÄÚÈİ¶¯Ì¬ VBO
+        // æ›´æ–°å†…å®¹åŠ¨æ€ VBO
         glBindBuffer(GL_ARRAY_BUFFER, VBO);
         glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertices), vertices);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-        // äÖÈ¾ quad
+        // æ¸²æŸ“ quad
         glDrawArrays(GL_TRIANGLES, 0, 6);
-        // ÏÖÔÚ advance cursors for next glyph 
-        x += (ch.Advance >> 6) * scale; // Î»ÒÆÒÔÏñËØÎªµ¥Î»
+        // ç°åœ¨ advance cursors for next glyph 
+        x += (ch.Advance >> 6) * scale; // ä½ç§»ä»¥åƒç´ ä¸ºå•ä½
     }
     glBindVertexArray(0);
     glBindTexture(GL_TEXTURE_2D, 0);

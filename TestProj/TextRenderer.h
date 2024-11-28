@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <map>
 #include <string>
 #include <ft2build.h>
@@ -8,10 +8,10 @@
 #include "Shader.h"
 
 struct Character {
-    GLuint TextureID;   // ×Ö·ûÎÆÀíID
-    glm::ivec2 Size;    // ×Ö·û³ß´ç
-    glm::ivec2 Bearing; // ×Ö·û»ùÏßÆ«ÒÆ
-    GLuint Advance;     // ×Ö·ûË®Æ½Ç°½øÁ¿
+    GLuint TextureID;   // å­—ç¬¦çº¹ç†ID
+    glm::ivec2 Size;    // å­—ç¬¦å°ºå¯¸
+    glm::ivec2 Bearing; // å­—ç¬¦åŸºçº¿åç§»
+    GLuint Advance;     // å­—ç¬¦æ°´å¹³å‰è¿›é‡
 };
 
 class TextRenderer

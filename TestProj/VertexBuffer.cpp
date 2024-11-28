@@ -1,4 +1,4 @@
-#include "VertexBuffer.h"
+ï»¿#include "VertexBuffer.h"
 #include <glad/glad.h>
 
 VertexBuffer::VertexBuffer()
@@ -40,11 +40,24 @@ void VertexBuffer::Unbind()
 	glBindBuffer(GL_ARRAY_BUFFER, 0);
 }
 
+void VertexBuffer::BufferData(const void* data, unsigned int size)
+{
+	this->size = size;
+	Bind();
+	glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+}
+
+void VertexBuffer::BufferSubData(unsigned int offset, unsigned int size, const void* data) const
+{
+	Bind();
+	glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+}
+
 VertexBuffer& VertexBuffer::operator=(const VertexBuffer& vb)
 {
 	if (this != &vb)
 	{
-		// ¸´ÖÆĞÂµÄ»º³åÇø
+		// å¤åˆ¶æ–°çš„ç¼“å†²åŒº
 		size = vb.size;
 		glGenBuffers(1, &rendererID);
 		glBindBuffer(GL_COPY_READ_BUFFER, vb.rendererID);
