@@ -24,12 +24,13 @@ public:
     Font(const std::string& fontPath, bool needPreLoad = true);
     ~Font();
 
-    void RenderText(const ::std::wstring& text, float x, float y, float scale, const glm::vec3& color);
+    void RenderText(const std::wstring& text, float x, float y, float scale, const glm::vec3& color);
+
+    void RendChar(wchar_t text, float x, float y, float scale, const glm::vec3& color);
 
     float GetFontSize() const;
-    float CalculateTextWidth(const std::wstring& text, float scale) const;
-    void RenderTextWrapped(const std::wstring& text, float x, float y, float scale, 
-        const glm::vec3& color, float maxWidth, float maxHeight);
+
+    void resize(int WindowWidth, int WindowHeight);
 
     bool operator==(const Font&) const;
 private:
@@ -42,6 +43,6 @@ private:
     VertexArray VAO;
     VertexBuffer VBO;
     static Shader shader;
-
+	int width, height;
     // 如果需要的话，添加其他成员变量
 };

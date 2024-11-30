@@ -61,6 +61,7 @@
     "ios": "cpp",
     "chrono": "cpp",
     "valarray": "cpp",
-    "stack": "cpp"
+    "stack": "cpp",
+    "xstring": "cpp"
   }
 }

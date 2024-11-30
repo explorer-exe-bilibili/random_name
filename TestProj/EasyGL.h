@@ -75,7 +75,7 @@ public:
 	//绘制扇形
 	void DrawSector(float x, float y, float radius, float startAngle, float endAngle, color RGBA, bool filled = 1) const;
 	//绘制文字
-	void Draw_text(float x, float y, int size, Font& font, const std::wstring& text, color RGBA) const;
+	void Draw_textRAW(float x, float y, int size, Font& font, const std::wstring& text, color RGBA) const;
     // 绘制位图
     void DrawBitmap(float x, float y, const Bitmap& bitmap, float angle = 0.0f) const;
     void DrawBitmap(float x, float y, float width, float height, const Bitmap& bitmap, float angle = 0.0f) const;

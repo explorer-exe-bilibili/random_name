@@ -19,6 +19,9 @@ Font* font;
 // 窗口过程函数
 LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
+
+	static int height=0;
+	static int width=0;
 	switch (uMsg)
 	{
 	case WM_CREATE:
@@ -105,23 +108,28 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		BeginPaint(hwnd, &ps);
 
 		easyGL.BeginRender();
-		easyGL.DrawVAO(*va, *ib, shader); // 绘制 VAO
-		easyGL.DrawBitmap(300, 300, 200, 200, bitmap); // 绘制位图
-		easyGL.DrawCircle(100, 200, 300, color(1.0f, 0.5f, 0.4f, 1.0f),false); // 绘制圆形
-		easyGL.DrawLine(10, 100, 20, 200, color(1, 0, 1)); // 绘制线段
-		easyGL.Draw_text(0, 0, 10, *font, L"珅", color(200, 200, 200));
-		easyGL.DrawString("hello world啊？", *font, 200, 200, 50, color(123, 245, 235));
-		easyGL.DrawVerticalStringBetween("hello啊？", *font, 0, 100, 700, 400, 50, color(123, 245, 235));
-		easyGL.DrawStringBetween("hello啊？", *font, 500, 400, 10000, 1000, 50, color(123, 245, 235));
+		easyGL.DrawLine(200, 200, 1000, 200, color(1, 0, 1)); // 绘制线段
+		easyGL.DrawLine(200, 250, 1000, 250, color(1, 0, 1)); // 绘制线段
+		easyGL.DrawRectangle(200, 200, 500, 500, color(1.0, 0.0, 0.0), 0);
+		easyGL.DrawString("hello啊？", *font, 200, 200, 50, color(123, 245, 235));
+		easyGL.DrawVerticalString("hello啊？", *font, 200, 200, 50, color(123, 245, 235));
 		easyGL.EndRender();
 
 		EndPaint(hwnd, &ps);
+		InvalidateRect(hwnd, NULL, FALSE);
 		return 0;
 	}
 
-	case WM_SIZE:
+	case WM_SIZE: {
 		// 处理窗口大小调整
-		easyGL.Resize(LOWORD(lParam), HIWORD(lParam));
+		RECT rect;
+		GetClientRect(hwnd, &rect);
+
+		height = rect.bottom - rect.top;
+		width = rect.right - rect.left;
+		easyGL.Resize(width, height);
+		font->resize(width, height);
+	}
 		return 0;
 
 	case WM_DESTROY:

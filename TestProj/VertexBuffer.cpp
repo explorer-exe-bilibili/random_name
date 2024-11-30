@@ -1,6 +1,8 @@
 ﻿#include "VertexBuffer.h"
 #include <glad/glad.h>
 
+#include "OpenGLBase.h"
+
 VertexBuffer::VertexBuffer()
 	: rendererID(0), size(0)
 {
@@ -32,7 +34,7 @@ VertexBuffer::~VertexBuffer()
 
 void VertexBuffer::Bind() const
 {
-	glBindBuffer(GL_ARRAY_BUFFER, rendererID);
+	GLCall(glBindBuffer(GL_ARRAY_BUFFER, rendererID));
 }
 
 void VertexBuffer::Unbind()
@@ -140,7 +142,7 @@ VertexArray::~VertexArray()
 
 void VertexArray::Bind() const
 {
-	glBindVertexArray(rendererID);
+	GLCall(glBindVertexArray(rendererID));
 }
 
 void VertexArray::Unbind()
@@ -152,8 +154,8 @@ void VertexArray::AddBuffer(const VertexBuffer& vb, unsigned int index, unsigned
 {
 	Bind();
 	vb.Bind();
-	glEnableVertexAttribArray(index);
-	glVertexAttribPointer(index, size, type, normalized ? GL_TRUE : GL_FALSE, stride, pointer);
+	GLCall(glEnableVertexAttribArray(index));
+	GLCall(glVertexAttribPointer(index, size, type, normalized ? GL_TRUE : GL_FALSE, stride, pointer));
 }
 
 VertexArray& VertexArray::operator=(const VertexArray& va)

@@ -129,7 +129,7 @@ void Font::RenderText(const std::wstring& text, float x, float y, float scale, c
 		}
 	}
 	// 设置正交投影矩阵
-	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(800), 0.0f, static_cast<float>(600));
+	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
 	std::cout << "paint test try"<<std::endl;
 	// 设置字体着色器中的投影矩阵
 	shader.use();
@@ -175,6 +175,60 @@ void Font::RenderText(const std::wstring& text, float x, float y, float scale, c
 		// 移动到下一个字符位置
 		x += (ch.Advance >> 6) * scale; // 位移单位是1/64像素，所以位移6位
 	}
+
+	VertexArray::Unbind();
+	glBindTexture(GL_TEXTURE_2D, 0);
+	glDisable(GL_BLEND);
+}
+
+void Font::RendChar(wchar_t text, float x, float y, float scale, const glm::vec3& color) {
+	//检查是否包含未加载的字符
+	if (!Characters.contains(text))
+	{
+		LoadCharacter(text);
+	}
+	// 设置正交投影矩阵
+	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(width), 0.0f, static_cast<float>(height));
+	std::cout << "paint test try" << std::endl;
+	// 设置字体着色器中的投影矩阵
+	shader.use();
+	shader.setMat4("projection", projection);
+	shader.setVec3("textColor", color);
+	// 启用混合以处理文本的透明度
+	GLCall(glEnable(GL_BLEND));
+	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+	GLCall(glActiveTexture(GL_TEXTURE0));
+	VAO.Bind();
+	// 遍历文本中的字符
+	Character ch = Characters[text];
+
+	float xpos = x + ch.Bearing.x * scale;
+	float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
+
+	float w = ch.Size.x * scale;
+	float h = ch.Size.y * scale;
+
+	// 更新 VBO
+	float vertices[6][4] = {
+		{ xpos,     ypos + h,   0.0f, 0.0f },
+		{ xpos,     ypos,       0.0f, 1.0f },
+		{ xpos + w, ypos,       1.0f, 1.0f },
+
+		{ xpos,     ypos + h,   0.0f, 0.0f },
+		{ xpos + w, ypos,       1.0f, 1.0f },
+		{ xpos + w, ypos + h,   1.0f, 0.0f }
+	};
+
+	// 绑定纹理
+	GLCall(glBindTexture(GL_TEXTURE_2D, ch.TextureID));
+
+	// 更新顶点缓冲
+	VBO.Bind();
+	VBO.BufferSubData(0, sizeof(vertices), vertices);
+	VertexBuffer::Unbind();
+
+	// 绘制
+	GLCall(glDrawArrays(GL_TRIANGLES, 0, 6));
 
 	VertexArray::Unbind();
 	glBindTexture(GL_TEXTURE_2D, 0);
@@ -247,97 +301,10 @@ float Font::GetFontSize() const
 	return fontSize;
 }
 
-float Font::CalculateTextWidth(const std::wstring& text, float scale) const
+void Font::resize(int WindowWidth,int WindowHeight)
 {
-	float width = 0.0f;
-	for (const wchar_t& c : text)
-	{
-		auto it = Characters.find(c);
-		if (it != Characters.end())
-		{
-			Character ch = it->second;
-			width += (ch.Advance >> 6) * scale;
-		}
-	}
-	return width;
-}
-
-void Font::RenderTextWrapped(const std::wstring& text, float x, float y, float scale,
-	const glm::vec3& color,float maxWidth, float maxHeight)
-{
-	//检查是否包含未加载的字符
-	for (auto c = text.begin(); c != text.end(); ++c) {
-		if (!Characters.contains(*c))
-		{
-			LoadCharacter(*c);
-		}
-	}
-	// 实现文本换行和截断逻辑
-	float originalX = x;
-	float lineHeight = fontSize * scale;
-	float usedHeight = 0.0f;
-	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(800), 0.0f, static_cast<float>(600));
-	std::cout << "paint test try" << std::endl;
-	// 设置字体着色器中的投影矩阵
-	shader.use();
-	shader.setMat4("projection", projection);
-	shader.setVec3("textColor", color);
-	// 启用混合以处理文本的透明度
-	GLCall(glEnable(GL_BLEND));
-	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-	GLCall(glActiveTexture(GL_TEXTURE0));
-	VAO.Bind();
-	for (auto c = text.begin(); c != text.end(); ++c)
-	{
-		Character ch = Characters[*c];
-
-		float xpos = x + ch.Bearing.x * scale;
-		float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
-
-		float w = ch.Size.x * scale;
-		float h = ch.Size.y * scale;
-		// 换行处理
-		if (xpos + w - originalX > maxWidth)
-		{
-			x = originalX;
-			y -= lineHeight;
-			usedHeight += lineHeight;
-			if (usedHeight + lineHeight > maxHeight)
-			{
-				break; // 超出最大高度，停止绘制
-			}
-			xpos = x + ch.Bearing.x * scale;
-			ypos = y + (fontSize - ch.Bearing.y) * scale;
-		}
-
-		// 更新 VBO
-		float vertices[6][4] = {
-			{ xpos,     ypos + h,   0.0f, 0.0f },
-			{ xpos,     ypos,       0.0f, 1.0f },
-			{ xpos + w, ypos,       1.0f, 1.0f },
-
-			{ xpos,     ypos + h,   0.0f, 0.0f },
-			{ xpos + w, ypos,       1.0f, 1.0f },
-			{ xpos + w, ypos + h,   1.0f, 0.0f }
-		};
-
-		// 绑定纹理
-		GLCall(glBindTexture(GL_TEXTURE_2D, ch.TextureID));
-
-		// 更新顶点缓冲
-		VBO.Bind();
-		VBO.BufferSubData(0, sizeof(vertices), vertices);
-		VertexBuffer::Unbind();
-
-		// 绘制
-		GLCall(glDrawArrays(GL_TRIANGLES, 0, 6));
-		VertexBuffer::Unbind();
-
-		// 更新 x 位置
-		x += (ch.Advance >> 6) * scale;
-	}
-	VertexArray::Unbind();
-    glBindTexture(GL_TEXTURE_2D, 0);
+	width = WindowWidth;
+	height = WindowHeight;
 }
 
 Character Font::GetCharacter(wchar_t c)

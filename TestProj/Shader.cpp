@@ -87,7 +87,7 @@ void Shader::init(const std::string& VertexShader, const std::string& fragmentSh
 
 void Shader::use() const
 {
-	glUseProgram(ID);
+	GLCall(glUseProgram(ID));
 }
 
 void Shader::setBool(const std::string& name, bool value) const {

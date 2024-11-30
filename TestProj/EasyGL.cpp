@@ -2,6 +2,7 @@
 
 #include <glad/glad.h>
 #include <gl/GL.h>
+#include <algorithm>
 #include <iostream>
 #include <vector>
 #include <glm/gtc/matrix_transform.hpp>
@@ -202,7 +203,7 @@ void EasyGL::DrawLine(const float x1, const float y1, const float x2, const floa
 	VertexArray::Unbind();
 }
 
-void EasyGL::DrawRectangle(const float x, const float y, const float width, const float height, const color RGBA, const bool filled) const
+void EasyGL::DrawRectangle(float x, float y, float width, float height, color RGBA, bool filled)const
 {
 	if (!isInit) return;
 
@@ -210,20 +211,16 @@ void EasyGL::DrawRectangle(const float x, const float y, const float width, cons
 	glm::vec2 p2 = ScreenToNDC(x + width, y + height);
 
 	float vertices[] = {
-		p1.x, p1.y,
-		p2.x, p1.y,
-		p2.x, p2.y,
-		p1.x, p2.y
+		p1.x, p1.y,  // 左下角
+		p2.x, p1.y,  // 右下角
+		p2.x, p2.y,  // 右上角
+		p1.x, p2.y   // 左上角
 	};
 
-	unsigned int indices[] = { 0, 1, 2, 2, 3, 0 };
-
-	// 创建 VAO、VBO、IBO
+	// 创建 VAO 和 VBO
 	VertexArray va;
 	VertexBuffer vb(vertices, sizeof(vertices));
-	IndexBuffer ib(indices, 6);
-
-	va.AddBuffer(vb, 0, 2, GL_FLOAT, false, 2 * sizeof(float), nullptr);
+	va.AddBuffer(vb, 0, 2, GL_FLOAT, false, 2 * sizeof(float), (void*)0);
 
 	// 使用默认着色器
 	defaultShader.use();
@@ -233,11 +230,15 @@ void EasyGL::DrawRectangle(const float x, const float y, const float width, cons
 	va.Bind();
 	if (filled)
 	{
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, nullptr);
+		// 使用索引绘制填充矩形
+		unsigned int indices[] = { 0, 1, 2, 2, 3, 0 };
+		IndexBuffer ib(indices, 6);
+		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
 	}
 	else
 	{
-		glDrawElements(GL_LINE_LOOP, 4, GL_UNSIGNED_INT, nullptr);
+		// 使用 glDrawArrays 绘制未填充矩形
+		glDrawArrays(GL_LINE_LOOP, 0, 4);
 	}
 	VertexArray::Unbind();
 }
@@ -515,7 +516,7 @@ void EasyGL::DrawSector(const float x, const float y, const float radius, const 
 	VertexArray::Unbind();
 }
 
-void EasyGL::Draw_text(const float x, const float y, const int size, Font& font, const std::wstring& text, const color RGBA) const
+void EasyGL::Draw_textRAW(const float x, const float y, const int size, Font& font, const std::wstring& text, const color RGBA) const
 {
 	if (!isInit) return;
 	float scale = size / font.GetFontSize();
@@ -529,7 +530,7 @@ void EasyGL::DrawString(const std::string& str, Font& font, const int x, const i
 	float scale = float(size) / font.GetFontSize();
 	auto wstr = sth2sth::str2wstr(str);
 	// 渲染文本
-	font.RenderText(wstr, static_cast<float>(x), static_cast<float>(y), scale, glm::vec3(RGBA.R, RGBA.G, RGBA.B));
+	font.RenderText(wstr, static_cast<float>(x), windowHeight-y-font.GetFontSize(), scale, glm::vec3(RGBA.R, RGBA.G, RGBA.B));
 }
 
 void EasyGL::DrawString(const std::wstring& str, Font& font, const int x, const int y, const int size, const color RGBA) const
@@ -537,34 +538,110 @@ void EasyGL::DrawString(const std::wstring& str, Font& font, const int x, const 
 	if (!isInit) return;
 	float scale = size / font.GetFontSize();
 	// 渲染文本
-	font.RenderText(str, static_cast<float>(x), static_cast<float>(y), scale, glm::vec3(RGBA.R, RGBA.G, RGBA.B));
+	font.RenderText(str, static_cast<float>(x), windowHeight - y - font.GetFontSize(), scale, glm::vec3(RGBA.R, RGBA.G, RGBA.B));
 }
 
-void EasyGL::DrawStringBetween(const std::wstring& str, Font& font, const int x, const int y, const int xend, const int yend, const int size, const color RGBA) const
+void EasyGL::DrawStringBetween(const std::wstring& str, Font& font, int x, int y, int xend, int yend, int size, color RGBA) const
 {
 	if (!isInit) return;
-	float scale = float(size) / font.GetFontSize();
-	// 计算可用宽度和高度
-	float maxWidth = static_cast<float>(xend - x);
-	float maxHeight = static_cast<float>(yend - y);
+	int width = 0, tmp_width = 0;
+	int height = 0, tmp_height = 0;
+	int MaxWidth = xend - x;
+	int MaxHeight = yend - y;
+	float scale = size / font.GetFontSize();
+	// 计算文本宽度和高度
+	for (size_t i = 0; i < str.length(); ++i)
+	{
+		width += size;
+		if (width > MaxWidth)
+		{
+			tmp_width = MaxWidth;
+			width = 0;
+			height += size;
+			if (height > MaxHeight)
+			{
+				break;
+			}
+		}
+	}
+	width = std::max(tmp_width, width);
+	height = std::min(tmp_height, height);
 
-	// 渲染文本，处理换行和截断
-	font.RenderTextWrapped(str, static_cast<float>(x), static_cast<float>(y), scale,
-						   glm::vec3(RGBA.R, RGBA.G, RGBA.B), maxWidth, maxHeight);
+	int posX = x + (MaxWidth - width) / 2;
+	int posY = y + (MaxHeight - height) / 2;
+	posY = windowHeight - posY;
+	int nowWidth = 0;
+	int nowHeight = 0;
+	for (size_t i = 0; i < str.length(); ++i)
+	{
+		wchar_t c = str[i];
+		// 渲染单个字符
+		font.RendChar(c, posX, posY - font.GetFontSize(), scale, glm::vec3(RGBA.R, RGBA.G, RGBA.B));
+		// 更新位置，向右移动
+		posX += size;
+		nowWidth += size;
+		// 如果超过窗口宽度，换行
+		if (nowWidth > MaxWidth)
+		{
+			posX = x + (MaxWidth - width) / 2;
+			posY -= size;
+			nowHeight += size;
+			nowWidth = 0;
+			if (nowHeight > MaxHeight)break;
+		}
+	}
 }
 
 void EasyGL::DrawStringBetween(const std::string& str, Font& font, const int x, const int y, const int xend, const int yend, const int size, const color RGBA) const
 {
 	if (!isInit) return;
-	float scale = float(size) / font.GetFontSize();
-
-	// 计算可用宽度和高度
-	float maxWidth = static_cast<float>(xend - x);
-	float maxHeight = static_cast<float>(yend - y);
 	auto wstr = sth2sth::str2wstr(str);
-	// 渲染文本，处理换行和截断
-	font.RenderTextWrapped(wstr, static_cast<float>(x), static_cast<float>(y), scale,
-						   glm::vec3(RGBA.R, RGBA.G, RGBA.B), maxWidth, maxHeight);
+	int width = 0, tmp_width = 0;
+	int height = 0, tmp_height = 0;
+	int MaxWidth = xend - x;
+	int MaxHeight = yend - y;
+	float scale = size / font.GetFontSize();
+	// 计算文本宽度和高度
+	for (size_t i=0;i<wstr.length();++i)
+	{
+		width += size;
+		if (width>MaxWidth)
+		{
+			tmp_width = MaxWidth;
+			width = 0;
+			height += size;
+			if (height > MaxHeight)
+			{
+				break;
+			}
+		}
+	}
+	width=std::max(tmp_width, width);
+	height = std::min(tmp_height, height);
+
+	int posX = x + (MaxWidth - width) / 2;
+	int posY = y + (MaxHeight - height) / 2;
+	posY = windowHeight - posY;
+	int nowWidth = 0;
+	int nowHeight = 0;
+	for (size_t i = 0; i < wstr.length(); ++i)
+	{
+		wchar_t c = wstr[i];
+		// 渲染单个字符
+		font.RendChar(c, posX, posY - font.GetFontSize(), scale, glm::vec3(RGBA.R, RGBA.G, RGBA.B));
+		// 更新位置，向右移动
+		posX += size;
+		nowWidth += size;
+		// 如果超过窗口宽度，换行
+		if (nowWidth > MaxWidth)
+		{
+			posX = x + (MaxWidth - width) / 2;
+			posY -= size;
+			nowHeight += size;
+			nowWidth = 0;
+			if (nowHeight > MaxHeight)break;
+		}
+	}
 }
 
 void EasyGL::DrawVerticalString(const std::wstring& str, Font& font, const int x, const int y, const int size, const color RGBA) const
@@ -572,25 +649,35 @@ void EasyGL::DrawVerticalString(const std::wstring& str, Font& font, const int x
 	if (!isInit) return;
 	float scale = float(size) / font.GetFontSize();
 
-
 	// 渲染竖排文本
+	float posY = static_cast<float>(windowHeight - y);
+	int line = 0;;
+
+	for (long long i = str.length() - 1; i >= 0; --i) {        // 如果超过窗口高度，换列
+		posY -= size;
+		if (posY - size < 0)
+		{
+			posY = static_cast<float>(windowHeight - y);
+			line++;
+		}
+	}
+	posY = static_cast<float>(windowHeight - y);
 	float posX = static_cast<float>(x);
-	float posY = static_cast<float>(y);
-	for (long long i = str.length()-1; i >= 0; --i)
+	font.RenderText(std::to_wstring(line), 0, 0, 1, glm::vec3(1, 1, 1));
+	for (size_t i = 0; i < str.length(); ++i)
+
 	{
 		wchar_t c = str[i];
-		std::wstring chStr(1, c);
-
 		// 渲染单个字符
-		font.RenderText(chStr, posX, posY, scale, glm::vec3(RGBA.R, RGBA.G, RGBA.B));
+		font.RendChar(c, posX, posY - font.GetFontSize(), scale, glm::vec3(RGBA.R, RGBA.G, RGBA.B));
 
 		// 更新位置，向下移动
-		posY += size;
+		posY -= size;
 
 		// 如果超过窗口高度，换列
-		if (posY + size > windowHeight)
+		if (posY - size < 0)
 		{
-			posY = static_cast<float>(y);
+			posY = static_cast<float>(windowHeight - y);
 			posX += size;
 		}
 	}
@@ -602,41 +689,42 @@ void EasyGL::DrawVerticalString(const std::string& str, Font& font, const int x,
 	float scale = float(size) / font.GetFontSize();
 
 	// 渲染竖排文本
-	float posY = static_cast<float>(y);
+	float posY = static_cast<float>(windowHeight - y);
 	int line = 0;
 	auto wstr = sth2sth::str2wstr(str);
 
 	for (long long i = wstr.length() - 1; i >= 0; --i){        // 如果超过窗口高度，换列
-		posY += size;
-		if (posY + size > windowHeight)
+		posY -= size;
+		if (posY - size < 0)
 		{
-			posY = static_cast<float>(y);
+			posY = static_cast<float>(windowHeight - y);
 			line++;
 		}
 	}
-	posY = static_cast<float>(y);
-	float posX = static_cast<float>(x + line * size);
-	for (long long i = wstr.length() - 1; i >= 0; --i)
+	posY = static_cast<float>(windowHeight - y);
+	float posX = static_cast<float>(x);
+	font.RenderText(std::to_wstring(line), 0, 0, 1, glm::vec3(1, 1, 1));
+	for (size_t i = 0; i < wstr.length(); ++i)
+
 	{
 		wchar_t c = wstr[i];
-		std::wstring chStr(1, c);
-
 		// 渲染单个字符
-		font.RenderText(chStr, posX, posY, scale, glm::vec3(RGBA.R, RGBA.G, RGBA.B));
+		font.RendChar(c, posX, posY - font.GetFontSize(), scale, glm::vec3(RGBA.R, RGBA.G, RGBA.B));
 
 		// 更新位置，向下移动
-		posY += size;
+		posY -= size;
 
 		// 如果超过窗口高度，换列
-		if (posY + size > windowHeight)
+		if (posY - size < 0)
 		{
-			posY = static_cast<float>(y);
-			posX -= size;
+			posY = static_cast<float>(windowHeight - y);
+			posX += size;
 		}
 	}
 }
 
-void EasyGL::DrawVerticalStringBetween(const std::wstring& str, Font& font, const int x, const int y, const int xend, const int yend, const int size, const color RGBA) const
+void EasyGL::DrawVerticalStringBetween
+(const std::wstring& str, Font& font, const int x, const int y, const int xend, const int yend, const int size, const color RGBA) const
 {
 	if (!isInit) return;
 	float scale = float(size) / font.GetFontSize();
@@ -647,50 +735,52 @@ void EasyGL::DrawVerticalStringBetween(const std::wstring& str, Font& font, cons
 
 	float posY = static_cast<float>(y);
 	float height = 0, temp_height = 0;
-	float width = 0;
-	for (long long i = str.length() - 1; i >= 0; --i)
+	float width = 50;
+	for (size_t i = 0; i < str.length(); ++i)
 	{
-		// 更新位置，向下移动
-		posY += size;
-		temp_height += size;
+		height += size;
 		// 如果超过窗口高度，换列
-		if (posY + size > windowHeight)
+		if (height > maxHeight)
 		{
-			if (height <= temp_height)
-				height = temp_height;
-			posY = static_cast<float>(y);
+			temp_height = maxHeight;
+			height = 0;
 			width += size;
 		}
 	}
-	if (width > maxWidth)width = maxWidth;
-	if (height > maxHeight)height = maxHeight;
+	width = std::min(width, maxWidth);
+	height = std::max(height, temp_height);
 
-	float posX = float(x) + (maxWidth - width) / 2 + width;
+	float posX = float(x) + (maxWidth - width) / 2;
 	posY = float(y) + (maxHeight - height) / 2;
-	for (long long i = str.length() - 1; i >= 0; --i)
+	posY = windowHeight - posY;
+	float nowWidth = 0, nowHeight = 0;
+	for (size_t i = 0; i < str.length(); ++i)
 	{
 		wchar_t c = str[i];
-		std::wstring chStr(1, c);
 
 		// 渲染单个字符
-		font.RenderText(chStr, posX, posY, scale, glm::vec3(RGBA.R, RGBA.G, RGBA.B));
-
+		font.RendChar(c, posX, posY - font.GetFontSize(), scale, glm::vec3(RGBA.R, RGBA.G, RGBA.B));
+		//EndRender();
 		// 更新位置，向下移动
-		posY += size;
-
+		posY -= size;
+		nowHeight += size;
 		// 如果超过最大高度，换列
-		if (posY - y > maxHeight)
+		if (nowHeight > height)
 		{
-			posY = static_cast<float>(y);
-			posX -= size;
+			posY = float(y) + (maxHeight - height) / 2;
+			posY = windowHeight - posY;
+			posX += size;
+			nowWidth += size;
+			nowHeight = 0;
 			// 如果超过最大宽度，停止绘制
-			if (posX - x < 0)
+			if (nowHeight > width)
 				break;
 		}
 	}
 }
 
-void EasyGL::DrawVerticalStringBetween(const std::string& str, Font& font, const int x, const int y, const int xend, const int yend, const int size, const color RGBA) const
+void EasyGL::DrawVerticalStringBetween
+(const std::string& str, Font& font, const int x, const int y, const int xend, const int yend, const int size, const color RGBA) const
 {
 	if (!isInit) return;
 	auto wstr = sth2sth::str2wstr(str);
@@ -702,44 +792,45 @@ void EasyGL::DrawVerticalStringBetween(const std::string& str, Font& font, const
 
 	float posY = static_cast<float>(y);
 	float height = 0, temp_height = 0;
-	float width = 0;
-	for (long long i = wstr.length() - 1; i >= 0; --i)
+	float width = 50;
+	for (size_t i = 0; i < wstr.length(); ++i)
 	{
-		// 更新位置，向下移动
-		posY += size;
-		temp_height += size;
+		height += size;
 		// 如果超过窗口高度，换列
-		if (posY + size > windowHeight)
+		if (height>maxHeight)
 		{
-			if (height <= temp_height)
-				height = temp_height;
-			posY = static_cast<float>(y);
+			temp_height = maxHeight;
+			height = 0;
 			width += size;
 		}
 	}
-	if (width > maxWidth)width = maxWidth;
-	if (height > maxHeight)height = maxHeight;
+	width = std::min(width, maxWidth);
+	height = std::max(height, temp_height);
 
-	float posX = float(x) + (maxWidth - width) / 2 + width;
+	float posX = float(x) + (maxWidth - width) / 2;
 	posY = float(y) + (maxHeight - height) / 2;
-	for (long long i = wstr.length() - 1; i >= 0; --i)
+	posY = windowHeight - posY;
+	float nowWidth = 0, nowHeight = 0;
+	for (size_t i = 0; i < wstr.length(); ++i)
 	{
 		wchar_t c = wstr[i];
-		std::wstring chStr(1, c);
 
 		// 渲染单个字符
-		font.RenderText(chStr, posX, posY, scale, glm::vec3(RGBA.R, RGBA.G, RGBA.B));
-
+		font.RendChar(c, posX, posY - font.GetFontSize(), scale, glm::vec3(RGBA.R, RGBA.G, RGBA.B));
+		//EndRender();
 		// 更新位置，向下移动
-		posY += size;
-
+		posY -= size; 
+		nowHeight += size;
 		// 如果超过最大高度，换列
-		if (posY - y < 0)
+		if (nowHeight>height)
 		{
-			posY = static_cast<float>(y);
-			posX -= size;
+			posY = float(y) + (maxHeight - height) / 2;
+			posY = windowHeight - posY;
+			posX += size;
+			nowWidth += size;
+			nowHeight = 0;
 			// 如果超过最大宽度，停止绘制
-			if (posX - x < 0)
+			if (nowHeight>width)
 				break;
 		}
 	}
