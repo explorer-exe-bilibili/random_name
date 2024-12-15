@@ -1,4 +1,5 @@
 ﻿#include "SetButton.h"
+#include "Gp.h"
 
 #include <shtypes.h>
 #include <windowsx.h>
@@ -9,7 +10,6 @@
 #include "VideoPlayer.h"
 #include "explorer.h"
 #include "getname.h"
-#include "Gp.h"
 #include "mywindows.h"
 #include "set-json.h"
 #include "sth2sth.h"
@@ -149,12 +149,12 @@ void SetButton::load()
 			}
 		});
 		b1.setMusic(CLICK_MUSIC);
-		b1.setFont(&ui::text_mid);
+		b1.setFont(ui::text, ui::FontSize::mid);
 		b1.refresh();
 		b2.setxy2WWWH(ButtonRect[1].x, ButtonRect[1].y, ButtonRect[1].xend, ButtonRect[1].yend);
 		b2.setText(L"打开");
 		b2.bind([this]() {OpenFile(); });
-		b2.setFont(&ui::text_mid);
+		b2.setFont(ui::text, ui::FontSize::mid);
 		b2.setMusic(CLICK_MUSIC);
 		b2.setTextColor(ARGB(255 ,0, 0, 0));
 		b2.setBmapC(setbutton);
@@ -196,7 +196,7 @@ void SetButton::load()
 		const std::wstring wstr = L"0x" + wss.str();
 		b.setText(wstr);
 		b.setTextColor(ARGB(255, 0, 0, 0));
-		b.setFont(&ui::text);
+		b.setFont(ui::text,ui::FontSize::normal);
 		buttons.push_back(b);
 		b1.setxy2WWWH(ButtonRect[1].x, ButtonRect[1].y, ButtonRect[1].xend, ButtonRect[1].yend);
 		b1.setBmapC(setbutton);
@@ -212,24 +212,6 @@ void SetButton::load()
 	}
 	refresh();
 }
-
-//MyEditBox* SetButton::CreateEditBox(const HWND hWndParent, const int number, const point& rect, const wchar_t* words) {
-//	// 创建EDIT控件的样式
-//	constexpr DWORD editStyle = ES_AUTOHSCROLL | (WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | ES_LEFT | WS_BORDER);
-//
-//	// 创建EDIT控件的附加样式（可选）
-//	constexpr DWORD editExStyle = WS_EX_CLIENTEDGE;
-//	const int x = rect.x * mywindows::WW;
-//	const int y = rect.y * mywindows::WH;
-//	const int w = rect.xend * mywindows::WW - x;
-//	const int h = rect.yend * mywindows::WH - y;
-//	// 创建文本框
-//	MyEditBox* pEdit = new MyEditBox(hWndParent, { x,y,x + w,y + h },number);
-//	pEdit->SetText(words);
-//	pEdit->Show();
-//	// 返回文本框句柄
-//	return pEdit;
-//}
 
 HWND SetButton::CreateEditBox(const HWND hWndParent, const int number, const point& rect, const wchar_t* words) {
 	// 创建EDIT控件的样式
@@ -333,7 +315,7 @@ void SetButton::show()
 	{
 		const int x = TitleRect.x * mywindows::WW;
 		const int y = TitleRect.y * mywindows::WH;
-		p->DrawString(item.Name, ui::text_mid, x, y, ARGB(255, 236, 229, 216));
+		p->DrawString(item.Name, *ui::text, ui::FontSize::mid, x, y, ARGB(255, 236, 229, 216));
 	}
 	for (auto& i : buttons)
 	{
@@ -437,86 +419,3 @@ void SetButton::EditBoxUpgrade(const int number) const
 		EditBoxEditor(temps);
 	}
 }
-
-//WNDPROC MyEditBox::oldProc = nullptr;
-//
-//MyEditBox::MyEditBox(HWND parent, const RECT& rect, int id)
-//	: hwnd(nullptr), parent_hwnd(parent), bgColor(RGB(255, 255, 255)), hBrush(nullptr), rect(rect), id(id)
-//{
-//	// 创建EDIT控件的样式
-//	constexpr DWORD editStyle = ES_AUTOHSCROLL | (WS_CHILD | WS_VISIBLE | ES_AUTOHSCROLL | ES_LEFT | WS_BORDER);
-//
-//	// 创建EDIT控件的附加样式（可选）
-//	constexpr DWORD editExStyle = WS_EX_CLIENTEDGE;
-//	if (hwnd != nullptr)return;
-//	int x = rect.left;
-//	int y = rect.top;
-//	int w = rect.right - rect.left;
-//	int h = rect.bottom - rect.top;
-//	hwnd = CreateWindowEx(WS_EX_CLIENTEDGE, L"EDIT", L"", editStyle
-//		, x, y, w, h, mywindows::main_hwnd, HMENU(id), nullptr, nullptr);
-//	SetWindowLongPtr(hwnd, GWLP_USERDATA, LONG_PTR(this));
-//	oldProc = WNDPROC(SetWindowLongPtr(hwnd, GWLP_WNDPROC, LONG_PTR(EditBoxProc)));
-//	SetBackgroundColor(bgColor);
-//	SetFocus(hwnd);
-//}
-//
-//void MyEditBox::SetText(const std::wstring& text) const
-//{
-//	SetWindowText(hwnd, text.c_str());
-//}
-//
-//std::wstring MyEditBox::GetText() const
-//{
-//	int length = GetWindowTextLength(hwnd);
-//	std::wstring text(length, L'\0');
-//	GetWindowText(hwnd, &text[0], length + 1);
-//	return text;
-//}
-//
-//void MyEditBox::SetBackgroundColor(COLORREF color)
-//{
-//	bgColor = color;
-//	if (hBrush)
-//	{
-//		DeleteObject(hBrush);
-//	}
-//	hBrush = CreateSolidBrush(bgColor);
-//	InvalidateRect(hwnd, NULL, TRUE);
-//}
-//
-//void MyEditBox::Show() const
-//{
-//	ShowWindow(hwnd, SW_SHOW);
-//}
-//
-//void MyEditBox::Unshow() const
-//{
-//	ShowWindow(hwnd, SW_HIDE);
-//}
-//
-//void MyEditBox::MoveTo(RECT new_rect)
-//{
-//	rect = new_rect;
-//	MoveWindow(hwnd, new_rect.left, new_rect.top, new_rect.right - new_rect.left, new_rect.bottom - new_rect.top, TRUE);
-//}
-//
-//LRESULT CALLBACK MyEditBox::EditBoxProc(HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam)
-//{
-//	MyEditBox* pThis = (MyEditBox*)GetWindowLongPtr(hwnd, GWLP_USERDATA);
-//	if (pThis)
-//	{
-//		switch (msg)
-//		{
-//		case WM_CTLCOLOREDIT:
-//		{
-//			HDC hdc = (HDC)wParam;
-//			SetBkColor(hdc, pThis->bgColor);
-//			return (LRESULT)pThis->hBrush;
-//		}
-//		default:
-//			break;
-//		}
-//	}
-//	return CallWindowProc(oldProc, hwnd, msg, wParam, lParam);
-//}

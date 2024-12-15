@@ -1,4 +1,5 @@
 ﻿#include "FirstScreen.h"
+#include"Gp.h"
 
 #include "bitmaps.h"
 #include "config.h"
@@ -7,7 +8,6 @@
 #include "ui.h"
 #include "mywindows.h"
 #include "set-json.h"
-#include"Gp.h"
 #include "HistoryScreen.h"
 #include "NameScreen.h"
 
@@ -125,7 +125,7 @@ void FirstScreen::regButtons()
 	buttons[EXITBUTTON].setxy2WWWH(0.9, 0.045, 0.93, 0.105);
 	buttons[HIS].bind([] { HistoryScreen::enter(); });
 	buttons[HIS].setDisable(true);
-	buttons[HIS].setFont(&ui::text);
+	buttons[HIS].setFont(ui::text,ui::FontSize::normal);
 	buttons[HIS].setMusic(ENTER);
 	buttons[HIS].setText(L"历史记录");
 	buttons[HIS].setTextColor(ARGB(255,0,0,0));
@@ -135,12 +135,12 @@ void FirstScreen::regButtons()
 		set2::offVideo = !set2::offVideo;
 		InvalidateRect(mywindows::main_hwnd, nullptr, FALSE);
 	});
-	buttons[OFFVIDEO].setFont(&ui::text);
+	buttons[OFFVIDEO].setFont(ui::text, ui::FontSize::normal);
 	buttons[OFFVIDEO].setMusic(CLICK_MUSIC);
 	buttons[OFFVIDEO].setTextColor(ARGB(255,0,0,0));
 	buttons[OFFVIDEO].setxy2WWWH(0.1, 0.85, 0.173, 0.886);
 	buttons[SET].bind([] { set2::enter(); });
-	buttons[SET].setFont(&ui::icon_mid, 1);
+	buttons[SET].setFont(ui::icon, ui::FontSize::mid, 1);
 	buttons[SET].setMusic(ENTER);
 	buttons[SET].setText(SETICON);
 	buttons[SET].setTextColor(ARGB(255,211, 188, 142));

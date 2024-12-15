@@ -1,4 +1,6 @@
 ﻿#include "NameScreen.h"
+#include "Gp.h"
+
 #include "set-json.h"
 #include "MenuScreen.h"
 #include "FirstScreen.h"
@@ -7,7 +9,6 @@
 #include "sth2sth.h"
 #include"bitmaps.h"
 #include"configitem.h"
-#include "Gp.h"
 #include"mywindows.h"
 #include"ui.h"
 
@@ -19,7 +20,7 @@ enum ButtonName
 	addName = 1
 };
 
-HBITMAP CreateTransparentTextBitmap(const std::wstring& text, float width, float height, HFONT hFont
+HBITMAP CreateTransparentTextBitmap(const std::wstring& text, float width, float height, Font& hFont
 	, uint32_t color =0xFFFFFFFF);
 
 getname* name = nullptr;
@@ -43,7 +44,6 @@ NameScreen::~NameScreen()
 	step = 0;
 	is5star = false;
 	is4star = false;
-	icon_star = nullptr;
 }
 void NameScreen::regButtons()
 {
@@ -51,14 +51,14 @@ void NameScreen::regButtons()
 	tmp.setxy2WWWH(0.82, 0.045, 0.88, 0.08);
 	tmp.setText(L"跳过>>");
 	tmp.refresh();
-	tmp.setFont(&ui::text_mid);
+	tmp.setFont(ui::text,ui::FontSize::normal);
 	tmp.bind([this] {menu(); });
 	tmp.setTextColor(ARGB(255, 255, 255, 255), 1);
 	buttons.push_back(tmp);
 	tmp.setxy2WWWH(0.4, 0.8, 0.52, 0.836);
 	tmp.setText(L"增加此名字几率");
 	tmp.refresh();
-	tmp.setFont(&ui::text_mid);
+	tmp.setFont(ui::text, ui::FontSize::normal);
 	tmp.bind([this] {AddName(); });
 	tmp.setTextColor(ARGB(255, 255, 230, 34),1);
 	buttons.push_back(tmp);
@@ -91,18 +91,16 @@ void NameScreen::enter()
 	}
 	for (const int tmp1 = number + 10; number < tmp1; number++) {items[10 - (tmp1 - number)] = name->items[ui::mode - 1][number];}
 	std::thread([this] {
-		for(const auto&i:nameBitmaps)DeleteObject(i);
 		nameBitmaps_Black.clear();
 		for (auto& item : items)
 			nameBitmaps_Black.push_back(CreateTransparentTextBitmap(item.name, 
-				mywindows::WW * 0.3, mywindows::WW * 0.3, ui::text_big, ARGB(255, 0, 0, 0)));
+				mywindows::WW * 0.3, mywindows::WW * 0.3, *ui::text, ARGB(255, 0, 0, 0)));
 		}).detach();
 	std::thread([this] {
-		for(const auto&i:nameBitmaps)DeleteObject(i);
 		nameBitmaps.clear();
 		for (auto& item : items)
 			nameBitmaps.push_back(CreateTransparentTextBitmap(item.name,
-				mywindows::WW * 0.3, mywindows::WW * 0.3,ui::text_big,
+				mywindows::WW * 0.3, mywindows::WW * 0.3,*ui::text,
 				(item.star==6)?config::getd(NAME_COLOR):config::getd(NAME_COLOR_6_STAR)));
 		}).detach();
 	if (ui::mode == config::getint(SPECIAL))buttons[addName].setDisable(false);
@@ -158,7 +156,7 @@ void NameScreen::paint()const
 	const int y = (mywindows::WH - w)/2;
 	const int h = w;
 	p->Paint(0, 0, mywindows::WW, mywindows::WH, cardbackground);
-	p->DrawString(items[step].name, ui::text, mywindows::WW * 0.175, mywindows::WH * 8 / 13, ARGB(255 ,250, 250, 250));
+	p->DrawString(items[step].name, *ui::text, mywindows::WW * 0.175, mywindows::WH * 8 / 13, ARGB(255, 250, 250, 250));
 	buttons[SKIP].paint();
 	buttons[addName].paint();
 	while (!nameButton->IsOK()) { Sleep(1); }
@@ -206,7 +204,7 @@ void NameScreen::printStars(const int star_number) const
 	{
 			const unsigned int curr_time = printedTime;
 			const int nowStep = step;
-			Gp::StaticPaintInfo StarInfo = { 0,0,ARGB(255,220,184,14),STAR,icon_star };
+			Gp::StaticPaintInfo StarInfo = { 0,0,ui::FontSize::star ,ARGB(255,220,184,14),STAR,*ui::icon };
 			std::this_thread::sleep_for(std::chrono::milliseconds(2000));
 			if (star_number == 6)std::this_thread::sleep_for(std::chrono::milliseconds(150));
 			if (star_number != 6)
@@ -340,80 +338,80 @@ void NameScreen::changedStep() const
 				}).detach();
 		});
 }
-HBITMAP CreateTransparentTextBitmap(const std::wstring& text, float width, float height, HFONT hFont,uint32_t color) {
-	// 初始化GDI+
-	using namespace Gdiplus;
-	//unsigned char b = char(config::getint(TEXTB));
-	//unsigned char g = char(config::getint(TEXTG));
-	//unsigned char r = char(config::getint(TEXTR));
-	//if(R!=200&&G!=200&&B!=200)
-	//{
-	//	r = R;
-	//	g = G;
-	//	b = B;
-	//}
-	// 创建GDI+位图
-	Bitmap bitmap(INT(width), INT(height), PixelFormat32bppARGB);
-	Graphics graphics(&bitmap);
-
-	// 设置背景为透明
-	graphics.Clear(Color(0, 0, 0, 0));
-
-	// 设置文本格式
-	HDC hdc = graphics.GetHDC();
-	Font font(hdc, hFont);
-	graphics.ReleaseHDC(hdc);
-	//SolidBrush brush(Color(255, 1, 1, 1));
-	SolidBrush brush{Color(color)};
-	StringFormat format;
-	format.SetAlignment(StringAlignmentCenter);
-	format.SetLineAlignment(StringAlignmentCenter);
-	std::wstring Char;
-	// 绘制文本
-	RectF rect(0, 0, width,height);
-	switch (text.size()) {
-	case 0:break;
-	case 2:
-		rect = { 0,0,width ,height / 2 };
-		Char = text.c_str()[0];
-		graphics.DrawString(Char.c_str(), -1, &font, rect, &format, &brush);
-		rect = { 0,height / 2,width ,height / 2 };
-		Char = text.c_str()[1];
-		graphics.DrawString(Char.c_str(), -1, &font, rect, &format, &brush);
-		break;
-	case 3:
-		rect = { width / 2,0,width/2,height / 2 };
-		Char = text.c_str()[0];
-		graphics.DrawString(Char.c_str(), -1, &font, rect, &format, &brush);
-		rect = { 0,height / 3,width / 2,height / 2};
-		Char = text.c_str()[1];
-		graphics.DrawString(Char.c_str(), -1, &font, rect, &format, &brush);
-		rect = { width / 2,height / 2,width/2,height/2 };
-		Char = text.c_str()[2];
-		graphics.DrawString(Char.c_str(), -1, &font, rect, &format, &brush);
-		break;
-	case 4:
-		rect = { 0,0,width / 2,height / 2 };
-		Char = text.c_str()[0];
-		graphics.DrawString(Char.c_str(), -1, &font, rect, &format, &brush);
-		rect = { 0,height / 2,width /2,height/2};
-		Char = text.c_str()[1];
-		graphics.DrawString(Char.c_str(), -1, &font, rect, &format, &brush);
-		rect = { width / 2,0,width/2,height / 2 };
-		Char = text.c_str()[2];
-		graphics.DrawString(Char.c_str(), -1, &font, rect, &format, &brush);
-		rect = { width / 2,height / 2,width/2,height/2 };
-		Char = text.c_str()[3];
-		graphics.DrawString(Char.c_str(), -1, &font, rect, &format, &brush);
-		break;
-	default:
-		graphics.DrawString(text.c_str(), -1, &font, rect, &format, &brush);
-		break;
-	}
-
-	// 将GDI+位图转换为HBITMAP
-	HBITMAP hBitmap;
-	bitmap.GetHBITMAP(Color(0, 0, 0, 0), &hBitmap);
-	
-	return hBitmap;
-}
+//HBITMAP CreateTransparentTextBitmap(const std::wstring& text, float width, float height, HFONT hFont,uint32_t color) {
+//	// 初始化GDI+
+//	using namespace Gdiplus;
+//	//unsigned char b = char(config::getint(TEXTB));
+//	//unsigned char g = char(config::getint(TEXTG));
+//	//unsigned char r = char(config::getint(TEXTR));
+//	//if(R!=200&&G!=200&&B!=200)
+//	//{
+//	//	r = R;
+//	//	g = G;
+//	//	b = B;
+//	//}
+//	// 创建GDI+位图
+//	Bitmap bitmap(INT(width), INT(height), PixelFormat32bppARGB);
+//	Graphics graphics(&bitmap);
+//
+//	// 设置背景为透明
+//	graphics.Clear(Color(0, 0, 0, 0));
+//
+//	// 设置文本格式
+//	HDC hdc = graphics.GetHDC();
+//	Font font(hdc, hFont);
+//	graphics.ReleaseHDC(hdc);
+//	//SolidBrush brush(Color(255, 1, 1, 1));
+//	SolidBrush brush{Color(color)};
+//	StringFormat format;
+//	format.SetAlignment(StringAlignmentCenter);
+//	format.SetLineAlignment(StringAlignmentCenter);
+//	std::wstring Char;
+//	// 绘制文本
+//	RectF rect(0, 0, width,height);
+//	switch (text.size()) {
+//	case 0:break;
+//	case 2:
+//		rect = { 0,0,width ,height / 2 };
+//		Char = text.c_str()[0];
+//		graphics.DrawString(Char.c_str(), -1, &font, rect, &format, &brush);
+//		rect = { 0,height / 2,width ,height / 2 };
+//		Char = text.c_str()[1];
+//		graphics.DrawString(Char.c_str(), -1, &font, rect, &format, &brush);
+//		break;
+//	case 3:
+//		rect = { width / 2,0,width/2,height / 2 };
+//		Char = text.c_str()[0];
+//		graphics.DrawString(Char.c_str(), -1, &font, rect, &format, &brush);
+//		rect = { 0,height / 3,width / 2,height / 2};
+//		Char = text.c_str()[1];
+//		graphics.DrawString(Char.c_str(), -1, &font, rect, &format, &brush);
+//		rect = { width / 2,height / 2,width/2,height/2 };
+//		Char = text.c_str()[2];
+//		graphics.DrawString(Char.c_str(), -1, &font, rect, &format, &brush);
+//		break;
+//	case 4:
+//		rect = { 0,0,width / 2,height / 2 };
+//		Char = text.c_str()[0];
+//		graphics.DrawString(Char.c_str(), -1, &font, rect, &format, &brush);
+//		rect = { 0,height / 2,width /2,height/2};
+//		Char = text.c_str()[1];
+//		graphics.DrawString(Char.c_str(), -1, &font, rect, &format, &brush);
+//		rect = { width / 2,0,width/2,height / 2 };
+//		Char = text.c_str()[2];
+//		graphics.DrawString(Char.c_str(), -1, &font, rect, &format, &brush);
+//		rect = { width / 2,height / 2,width/2,height/2 };
+//		Char = text.c_str()[3];
+//		graphics.DrawString(Char.c_str(), -1, &font, rect, &format, &brush);
+//		break;
+//	default:
+//		graphics.DrawString(text.c_str(), -1, &font, rect, &format, &brush);
+//		break;
+//	}
+//
+//	// 将GDI+位图转换为HBITMAP
+//	HBITMAP hBitmap;
+//	bitmap.GetHBITMAP(Color(0, 0, 0, 0), &hBitmap);
+//	
+//	return hBitmap;
+//}

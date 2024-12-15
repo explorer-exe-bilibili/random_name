@@ -2,10 +2,11 @@
 #include <functional>
 #include <vector>
 #include <string>
-#include <Windows.h>
 
 #include "bitmaps.h"
 #include "Timer.h"
+
+class Font;
 
 enum
 {
@@ -34,7 +35,7 @@ public:
 	};
 protected:
 	Button *binded=nullptr;
-	HFONT* font=nullptr;
+	Font* font=nullptr;
 	Gp *p=nullptr;
 	uint32_t Text_argb = 0xFFFFFFFF;
 	uint32_t BackGround_argb = 0xFFFFFFFF;
@@ -47,6 +48,7 @@ protected:
 	int FuncCounts=0;
 	bool DisableBmap = false, DisableStr = false, Disable = false, Moving = false, IsVertical = false;
 	bool DisableBackGroundColor = true;
+	int FontSize = 0;
 	std::wstring text;
 	std::vector<std::function<void()>> functions;
 	std::string music_string;
@@ -68,7 +70,7 @@ public:
 	void setPoint(int x, int y, int xE, int yE);
 	void setxy2WWWH(double x2WW, double y2WH, double xE2WW=-1, double yE2WH=-1);
 	void setBmapC(int Bmapc,int DisableStr=-1);
-	void setFont(HFONT* font,int DisableBmap=-1);
+	void setFont(Font* font,int size,int DisableBmap=-1);
 	void setDisableStr(bool newValue);
 	void setDisableBmap(bool newValue);
 	void setDisableBkColor(bool newValue);

@@ -1,10 +1,10 @@
 ﻿#include "floatwindow.h"
+#include "Gp.h"
 #include<thread>
 #include <chrono>
 
 #include "bitmaps.h"
 #include "ConfigItem.h"
-#include "Gp.h"
 #include "mywindows.h"
 
 bool ShowFloatWindow = true,ShowQuitWindow=true;

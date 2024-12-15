@@ -4,7 +4,7 @@
 
 
 int ui::mode=1, ui::ScreenMode=FIRST_SCREEN;
-HFONT ui::text=nullptr, ui::icon=nullptr, ui::text_big=nullptr, ui::text_mid=nullptr, ui::text_list=nullptr, ui::icon_mid=nullptr;
+Font* ui::text=nullptr, *ui::icon=nullptr;
 bool ui::ScreenModeChanged = true;
 int i = config::init();
 HistoryScreen* ui::HS = nullptr;

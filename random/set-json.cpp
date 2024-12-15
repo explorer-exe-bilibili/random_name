@@ -1,6 +1,7 @@
 ﻿// ReSharper disable CppClangTidyCppcoreguidelinesNarrowingConversions
 // ReSharper disable CppClangTidyClangDiagnosticImplicitIntFloatConversion
 #include "set-json.h"
+#include "Gp.h"
 #include"sth2sth.h"
 #include"configitem.h"
 #include "mywindows.h"
@@ -11,7 +12,6 @@
 
 #include "Button.h"
 #include "getname.h"
-#include "Gp.h"
 #include "SetButton.h"
 
 bool set2::offVideo = false;
@@ -106,8 +106,8 @@ void set2::paint() const
 	const int stringWidth = 0.0272 * mywindows::WW * title.length();
 	const int titlex = (mywindows::WW - stringWidth) / 2;
 	const int titley = mywindows::WH / 20;
-	p->DrawString(title, ui::text_mid, titlex, titley);
-	p->DrawString(t, ui::text_mid, mywindows::WW * 0.755, mywindows::WH * 0.91, ARGB(255, 236, 229, 216));
+	p->DrawString(title, *ui::text,ui::FontSize::mid, titlex, titley);
+	p->DrawString(t, *ui::text, ui::FontSize::mid, mywindows::WW * 0.755, mywindows::WH * 0.91, ARGB(255, 236, 229, 216));
 	for(auto&b:pages[page-1].buttons)
 	{
 		b->show();
@@ -277,7 +277,7 @@ void set2::regButton()
 	next.setxy2WWWH(0.8, 0.91, 0.822, 0.95);
 	next.setTextColor(ARGB(255,236, 229, 216));
 	next.setMusic(CLICK_MUSIC);
-	next.setFont(&ui::icon_mid);
+	next.setFont(ui::icon, ui::FontSize::mid);
 	next.bind([this]()
 		{
 			page++;

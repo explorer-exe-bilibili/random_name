@@ -25,6 +25,12 @@
     <Filter Include="源文件\底层渲染">
       <UniqueIdentifier>{8934f45f-79de-4b22-8aa9-9516cad89fdc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="源文件\EasyGL">
+      <UniqueIdentifier>{dc54fe16-bd89-401a-8030-d17cacec7f65}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="头文件\EasyGL">
+      <UniqueIdentifier>{a21d7842-b2b8-4498-b459-01ca0510a1df}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mywindows.h">
@@ -117,6 +123,21 @@
     <ClInclude Include="FontManager.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="EasyGL\VertexBuffer.h">
+      <Filter>头文件\EasyGL</Filter>
+    </ClInclude>
+    <ClInclude Include="EasyGL\Shader.h">
+      <Filter>头文件\EasyGL</Filter>
+    </ClInclude>
+    <ClInclude Include="EasyGL\My_Font.h">
+      <Filter>头文件\EasyGL</Filter>
+    </ClInclude>
+    <ClInclude Include="EasyGL\Bitmap.h">
+      <Filter>头文件\EasyGL</Filter>
+    </ClInclude>
+    <ClInclude Include="EasyGL\OpenGLBase.h">
+      <Filter>头文件\EasyGL</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="random.cpp">
@@ -208,6 +229,24 @@
     </ClCompile>
     <ClCompile Include="FontManager.cpp">
       <Filter>源文件</Filter>
+    </ClCompile>
+    <ClCompile Include="EasyGL\EasyGL.cpp">
+      <Filter>源文件\EasyGL</Filter>
+    </ClCompile>
+    <ClCompile Include="EasyGL\My_Font.cpp">
+      <Filter>源文件\EasyGL</Filter>
+    </ClCompile>
+    <ClCompile Include="EasyGL\Shader.cpp">
+      <Filter>源文件\EasyGL</Filter>
+    </ClCompile>
+    <ClCompile Include="EasyGL\Bitmap.cpp">
+      <Filter>源文件\EasyGL</Filter>
+    </ClCompile>
+    <ClCompile Include="EasyGL\VertexBuffer.cpp">
+      <Filter>源文件\EasyGL</Filter>
+    </ClCompile>
+    <ClCompile Include="EasyGL\OpenGLBase.cpp">
+      <Filter>源文件\EasyGL</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>

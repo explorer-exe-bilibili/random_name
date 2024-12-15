@@ -99,16 +99,16 @@ long long config::getScreen(const std::wstring& name)
 {
 	const wstring strv = get(name);
 	const long double douv = stold(strv);
-	if (douv> 1) {
+	if (douv > 1) {
 		const long long llv = douv;
 		return llv;
 	}
 	else {
-		if (name.back()=='x' || endsWith(name,L"width")) {
+		if (name.back() == 'x' || endsWith(name, L"width")) {
 			const long long llv = douv * mywindows::screenWidth;
 			return llv;
 		}
-		else if (name.back()=='y' || endsWith(name,L"height")) {
+		else if (name.back() == 'y' || endsWith(name, L"height")) {
 			const long long llv = douv * mywindows::screenHeight;
 			return llv;
 		}
@@ -118,16 +118,16 @@ long long config::getScreen(const std::wstring& name)
 long long config::getWindow(const std::wstring& name)
 {
 	const wstring strv = get(name);
-	if (const long double douv = stold(strv); douv> 1) {
+	if (const long double douv = stold(strv); douv > 1) {
 		const long long llv = douv;
 		return llv;
 	}
 	else {
-		if (name.back()=='x' || endsWith(name,L"width")) {
+		if (name.back() == 'x' || endsWith(name, L"width")) {
 			const long long llv = douv * mywindows::WW;
 			return llv;
 		}
-		else if (name.back()=='y' || endsWith(name,L"height")) {
+		else if (name.back() == 'y' || endsWith(name, L"height")) {
 			const long long llv = douv * mywindows::WH;
 			return llv;
 		}
@@ -168,7 +168,7 @@ void config::add(const std::wstring& name, const std::wstring& value) {
 }
 void config::add(const std::wstring& name, const int value)
 {
-	add(name,to_wstring(value));
+	add(name, to_wstring(value));
 }
 
 // 读取配置文件并保存配置项到链表

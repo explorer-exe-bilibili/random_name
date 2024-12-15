@@ -1,8 +1,8 @@
 ﻿#include "Button.h"
+#include "Gp.h"
 
 #include "configitem.h"
 #include "explorer.h"
-#include "Gp.h"
 #include "mywindows.h"
 #include "set-json.h"
 #include "ui.h"
@@ -87,13 +87,13 @@ void Button::paint() const
 			if (font != nullptr)
 				p->DrawVerticalStringBetween(text, *font, x, y, xE, yE, Text_argb);
 			else
-				p->DrawVerticalStringBetween(text, ui::text_mid, x, y, xE, yE, Text_argb);
+				p->DrawVerticalStringBetween(text, *ui::text,ui::FontSize::mid, x, y, xE, yE, Text_argb);
 		}
 		else {
 			if (font != nullptr)
 				p->DrawStringBetween(text, *font, x, y, xE, yE, Text_argb);
 			else
-				p->DrawStringBetween(text, ui::text_mid, x, y, xE, yE, Text_argb);
+				p->DrawStringBetween(text, *ui::text,ui::FontSize::mid, x, y, xE, yE, Text_argb);
 		}
 	}
 	if(debug)
@@ -143,9 +143,10 @@ void Button::setBmapC(const int Bmapc, const int DisableStr)
 		this->DisableStr = DisableStr;
 }
 
-void Button::setFont(HFONT* font, const int DisableBmap)
+void Button::setFont(Font* font, int size, int DisableBmap)
 {
 	this->font = font;
+	this->FontSize = size;
 	if(DisableBmap!=-1)
 		this->DisableBmap = DisableBmap;
 }

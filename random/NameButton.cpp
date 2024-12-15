@@ -1,7 +1,7 @@
 ﻿#include "NameButton.h"
+#include "Gp.h"
 
 #include "configitem.h"
-#include "Gp.h"
 #include "mywindows.h"
 
 void NameButton::paint() const
@@ -21,9 +21,9 @@ void NameButton::paint() const
 	}
 }
 
-void NameButton::setHBITMAP(HBITMAP newValue)
+void NameButton::setHBITMAP(Bitmap newValue)
 {
-	if (hBitmap)DeleteObject(hBitmap);
+	hBitmap.~Bitmap();
 	hBitmap = newValue;
 }
 

@@ -10,8 +10,7 @@ namespace init
 	void MainWindow();
 	void regWindow(WNDPROC w1, WNDPROC w2, WNDPROC w3);
 	DWORD WINAPI RegWindows(); // 修改这里
-	DWORD WINAPI Upgrade();    // 修改这里
-	bool checkIsFontInstalled(const std::wstring& fontName);
+	DWORD WINAPI Upgrade();    // 修改这里m
 	void music();
 	void config();
 }

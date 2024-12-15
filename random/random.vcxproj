@@ -234,6 +234,11 @@
     <ClInclude Include="Button.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="ConfigItem.h" />
+    <ClInclude Include="EasyGL\Bitmap.h" />
+    <ClInclude Include="EasyGL\My_Font.h" />
+    <ClInclude Include="EasyGL\OpenGLBase.h" />
+    <ClInclude Include="EasyGL\Shader.h" />
+    <ClInclude Include="EasyGL\VertexBuffer.h" />
     <ClInclude Include="FontManager.h" />
     <ClInclude Include="Screen.h" />
     <ClInclude Include="VideoPlayer.h" />
@@ -265,6 +270,12 @@
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="ConfigItem.cpp" />
+    <ClCompile Include="EasyGL\Bitmap.cpp" />
+    <ClCompile Include="EasyGL\EasyGL.cpp" />
+    <ClCompile Include="EasyGL\My_Font.cpp" />
+    <ClCompile Include="EasyGL\OpenGLBase.cpp" />
+    <ClCompile Include="EasyGL\Shader.cpp" />
+    <ClCompile Include="EasyGL\VertexBuffer.cpp" />
     <ClCompile Include="FontManager.cpp" />
     <ClCompile Include="Screen.cpp" />
     <ClCompile Include="VideoPlayer.cpp" />

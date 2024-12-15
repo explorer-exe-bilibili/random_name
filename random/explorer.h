@@ -1,25 +1,19 @@
 ﻿#pragma once
-#include <Windows.h>
-#include <gdiplus.h>
-#include <memory>
 #include <string>
 #include <vector>
 #include "VideoPlayer.h"
+#include "EasyGL/EasyGL.h"
 class explorer
 {
 	static explorer* instance;
-	std::vector<std::shared_ptr<Gdiplus::Bitmap>> GdiImage;
-	std::vector<HBITMAP> HBitmap;
-	std::vector<BITMAP> Bitmap;
+	std::vector<Bitmap> Bitmaps;
 	VideoPlayer* video = nullptr;
 	bool playingbgm = false;
 public:
 	explorer();
 	~explorer();
 	static explorer* getInstance();
-	HBITMAP getHBitmap(int number)const;
-	const BITMAP* getBitmap(int number)const;
-	const Gdiplus::Image* getGdiImage(int number)const;
+	const Bitmap* getBitmap(int number)const;
 	static void PlayMusic(const std::string& alias);
 	static void PlayMusic(const std::wstring& alias);
 	void PlayVideo(const std::wstring& alias)const;

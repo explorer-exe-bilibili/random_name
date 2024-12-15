@@ -1,12 +1,11 @@
 ﻿#pragma once
 #include <memory>
-#include <thread>
 #include <vector>
-#include<Windows.h>
 
 #include "Button.h"
 #include "getname.h"
 #include "Screen.h"
+#include "EasyGL/Bitmap.h"
 
 #define STAR L"E"
 
@@ -22,13 +21,11 @@ class NameScreen :Screen
 	int step = 0;
 	unsigned int printedTime = 0;
 	NameItem items[10];
-	std::vector<HBITMAP> nameBitmaps;
-	std::vector<HBITMAP> nameBitmaps_Black;
+	std::vector<Bitmap> nameBitmaps;
+	std::vector<Bitmap> nameBitmaps_Black;
 	std::shared_ptr<NameButton> nameButton;
 	std::shared_ptr<Button> typeButton;
 public:
-	HFONT icon_star = nullptr;
-
 	explicit NameScreen(Gp* p);
 	NameScreen();
 	~NameScreen() override;

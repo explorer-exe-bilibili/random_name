@@ -131,52 +131,46 @@ void HistoryScreen::show()
 {
 	using namespace std;
 	p->Paint(0, 0, mywindows::WW, mywindows::WH, goldencardbg);
-	p->DrawString(L"历史记录", ui::text_mid, 0.46 * mywindows::WW, 0.01 * mywindows::WH);
+	p->DrawString(L"历史记录", *ui::text,ui::FontSize::normal, 0.46 * mywindows::WW, 0.01 * mywindows::WH);
 	int totalp = history.size() / 20;
 	if (history.size() % 20 != 0)totalp++;
 	const wstring t = to_wstring(page + 1) + L"/" + to_wstring(totalp);
-	const HDC hdc = p->GetDC();
-	SetBkMode(hdc, TRANSPARENT);
-	SetTextColor(hdc, RGB(236, 229, 216));
-	SelectObject(hdc, ui::icon_mid);
-	TextOut_(hdc, nextbmx, nextbmy, L"b");
-	TextOut_(hdc, lastbmx, lastbmy, L"c");
-	SelectObject(hdc, ui::text_mid);
-	TextOut_(hdc, mywindows::WW * 0.765, mywindows::WH * 0.91, t.c_str());
-	p->ReleaseDC(hdc);
+	p->DrawString(L"b", *ui::icon, ui::FontSize::normal, nextbmx, nextbmy, ARGB(255, 236, 229, 216));
+	p->DrawString(L"c", *ui::icon, ui::FontSize::normal, lastbmx, lastbmy, ARGB(255, 236, 229, 216));
+	p->DrawString(t, *ui::text, ui::FontSize::normal, mywindows::WW * 0.765, mywindows::WH * 0.91, ARGB(255, 236, 229, 216));
 	if (!hasRead)if (!ReadHistory()) {
 		const int back = MessageBox(nullptr, L"姓名文件出现问题，请检查(点击是打开文件)", L"错误", MB_ICONERROR | MB_YESNO);
 		if (back == IDYES)ShellExecute(nullptr, L"open", filename.c_str(), nullptr, nullptr, SW_SHOWNORMAL);
 		ui::ScreenMode = FIRST_SCREEN;
 	}
-	if (history.size() == 0) {
+	if (history.empty()) {
 		MessageBox(nullptr, L"没有历史记录", L"提示", MB_ICONINFORMATION);
 		ui::ScreenMode = FIRST_SCREEN;
 	}
 	for (int j = 0; j < history[page].size(); j++)
 	{
 #define rgb ARGB(255,255,255,255)
-		p->DrawString(history[page][j].time, ui::text_mid, xy[j].TimeX, xy[j].y, rgb);
-		p->DrawString(history[page][j].name, ui::text_mid, xy[j].x, xy[j].y, rgb);
-		p->DrawString(std::to_wstring(history[page][j].star), ui::text_mid, xy[j].starX, xy[j].y, rgb);
+		p->DrawString(history[page][j].time, *ui::text,ui::FontSize::mid, xy[j].TimeX, xy[j].y, rgb);
+		p->DrawString(history[page][j].name, *ui::text,ui::FontSize::mid, xy[j].x, xy[j].y, rgb);
+		p->DrawString(std::to_wstring(history[page][j].star), *ui::text,ui::FontSize::mid, xy[j].starX, xy[j].y, rgb);
 		switch (history[page][j].type)
 		{
 		case -1:
-			p->DrawString(L"未知", ui::text_mid, xy[j].TypeX, xy[j].y, rgb);
+			p->DrawString(L"未知", *ui::text,ui::FontSize::mid, xy[j].TypeX, xy[j].y, rgb);
 		case 0:
-			p->DrawString(L"弓箭", ui::text_mid, xy[j].TypeX, xy[j].y, rgb);
+			p->DrawString(L"弓箭", *ui::text,ui::FontSize::mid, xy[j].TypeX, xy[j].y, rgb);
 			break;
 		case 1:
-			p->DrawString(L"单手剑", ui::text_mid, xy[j].TypeX, xy[j].y, rgb);
+			p->DrawString(L"单手剑", *ui::text,ui::FontSize::mid, xy[j].TypeX, xy[j].y, rgb);
 			break;
 		case 2:
-			p->DrawString(L"法器", ui::text_mid, xy[j].TypeX, xy[j].y, rgb);
+			p->DrawString(L"法器", *ui::text,ui::FontSize::mid, xy[j].TypeX, xy[j].y, rgb);
 			break;
 		case 3:
-			p->DrawString(L"双手剑", ui::text_mid, xy[j].TypeX, xy[j].y, rgb);
+			p->DrawString(L"双手剑", *ui::text,ui::FontSize::mid, xy[j].TypeX, xy[j].y, rgb);
 			break;
 		case 4:
-			p->DrawString(L"长枪", ui::text_mid, xy[j].TypeX, xy[j].y, rgb);
+			p->DrawString(L"长枪", *ui::text,ui::FontSize::mid, xy[j].TypeX, xy[j].y, rgb);
 			break;
 		default: ;
 		}

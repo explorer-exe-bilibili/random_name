@@ -9,6 +9,8 @@
 
 #include "ConfigItem.h"
 #include "mywindows.h"
+#include "sth2sth.h"
+#include "EasyGL/Bitmap.h"
 
 explorer* explorer::instance = nullptr;
 
@@ -19,19 +21,6 @@ explorer::explorer()
 
 explorer::~explorer()
 {
-	for(auto& i:HBitmap)
-	{
-		if(i)
-			DeleteObject(&i);
-		i = nullptr;
-	}
-	for(auto&i:Bitmap)
-	{
-		i = {};
-	}
-	HBitmap.clear();
-	Bitmap.clear();
-	GdiImage.clear();
 	mciSendString(L"close star3", nullptr, 0, nullptr);
 	mciSendString(L"close star4", nullptr, 0, nullptr);
 	mciSendString(L"close star5", nullptr, 0, nullptr);
@@ -51,30 +40,13 @@ explorer* explorer::getInstance()
 	return instance;
 }
 
-HBITMAP explorer::getHBitmap(const int number)const
-{
-	if (number >= HBitmap.size() || number < 0)
-		throw std::out_of_range("number out of range");
-	else if(!HBitmap[number])
-		throw std::runtime_error("HBitmap is nullptr");
-	else
-		return HBitmap[number];
-}
 
-const BITMAP* explorer::getBitmap(const int number) const
+const Bitmap* explorer::getBitmap(const int number)const
 {
-	if(number>=Bitmap.size()||number<0)
+	if (number >= Bitmaps.size() || number < 0)
 		throw std::out_of_range("number out of range");
 	else
-		return &Bitmap[number];
-}
-
-const Gdiplus::Image* explorer::getGdiImage(const int number)const
-{
-	if (number >= GdiImage.size() || number < 0)
-		throw std::out_of_range("number out of range");
-	else
-		return GdiImage[number].get();
+		return &Bitmaps[number];
 }
 
 void explorer::PlayMusic(const std::string& alias)
@@ -141,11 +113,11 @@ void explorer::Load()
 	for (char t = 1; t <= config::getint(POOL_COUNT); t++)
 	{
 		std::wstring configName = L"over" + std::to_wstring(t);
-		GdiImage.push_back(std::make_shared<Gdiplus::Bitmap>(config::getpath(configName).c_str()));
+		Bitmaps.emplace_back(sth2sth::wstr2str(config::getpath(configName)));
 		presses+=0.5;
 	}
 	std::wstring path = config::getpath(FLOATPHOTO);
-	GdiImage.push_back(std::make_shared<Gdiplus::Bitmap>(path.c_str()));
+	Bitmaps.emplace_back(sth2sth::wstr2str(path));
 	std::wstring directory = config::getpath(IMAGE_DIRECTORY);
 	std::wregex regex(LR"((\d+)\.\w+)");
 	std::vector<std::pair<int, std::wstring>> files;
@@ -170,31 +142,8 @@ void explorer::Load()
 	presses++;
 	for (const auto& file : files)
 	{
-		GdiImage.push_back(std::make_shared<Gdiplus::Bitmap>(file.second.c_str()));
+		Bitmaps.emplace_back(sth2sth::wstr2str(file.second));
 		presses+=0.5;
-	}
-	for (auto& i : GdiImage)
-	{
-		if(i->GetLastStatus()!=Gdiplus::Status::Ok)
-		{
-			mywindows::errlog(L"图片加载失败");
-		}
-		HBITMAP temp;
-		i->GetHBITMAP(Gdiplus::Color(0, 0, 0), &temp);
-		HBitmap.push_back(temp);
-		presses += 0.25;
-	}
-	for (auto& i : HBitmap)
-	{
-		if (!i)
-			throw std::runtime_error("HBitmap is nullptr");
-		else
-		{
-			BITMAP temp;
-			GetObject(i, sizeof(BITMAP), &temp);
-			Bitmap.push_back(temp);
-		}
-		presses += 0.1;
 	}
 	presses = 75;
 	presses_str = "加载其它音乐和音效";
@@ -217,7 +166,7 @@ void explorer::Load()
 
 void explorer::reloadBitmap(int number)
 {
-	if (number < 0 || number >= GdiImage.size())return;
+	if (number < 0 || number >= Bitmaps.size())return;
 	std::wstring path;
 	if (number <= 3)
 	{
@@ -249,23 +198,7 @@ void explorer::reloadBitmap(int number)
 			});
 		path += files[number - 4].second;
 	}
-	GdiImage[number] = std::make_shared<Gdiplus::Bitmap>(path.c_str());
-	Gdiplus::Bitmap* t_gb = new Gdiplus::Bitmap(path.c_str());
-	if (t_gb->GetLastStatus() != Gdiplus::Status::Ok)
-	{
-		std::wstring message = L"加载图片出错，请检查文件路径，报错码为（gdiplus）：" + t_gb->GetLastStatus();
-		MessageBox(nullptr, message.c_str(), L"错误", MB_ICONERROR);
-		mywindows::errlog(message.c_str());
-		return;
-	}
-	GdiImage[number].reset(t_gb);
-	DeleteObject(HBitmap[number]);
-	HBITMAP t;
-	GdiImage[number]->GetHBITMAP(Gdiplus::Color(0, 0, 0), &t);
-	HBitmap[number] = t;
-	BITMAP t_B;
-	GetObject(t, sizeof(BITMAP), &t_B);
-	Bitmap[number] = t_B;
+	Bitmaps[number] = Bitmap(sth2sth::wstr2str(path));
 }
 
 void explorer::reloadVideo(std::wstring alias) const

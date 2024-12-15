@@ -1,5 +1,5 @@
 ﻿#pragma once
-#include<Windows.h>
+#include "EasyGL/My_Font.h"
 
 class MenuScreen;
 class set2;
@@ -19,8 +19,16 @@ enum ScreenMode
 class ui
 {
 public:
+	enum FontSize
+	{
+		star = 3,
+		normal = 20,
+		mid = 30,
+		big = 40
+	};
+
 	static int mode,ScreenMode;
-	static HFONT text, icon, text_big, text_mid, text_list, icon_mid;
+	static Font* text, *icon;
 	static bool ScreenModeChanged;
 	static HistoryScreen* HS;
 	static FirstScreen* FS;

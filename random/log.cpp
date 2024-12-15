@@ -45,15 +45,13 @@ bool Log::CreatedMultipleDirectory(const std::string& direct)
     return false;
 }
 Log::Log(const std::string& fileName) {
-	std::string filepath;
-	filepath = runpath;
+	std::string filepath = runpath;
 	filepath += fileName;
 	CreatedMultipleDirectory(".\\files\\log");
 	logFile.open(fileName, std::ios::app);
 }
 Log::Log(const std::string& fileName, const bool add) {
-	std::string filepath;
-	filepath = runpath;
+	std::string filepath = runpath;
 	filepath += fileName;
 	CreatedMultipleDirectory(".\\files\\log");
 	FileName = fileName;
@@ -87,11 +85,10 @@ Log& operator<<(Log& log, std::ostream& (*f)(std::ostream&)) {
 }
 Log& Log::operator<<(const long double value) {
 	if (value != INSIDEINT) {
-		long int v;
 		long long t = value / 1;
 		if (value - t == 0)
 		{
-			v = value;
+			long int v = value;
 			writeToLog(std::to_string(v));
 		}
 		else {

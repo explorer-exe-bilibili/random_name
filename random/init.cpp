@@ -18,53 +18,8 @@ WNDPROC w2_, w3_;
 
 void init::font()
 {
-	const int desiredPixelHeight = mywindows::WW * 0.17;
-	// 获取设备上下文的 DPI
-	const HDC hdc = GetDC(nullptr); // 获取桌面设备上下文
-	const int dpi = GetDeviceCaps(hdc, LOGPIXELSY);
-	// 计算逻辑单位高度
-	const int logicalHeight = MulDiv(desiredPixelHeight, 72, dpi);
-	const int logicalWidth = logicalHeight * 0.77;
-	bool isInstall = checkIsFontInstalled(L"genshin-icon");
-	if (isInstall) {
-		//ui::NS->icon_star = CreateFontW(logicalHeight * 0.0862, logicalWidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
-		ui::icon_mid = CreateFontW(logicalHeight * 0.16, logicalWidth * 0.22, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
-		ui::icon = CreateFontW(logicalHeight * 0.2299, logicalWidth * 0.3008, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"genshin-icon");
-	}
-	else {
-		MessageBox(nullptr, L"请安装字体", L"错误", MB_ICONERROR);
-		mywindows::errlogf << R"("genshin - icon"字体未安装)" << std::endl;
-		system("files\\ttfs\\icon.ttf");
-		mywindows::reboot();
-	}
-	isInstall = checkIsFontInstalled(L"SDK_SC_Web");
-	if(isInstall){
-		ui::text = CreateFontW(logicalHeight * 0.1149, logicalWidth * 0.1127, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
-		ui::text_mid = CreateFontW(logicalHeight * 0.1724, logicalWidth * 0.1729, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
-		ui::text_list = CreateFontW(logicalHeight * 0.7, logicalWidth * 0.7, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
-	}
-	else {
-		MessageBox(nullptr, L"请安装字体", L"错误", MB_ICONERROR);
-		mywindows::errlogf << R"(SDK_SC_Web字体未安装)" << std::endl;
-		system("files\\ttfs\\text.ttf");
-		mywindows::reboot();
-	}
-	if (!config::getint(UNSUITFONT)) {
-		isInstall = checkIsFontInstalled(L"Aa漆书");
-		if (isInstall) {
-			ui::text_big = CreateFontW(logicalHeight*1.3, logicalWidth*1.3, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"Aa漆书");
-		}
-		else {
-			MessageBox(nullptr, L"请安装字体", L"错误", MB_ICONERROR);
-			mywindows::errlogf << R"(Aa漆书字体未安装)" << std::endl;
-			system("files\\ttfs\\QS.ttf");
-			mywindows::reboot();
-		}
-	}
-	else {
-		ui::text_big = CreateFontW(logicalHeight*1.3, logicalWidth*1.3, 0, 0, FW_NORMAL, 0, 0, 0, ANSI_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, DEFAULT_PITCH, L"SDK_SC_Web");
-	}
-	ReleaseDC(nullptr, hdc);
+	ui::text = new Font((Log::runpath+"\\files\\ttfs\\text.ttf"), false);
+	ui::icon = new Font((Log::runpath + "\\files\\ttfs\\icon.ttf"), false);
 }
 void init::resetPoint()
 {
@@ -81,28 +36,21 @@ void init::resetPoint()
 		ui::FS->resetSize();
 		ui::SS->resetplace();
 		ui::NS->resetPoint();
-		DeleteObject(ui::NS->icon_star);
-		DeleteObject(ui::text_mid);
-		DeleteObject(ui::text_big);
-		DeleteObject(ui::text);
-		DeleteObject(ui::text_list);
-		DeleteObject(ui::icon_mid);
-		DeleteObject(ui::icon);
 		font();
 	}
 }
 void init::main(WNDPROC w1, WNDPROC w2, WNDPROC w3)
 {
 	std::thread([w1, w2, w3] { regWindow(w1, w2, w3); }).detach();
-	//SetConsoleOutputCP(65001); // 设置为UTF-8编码
-	//CHAR run[260] = {};
-	//GetModuleFileNameA(nullptr, run, MAX_PATH);
-	//const int len = MultiByteToWideChar(CP_ACP, 0, run, -1, nullptr, 0);
-	//wchar_t* run_ = new wchar_t[len];
-	//MultiByteToWideChar(CP_ACP, 0, run, -1, run_, len);
-	//Log::wrunpath = run_;
-	//mywindows::log("getting run path \n%s", run);
-	//mywindows::log(L"getting run path \n%s", run_);
+	SetConsoleOutputCP(65001); // 设置为UTF-8编码
+	CHAR run[260] = {};
+	GetModuleFileNameA(nullptr, run, MAX_PATH);
+	const int len = MultiByteToWideChar(CP_ACP, 0, run, -1, nullptr, 0);
+	wchar_t* run_ = new wchar_t[len];
+	MultiByteToWideChar(CP_ACP, 0, run, -1, run_, len);
+	Log::wrunpath = run_;
+	mywindows::log("getting run path \n%s", run);
+	mywindows::log(L"getting run path \n%s", run_);
 	//mywindows::removeFileNameFromPath(run);
 	//Log::wrunpath = run_;
 	//mywindows::removeFileNameFromPath(Log::wrunpath);
@@ -229,41 +177,4 @@ DWORD WINAPI init::Upgrade(){
 	}
 	ShellExecute(nullptr, L"open", L"upgrade.exe", nullptr, nullptr, SW_SHOWNORMAL);
 	return 0;
-}
-
-bool init::checkIsFontInstalled(const std::wstring& fontName) {
-	using namespace Gdiplus;
-	// 要检查的字体名称
-	bool isFontInstalled = false;
-	const InstalledFontCollection installedFontCollection;
-	INT          found = 0;
-	WCHAR        familyName[LF_FACESIZE];  // enough space for one family name
-
-	// How many font families are installed?
-	const INT count = installedFontCollection.GetFamilyCount();
-
-	// Allocate a buffer to hold the array of FontFamily
-	// objects returned by GetFamilies.
-	FontFamily* pFontFamily = new FontFamily[count];
-
-	// Get the array of FontFamily objects.
-	installedFontCollection.GetFamilies(count, pFontFamily, &found);
-
-	// The loop below creates a large string that is a comma-separated
-	// list of all font family names.
-	// Allocate a buffer large enough to hold that string.
-	const auto familyList = new WCHAR[count * (sizeof(familyName) + 3)];
-	StringCchCopy(familyList, 1, L"");
-
-	for (INT j = 0; j < count; ++j)
-	{
-		pFontFamily[j].GetFamilyName(familyName);
-		if (fontName == familyName) {
-			isFontInstalled = true;
-		}
-	}
-	delete[] pFontFamily;
-	delete[] familyList;
-
-	return isFontInstalled;
 }
