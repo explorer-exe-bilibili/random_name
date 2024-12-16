@@ -3,6 +3,8 @@
 #include <Windows.h>
 #include <glad/glad.h>
 #include <iostream>
+#include <GLFW/glfw3.h>
+
 #include "EasyGL.h"
 #include "Bitmap.h"
 #include "My_Font.h"
@@ -113,6 +115,8 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 		easyGL.DrawRectangle(200, 200, 500, 500, color(1.0, 0.0, 0.0), 0);
 		easyGL.DrawString("hello啊？", *font, 200, 200, 50, color(123, 245, 235));
 		easyGL.DrawVerticalString("hello啊？", *font, 200, 200, 50, color(123, 245, 235));
+		font->RenderText(L"hello啊？", 200, 200, 1, glm::vec3(1.0, 1.0, 1.0));
+		font->RendChar(L'a', 0, 0, 1, glm::vec3(0, 0, 1.0));
 		easyGL.EndRender();
 
 		EndPaint(hwnd, &ps);
@@ -144,6 +148,12 @@ LRESULT CALLBACK WindowProc(HWND hwnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 
 int main()
 {
+
+	//设置OpenGL版本为3.3
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+	glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+	glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+
 	// 注册窗口类
 	WNDCLASS wc = {};
 	wc.style = CS_OWNDC;

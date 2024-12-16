@@ -77,13 +77,7 @@ void Bitmap::init()
     VertexArray::Unbind();
 }
 
-Bitmap::~Bitmap()
-{
-    if (IsLoad)
-    {
-        glDeleteTextures(1, &texture);
-    }
-}
+Bitmap::~Bitmap() = default;
 
 bool Bitmap::LoadFromFile(const std::string& path)
 {
@@ -104,18 +98,12 @@ bool Bitmap::LoadFromFile(const std::string& path)
     else if (channels == 4)
         format = GL_RGBA;
 
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    // 设置纹理参数
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // 加载纹理数据
-    glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
+    // 加载纹理数据到 Texture 对象
+    texture.Bind();
+    texture.LoadFromData(data, width, height, format);
+    texture.SetWrapMode(GL_REPEAT, GL_REPEAT);
+    texture.SetFilterMode(GL_LINEAR, GL_LINEAR);
+    Texture::Unbind();
 
     // 释放图像数据
     stbi_image_free(data);
@@ -123,6 +111,7 @@ bool Bitmap::LoadFromFile(const std::string& path)
 
     return true;
 }
+
 
 void Bitmap::Draw(const glm::vec3& topLeft, const glm::vec3& bottomRight, float angle) const
 {
@@ -148,7 +137,7 @@ void Bitmap::Draw(const glm::vec3& topLeft, const glm::vec3& bottomRight, float 
 
     // 绑定纹理
     glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, texture);
+    texture.Bind();
     shader->setInt("texture1", 0);
 
     // 绘制
@@ -158,4 +147,5 @@ void Bitmap::Draw(const glm::vec3& topLeft, const glm::vec3& bottomRight, float 
     // 解绑 VAO 和 IBO
     VertexArray::Unbind();
     IndexBuffer::Unbind();
+    Texture::Unbind();
 }

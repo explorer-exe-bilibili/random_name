@@ -162,7 +162,8 @@ void Font::RenderText(const std::wstring& text, float x, float y, float scale, c
 		};
 
 		// 绑定纹理
-		GLCall(glBindTexture(GL_TEXTURE_2D, ch.TextureID));
+		ch.texture.Bind();
+
 
 		// 更新顶点缓冲
 		VBO.Bind();
@@ -177,6 +178,7 @@ void Font::RenderText(const std::wstring& text, float x, float y, float scale, c
 	}
 
 	VertexArray::Unbind();
+	Texture::Unbind();
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDisable(GL_BLEND);
 }
@@ -243,28 +245,27 @@ bool Font::operator==(const Font& b) const
 std::mutex mx;
 bool Font::LoadCharacter(wchar_t c)
 {
-	//检查是否已经加载过
-	if (Characters.contains(c))return true;
-	mx.lock();
+	// 检查是否已经加载过
+	if (Characters.contains(c)) return true;
+	std::lock_guard<std::mutex> lock(mx);
+
 	// 加载字符字形
-	if (FT_Get_Char_Index(face,c)==0)
+	if (FT_Get_Char_Index(face, c) == 0)
 	{
-		mx.unlock();
 		std::wcout << L"字符不存在: " << c << std::endl;
-		if (!spare_font)return false;
-		if (FT_Get_Char_Index(spare_font->face, c) == 0)return false;
-		Characters.insert(std::pair(c, spare_font->GetCharacter(c)));
+		if (!spare_font) return false;
+		if (FT_Get_Char_Index(spare_font->face, c) == 0) return false;
+		Characters.insert(std::make_pair(c, spare_font->GetCharacter(c)));
 		return true;
 	}
 	if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
-		mx.unlock();
 		std::wcerr << L"加载字符失败: " << c << std::endl;
 		return false;
 	}
-	// 生成纹理
-	unsigned int texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
+
+	// 创建纹理
+	Texture characterTexture;
+	characterTexture.Bind();
 	glTexImage2D(
 		GL_TEXTURE_2D,
 		0,
@@ -276,26 +277,22 @@ bool Font::LoadCharacter(wchar_t c)
 		GL_UNSIGNED_BYTE,
 		face->glyph->bitmap.buffer
 	);
-
-	// 设置纹理选项
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// 设置纹理参数
+	characterTexture.SetWrapMode(GL_CLAMP_TO_EDGE, GL_CLAMP_TO_EDGE);
+	characterTexture.SetFilterMode(GL_LINEAR, GL_LINEAR);
+	Texture::Unbind();
 
 	// 存储字符
 	Character character = {
-		texture,
+		characterTexture,
 		glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
 		glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
 		static_cast<unsigned int>(face->glyph->advance.x)
 	};
-	Characters.insert(std::pair(c, character));
-	std::wcout << c<<L"\t";
-	mx.unlock();
+	Characters.insert(std::make_pair(c, character));
+	std::wcout << c << L"\t";
 	return true;
 }
-
 float Font::GetFontSize() const
 {
 	return fontSize;

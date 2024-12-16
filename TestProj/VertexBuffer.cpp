@@ -167,3 +167,45 @@ VertexArray& VertexArray::operator=(const VertexArray& va)
 	}
 	return *this;
 }
+
+Texture::Texture() {
+	glGenTextures(1, &ID);
+}
+
+Texture::~Texture() {
+	glDeleteTextures(1, &ID);
+}
+
+bool Texture::LoadFromData(unsigned char* data, int width, int height, GLenum format) {
+	glBindTexture(GL_TEXTURE_2D, ID);
+	glTexImage2D(GL_TEXTURE_2D, 0, format, width, height, 0, format, GL_UNSIGNED_BYTE, data);
+	glGenerateMipmap(GL_TEXTURE_2D);
+	glBindTexture(GL_TEXTURE_2D, 0);
+	return true;
+}
+
+void Texture::Bind() const {
+	glBindTexture(GL_TEXTURE_2D, ID);
+}
+
+void Texture::Unbind() {
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Texture::SetWrapMode(GLenum wrapS, GLenum wrapT) {
+	glBindTexture(GL_TEXTURE_2D, ID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, wrapS);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, wrapT);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Texture::SetFilterMode(GLenum minFilter, GLenum magFilter) {
+	glBindTexture(GL_TEXTURE_2D, ID);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, minFilter);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, magFilter);
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+unsigned int Texture::GetID() const {
+	return ID;
+}

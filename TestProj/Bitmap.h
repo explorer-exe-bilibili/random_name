@@ -10,7 +10,7 @@
 class Bitmap
 {
     bool IsLoad = false;
-    unsigned int texture = 0;
+    Texture texture;
     static std::shared_ptr<Shader> shader;
 
     // 使用自定义的缓冲区类

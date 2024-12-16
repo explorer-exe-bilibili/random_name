@@ -10,10 +10,10 @@
 #include "VertexBuffer.h"
 
 struct Character {
-    unsigned int     TextureID;  // 字符纹理ID
-    glm::ivec2 Size;             // 字符大小
-    glm::ivec2 Bearing;          // 基线到字符左部/顶部的偏移值
-    unsigned int     Advance;    // 原点距下一个字形原点的水平偏移量
+    Texture texture;         // 字符纹理
+    glm::ivec2 Size;         // 字符大小
+    glm::ivec2 Bearing;      // 基线到字符左部/顶部的偏移值
+    unsigned int Advance;    // 原点距下一个字形原点的水平偏移量
 };
 
 class Font {

@@ -1,6 +1,7 @@
 ﻿#include "EasyGL.h"
 
 #include <glad/glad.h>
+#include<GLFW/glfw3.h>
 #include <gl/GL.h>
 #include <algorithm>
 #include <iostream>
@@ -23,6 +24,7 @@ EasyGL::~EasyGL()
 
 bool EasyGL::Init(const HWND hwnd)
 {
+	
 	// 获取设备上下文
 	hDC = GetDC(hwnd);
 	if (!hDC)
@@ -64,13 +66,13 @@ bool EasyGL::Init(const HWND hwnd)
 		std::cerr << "激活当前 OpenGL 渲染上下文失败！" << std::endl;
 		return false;
 	}
-
 	// 初始化 GLAD
 	if (!gladLoadGL())
 	{
 		std::cerr << "初始化 GLAD 失败！" << std::endl;
 		return false;
 	}
+	std::cout << "OpenGL版本：" << glGetString(GL_VERSION) << std::endl;
 
 	// 设置视口
 	RECT rect;

@@ -58,3 +58,28 @@ public:
 
 	VertexArray& operator=(const VertexArray& va);
 };
+
+class Texture {
+public:
+	Texture();
+	~Texture();
+
+	// 从内存数据加载纹理
+	bool LoadFromData(unsigned char* data, int width, int height, unsigned int format);
+
+	// 绑定纹理
+	void Bind() const;
+
+	// 解绑纹理
+	static void Unbind();
+
+	// 设置纹理参数
+	void SetWrapMode(unsigned int wrapS, unsigned int wrapT);
+	void SetFilterMode(unsigned int minFilter, unsigned int magFilter);
+
+	// 获取纹理ID
+	unsigned int GetID() const;
+
+private:
+	unsigned int ID;
+};
