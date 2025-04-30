@@ -234,6 +234,12 @@
     <ClInclude Include="Button.h" />
     <ClInclude Include="config.h" />
     <ClInclude Include="ConfigItem.h" />
+    <ClInclude Include="opengl\Application.h" />
+    <ClInclude Include="opengl\FontRenderer.h" />
+    <ClInclude Include="opengl\GLRenderer.h" />
+    <ClInclude Include="opengl\Shader.h" />
+    <ClInclude Include="opengl\Texture.h" />
+    <ClInclude Include="opengl\Window.h" />
     <ClInclude Include="Screen.h" />
     <ClInclude Include="VideoPlayer.h" />
     <ClInclude Include="floatwindow.h" />
@@ -264,6 +270,13 @@
     <ClCompile Include="Button.cpp" />
     <ClCompile Include="config.cpp" />
     <ClCompile Include="ConfigItem.cpp" />
+    <ClCompile Include="opengl\Application.cpp" />
+    <ClCompile Include="opengl\FontRenderer.cpp" />
+    <ClCompile Include="opengl\GLRenderer.cpp" />
+    <ClCompile Include="opengl\main.cpp" />
+    <ClCompile Include="opengl\Shader.cpp" />
+    <ClCompile Include="opengl\Texture.cpp" />
+    <ClCompile Include="opengl\Window.cpp" />
     <ClCompile Include="Screen.cpp" />
     <ClCompile Include="VideoPlayer.cpp" />
     <ClCompile Include="floatwindow.cpp" />
@@ -282,7 +295,6 @@
     <ClCompile Include="NameScreen.cpp" />
     <ClCompile Include="Others.cpp" />
     <ClCompile Include="Painter.cpp" />
-    <ClCompile Include="random.cpp" />
     <ClCompile Include="explorer.cpp" />
     <ClCompile Include="set-json.cpp" />
     <ClCompile Include="SetButton.cpp" />

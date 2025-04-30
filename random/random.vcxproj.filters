@@ -22,6 +22,12 @@
     <Filter Include="源文件\前端\设置界面">
       <UniqueIdentifier>{faea4ab6-4bad-45b4-a2ec-35fdf8b98ad5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="openGL">
+      <UniqueIdentifier>{df682933-9cf2-48db-92b0-8fe94a80c69d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="源文件\OpenGL">
+      <UniqueIdentifier>{7bc1c472-b64f-4569-93e4-525f7fe0256b}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="mywindows.h">
@@ -111,11 +117,26 @@
     <ClInclude Include="Screen.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="opengl\Application.h">
+      <Filter>openGL</Filter>
+    </ClInclude>
+    <ClInclude Include="opengl\FontRenderer.h">
+      <Filter>openGL</Filter>
+    </ClInclude>
+    <ClInclude Include="opengl\GLRenderer.h">
+      <Filter>openGL</Filter>
+    </ClInclude>
+    <ClInclude Include="opengl\Shader.h">
+      <Filter>openGL</Filter>
+    </ClInclude>
+    <ClInclude Include="opengl\Texture.h">
+      <Filter>openGL</Filter>
+    </ClInclude>
+    <ClInclude Include="opengl\Window.h">
+      <Filter>openGL</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="random.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
     <ClCompile Include="mywindows.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
@@ -129,9 +150,6 @@
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="sth2sth.cpp">
-      <Filter>源文件</Filter>
-    </ClCompile>
-    <ClCompile Include="ui.cpp">
       <Filter>源文件</Filter>
     </ClCompile>
     <ClCompile Include="init.cpp">
@@ -199,6 +217,30 @@
     </ClCompile>
     <ClCompile Include="NameButton.cpp">
       <Filter>源文件\前端</Filter>
+    </ClCompile>
+    <ClCompile Include="ui.cpp">
+      <Filter>源文件\前端</Filter>
+    </ClCompile>
+    <ClCompile Include="opengl\Application.cpp">
+      <Filter>源文件\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="opengl\FontRenderer.cpp">
+      <Filter>源文件\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="opengl\GLRenderer.cpp">
+      <Filter>源文件\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="opengl\Shader.cpp">
+      <Filter>源文件\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="opengl\main.cpp">
+      <Filter>源文件\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="opengl\Texture.cpp">
+      <Filter>源文件\OpenGL</Filter>
+    </ClCompile>
+    <ClCompile Include="opengl\Window.cpp">
+      <Filter>源文件\OpenGL</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
