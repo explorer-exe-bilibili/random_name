@@ -1,21 +1,11 @@
 {
-    "name": "random-name",
-    "version-string": "0.1.0",
-    "dependencies": [
-        "uchardet",
-        "nlohmann-json",
-        "minizip",
-        "jsoncpp",
-        "libzip",
-        "curl",
-        "zlib",
-		"opengl",
-		"freetype",
-		"glm",
-		"glew",
-		"glfw3",
-		"stb",
-		"glad"
-    ]
-    
+  "name": "random-name",
+  "version": "1.0.0",
+  "description": "Random Name Project",
+  "builtin-baseline": "3426db05b996481ca31e95fff3734cf23e0f51bc",
+  "dependencies": [
+    "fmt",
+    "nlohmann-json",
+    "glfw3"
+  ]
 }

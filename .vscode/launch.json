@@ -1,15 +1,12 @@
 {
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "C/C++ Runner: Debug Session",
-      "type": "cppvsdbg",
-      "request": "launch",
-      "args": [],
-      "stopAtEntry": false,
-      "console": "externalTerminal",
-      "cwd": "d:/Users/explorer/Source/Repos/random_name/random/Release",
-      "program": "d:/Users/explorer/Source/Repos/random_name/random/Release/build/Debug/outDebug"
-    }
-  ]
+    "configurations": [
+        {
+            "type": "cmake",
+            "request": "launch",
+            "name": "Debug portfile(s)",
+            "cmakeDebugType": "external",
+            "pipeName": "\\\\.\\pipe\\vcpkg_ext_portfile_dbg",
+            "preLaunchTask": "Debug vcpkg commands"
+        }
+    ]
 }
