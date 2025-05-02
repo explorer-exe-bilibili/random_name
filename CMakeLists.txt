@@ -37,6 +37,9 @@ find_package(fmt CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 
+# 查找 OpenGL 库
+find_package(OpenGL REQUIRED)
+
 # 创建可执行文件
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
@@ -48,4 +51,13 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     fmt::fmt
     glfw
     nlohmann_json::nlohmann_json
+    ${OPENGL_LIBRARIES}
 )
+
+# 如果使用GLAD或其他OpenGL加载库，确保在这里添加它们
+# 例如: ${GLAD_LIBRARIES}
+
+# 如果在不同平台上需要不同的链接
+if(WIN32)
+    target_link_libraries(${PROJECT_NAME} PRIVATE opengl32)
+endif()
