@@ -6,6 +6,10 @@
   "dependencies": [
     "fmt",
     "nlohmann-json",
-    "glfw3"
+    "glfw3",
+    "freetype",
+    "glm",
+    "glad",
+    "stb"
   ]
 }

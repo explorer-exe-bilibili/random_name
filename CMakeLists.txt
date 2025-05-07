@@ -32,32 +32,81 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
 file(GLOB_RECURSE HEADERS "include/*.hpp" "include/*.h")
 
-# 查找所有依赖库 - 注意这里使用标准方式，无需特殊路径
+# 查找所有依赖库
 find_package(fmt CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
-
-# 查找 OpenGL 库
+find_package(Freetype CONFIG REQUIRED)
+find_package(glm CONFIG REQUIRED)
+find_package(glad CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
+find_path(STB_INCLUDE_DIRS "stb.h")
 
 # 创建可执行文件
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
 # 包含头文件目录
-target_include_directories(${PROJECT_NAME} PRIVATE include)
+target_include_directories(${PROJECT_NAME} PRIVATE 
+    include
+    ${FREETYPE_INCLUDE_DIRS}
+    ${GLM_INCLUDE_DIRS}
+    ${STB_INCLUDE_DIRS}
+)
 
-# 链接所有库 - 标准方式
+# 启用STB图像库的实现
+target_compile_definitions(${PROJECT_NAME} PRIVATE)
+
+# 链接所有库
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     fmt::fmt
     glfw
     nlohmann_json::nlohmann_json
+    freetype
+    glm
+    glad::glad
     ${OPENGL_LIBRARIES}
 )
-
-# 如果使用GLAD或其他OpenGL加载库，确保在这里添加它们
-# 例如: ${GLAD_LIBRARIES}
-
-# 如果在不同平台上需要不同的链接
+# 平台特定设置
 if(WIN32)
+    # Windows平台特定链接
     target_link_libraries(${PROJECT_NAME} PRIVATE opengl32)
+    
+    # 添加Windows资源文件（如图标）
+    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/OIP-C.ico")
+        configure_file("${CMAKE_CURRENT_SOURCE_DIR}/OIP-C.ico" 
+                       "${CMAKE_BINARY_DIR}/bin/OIP-C.ico" COPYONLY)
+    endif()
+elseif(APPLE)
+    # macOS平台特定链接
+    find_library(COCOA_LIBRARY Cocoa)
+    find_library(IOKIT_LIBRARY IOKit)
+    find_library(COREVIDEO_LIBRARY CoreVideo)
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        ${COCOA_LIBRARY}
+        ${IOKIT_LIBRARY}
+        ${COREVIDEO_LIBRARY}
+    )
+elseif(UNIX)
+    # Linux平台特定链接
+    find_package(X11 REQUIRED)
+    if(X11_FOUND)
+        target_include_directories(${PROJECT_NAME} PRIVATE ${X11_INCLUDE_DIR})
+        target_link_libraries(${PROJECT_NAME} PRIVATE ${X11_LIBRARIES})
+    endif()
+endif()
+
+# 设置安装规则
+install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+
+# 复制必要的资源文件到输出目录
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/files DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+# 使所有目标都依赖于vcpkg manifest模式中安装的所有库
+add_custom_target(copy_dlls ALL)
+if(WIN32)
+    add_custom_command(TARGET copy_dlls POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_BINARY_DIR}/vcpkg_installed/x64-windows/bin"
+            "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release"
+    )
 endif()
