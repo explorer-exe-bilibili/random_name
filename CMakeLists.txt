@@ -33,7 +33,6 @@ file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
 file(GLOB_RECURSE HEADERS "include/*.hpp" "include/*.h")
 
 # 查找所有依赖库
-find_package(fmt CONFIG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Freetype CONFIG REQUIRED)
@@ -58,7 +57,6 @@ target_compile_definitions(${PROJECT_NAME} PRIVATE)
 
 # 链接所有库
 target_link_libraries(${PROJECT_NAME} PRIVATE 
-    fmt::fmt
     glfw
     nlohmann_json::nlohmann_json
     freetype
