@@ -4,11 +4,12 @@
   "description": "Random Name Project",
   "builtin-baseline": "3426db05b996481ca31e95fff3734cf23e0f51bc",
   "dependencies": [
-    "nlohmann-json",
-    "glfw3",
     "freetype",
-    "glm",
     "glad",
-    "stb"
+    "glfw3",
+    "glm",
+    "nlohmann-json",
+    "stb",
+    "utfcpp"
   ]
 }

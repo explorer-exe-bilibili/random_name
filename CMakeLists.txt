@@ -39,6 +39,7 @@ find_package(Freetype CONFIG REQUIRED)
 find_package(glm CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
+find_package(utf8cpp CONFIG REQUIRED)
 find_path(STB_INCLUDE_DIRS "stb.h")
 
 # 创建可执行文件
@@ -63,6 +64,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     glm
     glad::glad
     ${OPENGL_LIBRARIES}
+    utf8cpp
 )
 # 平台特定设置
 if(WIN32)

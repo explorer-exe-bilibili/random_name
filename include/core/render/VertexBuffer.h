@@ -1,12 +1,14 @@
 #pragma once
 #include <glad/glad.h>
 
+namespace core {
+
 class VertexBuffer
 {
 	unsigned int rendererID;
 	unsigned int size;
 public:
-	VertexBuffer();
+	VertexBuffer(){glGenBuffers(1, &rendererID);}
 	VertexBuffer(const void* data, unsigned int size);
 	VertexBuffer(const VertexBuffer& vb);
 	~VertexBuffer();
@@ -21,3 +23,4 @@ public:
 
 	VertexBuffer& operator=(const VertexBuffer& vb);
 };
+}

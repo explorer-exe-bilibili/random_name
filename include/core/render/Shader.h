@@ -1,9 +1,9 @@
 #pragma once
+#include <glad/glad.h>
 #include <string>
-#include <glm/fwd.hpp>
-#include <glm/vec3.hpp>
-#include <glm/vec4.hpp>
+#include <glm/glm.hpp>
 
+namespace core {
 
 class Shader {
     unsigned int ID;
@@ -23,23 +23,47 @@ public:
     void Bind() const{use();};
 
     // 设置uniform变量
-    void setBool(const std::string& name, bool value) const;
-    void setInt(const std::string& name, int value) const;
-    void setFloat(const std::string& name, float value) const;
-    void set2float(const std::string& name, float value1, float value2) const;
-    void setVec3(const std::string& name, const glm::vec3& value) const;
-    void setVec4(const std::string& name, const glm::vec4& value) const;
-    void setMat4(const std::string& name, const glm::mat4& mat) const;
+    void setInt(const std::string& name, int value) const{glUniform1i(glGetUniformLocation(ID, name.c_str()), value);}
+    void setFloat(const std::string& name, float value) const{glUniform1f(glGetUniformLocation(ID, name.c_str()), value);}
+    void set2float(const std::string& name, float value1, float value2) const{glUniform2f(glGetUniformLocation(ID, name.c_str()), value1, value2);}
+    void setVec3(const std::string& name, const glm::vec3& value) const{glUniform3f(glGetUniformLocation(ID, name.c_str()), value.x, value.y, value.z);}
+    void setVec4(const std::string& name, const glm::vec4& value) const{glUniform4f(glGetUniformLocation(ID, name.c_str()), value.x, value.y, value.z, value.w);}
+    void setMat4(const std::string& name, const glm::mat4& mat) const{glUniformMatrix4fv(glGetUniformLocation(ID, name.c_str()), 1, GL_FALSE, &mat[0][0]);}
 
     //获取uniform变量
-	bool getBool(const std::string& name) const;
-	int getInt(const std::string& name) const;
-	unsigned int getUInt(const std::string& name) const;
-	float getFloat(const std::string& name) const;
-	glm::vec3 getVec3(const std::string& name) const;
-	glm::vec4 getVec4(const std::string& name) const;
-	glm::mat4 getMat4(const std::string& name) const;
+	int getInt(const std::string& name) const{
+        int value;
+        glGetUniformiv(ID, glGetUniformLocation(ID, name.c_str()), &value);
+        return value;
+    }
+	unsigned int getUInt(const std::string& name) const{
+        unsigned int value;
+        glGetUniformuiv(ID, glGetUniformLocation(ID, name.c_str()), &value);
+        return value;
+    }
+	float getFloat(const std::string& name) const{
+        float value;
+        glGetUniformfv(ID, glGetUniformLocation(ID, name.c_str()), &value);
+        return value;
+    }
+	glm::vec3 getVec3(const std::string& name) const{
+        glm::vec3 value;
+        glGetUniformfv(ID, glGetUniformLocation(ID, name.c_str()), &value[0]);
+        return value;
+    }
+	glm::vec4 getVec4(const std::string& name) const{
+        glm::vec4 value;
+        glGetUniformfv(ID, glGetUniformLocation(ID, name.c_str()), &value[0]);
+        return value;
+    }
+	glm::mat4 getMat4(const std::string& name) const{
+        glm::mat4 value;
+        glGetUniformfv(ID, glGetUniformLocation(ID, name.c_str()), &value[0][0]);
+        return value;
+    }
 	// 重载赋值运算符
 	Shader& operator=(const Shader&);
-	operator bool() const;
+	operator bool() const{return ID != 0;};
+    operator unsigned int() const{return ID;};
 };
+}

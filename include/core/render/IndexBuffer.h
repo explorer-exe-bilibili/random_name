@@ -1,6 +1,7 @@
 #pragma once
 #include <glad/glad.h>
 
+namespace core {
 
 class IndexBuffer
 {
@@ -20,3 +21,4 @@ public:
 
 	IndexBuffer& operator=(const IndexBuffer& ib);
 };
+}
