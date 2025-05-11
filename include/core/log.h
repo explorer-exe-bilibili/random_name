@@ -4,6 +4,7 @@
 #include <fstream>
 #include <thread>
 #include "baseitem/Base.h"
+#pragma execution_character_set("utf-8")
 
 enum class operation {
     time,

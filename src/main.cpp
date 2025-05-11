@@ -11,6 +11,7 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
+#pragma execution_character_set("utf-8")
 
 using namespace std;
 GLFWwindow* window;

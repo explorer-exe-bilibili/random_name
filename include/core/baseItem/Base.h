@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include "../render/Texture.h"
+#pragma execution_character_set("utf-8")
 
 namespace core
 {

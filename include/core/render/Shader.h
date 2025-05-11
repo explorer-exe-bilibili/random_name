@@ -2,6 +2,7 @@
 #include <glad/glad.h>
 #include <string>
 #include <glm/glm.hpp>
+#pragma execution_character_set("utf-8")
 
 namespace core {
 

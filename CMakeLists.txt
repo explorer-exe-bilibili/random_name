@@ -1,7 +1,4 @@
 cmake_minimum_required(VERSION 3.15)
-if(MSVC)
-  add_compile_options(/utf-8)
-endif()
 # 确保在任何其他操作之前设置 vcpkg 集成
 set(VCPKG_TARGET_TRIPLET "x64-windows" CACHE STRING "Vcpkg target triplet")
 
@@ -97,6 +94,7 @@ elseif(UNIX)
     endif()
 endif()
 
+
 # 设置安装规则
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 
@@ -111,4 +109,5 @@ if(WIN32)
             "${CMAKE_BINARY_DIR}/vcpkg_installed/x64-windows/bin"
             "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release"
     )
+    target_compile_options(${PROJECT_NAME} PRIVATE /utf-8)
 endif()

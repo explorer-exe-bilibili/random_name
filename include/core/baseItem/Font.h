@@ -7,6 +7,7 @@
 #include <freetype/freetype.h>
 #include <map>
 #include <memory>
+#pragma execution_character_set("utf-8")
 
 namespace core
 {

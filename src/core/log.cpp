@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <ctime>
 #include <mutex>
+#pragma execution_character_set("utf-8")
 
 Log_ Log;
 Logerr logErr;

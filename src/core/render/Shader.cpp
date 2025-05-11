@@ -4,6 +4,7 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <iostream>
+#pragma execution_character_set("utf-8")
 
 using namespace core;
 

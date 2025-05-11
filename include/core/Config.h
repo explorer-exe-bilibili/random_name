@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <filesystem>
+#pragma execution_character_set("utf-8")
 
 namespace core {
 

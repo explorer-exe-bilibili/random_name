@@ -6,6 +6,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 
+#pragma execution_character_set("utf-8")
 
 using namespace core;
 

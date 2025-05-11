@@ -1,6 +1,7 @@
 #include "mainloop.h"
 
 #include "core/log.h"
+#pragma execution_character_set("utf-8")
 
 int mainloop(GLFWwindow* window) {
     // 清除颜色和深度缓冲区

@@ -1,5 +1,6 @@
 #pragma once
 #include <glad/glad.h>
+#pragma execution_character_set("utf-8")
 
 namespace core {
 

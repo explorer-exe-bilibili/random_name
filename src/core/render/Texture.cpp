@@ -3,6 +3,7 @@
 #include "core/log.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <mutex>
+#pragma execution_character_set("utf-8")
 
 using namespace core;
 

@@ -2,6 +2,7 @@
 
 #include "render/Texture.h"
 #include "Bitmap.h"
+#pragma execution_character_set("utf-8")
 
 namespace core {
 class Button {

@@ -1,4 +1,5 @@
 #pragma once
+#pragma execution_character_set("utf-8")
 
 #include<glad/glad.h>
 #include <GLFW/glfw3.h>
