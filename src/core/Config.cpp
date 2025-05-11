@@ -6,7 +6,7 @@
 #include <filesystem>
 #include <iostream>
 #include <algorithm>
-#pragma execution_character_set("utf-8")
+
 
 namespace core {
 

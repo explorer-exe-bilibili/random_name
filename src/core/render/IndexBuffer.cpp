@@ -1,7 +1,7 @@
 #include"core/render/IndexBuffer.h"
 #include"core/log.h"
 #include<glad/glad.h>
-#pragma execution_character_set("utf-8")
+
 
 using namespace core;
 

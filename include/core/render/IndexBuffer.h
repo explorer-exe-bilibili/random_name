@@ -1,13 +1,13 @@
 #pragma once
 #include <glad/glad.h>
-#pragma execution_character_set("utf-8")
+
 
 namespace core {
 
 class IndexBuffer
 {
-	unsigned int rendererID;
-	unsigned int count;
+	unsigned int rendererID=0;
+	unsigned int count=0;
 public:
 	IndexBuffer();
 	IndexBuffer(const unsigned int* data, unsigned int count);

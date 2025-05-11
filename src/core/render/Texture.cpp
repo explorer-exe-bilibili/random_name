@@ -3,7 +3,7 @@
 #include "core/log.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <mutex>
-#pragma execution_character_set("utf-8")
+
 
 using namespace core;
 
@@ -156,7 +156,6 @@ void Texture::bind() const {
         Log<<Level::Error<<"Texture::bind() textureID is 0"<<op::endl;
         return;
     }
-    Log<<Level::Info<<"Texture::bind() "<<textureID<<op::endl;
     glActiveTexture(GL_TEXTURE0);
     glBindTexture(GL_TEXTURE_2D, textureID);
 }

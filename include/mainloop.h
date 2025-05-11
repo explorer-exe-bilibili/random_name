@@ -1,9 +1,19 @@
 #pragma once
-#pragma execution_character_set("utf-8")
-
-#include<glad/glad.h>
+#include <glad/glad.h>
 #include <GLFW/glfw3.h>
+#include <glm/glm.hpp>
+#include <glm/gtc/matrix_transform.hpp>
+#include <glm/gtc/type_ptr.hpp>
+#include <iostream>
+#include <string>
+
+#include "core/log.h"
+
+extern GLFWwindow* window;
 
 int mainloop(GLFWwindow* window);
 void KeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods);
 void MouseButtonEvent(GLFWwindow* window, int button, int action, int mods);
+
+int init();
+int cleanup();

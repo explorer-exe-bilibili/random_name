@@ -1,6 +1,6 @@
 #include "core/render/VertexArray.h"
 #include "core/log.h"
-#pragma execution_character_set("utf-8")
+
 
 using namespace core;
 

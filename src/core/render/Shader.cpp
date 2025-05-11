@@ -4,7 +4,7 @@
 #include <glad/glad.h>
 #include <glm/glm.hpp>
 #include <iostream>
-#pragma execution_character_set("utf-8")
+
 
 using namespace core;
 
@@ -102,7 +102,6 @@ void Shader::init(const std::string& VertexShader, const std::string& fragmentSh
 }
 
 void Shader::use() const {
-    Log<<Level::Info<<"Shader::use() "<<ID<<op::endl;
     if(ID == 0) {
         Log<<Level::Error<<"Shader::use() ID is 0"<<op::endl;
     }

@@ -1,7 +1,7 @@
 #include "core/render/VertexBuffer.h"
 #include "core/log.h"
 #include <cstdlib>
-#pragma execution_character_set("utf-8")
+
 
 using namespace core;
 

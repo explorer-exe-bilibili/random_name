@@ -3,15 +3,14 @@
 #include "core/log.h"
 
 #include <glm/gtc/matrix_transform.hpp>
-#pragma execution_character_set("utf-8")
+
 
 
 using namespace core;
 FT_Library Font::ft;
 bool Font::inited = false;
-std::shared_ptr<Font> Font::defaultFont = nullptr;
 Shader Font::shader;
-int FontIdID = 1;
+int FontIdID = 0;
 
 
 static std::string vertexShader = R"(
@@ -52,7 +51,6 @@ Font::Font(const std::string& fontPath, bool needPreLoad) : fontSize(48)
         inited = true;
         FT_Init_FreeType(&ft);
         shader.init(vertexShader, fragmentShader);
-        LoadDefaultFont();
         Log<<Level::Info<<"Font::Font() Init FreeType Success"<<op::endl;
     }
     Log<<Level::Info<<"Font::Font() Init Font face"<<op::endl;
@@ -70,12 +68,6 @@ Font::Font(const std::string& fontPath, bool needPreLoad) : fontSize(48)
     {
         Log<<Level::Info<<"Font::Font() Not Preload Font"<<op::endl;
         LoadCharacter('?');
-    }
-    if(this==defaultFont.get())
-    {
-        Log<<Level::Info<<"Font::Font() Set Default Font"<<op::endl;
-        Fontid=0;
-        return;
     }
     vao.Bind();
     vbo.Bind();
@@ -101,23 +93,10 @@ Font::~Font()
 {
     Log<<Level::Info<<"Font::~Font() "<<Fontid<<op::endl;
     FT_Done_Face(face);
-    if(this==defaultFont.get())
+    if(Fontid==0)
     {
         inited=false;
         FT_Done_FreeType(ft);
-    }
-}
-
-void Font::LoadDefaultFont()
-{
-    if (defaultFont == nullptr)
-    {
-        defaultFont = std::make_shared<Font>("files/fonts/spare.ttf", false);
-        defaultFont->fontSize = 48;
-        defaultFont->vao.Bind();
-        defaultFont->vbo.Bind();
-        defaultFont->vao.Unbind();
-        defaultFont->vbo.Unbind();
     }
 }
 

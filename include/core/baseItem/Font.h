@@ -7,7 +7,7 @@
 #include <freetype/freetype.h>
 #include <map>
 #include <memory>
-#pragma execution_character_set("utf-8")
+
 
 namespace core
 {
@@ -15,7 +15,6 @@ namespace core
 class Font{
     static FT_Library ft;
     static bool inited;
-    static std::shared_ptr<Font> defaultFont;
     static Shader shader;
 public:
     Font(const std::string& fontPath, bool needPreLoad=true);
@@ -37,12 +36,10 @@ public:
     Font& operator=(const Font& font);
 private:
     bool LoadCharacter(wchar_t c);
-
-    void LoadDefaultFont();
     
-    int Fontid;
-    FT_Face face;
-    float fontSize;
+    int Fontid=0;
+    FT_Face face=0;
+    float fontSize=0;
     std::map<wchar_t, core::Character> characters;
     VertexArray vao;
     VertexBuffer vbo;

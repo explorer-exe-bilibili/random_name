@@ -1,13 +1,13 @@
 #pragma once
 #include <glad/glad.h>
-#pragma execution_character_set("utf-8")
+
 
 namespace core {
 
 class VertexBuffer
 {
-	unsigned int rendererID;
-	unsigned int size;
+	unsigned int rendererID=0;
+	unsigned int size=0;
 public:
 	VertexBuffer(){glGenBuffers(1, &rendererID);}
 	VertexBuffer(const void* data, unsigned int size);

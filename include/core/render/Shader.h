@@ -2,14 +2,14 @@
 #include <glad/glad.h>
 #include <string>
 #include <glm/glm.hpp>
-#pragma execution_character_set("utf-8")
+
 
 namespace core {
 
 class Shader {
-    unsigned int ID;
-    std::string VertexShader;
-	std::string fragmentShader;
+    unsigned int ID=0;
+    std::string VertexShader="";
+	std::string fragmentShader="";
 public:
     // 构造函数读取并编译着色器
     Shader(const std::string& VertexShader, const std::string& fragmentShader);

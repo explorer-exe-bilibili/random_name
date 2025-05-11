@@ -3,7 +3,7 @@
 
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
-#pragma execution_character_set("utf-8")
+
 
 namespace core {
 

@@ -1,8 +1,8 @@
 #pragma once
 
-#include "render/Texture.h"
+#include "../render/Texture.h"
 #include "Bitmap.h"
-#pragma execution_character_set("utf-8")
+
 
 namespace core {
 class Button {
@@ -29,7 +29,7 @@ private:
     bool enableText=true;
     bool enable=true;
     bool enableTexture=true;
-    std::string text;
+    std::string text="";
     Texture texture;
 };
 }
