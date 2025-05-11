@@ -41,7 +41,7 @@ void main()
 }
 )";
 
-Font::Font(const std::string& fontPath, bool needPreLoad) : fontSize(48), width(0), height(0)
+Font::Font(const std::string& fontPath, bool needPreLoad) : fontSize(48)
 {
     Log<<Level::Info<<"Font::Font() "<<fontPath<<op::endl;
     if (!inited)
@@ -83,7 +83,7 @@ Font::Font(const std::string& fontPath, bool needPreLoad) : fontSize(48), width(
     Log<<Level::Info<<"Font::Font() Init Font face Success"<<Fontid<<op::endl;
 }
 
-Font::Font(const Font& font) : fontSize(font.fontSize), width(font.width), height(font.height)
+Font::Font(const Font& font) : fontSize(font.fontSize)
 {
     Log<<Level::Info<<"Font::Font(const Font& font) from"<<font.getFontID()<<op::endl;
     face = font.face;
@@ -121,6 +121,11 @@ void Font::LoadDefaultFont()
 
 void Font::RenderText(const std::string& text, core::Point position, int scale, const glm::vec3& color)
 {
+    std::wstring wtext = core::string2wstring(text);
+    RenderText(wtext, position, scale, color);
+}
+void Font::RenderText(const std::wstring& text, core::Point position, int scale, const glm::vec3& color)
+{
     //检查是否包含有未加载的字符
     for (const auto& c : text)
     {
@@ -145,8 +150,8 @@ void Font::RenderText(const std::string& text, core::Point position, int scale, 
     for(auto &c: text)
     {
         Character ch = GetCharacter(c);
-        float xpos = width + ch.bearing.x * scale;
-        float ypos = height - (ch.size.y - ch.bearing.y) * scale;
+        float xpos = screenInfo.width + ch.bearing.x * scale;
+        float ypos = screenInfo.height - (ch.size.y - ch.bearing.y) * scale;
         float w = ch.size.x * scale;
         float h = ch.size.y * scale;
         //设置顶点数据
@@ -174,4 +179,82 @@ void Font::RenderText(const std::string& text, core::Point position, int scale, 
     Texture::unbind();
     glDisable(GL_BLEND);
     Log<<Level::Info<<"Font::RenderText() "<< text <<" (finish)"<<op::endl;
+}
+
+void Font::RenderChar(wchar_t c, core::Point position, int scale, const glm::vec3& color)
+{
+    RenderText(std::wstring(1, c), position, scale, color);
+}
+
+bool Font::LoadCharacter(wchar_t c)
+{
+    if (characters.find(c) != characters.end())
+        return true;
+    FT_Set_Pixel_Sizes(face, 0, 48);
+    if(FT_Load_Char(face, c, FT_LOAD_RENDER)){
+        Log<<Level::Error<<"Font::LoadCharacter() Failed to load Glyph "<<c<<op::endl;
+        return false;
+    }
+    Texture texture(face->glyph->bitmap.buffer, face->glyph->bitmap.width, face->glyph->bitmap.rows);
+    texture.Bind();
+    Character character(texture, glm::vec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
+                        glm::vec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
+                        face->glyph->advance.x);
+    characters.insert(std::pair<wchar_t, core::Character>(c, character));
+    Log<<"Loaded character: "<<c<<"/t";
+    return true;
+}
+
+Font& Font::operator=(const Font& font)
+{
+    Log<<Level::Info<<"Font& Font::operator=(const Font& font) from "<<font.getFontID()<<" to "<<this->getFontID()<<op::endl;
+    if (this != &font)
+    {
+        face = font.face;
+        characters = font.characters;
+        vao = font.vao;
+        vbo = font.vbo;
+        CustomShaderProgram = font.CustomShaderProgram;
+    }
+    return *this;
+}
+
+float Font::GetTextWidth(const std::wstring& text, int scale)
+{
+    float width = 0;
+    for (const auto& c : text)
+    {
+        if (characters.find(c) == characters.end())
+        {
+            Log<<Level::Warn<<"Font::GetTextWidth() Character not loaded: "<<c<<op::endl;
+            LoadCharacter(c);
+        }
+        width += (characters[c].advance >> 6) * scale;
+    }
+    return width;
+}
+
+float Font::GetTextHeight(const std::wstring& text, int scale)
+{
+    float height = 0;
+    for (const auto& c : text)
+    {
+        if (characters.find(c) == characters.end())
+        {
+            Log<<Level::Warn<<"Font::GetTextHeight() Character not loaded: "<<c<<op::endl;
+            LoadCharacter(c);
+        }
+        height = std::max(height, (float)characters[c].size.y);
+    }
+    return height * scale;
+}
+
+Character& Font::GetCharacter(wchar_t c)
+{
+    if (characters.find(c) == characters.end())
+    {
+        Log<<Level::Warn<<"Font::GetCharacter() Character not loaded: "<<c<<op::endl;
+        LoadCharacter(c);
+    }
+    return characters[c];
 }

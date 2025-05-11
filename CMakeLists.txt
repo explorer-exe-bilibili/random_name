@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
-
+if(MSVC)
+  add_compile_options(/utf-8)
+endif()
 # 确保在任何其他操作之前设置 vcpkg 集成
 set(VCPKG_TARGET_TRIPLET "x64-windows" CACHE STRING "Vcpkg target triplet")
 
