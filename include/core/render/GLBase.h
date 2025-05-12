@@ -1,17 +1,15 @@
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
+#pragma once
 
-#include "../log.h"
+#ifdef DEBUG_MODE
+#define ASSERT(x) if (!(x)) __debugbreak()
 
-#ifdef _DEBUG
-# define GLCall(x) do { while (glGetError() != GL_NO_ERROR); x;\
-    while (GLenum error = glGetError()) {\
-        Log<<Level::Error<<"OpenGL Error: {0}", error;\
-        Log<<"Function: {0}"<< #x;\
-        Log<<"File: {0}"<< __FILE__;\
-        Log<<"Line: {0}"<< __LINE__<<op::endl;\
-    }\
-} while (0)
+#define GLCall(a) GLClearError();\
+	a;\
+	ASSERT(GLLogCall(#a,__FILE__,__LINE__))
 #else
-# define GLCall(x) do { x; } while (0)
+#define ASSERT(x) do { } while (0)
+#define GLCall(a) a
 #endif
+void GLClearError();
+
+bool GLLogCall(const char* function, const char* file, int line);

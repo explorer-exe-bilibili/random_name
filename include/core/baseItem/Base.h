@@ -1,6 +1,7 @@
 #pragma once
 #include <glm/glm.hpp>
 #include "../render/Texture.h"
+#include <string>
 
 namespace core
 {

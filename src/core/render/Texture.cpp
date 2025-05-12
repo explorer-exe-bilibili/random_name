@@ -126,7 +126,24 @@ Texture::Texture(const int width, const int height)
 Texture::Texture(const Texture& other){
     Log<<Level::Info<<"Texture::Texture(const Texture& other) "<<other.textureID<<op::endl;
     init();
+    // 先设置宽高，这样能够正确分配纹理空间
+    this->width = other.width;
+    this->height = other.height;
+    
+    // 创建纹理
     GLCall(glGenTextures(1, &textureID));
+    GLCall(glBindTexture(GL_TEXTURE_2D, this->textureID));
+    
+    // 为目标纹理分配存储空间
+    GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+    
+    // 设置纹理参数
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+    
+    // 创建FBO并复制纹理内容
     GLuint fbo;
     GLCall(glGenFramebuffers(1,&fbo));
     /// 绑定FBO
@@ -137,13 +154,11 @@ Texture::Texture(const Texture& other){
     /// 绑定目标纹理
     GLCall(glBindTexture(GL_TEXTURE_2D, this->textureID));
     /// 复制FBO的颜色缓冲到目标纹理
-    GLCall(glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, width,height));
+    GLCall(glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height));
     /// 解绑FBO
     GLCall(glBindFramebuffer(GL_FRAMEBUFFER, 0));
     GLCall(glBindTexture(GL_TEXTURE_2D, 0));
     GLCall(glDeleteFramebuffers(1,&fbo));
-    this->width = other.width;
-    this->height = other.height;
 }
 
 Texture::~Texture() {
@@ -211,7 +226,21 @@ Texture& Texture::operator=(const Texture& other) {
         }
         this->width = other.width;
         this->height = other.height;
+        
+        // 创建新纹理
         GLCall(glGenTextures(1, &textureID));
+        GLCall(glBindTexture(GL_TEXTURE_2D, this->textureID));
+        
+        // 首先为目标纹理分配存储空间
+        GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+        
+        // 设置纹理参数
+        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+        
+        // 创建帧缓冲对象
         GLuint fbo;
         GLCall(glGenFramebuffers(1,&fbo));
         /// 绑定FBO

@@ -4,6 +4,11 @@ using namespace std;
 
 int main()
 {
+#ifdef DEBUG_MODE
+    Log<<Level::Info<<"运行在Debug模式"<<op::endl;
+#else
+    Log<<Level::Info<<"运行在非Debug模式"<<op::endl;
+#endif
     if(init()!=0){
         Log<<Level::Error<<"Failed to initialize"<<op::endl;
         return -1;

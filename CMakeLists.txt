@@ -43,7 +43,9 @@ find_path(STB_INCLUDE_DIRS "stb.h")
 
 # 创建可执行文件
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
-
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+    $<$<CONFIG:Debug>:DEBUG_MODE>
+)
 # 包含头文件目录
 target_include_directories(${PROJECT_NAME} PRIVATE 
     include

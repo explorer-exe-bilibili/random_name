@@ -1,5 +1,4 @@
 #pragma once
-#include <glad/glad.h>
 #include "GLBase.h"
 
 #include "VertexBuffer.h"
