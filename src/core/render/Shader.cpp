@@ -52,8 +52,19 @@ Shader::Shader() : ID(0) {}
 
 Shader::~Shader() {
     Log<<Level::Info<<"Shader::~Shader() "<<ID<<op::endl;
-    GLCall(glDeleteProgram(ID));
-    ID = 0;
+    
+    // 只有在ID有效时才删除程序
+    if (ID != 0) {
+        // 使用try-catch包裹，避免在上下文无效时崩溃
+        try {
+            GLCall(glDeleteProgram(ID));
+        } catch (...) {
+            Log<<Level::Error<<"Exception occurred while deleting shader program "<<ID<<op::endl;
+        }
+        ID = 0;
+    }
+    
+    Log<<Level::Info<<"Shader::~Shader() finished ID "<<ID<<op::endl;
 }
 
 void Shader::init(const std::string& VertexShader, const std::string& fragmentShader) {

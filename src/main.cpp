@@ -14,8 +14,8 @@ int main()
         return -1;
     }
     // 渲染循环
-    while (!glfwWindowShouldClose(window)) {
-        mainloop(window);
+    while (!glfwWindowShouldClose(core::screenInfo.window)) {
+        mainloop();
     }
     cleanup();
     return 0;

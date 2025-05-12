@@ -8,10 +8,9 @@
 #include <string>
 
 #include "core/log.h"
+#include "core/baseItem/Base.h"
 
-extern GLFWwindow* window;
-
-int mainloop(GLFWwindow* window);
+int mainloop();
 void KeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods);
 void MouseButtonEvent(GLFWwindow* window, int button, int action, int mods);
 

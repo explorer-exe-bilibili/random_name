@@ -2,6 +2,7 @@
 #include <glm/glm.hpp>
 #include "../render/Texture.h"
 #include <string>
+#include <GLFW/glfw3.h>
 
 namespace core
 {
@@ -12,13 +13,14 @@ namespace core
         float aspectRatio;
         float dpi;
         float pixelRatio;
-        ScreenInfo() : width(0), height(0), aspectRatio(0), dpi(0), pixelRatio(1) {}
-        ScreenInfo(int w, int h, float ar, float d, float pr)
-            : width(w), height(h), aspectRatio(ar), dpi(d), pixelRatio(pr) {}
+        GLFWwindow* window;
+        ScreenInfo() : width(0), height(0), aspectRatio(0), dpi(0), pixelRatio(1), window(nullptr) {}
+        ScreenInfo(int w, int h, float ar, float d, float pr, GLFWwindow* win)
+            : width(w), height(h), aspectRatio(ar), dpi(d), pixelRatio(pr), window(win) {}
         ScreenInfo(const ScreenInfo& info)
             : width(info.width), height(info.height), aspectRatio(info.aspectRatio),
-              dpi(info.dpi), pixelRatio(info.pixelRatio) {}
-    }extern screenInfo;
+              dpi(info.dpi), pixelRatio(info.pixelRatio), window(info.window) {}
+    } extern screenInfo;
 
     struct Region {
         float x,xend;

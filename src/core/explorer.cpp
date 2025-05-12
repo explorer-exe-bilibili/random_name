@@ -16,7 +16,7 @@ Explorer::Explorer() {
 }
 
 Explorer::~Explorer() {
-    Log << Level::Info << "Explorer destroyed" << op::endl;
+    Log << Level::Info << "Explorer destroying" << op::endl;
     bitmaps.clear();
     fonts.clear();
 }

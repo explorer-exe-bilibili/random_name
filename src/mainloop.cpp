@@ -3,14 +3,28 @@
 #include "core/log.h"
 #include "core/explorer.h"
 #include "core/render/GLBase.h"
+#include "core/baseItem/Base.h"
 
 #ifdef _WIN32
 #include <windows.h>
 #endif
-GLFWwindow* window;
 
+using namespace core;
 
-int mainloop(GLFWwindow* window) {
+// 窗口大小改变时的回调函数
+void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
+    // 更新screenInfo的相关变量
+    screenInfo.width = width;
+    screenInfo.height = height;
+    screenInfo.aspectRatio = static_cast<float>(width) / static_cast<float>(height);
+    
+    // 设置OpenGL视口大小
+    GLCall(glViewport(0, 0, width, height));
+    
+    Log << Level::Info << "Window resized to " << width << "x" << height << op::endl;
+}
+
+int mainloop() {
     GLCall(glClearColor(0.2f, 0.2f, 0.2f, 1.0f));
     
     // 清除颜色和深度缓冲区
@@ -18,23 +32,20 @@ int mainloop(GLFWwindow* window) {
 
     // 设置视口和投影矩阵（如果需要）
     int width, height;
-    glfwGetFramebufferSize(window, &width, &height);
+    glfwGetFramebufferSize(screenInfo.window, &width, &height);
     GLCall(glViewport(0, 0, width, height));
     
     // 尝试绘制位图
     auto& bitmap = core::Explorer::getInstance()->getBitmap("1");
     
-    // 输出调试信息，确认位图状态
-    Log << Level::Info << "Drawing bitmap: size=" << bitmap.getWidth() << "x" << bitmap.getHeight() << op::endl;
-    
     // 绘制位图
     bitmap.Draw(core::Region(0, 0, width, height));
     
     // 交换前后缓冲区
-    GLCall(glfwSwapBuffers(window));
+    glfwSwapBuffers(screenInfo.window);
     
     // 处理事件
-    GLCall(glfwPollEvents());
+    glfwPollEvents();
     
     return 0;
 }
@@ -103,14 +114,14 @@ int init(){
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
     Log<<Level::Info<<"Creating window"<<op::endl;
     // 创建窗口
-    window = glfwCreateWindow(800, 600, "OpenGL Demo", nullptr, nullptr);
-    if (!window) {
+    screenInfo.window = glfwCreateWindow(800, 600, "OpenGL Demo", nullptr, nullptr);
+    if (!screenInfo.window) {
         glfwTerminate();
         return -1;
     }
     
     // 设置当前上下文
-    glfwMakeContextCurrent(window);
+    glfwMakeContextCurrent(screenInfo.window);
     glfwSwapInterval(0); // 垂直同步
 
     Log<<Level::Info<<"Loading GLAD"<<op::endl;
@@ -119,8 +130,9 @@ int init(){
         glfwTerminate();
         return -1;
     }
-    glfwSetMouseButtonCallback(window, MouseButtonEvent);
-    glfwSetKeyCallback(window, KeyEvent);
+    glfwSetMouseButtonCallback(screenInfo.window, MouseButtonEvent);
+    glfwSetKeyCallback(screenInfo.window, KeyEvent);
+    glfwSetFramebufferSizeCallback(screenInfo.window, framebuffer_size_callback);
     // 打印OpenGL版本
     {
         const GLubyte* version = glGetString(GL_VERSION);
@@ -137,11 +149,20 @@ int init(){
 
 int cleanup() {
     Log<<Level::Info<<"Cleaning up"<<op::endl<<op::flush;
-    GLFWwindow* w = window; // preserve
-    GLCall(glfwTerminate());
+    
+    // 先释放Explorer实例以确保所有OpenGL资源被正确释放
+    Log<<Level::Info<<"Releasing Explorer instance"<<op::endl<<op::flush;
+    core::Explorer::getInstance().reset();
+    
+    // 标记OpenGL上下文即将失效，防止后续OpenGL调用引起问题
+    SetOpenGLContextInvalid();
+    
+    // 然后再终止GLFW
+    glfwTerminate();
 
     // 安全停止日志系统
     Log<<Level::Info<<"Shutting down logging system"<<op::endl<<op::flush;
     Log.Stop();
+    
     return 0;
 }

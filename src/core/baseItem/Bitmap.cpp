@@ -40,13 +40,6 @@ void Bitmap::Draw(Region region)
         Log<<Level::Error << "Bitmap::Draw() texture is null" << op::endl;
         return;
     }
-
-    // 打印区域信息
-    Log<<Level::Info << "Bitmap::Draw() region: " << region.x << "," << region.y
-        << " to " << region.xend << "," << region.yend 
-        << ", screen size: " << screenInfo.width << "x" << screenInfo.height
-        << ", bitmap size: " << texture.getWidth() << "x" << texture.getHeight() << op::endl;
-
     // 检查屏幕信息是否合法
     if (screenInfo.width <= 0 || screenInfo.height <= 0) {
         Log<<Level::Error << "Bitmap::Draw() invalid screen size: " << screenInfo.width << "x" << screenInfo.height << op::endl;
@@ -57,8 +50,6 @@ void Bitmap::Draw(Region region)
     if (region.xend == region.x || region.yend == region.y) {
         region.xend = screenInfo.width;
         region.yend = screenInfo.height;
-        Log<<Level::Info << "Bitmap::Draw() region adjusted to screen size: " << region.x << "," << region.y
-            << " to " << region.xend << "," << region.yend << op::endl;
     }
 
     // 确保区域有效
@@ -77,9 +68,6 @@ void Bitmap::Draw(Region region)
     // 左上角和右下角坐标
     glm::vec3 topLeft = screenToNDC(region.x, region.y);
     glm::vec3 bottomRight = screenToNDC(region.xend, region.yend);
-
-    Log<<Level::Info << "Bitmap::Draw() NDC coords: (" << topLeft.x << "," << topLeft.y 
-        << ") to (" << bottomRight.x << "," << bottomRight.y << ")" << op::endl;
 
     texture.Draw(topLeft, bottomRight);
 }
