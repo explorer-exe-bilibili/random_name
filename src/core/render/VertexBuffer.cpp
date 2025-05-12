@@ -1,14 +1,15 @@
 #include "core/render/VertexBuffer.h"
 #include "core/log.h"
+#include "core/render/GLBase.h"
 #include <cstdlib>
 
 
 using namespace core;
 
 VertexBuffer::VertexBuffer(const void* data, unsigned int size) : size(size) {
-    glGenBuffers(1, &rendererID);
+    GLCall(glGenBuffers(1, &rendererID));
     Bind();
-    glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+    GLCall(glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW));
     Unbind();
     Log<<Level::Info<<"VertexBuffer::VertexBuffer(const void* data, unsigned int size) "<<rendererID<<op::endl;
     if (rendererID == 0) {
@@ -19,7 +20,7 @@ VertexBuffer::VertexBuffer(const void* data, unsigned int size) : size(size) {
 
 VertexBuffer::VertexBuffer(const VertexBuffer& vb) : size(vb.size) {
     // 生成新的缓冲区ID
-    glGenBuffers(1, &rendererID);
+    GLCall(glGenBuffers(1, &rendererID));
     Log<<Level::Info<<"VertexBuffer::VertexBuffer(const VertexBuffer& vb) "<<rendererID<<op::endl;
     if (rendererID == 0) {
         Log<<Level::Error<<"VertexBuffer::VertexBuffer(const VertexBuffer& vb) rendererID is 0"<<op::endl;
@@ -27,10 +28,10 @@ VertexBuffer::VertexBuffer(const VertexBuffer& vb) : size(vb.size) {
     }
     // 保存当前绑定的缓冲区，以便后续恢复
     GLint previousBuffer;
-    glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &previousBuffer);
+    GLCall(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &previousBuffer));
     
     // 绑定源缓冲区并获取数据
-    glBindBuffer(GL_ARRAY_BUFFER, vb.rendererID);
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, vb.rendererID));
     void* data = nullptr;
     
     // 只有在缓冲区有大小时才分配内存
@@ -38,27 +39,26 @@ VertexBuffer::VertexBuffer(const VertexBuffer& vb) : size(vb.size) {
         data = malloc(size);
         if (data) {
             // 读取源缓冲区的数据
-            glGetBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+            GLCall(glGetBufferSubData(GL_ARRAY_BUFFER, 0, size, data));
         }
     }
     
     // 绑定新缓冲区并复制数据
-    glBindBuffer(GL_ARRAY_BUFFER, rendererID);
-    glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, rendererID));
+    GLCall(glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW));
     
     // 释放临时数据
     if (data) {
         free(data);
     }
-    
-    // 恢复之前绑定的缓冲区
-    glBindBuffer(GL_ARRAY_BUFFER, previousBuffer);
+      // 恢复之前绑定的缓冲区
+    GLCall(glBindBuffer(GL_ARRAY_BUFFER, previousBuffer));
     Log<<Level::Info<<"VertexBuffer::VertexBuffer(const VertexBuffer& vb) finished "<<rendererID<<op::endl;
 }
 
 VertexBuffer::~VertexBuffer() {
     Log<<Level::Info<<"VertexBuffer::~VertexBuffer() "<<rendererID<<op::endl;
-    glDeleteBuffers(1, &rendererID);
+    GLCall(glDeleteBuffers(1, &rendererID));
 }
 
 void VertexBuffer::BufferData(const void* data, unsigned int size) {
@@ -67,7 +67,7 @@ void VertexBuffer::BufferData(const void* data, unsigned int size) {
         return;
     }
     Bind();
-    glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+    GLCall(glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW));
     Unbind();
 }
 
@@ -77,7 +77,7 @@ void VertexBuffer::BufferSubData(unsigned int offset, unsigned int size, const v
         return;
     }
     Bind();
-    glBufferSubData(GL_ARRAY_BUFFER, offset, size, data);
+    GLCall(glBufferSubData(GL_ARRAY_BUFFER, offset, size, data));
     Unbind();
 }
 
@@ -86,14 +86,14 @@ VertexBuffer& VertexBuffer::operator=(const VertexBuffer& vb) {
     if (this != &vb) {
         // 先删除当前的缓冲区
         if (rendererID != 0) {
-            glDeleteBuffers(1, &rendererID);
+            GLCall(glDeleteBuffers(1, &rendererID));
         }
         
         // 生成新的缓冲区ID
-        glGenBuffers(1, &rendererID);
+        GLCall(glGenBuffers(1, &rendererID));
         
         // 绑定源缓冲区并获取数据
-        glBindBuffer(GL_ARRAY_BUFFER, vb.rendererID);
+        GLCall(glBindBuffer(GL_ARRAY_BUFFER, vb.rendererID));
         void* data = nullptr;
         
         // 只有在缓冲区有大小时才分配内存
@@ -101,13 +101,13 @@ VertexBuffer& VertexBuffer::operator=(const VertexBuffer& vb) {
             data = malloc(size);
             if (data) {
                 // 读取源缓冲区的数据
-                glGetBufferSubData(GL_ARRAY_BUFFER, 0, size, data);
+                GLCall(glGetBufferSubData(GL_ARRAY_BUFFER, 0, size, data));
             }
         }
         
         // 绑定新缓冲区并复制数据
-        glBindBuffer(GL_ARRAY_BUFFER, rendererID);
-        glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW);
+        GLCall(glBindBuffer(GL_ARRAY_BUFFER, rendererID));
+        GLCall(glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW));
         
         // 释放临时数据
         if (data) {

@@ -1,21 +1,22 @@
 #include "core/render/VertexArray.h"
 #include "core/log.h"
+#include "core/render/GLBase.h"
 
 
 using namespace core;
 
 VertexArray::VertexArray() {
-    glGenVertexArrays(1, &rendererID);
+    GLCall(glGenVertexArrays(1, &rendererID));
     Log<<Level::Info<<"VertexArray::VertexArray() "<<rendererID<<op::endl;
 }
 
 VertexArray::VertexArray(const VertexArray& va) {
     // 生成新的顶点数组对象
-    glGenVertexArrays(1, &rendererID);
+    GLCall(glGenVertexArrays(1, &rendererID));
     Log<<Level::Info<<"VertexArray::VertexArray(const VertexArray& va) "<<rendererID<<op::endl;
     // 保存当前绑定的VAO，以便操作后恢复
     GLint previousVAO;
-    glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &previousVAO);
+    GLCall(glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &previousVAO));
     
     // 绑定源VAO
     va.Bind();
@@ -25,69 +26,68 @@ VertexArray::VertexArray(const VertexArray& va) {
     const int maxAttribs = 16;
     for (int i = 0; i < maxAttribs; i++) {
         GLint enabled = 0;
-        glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &enabled);
+        GLCall(glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &enabled));
         
         if (enabled) {
             // 获取源属性配置
             GLint size = 0, type = 0, normalized = 0, stride = 0;
             void* pointer = nullptr;
             
-            glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_SIZE, &size);
-            glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_TYPE, &type);
-            glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_NORMALIZED, &normalized);
-            glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_STRIDE, &stride);
-            glGetVertexAttribPointerv(i, GL_VERTEX_ATTRIB_ARRAY_POINTER, &pointer);
+            GLCall(glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_SIZE, &size));
+            GLCall(glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_TYPE, &type));
+            GLCall(glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_NORMALIZED, &normalized));
+            GLCall(glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_STRIDE, &stride));
+            GLCall(glGetVertexAttribPointerv(i, GL_VERTEX_ATTRIB_ARRAY_POINTER, &pointer));
             
             // 获取当前绑定的VBO
             GLint currentVBO = 0;
-            glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, &currentVBO);
+            GLCall(glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, &currentVBO));
             
             // 绑定我们的VAO
             Bind();
             
             // 绑定相同的VBO
-            glBindBuffer(GL_ARRAY_BUFFER, currentVBO);
+            GLCall(glBindBuffer(GL_ARRAY_BUFFER, currentVBO));
             
             // 复制属性配置到我们的VAO
-            glEnableVertexAttribArray(i);
-            glVertexAttribPointer(
+            GLCall(glEnableVertexAttribArray(i));
+            GLCall(glVertexAttribPointer(
                 i, 
                 size, 
                 type, 
                 normalized == GL_TRUE, 
                 stride, 
                 pointer
-            );
+            ));
         }
     }
     
     // 检查索引缓冲区(EBO)是否绑定
     va.Bind();
     GLint elementArrayBufferBinding;
-    glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &elementArrayBufferBinding);
+    GLCall(glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &elementArrayBufferBinding));
     
     if (elementArrayBufferBinding) {
         // 如果源VAO有EBO绑定，我们也应该绑定相同的EBO到新VAO
         Bind();
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementArrayBufferBinding);
+        GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementArrayBufferBinding));
     }
-    
-    // 恢复原来绑定的VAO
-    glBindVertexArray(previousVAO);
+      // 恢复原来绑定的VAO
+    GLCall(glBindVertexArray(previousVAO));
     Log<<Level::Info<<"VertexArray::VertexArray(const VertexArray& va) finished "<<rendererID<<op::endl;
 }
 
 VertexArray::~VertexArray() {
     Log<<Level::Info<<"VertexArray::~VertexArray() "<<rendererID<<op::endl;
-    glDeleteVertexArrays(1, &rendererID);
+    GLCall(glDeleteVertexArrays(1, &rendererID));
 }
 
 void VertexArray::AddBuffer(const VertexBuffer& vb, unsigned int index, unsigned int size, unsigned int type, bool normalized, unsigned int stride, const void* pointer) const {
     Log<<Level::Info<<"VertexArray::AddBuffer() VAO:"<<rendererID<<"VBO:"<<vb.getRendererID()<<op::endl;
     Bind();
     vb.Bind();
-    glVertexAttribPointer(index, size, type, normalized ? GL_TRUE : GL_FALSE, stride, pointer);
-    glEnableVertexAttribArray(index);
+    GLCall(glVertexAttribPointer(index, size, type, normalized ? GL_TRUE : GL_FALSE, stride, pointer));
+    GLCall(glEnableVertexAttribArray(index));
     Unbind();
 }
 
@@ -110,14 +110,14 @@ VertexArray& VertexArray::operator=(const VertexArray& va) {
     if (this != &va) {
         // 先删除当前的VAO
         if(rendererID != 0) {
-            glDeleteVertexArrays(1, &rendererID);
+            GLCall(glDeleteVertexArrays(1, &rendererID));
         }
         // 生成新的顶点数组对象
-        glGenVertexArrays(1, &rendererID);
+        GLCall(glGenVertexArrays(1, &rendererID));
         
         // 保存当前绑定的VAO，以便操作后恢复
         GLint previousVAO;
-        glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &previousVAO);
+        GLCall(glGetIntegerv(GL_VERTEX_ARRAY_BINDING, &previousVAO));
         
         // 绑定源VAO
         va.Bind();
@@ -127,55 +127,55 @@ VertexArray& VertexArray::operator=(const VertexArray& va) {
         const int maxAttribs = 16;
         for (int i = 0; i < maxAttribs; i++) {
             GLint enabled = 0;
-            glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &enabled);
+            GLCall(glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_ENABLED, &enabled));
             
             if (enabled) {
                 // 获取源属性配置
                 GLint size = 0, type = 0, normalized = 0, stride = 0;
                 void* pointer = nullptr;
                 
-                glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_SIZE, &size);
-                glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_TYPE, &type);
-                glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_NORMALIZED, &normalized);
-                glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_STRIDE, &stride);
-                glGetVertexAttribPointerv(i, GL_VERTEX_ATTRIB_ARRAY_POINTER, &pointer);
+                GLCall(glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_SIZE, &size));
+                GLCall(glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_TYPE, &type));
+                GLCall(glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_NORMALIZED, &normalized));
+                GLCall(glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_STRIDE, &stride));
+                GLCall(glGetVertexAttribPointerv(i, GL_VERTEX_ATTRIB_ARRAY_POINTER, &pointer));
                 
                 // 获取当前绑定的VBO
                 GLint currentVBO = 0;
-                glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, &currentVBO);
+                GLCall(glGetVertexAttribiv(i, GL_VERTEX_ATTRIB_ARRAY_BUFFER_BINDING, &currentVBO));
                 
                 // 绑定我们的VAO
                 Bind();
                 
                 // 绑定相同的VBO
-                glBindBuffer(GL_ARRAY_BUFFER, currentVBO);
+                GLCall(glBindBuffer(GL_ARRAY_BUFFER, currentVBO));
                 
                 // 复制属性配置到我们的VAO
-                glEnableVertexAttribArray(i);
-                glVertexAttribPointer(
+                GLCall(glEnableVertexAttribArray(i));
+                GLCall(glVertexAttribPointer(
                     i, 
                     size, 
                     type, 
                     normalized == GL_TRUE, 
                     stride, 
                     pointer
-                );
+                ));
             }
         }
         
         // 检查索引缓冲区(EBO)是否绑定
         va.Bind();
         GLint elementArrayBufferBinding;
-        glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &elementArrayBufferBinding);
+        GLCall(glGetIntegerv(GL_ELEMENT_ARRAY_BUFFER_BINDING, &elementArrayBufferBinding));
         
         if (elementArrayBufferBinding) {
             // 如果源VAO有EBO绑定，我们也应该绑定相同的EBO到新VAO
             Bind();
-            glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementArrayBufferBinding);
+            GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementArrayBufferBinding));
         }
         
         // 恢复原来绑定的VAO
-        glBindVertexArray(previousVAO);
+        GLCall(glBindVertexArray(previousVAO));
     }
     Log<<Level::Info<<"VertexArray& VertexArray::operator=(const VertexArray& va) finished "<<this->rendererID<<op::endl;
     return *this;

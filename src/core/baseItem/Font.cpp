@@ -123,8 +123,8 @@ void Font::RenderText(const std::wstring& text, core::Point position, int scale,
     shader.setMat4("projection", projection);
     shader.setVec3("textColor", color);
     //启用混合
-    glEnable(GL_BLEND);
-    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    GLCall(glEnable(GL_BLEND));
+    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
     //设置VAO
     vao.Bind();
     //遍历每个字符
@@ -152,13 +152,13 @@ void Font::RenderText(const std::wstring& text, core::Point position, int scale,
         //解绑VBO
         vbo.Unbind();
         //绘制字符
-        glDrawArrays(GL_TRIANGLES, 0, 6);
+        GLCall(glDrawArrays(GL_TRIANGLES, 0, 6));
         //更新宽度
         position.x += (ch.advance >> 6) * scale; // Bitshift by 6 to convert from 1/64 pixels to pixels
     }
     VertexArray::Unbind();
     Texture::unbind();
-    glDisable(GL_BLEND);
+    GLCall(glDisable(GL_BLEND));
     Log<<Level::Info<<"Font::RenderText() "<< text <<" (finish)"<<op::endl;
 }
 

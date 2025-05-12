@@ -1,6 +1,7 @@
 #include "core/render/Texture.h"
 
 #include "core/log.h"
+#include "core/render/GLBase.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <mutex>
 
@@ -81,7 +82,7 @@ void Texture::init() {
 Texture::Texture(const unsigned char* data, int width, int height)
     : width(width), height(height), textureID(0) {
     init();
-    glGenTextures(1, &textureID);
+    GLCall(glGenTextures(1, &textureID));
     Log<<Level::Info<<"Texture::Texture(const unsigned char* data, int width, int height) "<<textureID<<op::endl;
     if (data == nullptr) {
         Log<<Level::Error<<"Texture::Texture(const unsigned char* data, int width, int height) data is null"<<op::endl;
@@ -96,58 +97,58 @@ Texture::Texture(const unsigned char* data, int width, int height)
         return;
     }
     bind();
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
+    GLCall(glGenerateMipmap(GL_TEXTURE_2D));
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 }
 
 Texture::Texture(const int width, const int height)
     : width(width), height(height), textureID(0) {
     Log<<Level::Info<<"Texture::Texture(const int width, const int height) "<<width<<" "<<height<<op::endl;
     init();
-    glGenTextures(1, &textureID);
+    GLCall(glGenTextures(1, &textureID));
     if(textureID == 0) {
         Log<<Level::Error<<"Texture::Texture(const int width, const int height) textureID is 0"<<op::endl;
         return;
     }
     bind();
-    glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr);
-    glGenerateMipmap(GL_TEXTURE_2D);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+    GLCall(glGenerateMipmap(GL_TEXTURE_2D));
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR));
+    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 }
 
 Texture::Texture(const Texture& other){
     Log<<Level::Info<<"Texture::Texture(const Texture& other) "<<other.textureID<<op::endl;
     init();
-    glGenTextures(1, &textureID);
+    GLCall(glGenTextures(1, &textureID));
     GLuint fbo;
-    glGenFramebuffers(1,&fbo);
+    GLCall(glGenFramebuffers(1,&fbo));
     /// 绑定FBO
-    glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+    GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo));
     /// 绑定纹理到FBO
-    glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-    GL_TEXTURE_2D, other.textureID, 0);
+    GLCall(glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+    GL_TEXTURE_2D, other.textureID, 0));
     /// 绑定目标纹理
-    glBindTexture(GL_TEXTURE_2D, this->textureID);
+    GLCall(glBindTexture(GL_TEXTURE_2D, this->textureID));
     /// 复制FBO的颜色缓冲到目标纹理
-    glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, width,height);
+    GLCall(glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, width,height));
     /// 解绑FBO
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-    glBindTexture(GL_TEXTURE_2D, 0);
-    glDeleteFramebuffers(1,&fbo);
+    GLCall(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+    GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+    GLCall(glDeleteFramebuffers(1,&fbo));
     this->width = other.width;
     this->height = other.height;
 }
 
 Texture::~Texture() {
     if (textureID != 0) {
-        glDeleteTextures(1, &textureID);
+        GLCall(glDeleteTextures(1, &textureID));
     }
 }
 
@@ -156,8 +157,8 @@ void Texture::bind() const {
         Log<<Level::Error<<"Texture::bind() textureID is 0"<<op::endl;
         return;
     }
-    glActiveTexture(GL_TEXTURE0);
-    glBindTexture(GL_TEXTURE_2D, textureID);
+    GLCall(glActiveTexture(GL_TEXTURE0));
+    GLCall(glBindTexture(GL_TEXTURE_2D, textureID));
 }
 
 void Texture::Draw(const glm::vec3& topLeft, const glm::vec3& bottomRight, float angle) const {
@@ -192,10 +193,10 @@ void Texture::Draw(const glm::vec3& topLeft, const glm::vec3& bottomRight, float
     }
     if(customerIBO) {
         customerIBO->Bind();
-        glDrawElements(GL_TRIANGLES, customerIBO->getCount(), GL_UNSIGNED_INT, nullptr);
+        GLCall(glDrawElements(GL_TRIANGLES, customerIBO->getCount(), GL_UNSIGNED_INT, nullptr));
     } else {
         ib->Bind();
-        glDrawElements(GL_TRIANGLES, ib->getCount(), GL_UNSIGNED_INT, nullptr);
+        GLCall(glDrawElements(GL_TRIANGLES, ib->getCount(), GL_UNSIGNED_INT, nullptr));
     }
     // 解绑 VAO 和 IBO
     VertexArray::Unbind();
@@ -210,22 +211,22 @@ Texture& Texture::operator=(const Texture& other) {
         }
         this->width = other.width;
         this->height = other.height;
-        glGenTextures(1, &textureID);
+        GLCall(glGenTextures(1, &textureID));
         GLuint fbo;
-        glGenFramebuffers(1,&fbo);
+        GLCall(glGenFramebuffers(1,&fbo));
         /// 绑定FBO
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo);
+        GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo));
         /// 绑定纹理到FBO
-        glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-        GL_TEXTURE_2D, other.textureID, 0);
+        GLCall(glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+        GL_TEXTURE_2D, other.textureID, 0));
         /// 绑定目标纹理
-        glBindTexture(GL_TEXTURE_2D, this->textureID);
+        GLCall(glBindTexture(GL_TEXTURE_2D, this->textureID));
         /// 复制FBO的颜色缓冲到目标纹理
-        glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, width,height);
+        GLCall(glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, width,height));
         /// 解绑FBO
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glBindTexture(GL_TEXTURE_2D, 0);
-        glDeleteFramebuffers(1,&fbo);
+        GLCall(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+        GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+        GLCall(glDeleteFramebuffers(1,&fbo));
     }
     return *this;
 }
@@ -233,35 +234,35 @@ Texture& Texture::operator=(const Texture& other) {
 bool Texture::setCustomerShaderProgram(const std::string& vertexShader, const std::string& fragmentShader) {
     if (customerShaderProgram) 
         customerShaderProgram.reset();
-    customerShaderProgram=std::make_shared<Shader>(vertexShader, fragmentShader);
+    customerShaderProgram = std::make_shared<Shader>(vertexShader, fragmentShader);
     return true;
 }
 
 bool Texture::setCustomerShaderProgram(const Shader& shader) {
-    if (customerShaderProgram) 
+    if (customerShaderProgram)
         customerShaderProgram.reset();
-    customerShaderProgram=std::make_shared<Shader>(shader);
+    customerShaderProgram = std::make_shared<Shader>(shader);
     return true;
 }
 
 void Texture::setCustomerVertexArray(const VertexArray& va) {
     if (customerVAO) 
         customerVAO.reset();
-    customerVAO=std::make_shared<VertexArray>(va);
+    customerVAO = std::make_shared<VertexArray>(va);
 }
 
 void Texture::setCustomerVertexBuffer(const VertexBuffer& vb) {
     if (customerVBO) {
         customerVBO.reset();
     }
-    customerVBO=std::make_shared<VertexBuffer>(vb);
+    customerVBO = std::make_shared<VertexBuffer>(vb);
 }
 
 void Texture::setCustomerIndexBuffer(const IndexBuffer& ib) {
     if (customerIBO) {
         customerIBO.reset();
     }
-    customerIBO=std::make_shared<IndexBuffer>(ib);
+    customerIBO = std::make_shared<IndexBuffer>(ib);
 }
 
 void Texture::setCustomerVertices(const std::vector<float>& vertices) {

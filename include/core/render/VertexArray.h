@@ -1,5 +1,6 @@
 #pragma once
 #include <glad/glad.h>
+#include "GLBase.h"
 
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
@@ -14,9 +15,8 @@ public:
 	VertexArray();
 	VertexArray(const VertexArray& va);
 	~VertexArray();
-
-	void Bind() const { glBindVertexArray(rendererID); };
-	static void Unbind() { glBindVertexArray(0); };
+	void Bind() const { GLCall(glBindVertexArray(rendererID)); };
+	static void Unbind() { GLCall(glBindVertexArray(0)); };
 
 	// 添加缓冲区并设置属性指针
 	void AddBuffer(const VertexBuffer& vb, unsigned int index, unsigned int size, unsigned int type, bool normalized, unsigned int stride, const void* pointer) const;

@@ -26,7 +26,7 @@ namespace core {
         void bind() const;
         void Bind() const {bind();}
         static void unbind() {
-            glBindTexture(GL_TEXTURE_2D, 0);
+            GLCall(glBindTexture(GL_TEXTURE_2D, 0));
         }
 
         int getWidth() const {return width;}

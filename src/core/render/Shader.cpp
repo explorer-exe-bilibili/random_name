@@ -1,4 +1,5 @@
 #include"core/render/Shader.h"
+#include "core/render/GLBase.h"
 
 #include "core/log.h"
 #include <glad/glad.h>
@@ -11,23 +12,24 @@ using namespace core;
 
 static unsigned int compileShader(unsigned int type, const std::string& source) {
     Log<<Level::Info<<"compileShader() "<<source<<op::endl;
-    unsigned int id = glCreateShader(type);
+    unsigned int id;
+    GLCall(id = glCreateShader(type));
     const char* src = source.c_str();
-    glShaderSource(id, 1, &src, nullptr);
-    glCompileShader(id);
+    GLCall(glShaderSource(id, 1, &src, nullptr));
+    GLCall(glCompileShader(id));
 
     // 检查编译错误
     int result;
-    glGetShaderiv(id, GL_COMPILE_STATUS, &result);
+    GLCall(glGetShaderiv(id, GL_COMPILE_STATUS, &result));
     if (result == GL_FALSE) {
         int length;
-        glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length);
+        GLCall(glGetShaderiv(id, GL_INFO_LOG_LENGTH, &length));
         char* message = new char[length];
-        glGetShaderInfoLog(id, length, &length, message);
+        GLCall(glGetShaderInfoLog(id, length, &length, message));
         Log<<Level::Error<<"Failed to compile shader!"<<op::endl;
         Log<<Level::Error<<message<<op::endl;
         delete[] message;
-        glDeleteShader(id);
+        GLCall(glDeleteShader(id));
         return 0;
     }
     return id;
@@ -41,7 +43,7 @@ Shader::Shader(const Shader& shader) {
     Log<<Level::Info<<"Shader::Shader(const Shader&) "<<shader.ID<<"to"<<ID<<op::endl;
     if(this != &shader) {
         if(ID!=0)
-            glDeleteProgram(ID);
+            GLCall(glDeleteProgram(ID));
         init(shader.VertexShader, shader.fragmentShader);
     }
 }
@@ -50,18 +52,19 @@ Shader::Shader() : ID(0) {}
 
 Shader::~Shader() {
     Log<<Level::Info<<"Shader::~Shader() "<<ID<<op::endl;
-    glDeleteProgram(ID);
+    GLCall(glDeleteProgram(ID));
     ID = 0;
 }
 
 void Shader::init(const std::string& VertexShader, const std::string& fragmentShader) {
     Log<<Level::Info<<"Shader::init() "<<op::endl;
     if (ID != 0)
-        glDeleteProgram(ID);
+        GLCall(glDeleteProgram(ID));
     this->VertexShader = VertexShader;
     this->fragmentShader = fragmentShader;
 
-    unsigned int program = glCreateProgram();
+    unsigned int program;
+    GLCall(program = glCreateProgram());
     unsigned int vs = compileShader(GL_VERTEX_SHADER, VertexShader);
     Log<<Level::Info<<"Shader::init() vs "<<vs<<op::endl;
     if (vs == 0) {
@@ -72,30 +75,30 @@ void Shader::init(const std::string& VertexShader, const std::string& fragmentSh
     Log<<Level::Info<<"Shader::init() fs "<<fs<<op::endl;
     if (fs == 0) {
         Log<<Level::Error<<"Shader::init() fs compile error "<<op::endl;
-        glDeleteShader(vs);
+        GLCall(glDeleteShader(vs));
         return;
     }
 
-    glAttachShader(program, vs);
-    glAttachShader(program, fs);
-    glLinkProgram(program);
-    glValidateProgram(program);
+    GLCall(glAttachShader(program, vs));
+    GLCall(glAttachShader(program, fs));
+    GLCall(glLinkProgram(program));
+    GLCall(glValidateProgram(program));
 
-    glDeleteShader(vs);
-    glDeleteShader(fs);
+    GLCall(glDeleteShader(vs));
+    GLCall(glDeleteShader(fs));
     Log<<Level::Info<<"Shader::init() program "<<program<<op::endl;
     // 检查链接错误
     int linkResult;
-    glGetProgramiv(program, GL_LINK_STATUS, &linkResult);
+    GLCall(glGetProgramiv(program, GL_LINK_STATUS, &linkResult));
     if (linkResult == GL_FALSE) {
         int length;
-        glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length);
+        GLCall(glGetProgramiv(program, GL_INFO_LOG_LENGTH, &length));
         char* message = new char[length];
-        glGetProgramInfoLog(program, length, &length, message);
+        GLCall(glGetProgramInfoLog(program, length, &length, message));
         Log<<Level::Error<<"Shader::init() Failed to link program!"<<op::endl;
         Log<<Level::Error<<message<<op::endl;
         delete[] message;
-        glDeleteProgram(program);
+        GLCall(glDeleteProgram(program));
         return;
     }
     ID = program;
@@ -105,14 +108,14 @@ void Shader::use() const {
     if(ID == 0) {
         Log<<Level::Error<<"Shader::use() ID is 0"<<op::endl;
     }
-    glUseProgram(ID);
+    GLCall(glUseProgram(ID));
 }
 
 Shader& Shader::operator=(const Shader& shader) {
     Log<<Level::Info<<"Shader::operator=() "<<shader.ID<<" to "<<ID<<op::endl;
     if (this != &shader) {
         if (ID != 0)
-            glDeleteProgram(ID);
+            GLCall(glDeleteProgram(ID));
         init(shader.VertexShader, shader.fragmentShader);
     }
     return *this;

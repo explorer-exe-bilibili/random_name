@@ -2,6 +2,7 @@
 
 #include "core/log.h"
 #include "core/explorer.h"
+#include "core/render/GLBase.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -10,16 +11,15 @@ GLFWwindow* window;
 
 
 int mainloop(GLFWwindow* window) {
-    // 设置清屏颜色（灰色背景便于调试）
-    glClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+    GLCall(glClearColor(0.2f, 0.2f, 0.2f, 1.0f));
     
     // 清除颜色和深度缓冲区
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    
+    GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+
     // 设置视口和投影矩阵（如果需要）
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
-    glViewport(0, 0, width, height);
+    GLCall(glViewport(0, 0, width, height));
     
     // 尝试绘制位图
     auto& bitmap = core::Explorer::getInstance()->getBitmap("1");
@@ -31,10 +31,10 @@ int mainloop(GLFWwindow* window) {
     bitmap.Draw(core::Region(0, 0, width, height));
     
     // 交换前后缓冲区
-    glfwSwapBuffers(window);
+    GLCall(glfwSwapBuffers(window));
     
     // 处理事件
-    glfwPollEvents();
+    GLCall(glfwPollEvents());
     
     return 0;
 }
@@ -122,7 +122,10 @@ int init(){
     glfwSetMouseButtonCallback(window, MouseButtonEvent);
     glfwSetKeyCallback(window, KeyEvent);
     // 打印OpenGL版本
-    std::cout << "OpenGL Version: " << glGetString(GL_VERSION) << std::endl;
+    {
+        const GLubyte* version = glGetString(GL_VERSION);
+        std::cout << "OpenGL Version: " << version << std::endl;
+    }
     core::screenInfo.width = 800;
     core::screenInfo.height = 600;
 
@@ -134,7 +137,8 @@ int init(){
 
 int cleanup() {
     Log<<Level::Info<<"Cleaning up"<<op::endl<<op::flush;
-    glfwTerminate();
+    GLFWwindow* w = window; // preserve
+    GLCall(glfwTerminate());
 
     // 安全停止日志系统
     Log<<Level::Info<<"Shutting down logging system"<<op::endl<<op::flush;
