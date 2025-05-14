@@ -13,10 +13,17 @@ int main()
         Log<<Level::Error<<"Failed to initialize"<<op::endl;
         return -1;
     }
+    
     // 渲染循环
     while (!glfwWindowShouldClose(core::screenInfo.window)) {
         mainloop();
     }
-    cleanup();
+    
+    // 执行清理操作并确保不再进行后续的OpenGL调用
+    int cleanupResult = cleanup();
+    if (cleanupResult != 0) {
+        Log<<Level::Error<<"Cleanup failed with code: "<<cleanupResult<<op::endl;
+    }
+    
     return 0;
 }

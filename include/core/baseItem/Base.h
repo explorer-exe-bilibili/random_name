@@ -22,6 +22,18 @@ namespace core
               dpi(info.dpi), pixelRatio(info.pixelRatio), window(info.window) {}
     } extern screenInfo;
 
+    struct Color{
+        char r,g,b,a;
+        Color() : r(0), g(0), b(0), a(0) {}
+        Color(char r, char g, char b, char a) : r(r), g(g), b(b), a(a) {}
+        Color(const Color& color) : r(color.r), g(color.g), b(color.b), a(color.a) {}
+        Color(const glm::vec3& color) : r(color.r * 255), g(color.g * 255), b(color.b * 255), a(255) {}
+        Color(const glm::vec4& color) : r(color.r * 255), g(color.g * 255), b(color.b * 255), a(color.a * 255) {}
+        
+        operator glm::vec4() const { return glm::vec4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f); }
+        operator glm::vec3() const { return glm::vec3(r / 255.0f, g / 255.0f, b / 255.0f); }
+    };
+    namespace color{extern Color white, black, red, green, blue;}
     struct Region {
         float x,xend;
         float y,yend;
@@ -42,16 +54,16 @@ namespace core
     };
 
     struct Character {
-        Texture texture;
+        unsigned int textureID;
         glm::vec2 size;
         glm::vec2 bearing;
         unsigned int advance;
-        Character(Texture& tx, const glm::vec2& size, const glm::vec2& bearing, unsigned int advance)
-            : texture(tx), size(size), bearing(bearing), advance(advance) {}
+        Character(unsigned int tx, const glm::vec2& size, const glm::vec2& bearing, unsigned int advance)
+            : textureID(tx), size(size), bearing(bearing), advance(advance) {}
         Character(const Character& character)
-            : texture(character.texture), size(character.size),
+            : textureID(character.textureID), size(character.size),
               bearing(character.bearing), advance(character.advance) {}
-        Character() : texture(), size(0, 0), bearing(0, 0), advance(0) {}
+        Character() : textureID(0), size(0, 0), bearing(0, 0), advance(0) {}
         Character& operator=(const Character& character);
     };
 

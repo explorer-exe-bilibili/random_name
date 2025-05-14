@@ -7,6 +7,15 @@
 using namespace core;
 
 ScreenInfo core::screenInfo;
+namespace core {
+    namespace color {
+        Color white(255, 255, 255, 255);
+        Color black(0, 0, 0, 255);
+        Color red(255, 0, 0, 255);
+        Color green(0, 255, 0, 255);
+        Color blue(0, 0, 255, 255);
+    }
+}
 
 std::string core::wstring2string(const std::wstring& wstr) {
     std::string str;
@@ -24,7 +33,7 @@ Character& Character::operator=(const Character& character)
 {
     if (this != &character)
     {
-        texture = character.texture;
+        textureID = character.textureID;
         size = character.size;
         bearing = character.bearing;
         advance = character.advance;

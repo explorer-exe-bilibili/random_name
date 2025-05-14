@@ -13,8 +13,15 @@ bool IsOpenGLContextValid() {
 }
 
 void SetOpenGLContextInvalid() {
-    g_OpenGLContextValid = false;
-    Log<<Level::Info<<"OpenGL context marked as invalid"<<op::endl;
+    if (g_OpenGLContextValid) {
+        g_OpenGLContextValid = false;
+        Log<<Level::Info<<"OpenGL context marked as invalid"<<op::endl;
+        
+        // 清除所有待处理的OpenGL错误，防止它们在后续调用中被报告
+        while (glGetError() != GL_NO_ERROR) {
+            // 仅清除错误，不记录
+        }
+    }
 }
 
 void GLClearError(const char* function, const char* file, int line) {

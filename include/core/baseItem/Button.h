@@ -7,7 +7,7 @@
 namespace core {
 class Button {
 public:
-    Button(const std::string& text="", const Region& region=Region(), const Texture& texture=Texture());
+    Button(const std::string& text="", int FontID=0, const Region& region=Region(), const Texture& texture=Texture());
     Button(const Button& button);
     Button& operator=(const Button& button);
     ~Button();
@@ -31,5 +31,6 @@ private:
     bool enableTexture=true;
     std::string text="";
     Texture texture;
+    int FontID=0;
 };
 }

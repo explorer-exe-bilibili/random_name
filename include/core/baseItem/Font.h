@@ -13,36 +13,38 @@ namespace core
 {
 
 class Font{
-    static FT_Library ft;
     static bool inited;
-    static Shader shader;
 public:
     Font(const std::string& fontPath, bool needPreLoad=true);
-    Font(const Font& font);
+    Font(const Font& font)=delete;
     ~Font();
 
-    void RenderText(const std::string& text, core::Point position, int scale, const glm::vec3& color);
-    void RenderText(const std::wstring& text, core::Point position, int scale, const glm::vec3& color);
-    void RenderChar(wchar_t c, core::Point position, int scale, const glm::vec3& color);
+    void RenderText(const std::string& text, core::Point position, float scale, const glm::vec3& color);
+    void RenderText(const std::wstring& text, core::Point position, float scale, const glm::vec3& color);
+    void RenderChar(wchar_t c, core::Point position, float scale, const glm::vec3& color);
 
-    float GetTextWidth(const std::wstring& text, int scale);
-    float GetTextHeight(const std::wstring& text, int scale);
+    float GetTextWidth(const std::wstring& text, float scale);
+    float GetTextHeight(const std::wstring& text, float scale);
     Character& GetCharacter(wchar_t c);
-    int getFontID() const { return Fontid; }
+    float GetFontSize() const;
+    unsigned int GetFontID() const{return fontID;}
 
     bool setCustomerShaderProgram(const std::string& vertexShader, const std::string& fragmentShader);
     bool setCustomerShaderProgram(const Shader& shader);
 
-    Font& operator=(const Font& font);
+    Font& operator=(const Font& font)=delete;
+    bool operator==(const Font&) const;
 private:
     bool LoadCharacter(wchar_t c);
     
-    int Fontid=0;
-    FT_Face face=0;
-    float fontSize=0;
-    std::map<wchar_t, core::Character> characters;
-    VertexArray vao;
-    VertexBuffer vbo;
-    std::shared_ptr<Shader> CustomShaderProgram;
+    static FT_Library ft;
+    FT_Face face;
+    static std::shared_ptr<Font> spare_font;
+    float fontSize; // 字体大小
+    std::map<wchar_t, Character> Characters;
+    VertexArray VAO;
+    VertexBuffer VBO;
+    static Shader shader;
+    unsigned int fontID;
 };
 }

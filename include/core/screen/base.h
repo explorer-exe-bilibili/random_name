@@ -1,21 +1,26 @@
 #pragma once
 
+#include <string>
+#include <vector>
+#include <memory>
 
-class ScreenBase {
+#include "core/baseItem/Button.h"
+
+namespace core{
+
+class Screen {
+    std::string ID;
+    std::vector<std::shared_ptr<core::Button>> buttons;
 public:
-    ScreenBase() = default;
-    virtual ~ScreenBase() = default;
+    Screen(const std::string& ID) : ID(ID) { init(); }
+    virtual ~Screen()=default;
+    virtual void init()=0;
+    virtual bool Click(int x, int y)=0;
 
-    // Initialize the screen
-    virtual void Init() = 0;
-
-    // Render the screen
-    virtual void Render() = 0;
-
-    // Handle key events
-    virtual void KeyEvent(int key, int scancode, int action, int mods) = 0;
-
-    // Handle mouse button events
-    virtual void MouseButtonEvent(int button, int action, int mods) = 0;
-
+    virtual void Draw();
+    
+    std::string getID() const { return ID; }
+    
 };
+
+}

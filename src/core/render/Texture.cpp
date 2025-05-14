@@ -59,6 +59,11 @@ const unsigned int Texture::indices[6] = {
 };
 
 void Texture::init() {
+    GLCall(glGenTextures(1, &textureID));
+    if (textureID == 0) {
+        Log<<Level::Error<<"Texture::init() textureID is 0"<<op::endl;
+        return;
+    }
     if (inited) return;
     Log<<Level::Info<<"Texture::init() "<<op::endl;
     inited = true;
@@ -132,6 +137,14 @@ Texture::Texture(const Texture& other){
     
     // 创建纹理
     GLCall(glGenTextures(1, &textureID));
+    if(width <= 0 || height <= 0) {
+        Log<<Level::Error<<"Texture::Texture(const Texture& other) width or height is invalid"<<op::endl;
+        return;
+    }
+    if(!other) {
+        Log<<Level::Error<<"Texture::Texture(const Texture& other) textureID is 0"<<op::endl;
+        return;
+    }
     GLCall(glBindTexture(GL_TEXTURE_2D, this->textureID));
     
     // 为目标纹理分配存储空间

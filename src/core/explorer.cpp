@@ -112,9 +112,9 @@ Font& Explorer::getFont(int id) {
 int Explorer::loadFont(const std::string& path, bool needPreLoad) {
     Log << Level::Info << "Loading font from path: " << path << op::endl;
     auto font = std::make_shared<Font>(path, needPreLoad);
-    fonts[font->getFontID()] = font;
-    Log << Level::Info << "Font loaded successfully: " << font->getFontID() << op::endl;
-    return font->getFontID();
+    fonts[font->GetFontID()] = font;
+    Log << Level::Info << "Font loaded successfully: " << font->GetFontID() << op::endl;
+    return font->GetFontID();
 }
 
 void Explorer::loadImagesFromDirectory(const std::string& directory) {

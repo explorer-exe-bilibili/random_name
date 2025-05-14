@@ -4,12 +4,15 @@
 #include "core/explorer.h"
 #include "core/render/GLBase.h"
 #include "core/baseItem/Base.h"
+#include "core/baseItem/Button.h"
 
 #ifdef _WIN32
 #include <windows.h>
 #endif
 
 using namespace core;
+
+Button* test_button = nullptr;
 
 // 窗口大小改变时的回调函数
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -34,19 +37,14 @@ int mainloop() {
     int width, height;
     glfwGetFramebufferSize(screenInfo.window, &width, &height);
     GLCall(glViewport(0, 0, width, height));
-    
-    // 尝试绘制位图
-    auto& bitmap = core::Explorer::getInstance()->getBitmap("1");
-    
-    // 绘制位图
-    bitmap.Draw(core::Region(0, 0, width, height));
-    
+
+    test_button->Draw();
     // 交换前后缓冲区
     glfwSwapBuffers(screenInfo.window);
-    
+
     // 处理事件
     glfwPollEvents();
-    
+
     return 0;
 }
 
@@ -143,6 +141,7 @@ int init(){
 
     Log<<Level::Info<<"Init explorer"<<op::endl;
     core::Explorer::getInstance();
+    test_button = new Button("Test Button", 0, Region(0,0,800,600));
     Log<<Level::Info<<"starting render loop"<<op::endl<<op::flush;
     return 0;
 }
@@ -153,11 +152,18 @@ int cleanup() {
     // 先释放Explorer实例以确保所有OpenGL资源被正确释放
     Log<<Level::Info<<"Releasing Explorer instance"<<op::endl<<op::flush;
     core::Explorer::getInstance().reset();
+    delete test_button;
+    test_button = nullptr;
     
     // 标记OpenGL上下文即将失效，防止后续OpenGL调用引起问题
     SetOpenGLContextInvalid();
     
+    // 确保在终止GLFW前解绑当前上下文
+    Log<<Level::Info<<"Unbinding OpenGL context"<<op::endl<<op::flush;
+    glfwMakeContextCurrent(nullptr);
+    
     // 然后再终止GLFW
+    Log<<Level::Info<<"Terminating GLFW"<<op::endl<<op::flush;
     glfwTerminate();
 
     // 安全停止日志系统
