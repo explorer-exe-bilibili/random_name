@@ -15,7 +15,7 @@ Button::~Button() {
 void Button::Draw() {
     // Draw the button
     try {
-        auto& explorer = Explorer::getInstance();
+        const auto& explorer = Explorer::getInstance();
         if (!explorer) {
             Log << "Explorer instance is null" << op::endl;
             return;
@@ -23,7 +23,7 @@ void Button::Draw() {
         
         try {
             Font& font = explorer->getFont(FontID);
-            font.RenderText(text, {0,0}, 1, color::white);
+            font.RenderText(text, 0, 0, 1, Color(255, 255, 255, 255));
         } catch (const std::exception& e) {
             Log << "Error rendering button text: " << e.what() << op::endl;
         }

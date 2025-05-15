@@ -1,22 +1,20 @@
 #include "core/baseItem/Font.h"
-
-#include <ft2build.h>
+#include "core/render/VertexArray.h"
 #include FT_FREETYPE_H
 
 #include <iostream>
 #include <mutex>
-#include <thread>
 #include <glad/glad.h>
 #include <glm/ext/matrix_clip_space.hpp>
 
 #include "core/render/GLBase.h"
+#include "core/baseItem/Base.h"
 
 using namespace core;
 
-FT_Library Font::ft;
-static unsigned int fontCounter = 0;
+FT_Library Font::ft = nullptr;
 
-std::string vertexShader = R"(
+static std::string vertexShader = R"(
 #version 330 core
 layout(location = 0) in vec4 vertex; // <vec2 pos, vec2 tex>
 out vec2 TexCoords;
@@ -30,7 +28,7 @@ void main()
 }
 )";
 
-std::string fragmentShader = R"(
+static std::string fragmentShader = R"(
 #version 330 core
 in vec2 TexCoords;
 out vec4 color;
@@ -55,22 +53,21 @@ Font::Font(const std::string& fontPath,bool needPreLoad)
 	{
 		shader.init(vertexShader, fragmentShader);
 	}
+	// 初始化 FreeType 字库
+	if(ft==nullptr) {
+		if (FT_Init_FreeType(&ft)) {
+			std::cerr << "无法初始化 FreeType 库" << std::endl;
+			return;
+		}
+	}
 	static bool spareIniting = false;
 	// 初始化备用字体
 	if (!spare_font&&!spareIniting) {
-		std::thread([this]
-			{
-				spareIniting = true;
-				spare_font = std::make_shared<Font>
-			(R"(D:\Users\explorer\Source\Repos\random_name\random\files\ttfs\spare.ttf)",0);
-			}).detach();
+		spareIniting = true;
+		spare_font = std::make_shared<Font>
+			(R"(C:\Users\j1387\source\repos\explorer-exe-bilibili\random_name\files\fonts\spare.ttf)", 0);
 	}
-	// 初始化 FreeType 字库
-	if (FT_Init_FreeType(&ft)) {
-		std::cerr << "无法初始化 FreeType 库" << std::endl;
-		return;
-	}
-
+	face = nullptr;
 	// 加载字体
 	if (FT_New_Face(ft, fontPath.c_str(), 0, &face)) {
 		std::cerr << "无法加载字体: " << fontPath << std::endl;
@@ -108,36 +105,34 @@ Font::Font(const std::string& fontPath,bool needPreLoad)
 
 	VertexArray::Unbind();
 	VertexBuffer::Unbind();
-	fontID=fontCounter++;
 	std::cout << "Load font finished"<<fontPath<<std::endl;
 }
 
 Font::~Font() {
 	// 释放纹理
 	for (auto& pair : Characters) {
-		glDeleteTextures(1, &pair.second.textureID);
+		glDeleteTextures(1, &pair.second.TextureID);
 	}
 
 	// 释放 FreeType 资源
 	FT_Done_Face(face);
 }
 
-void core::Font::RenderText(const std::string & text, core::Point position, float scale, const glm::vec3 & color)
-{
-	RenderText(core::string2wstring(text), position, scale, color);
+void Font::RenderText(const std::string& text,float x, float y,float scale, const glm::vec3& color){
+	std::wstring wtext = string2wstring(text);
+	RenderText(wtext, x, y, scale, color);
 }
 
-void Font::RenderText(const std::wstring& text, Point position, float scale, const glm::vec3& color) {
+void Font::RenderText(const std::wstring& text, float x, float y, float scale, const glm::vec3& color) {
 	//检查是否包含未加载的字符
-	for (const auto& c : text) {
-		if (Characters.find(c) == Characters.end())
+	for (auto c = text.begin(); c != text.end(); ++c) {
+		if (!Characters.contains(*c))
 		{
-			LoadCharacter(c);
+			LoadCharacter(*c);
 		}
 	}
 	// 设置正交投影矩阵
-	glm::mat4 projection = 
-		glm::ortho(0.0f, static_cast<float>(screenInfo.width), 0.0f, static_cast<float>(screenInfo.height));
+	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(screenInfo.width), 0.0f, static_cast<float>(screenInfo.height));
 	std::cout << "paint test try"<<std::endl;
 	// 设置字体着色器中的投影矩阵
 	shader.use();
@@ -152,11 +147,11 @@ void Font::RenderText(const std::wstring& text, Point position, float scale, con
 	for (auto c = text.begin(); c != text.end(); ++c) {
 		Character ch = Characters[*c];
 
-		float xpos = position.x + ch.bearing.x * scale;
-		float ypos = position.y - (ch.size.y - ch.bearing.y) * scale;
+		float xpos = x + ch.Bearing.x * scale;
+		float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
 
-		float w = ch.size.x * scale;
-		float h = ch.size.y * scale;
+		float w = ch.Size.x * scale;
+		float h = ch.Size.y * scale;
 
 		// 更新 VBO
 		float vertices[6][4] = {
@@ -170,8 +165,7 @@ void Font::RenderText(const std::wstring& text, Point position, float scale, con
 		};
 
 		// 绑定纹理
-		GLCall(glBindTexture(GL_TEXTURE_2D, ch.textureID));
-
+		GLCall(glBindTexture(GL_TEXTURE_2D, ch.TextureID));
 
 		// 更新顶点缓冲
 		VBO.Bind();
@@ -182,7 +176,7 @@ void Font::RenderText(const std::wstring& text, Point position, float scale, con
 		GLCall(glDrawArrays(GL_TRIANGLES, 0, 6));
 
 		// 移动到下一个字符位置
-		position.x += (ch.advance >> 6) * scale; // 位移单位是1/64像素，所以位移6位
+		x += (ch.Advance >> 6) * scale; // 位移单位是1/64像素，所以位移6位
 	}
 
 	VertexArray::Unbind();
@@ -190,9 +184,9 @@ void Font::RenderText(const std::wstring& text, Point position, float scale, con
 	glDisable(GL_BLEND);
 }
 
-void Font::RenderChar(wchar_t text, Point position, float scale, const glm::vec3& color) {
+void Font::RendChar(wchar_t text, float x, float y, float scale, const glm::vec3& color) {
 	//检查是否包含未加载的字符
-	if (Characters.find(text) == Characters.end())
+	if (!Characters.contains(text))
 	{
 		LoadCharacter(text);
 	}
@@ -211,11 +205,11 @@ void Font::RenderChar(wchar_t text, Point position, float scale, const glm::vec3
 	// 遍历文本中的字符
 	Character ch = Characters[text];
 
-	float xpos = position.x + ch.bearing.x * scale;
-	float ypos = position.y - (ch.size.y - ch.bearing.y) * scale;
+	float xpos = x + ch.Bearing.x * scale;
+	float ypos = y - (ch.Size.y - ch.Bearing.y) * scale;
 
-	float w = ch.size.x * scale;
-	float h = ch.size.y * scale;
+	float w = ch.Size.x * scale;
+	float h = ch.Size.y * scale;
 
 	// 更新 VBO
 	float vertices[6][4] = {
@@ -229,7 +223,7 @@ void Font::RenderChar(wchar_t text, Point position, float scale, const glm::vec3
 	};
 
 	// 绑定纹理
-	GLCall(glBindTexture(GL_TEXTURE_2D, ch.textureID));
+	GLCall(glBindTexture(GL_TEXTURE_2D, ch.TextureID));
 
 	// 更新顶点缓冲
 	VBO.Bind();
@@ -244,66 +238,36 @@ void Font::RenderChar(wchar_t text, Point position, float scale, const glm::vec3
 	glDisable(GL_BLEND);
 }
 
-float Font::GetTextHeight(const std::wstring & text, float scale)
-{
-	// 计算文本高度
-	float height = 0.0f;
-	for (auto c = text.begin(); c != text.end(); ++c) {
-		if (Characters.find(*c) == Characters.end())
-		{
-			LoadCharacter(*c);
-		}
-		height = std::max(height, Characters[*c].size.y * scale);
-	}
-	return height;
-}
-
-float Font::GetTextWidth(const std::wstring &text, float scale)
-{
-	// 计算文本宽度
-	float width = 0.0f;
-	for (auto c = text.begin(); c != text.end(); ++c) {
-		if (Characters.find(*c) == Characters.end())
-		{
-			LoadCharacter(*c);
-		}
-		width += Characters[*c].advance * scale;
-	}
-	return width;
-}
-
 bool Font::operator==(const Font& b) const
 {
 	if (face == b.face)return true;
 	return false;
 }
-std::mutex mx;
+static std::mutex mx;
 bool Font::LoadCharacter(wchar_t c)
 {
-	// 检查是否已经加载过
-	if (Characters.find(c) != Characters.end()) return true;
-	std::lock_guard<std::mutex> lock(mx);
-
+	//检查是否已经加载过
+	if (Characters.contains(c))return true;
+	mx.lock();
 	// 加载字符字形
-	if (FT_Get_Char_Index(face, c) == 0)
+	if (FT_Get_Char_Index(face,c)==0)
 	{
+		mx.unlock();
 		std::wcout << L"字符不存在: " << c << std::endl;
-		if (!spare_font) return false;
-		if (FT_Get_Char_Index(spare_font->face, c) == 0) return false;
-		Characters.insert(std::make_pair(c, spare_font->GetCharacter(c)));
+		if (!spare_font)return false;
+		if (FT_Get_Char_Index(spare_font->face, c) == 0)return false;
+		Characters.insert(std::pair(c, spare_font->GetCharacter(c)));
 		return true;
 	}
 	if (FT_Load_Char(face, c, FT_LOAD_RENDER)) {
+		mx.unlock();
 		std::wcerr << L"加载字符失败: " << c << std::endl;
 		return false;
 	}
-
-	// 创建纹理
-	unsigned int textureID;
-	glGenTextures(1, &textureID);
-	
-	// 设置纹理参数
-	glBindTexture(GL_TEXTURE_2D, textureID);
+	// 生成纹理
+	unsigned int texture;
+	glGenTextures(1, &texture);
+	glBindTexture(GL_TEXTURE_2D, texture);
 	glTexImage2D(
 		GL_TEXTURE_2D,
 		0,
@@ -315,27 +279,34 @@ bool Font::LoadCharacter(wchar_t c)
 		GL_UNSIGNED_BYTE,
 		face->glyph->bitmap.buffer
 	);
-	glBindTexture(GL_TEXTURE_2D, 0);
+
+	// 设置纹理选项
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	// 存储字符
 	Character character = {
-		textureID,
+		texture,
 		glm::ivec2(face->glyph->bitmap.width, face->glyph->bitmap.rows),
 		glm::ivec2(face->glyph->bitmap_left, face->glyph->bitmap_top),
 		static_cast<unsigned int>(face->glyph->advance.x)
 	};
-	Characters.insert(std::make_pair(c, character));
-	std::wcout << c << L"\t";
+	Characters.insert(std::pair(c, character));
+	std::wcout << c<<L"\t";
+	mx.unlock();
 	return true;
 }
+
 float Font::GetFontSize() const
 {
 	return fontSize;
 }
 
-Character& Font::GetCharacter(wchar_t c)
+Character Font::GetCharacter(wchar_t c)
 {
-	if (Characters.find(c) == Characters.end())
+	if (!Characters.contains(c))
 	{
 		if (!LoadCharacter(c))return Characters[L'?'];
 	}

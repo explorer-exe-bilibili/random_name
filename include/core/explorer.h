@@ -28,7 +28,7 @@ public:
     Bitmap& getBitmap(const std::string& name);
     Font& getFont(int id);
     bool loadBitmap(const std::string& name, const std::string& path);
-    int loadFont(const std::string& path, bool needPreLoad = true);
+    int loadFont(const unsigned int ID, const std::string& path, bool needPreLoad = true);
     void loadImagesFromDirectory(const std::string& directory);
     void listLoadedBitmaps();
 };

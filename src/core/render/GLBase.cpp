@@ -25,20 +25,9 @@ void SetOpenGLContextInvalid() {
 }
 
 void GLClearError(const char* function, const char* file, int line) {
-    // 最多处理10个错误，避免死循环
-    int maxErrors = 10;
-    int errorCount = 0;
     
 	while (GLenum error = glGetError()) {
 		Log<<Level::Warn<<"[OpenGL Error]("<<error<<")" << function << " " << file << ":" << line << op::endl;
-		
-		// 增加计数器并检查是否达到最大值
-		if (++errorCount >= maxErrors) {
-            Log<<Level::Warn<<"Too many OpenGL errors, breaking loop" << op::endl;
-            break;
-        }
-		
-		std::this_thread::sleep_for(std::chrono::milliseconds(5));
 	}	
 }
 

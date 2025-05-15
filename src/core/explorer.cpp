@@ -45,7 +45,7 @@ int Explorer::init() {
 
     // 尝试加载默认字体
     try {
-        loadFont("files/fonts/spare.ttf", false);
+        loadFont(0, R"(C:\Users\j1387\source\repos\explorer-exe-bilibili\random_name\files\fonts\QS.ttf)", false);
     } catch (const std::exception& e) {
         Log << Level::Error << "Failed to load font: " << e.what() << op::endl;
     }
@@ -109,12 +109,12 @@ Font& Explorer::getFont(int id) {
     return *fonts[id];
 }
 
-int Explorer::loadFont(const std::string& path, bool needPreLoad) {
+int Explorer::loadFont(const unsigned int ID, const std::string& path, bool needPreLoad) {
     Log << Level::Info << "Loading font from path: " << path << op::endl;
     auto font = std::make_shared<Font>(path, needPreLoad);
-    fonts[font->GetFontID()] = font;
-    Log << Level::Info << "Font loaded successfully: " << font->GetFontID() << op::endl;
-    return font->GetFontID();
+    fonts[ID] = font;
+    Log << Level::Info << "Font loaded successfully: " << ID << op::endl;
+    return ID;
 }
 
 void Explorer::loadImagesFromDirectory(const std::string& directory) {

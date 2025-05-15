@@ -53,20 +53,6 @@ namespace core
         operator glm::vec2() const { return glm::vec2(x, y); }
     };
 
-    struct Character {
-        unsigned int textureID;
-        glm::vec2 size;
-        glm::vec2 bearing;
-        unsigned int advance;
-        Character(unsigned int tx, const glm::vec2& size, const glm::vec2& bearing, unsigned int advance)
-            : textureID(tx), size(size), bearing(bearing), advance(advance) {}
-        Character(const Character& character)
-            : textureID(character.textureID), size(character.size),
-              bearing(character.bearing), advance(character.advance) {}
-        Character() : textureID(0), size(0, 0), bearing(0, 0), advance(0) {}
-        Character& operator=(const Character& character);
-    };
-
     struct Size
     {
         int width;

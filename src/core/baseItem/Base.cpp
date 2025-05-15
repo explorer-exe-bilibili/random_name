@@ -28,15 +28,3 @@ std::wstring core::string2wstring(const std::string& str) {
     utf8::utf8to16(str.begin(), str.end(), std::back_inserter(wstr));
     return wstr;
 }
-
-Character& Character::operator=(const Character& character)
-{
-    if (this != &character)
-    {
-        textureID = character.textureID;
-        size = character.size;
-        bearing = character.bearing;
-        advance = character.advance;
-    }
-    return *this;
-}
