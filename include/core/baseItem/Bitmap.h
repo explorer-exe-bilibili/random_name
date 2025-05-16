@@ -10,7 +10,6 @@ class Bitmap
 {
 public:
     Bitmap(const std::string& filePath){Load(filePath);}
-    Bitmap(const Bitmap& bitmap){texture=bitmap.texture;}
     Bitmap(){}
     ~Bitmap(){}
 
@@ -18,13 +17,11 @@ public:
 
     void Draw(Region region);
 
-    Bitmap& operator=(const Bitmap& bitmap);
-
-    inline unsigned int getWidth() const { return texture.getWidth(); }
-    inline unsigned int getHeight() const { return texture.getHeight(); }
-    inline operator bool() const { return texture; }
+    inline unsigned int getWidth() const { return texture->getWidth(); }
+    inline unsigned int getHeight() const { return texture->getHeight(); }
+    inline operator bool() const { return texture != nullptr; }
 private:
-    Texture texture;
+    std::shared_ptr<Texture> texture;
 };
 
 } // namespace core

@@ -128,51 +128,51 @@ Texture::Texture(const int width, const int height)
     GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 }
 
-Texture::Texture(const Texture& other){
-    Log<<Level::Info<<"Texture::Texture(const Texture& other) "<<other.textureID<<op::endl;
-    init();
-    // 先设置宽高，这样能够正确分配纹理空间
-    this->width = other.width;
-    this->height = other.height;
+// Texture::Texture(const Texture& other){
+//     Log<<Level::Info<<"Texture::Texture(const Texture& other) "<<other.textureID<<op::endl;
+//     init();
+//     // 先设置宽高，这样能够正确分配纹理空间
+//     this->width = other.width;
+//     this->height = other.height;
     
-    // 创建纹理
-    GLCall(glGenTextures(1, &textureID));
-    if(width <= 0 || height <= 0) {
-        Log<<Level::Error<<"Texture::Texture(const Texture& other) width or height is invalid"<<op::endl;
-        return;
-    }
-    if(!other) {
-        Log<<Level::Error<<"Texture::Texture(const Texture& other) textureID is 0"<<op::endl;
-        return;
-    }
-    GLCall(glBindTexture(GL_TEXTURE_2D, this->textureID));
+//     // 创建纹理
+//     GLCall(glGenTextures(1, &textureID));
+//     if(width <= 0 || height <= 0) {
+//         Log<<Level::Error<<"Texture::Texture(const Texture& other) width or height is invalid"<<op::endl;
+//         return;
+//     }
+//     if(!other) {
+//         Log<<Level::Error<<"Texture::Texture(const Texture& other) textureID is 0"<<op::endl;
+//         return;
+//     }
+//     GLCall(glBindTexture(GL_TEXTURE_2D, this->textureID));
     
-    // 为目标纹理分配存储空间
-    GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+//     // 为目标纹理分配存储空间
+//     GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
     
-    // 设置纹理参数
-    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
-    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-    GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+//     // 设置纹理参数
+//     GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+//     GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+//     GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+//     GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
     
-    // 创建FBO并复制纹理内容
-    GLuint fbo;
-    GLCall(glGenFramebuffers(1,&fbo));
-    /// 绑定FBO
-    GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo));
-    /// 绑定纹理到FBO
-    GLCall(glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-    GL_TEXTURE_2D, other.textureID, 0));
-    /// 绑定目标纹理
-    GLCall(glBindTexture(GL_TEXTURE_2D, this->textureID));
-    /// 复制FBO的颜色缓冲到目标纹理
-    GLCall(glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height));
-    /// 解绑FBO
-    GLCall(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-    GLCall(glBindTexture(GL_TEXTURE_2D, 0));
-    GLCall(glDeleteFramebuffers(1,&fbo));
-}
+//     // 创建FBO并复制纹理内容
+//     GLuint fbo;
+//     GLCall(glGenFramebuffers(1,&fbo));
+//     /// 绑定FBO
+//     GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo));
+//     /// 绑定纹理到FBO
+//     GLCall(glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+//     GL_TEXTURE_2D, other.textureID, 0));
+//     /// 绑定目标纹理
+//     GLCall(glBindTexture(GL_TEXTURE_2D, this->textureID));
+//     /// 复制FBO的颜色缓冲到目标纹理
+//     GLCall(glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, width, height));
+//     /// 解绑FBO
+//     GLCall(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+//     GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+//     GLCall(glDeleteFramebuffers(1,&fbo));
+// }
 
 Texture::~Texture() {
     if (textureID != 0) {
@@ -231,47 +231,47 @@ void Texture::Draw(const glm::vec3& topLeft, const glm::vec3& bottomRight, float
     IndexBuffer::Unbind();
 }
 
-Texture& Texture::operator=(const Texture& other) {
-    Log<<Level::Info<<"Texture& Texture::operator=(const Texture& other) from "<<other.textureID<<op::endl;
-    if(this != &other) {
-        if (textureID != 0) {
-            glDeleteTextures(1, &textureID);
-        }
-        this->width = other.width;
-        this->height = other.height;
+// Texture& Texture::operator=(const Texture& other) {
+//     Log<<Level::Info<<"Texture& Texture::operator=(const Texture& other) from "<<other.textureID<<op::endl;
+//     if(this != &other) {
+//         if (textureID != 0) {
+//             glDeleteTextures(1, &textureID);
+//         }
+//         this->width = other.width;
+//         this->height = other.height;
         
-        // 创建新纹理
-        GLCall(glGenTextures(1, &textureID));
-        GLCall(glBindTexture(GL_TEXTURE_2D, this->textureID));
+//         // 创建新纹理
+//         GLCall(glGenTextures(1, &textureID));
+//         GLCall(glBindTexture(GL_TEXTURE_2D, this->textureID));
         
-        // 首先为目标纹理分配存储空间
-        GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+//         // 首先为目标纹理分配存储空间
+//         GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
         
-        // 设置纹理参数
-        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
-        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
-        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
-        GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
+//         // 设置纹理参数
+//         GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
+//         GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
+//         GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR));
+//         GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
         
-        // 创建帧缓冲对象
-        GLuint fbo;
-        GLCall(glGenFramebuffers(1,&fbo));
-        /// 绑定FBO
-        GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo));
-        /// 绑定纹理到FBO
-        GLCall(glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
-        GL_TEXTURE_2D, other.textureID, 0));
-        /// 绑定目标纹理
-        GLCall(glBindTexture(GL_TEXTURE_2D, this->textureID));
-        /// 复制FBO的颜色缓冲到目标纹理
-        GLCall(glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, width,height));
-        /// 解绑FBO
-        GLCall(glBindFramebuffer(GL_FRAMEBUFFER, 0));
-        GLCall(glBindTexture(GL_TEXTURE_2D, 0));
-        GLCall(glDeleteFramebuffers(1,&fbo));
-    }
-    return *this;
-}
+//         // 创建帧缓冲对象
+//         GLuint fbo;
+//         GLCall(glGenFramebuffers(1,&fbo));
+//         /// 绑定FBO
+//         GLCall(glBindFramebuffer(GL_READ_FRAMEBUFFER, fbo));
+//         /// 绑定纹理到FBO
+//         GLCall(glFramebufferTexture2D(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0,
+//         GL_TEXTURE_2D, other.textureID, 0));
+//         /// 绑定目标纹理
+//         GLCall(glBindTexture(GL_TEXTURE_2D, this->textureID));
+//         /// 复制FBO的颜色缓冲到目标纹理
+//         GLCall(glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 0, 0, width,height));
+//         /// 解绑FBO
+//         GLCall(glBindFramebuffer(GL_FRAMEBUFFER, 0));
+//         GLCall(glBindTexture(GL_TEXTURE_2D, 0));
+//         GLCall(glDeleteFramebuffers(1,&fbo));
+//     }
+//     return *this;
+// }
 
 bool Texture::setCustomerShaderProgram(const std::string& vertexShader, const std::string& fragmentShader) {
     if (customerShaderProgram) 

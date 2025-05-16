@@ -9,6 +9,7 @@
 
 #include "core/render/GLBase.h"
 #include "core/baseItem/Base.h"
+#include "core/log.h"
 
 using namespace core;
 
@@ -124,6 +125,11 @@ void Font::RenderText(const std::string& text,float x, float y,float scale, cons
 }
 
 void Font::RenderText(const std::wstring& text, float x, float y, float scale, const glm::vec3& color) {
+	if(this==nullptr){
+		Log<<"Font is nullptr"<<op::endl;
+		spare_font->RenderText(text, x, y, scale, color);
+		return;
+	}
 	//检查是否包含未加载的字符
 	for (auto c = text.begin(); c != text.end(); ++c) {
 		if (!Characters.contains(*c))
@@ -133,7 +139,6 @@ void Font::RenderText(const std::wstring& text, float x, float y, float scale, c
 	}
 	// 设置正交投影矩阵
 	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(screenInfo.width), 0.0f, static_cast<float>(screenInfo.height));
-	std::cout << "paint test try"<<std::endl;
 	// 设置字体着色器中的投影矩阵
 	shader.use();
 	shader.setMat4("projection", projection);
@@ -185,6 +190,11 @@ void Font::RenderText(const std::wstring& text, float x, float y, float scale, c
 }
 
 void Font::RendChar(wchar_t text, float x, float y, float scale, const glm::vec3& color) {
+	if (this == nullptr) {
+		Log << "Font is nullptr" << op::endl;
+		spare_font->RendChar(text, x, y, scale, color);
+		return;
+	}
 	//检查是否包含未加载的字符
 	if (!Characters.contains(text))
 	{
@@ -192,7 +202,6 @@ void Font::RendChar(wchar_t text, float x, float y, float scale, const glm::vec3
 	}
 	// 设置正交投影矩阵
 	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(screenInfo.width), 0.0f, static_cast<float>(screenInfo.height));
-	std::cout << "paint test try" << std::endl;
 	// 设置字体着色器中的投影矩阵
 	shader.use();
 	shader.setMat4("projection", projection);
@@ -246,6 +255,11 @@ bool Font::operator==(const Font& b) const
 static std::mutex mx;
 bool Font::LoadCharacter(wchar_t c)
 {
+	if (this == nullptr) {
+		Log << "Font is nullptr" << op::endl;
+		spare_font->LoadCharacter(c);
+		return false;
+	}
 	//检查是否已经加载过
 	if (Characters.contains(c))return true;
 	mx.lock();
@@ -306,6 +320,10 @@ float Font::GetFontSize() const
 
 Character Font::GetCharacter(wchar_t c)
 {
+	if (this == nullptr) {
+		Log << "Font is nullptr" << op::endl;
+		return spare_font->GetCharacter(c);
+	}
 	if (!Characters.contains(c))
 	{
 		if (!LoadCharacter(c))return Characters[L'?'];

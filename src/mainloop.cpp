@@ -1,5 +1,7 @@
 #include "mainloop.h"
 
+#include <memory>
+
 #include "core/log.h"
 #include "core/explorer.h"
 #include "core/render/GLBase.h"
@@ -140,8 +142,11 @@ int init(){
     core::screenInfo.height = 600;
 
     Log<<Level::Info<<"Init explorer"<<op::endl;
-    core::Explorer::getInstance();
-    test_button = new Button("Test Button", 0, Region(0,0,800,600));
+    core::Explorer::getInstance();    test_button = new Button("啊Test Button", 0, Region(0,0,800,600));
+    test_button->SetFontID(0);
+    test_button->SetBitmap(core::Explorer::getInstance()->getBitmap("1"));
+    test_button->SetEnableBitmap(true);
+    test_button->SetEnableText(true);
     Log<<Level::Info<<"starting render loop"<<op::endl<<op::flush;
     return 0;
 }

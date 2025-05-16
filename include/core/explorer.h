@@ -25,8 +25,8 @@ public:
 
     int init();
 
-    Bitmap& getBitmap(const std::string& name);
-    Font& getFont(int id);
+    std::shared_ptr<core::Bitmap> getBitmap(const std::string& name);
+    std::shared_ptr<core::Font> getFont(int id);
     bool loadBitmap(const std::string& name, const std::string& path);
     int loadFont(const unsigned int ID, const std::string& path, bool needPreLoad = true);
     void loadImagesFromDirectory(const std::string& directory);

@@ -31,7 +31,6 @@ int Explorer::init() {
     // 2. 使用相对路径
     loadBitmap("rel1", "files/imgs/1.jpg");
     loadBitmap("rel2", "./files/imgs/1.jpg");
-    loadBitmap("rel3", "../files/imgs/1.jpg");
     
     // 3. 使用不同文件格式
     loadBitmap("png1", "files/imgs/3.png");
@@ -80,16 +79,15 @@ bool Explorer::loadBitmap(const std::string& name, const std::string& path) {
     return false;
 }
 
-Bitmap& Explorer::getBitmap(const std::string& name) {
+std::shared_ptr<Bitmap> Explorer::getBitmap(const std::string& name) {
     if (bitmaps.find(name) == bitmaps.end()) {
         Log << Level::Error << "Bitmap not found: " << name << op::endl;
         Log << Level::Info << "Available bitmaps: " << op::endl;
         listLoadedBitmaps();
-        
-        static Bitmap emptyBitmap;
-        return emptyBitmap;
+
+        return nullptr;
     }
-    return *bitmaps[name];
+    return bitmaps[name];
 }
 
 void Explorer::listLoadedBitmaps() {
@@ -101,12 +99,12 @@ void Explorer::listLoadedBitmaps() {
     }
 }
 
-Font& Explorer::getFont(int id) {
+std::shared_ptr<core::Font> Explorer::getFont(int id) {
     if (fonts.find(id) == fonts.end()) {
         Log << Level::Error << "Font not found: " << id << op::endl;
-        return *fonts[0]; // 返回默认的Font对象
+        return fonts[0]; // 返回默认的Font对象
     }
-    return *fonts[id];
+    return fonts[id];
 }
 
 int Explorer::loadFont(const unsigned int ID, const std::string& path, bool needPreLoad) {

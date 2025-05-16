@@ -12,18 +12,17 @@ using namespace core;
 
 bool Bitmap::Load(const std::string& filePath)
 {
-    if (texture)
+    if (texture)    
     {
         Log<<Level::Warn << "Bitmap::Load() texture already loaded" << op::endl;
-        texture.~Texture();
-        new (&texture) Texture(); // 使用placement new重新构造对象
+        texture.reset();  // 释放旧的纹理
     }
     int width, height, channels;
     Log<<Level::Info << "Loading image: " << filePath << op::endl;
     unsigned char* data = stbi_load(filePath.c_str(), &width, &height, &channels, 4);
     if (data)
     {
-        texture = Texture(data, width, height);
+        texture = std::make_shared<Texture>(data, width, height);
         stbi_image_free(data);
         Log<<Level::Info << "Loaded image: " << filePath << op::endl;
         return true;
@@ -69,15 +68,5 @@ void Bitmap::Draw(Region region)
     glm::vec3 topLeft = screenToNDC(region.x, region.y);
     glm::vec3 bottomRight = screenToNDC(region.xend, region.yend);
 
-    texture.Draw(topLeft, bottomRight);
-}
-
-Bitmap& Bitmap::operator=(const Bitmap& bitmap)
-{
-    Log<<Level::Info << "Bitmap& Bitmap::operator=(const Bitmap& bitmap) " << this->texture << " to " << bitmap.texture << op::endl;
-    if (this != &bitmap)
-    {
-        texture = bitmap.texture;
-    }
-    return *this;
+    texture->Draw(topLeft, bottomRight);
 }

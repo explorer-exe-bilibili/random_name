@@ -19,7 +19,7 @@ namespace core {
     public:
         Texture(const unsigned char* data, const int width, const int height);
         Texture(const int width,const int height);
-        Texture(const Texture& texture);
+        Texture(const Texture& texture)=delete;
         Texture(){init();}
         ~Texture();
 
@@ -42,7 +42,7 @@ namespace core {
 
 
         operator bool() const {return textureID != 0;}
-        Texture& operator=(const Texture& other);
+        Texture& operator=(const Texture& other)=delete;
 
         bool setCustomerShaderProgram(const std::string& vertexShader, const std::string& fragmentShader);
         bool setCustomerShaderProgram(const Shader& shader);
