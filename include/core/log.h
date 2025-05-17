@@ -66,16 +66,16 @@ public:
     Log_& operator<<(Level level);
     Log_& operator<<(operation op);
     Log_& operator<<(const core::Point& point) {
-        LogMessage("[" + std::to_string(point.x) + "," + std::to_string(point.y) + "]");
+        LogMessage("[" + std::to_string(point.getx()) + "," + std::to_string(point.gety()) + "]");
         return *this;
     }
     Log_& operator<<(const core::Size& size) {
-        LogMessage("[" + std::to_string(size.width) + "," + std::to_string(size.height) + "]");
+        LogMessage("[" + std::to_string(size.getw()) + "," + std::to_string(size.geth()) + "]");
         return *this;
     }
     Log_& operator<<(const core::Region& region) {
-        LogMessage("[" + std::to_string(region.x) + "," + std::to_string(region.y) + "|" +
-                   std::to_string(region.xend) + "," + std::to_string(region.yend) + "]");
+        LogMessage("[" + std::to_string(region.getx()) + "," + std::to_string(region.gety()) + "|" +
+                   std::to_string(region.getxend()) + "," + std::to_string(region.getyend()) + "]");
         return *this;
     }
     Log_& operator<<(const core::ScreenInfo& screenInfo) {

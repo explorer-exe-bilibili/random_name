@@ -8,7 +8,7 @@ using namespace core;
 
 void MainScreen::init() {
     // 初始化按钮和背景
-    auto button = std::make_shared<Button>("Click Me", 0, Region(100, 50, 200, 100));
+    auto button = std::make_shared<Button>("Click Me", 0, Region(0.1,0.2,0.2,0.3));
     button->SetClickFunc([]() {
         Log << Level::Info << "Button clicked!" << op::endl;
     });

@@ -191,13 +191,64 @@ void Font::RenderText(const std::wstring& text, float x, float y_origin, float s
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Font::RenderTextBetween(const std::string& text, float x, float y, float scale, const glm::vec4& color) {
+void Font::RenderTextBetween(const std::string& text, Region region, float scale, const glm::vec4& color) {
 	std::wstring wtext=string2wstring(text);
-	RenderTextBetween(wtext, x, y, scale, color);
+	RenderTextBetween(wtext, region, scale, color);
 }
 
-void Font::RenderTextBetween(const std::wstring& text,float x,float y,float scale,const glm::vec4& color){
+void Font::RenderTextBetween(const std::wstring& text, Region region, float scale, const glm::vec4& color) {
+	if (this == nullptr) {
+		Log << "Font is nullptr" << op::endl;
+		spare_font->RenderTextBetween(text, region, scale, color);
+		return;
+	}
+
+	//计算可用的区域宽度
+	float availableWidth = region.getxend() - region.getx();
+	float availableHeight = region.getyend() - region.gety();
+
+	if (availableWidth <= 0 || availableHeight <= 0 || text.empty()) {
+		return; // 没有可用空间或文本为空，直接返回
+	}
+
+	// 测量文本宽度，同时加载未加载的字符
+	float textWidth = 0.0f;
+	std::wstring displayText = text;
 	
+	for (size_t i = 0; i < text.length(); ++i) {
+		wchar_t c = text[i];
+		if (!Characters.contains(c)) {
+			LoadCharacter(c);
+		}
+		
+		Character ch = Characters[c];
+		float charWidth = (ch.Advance >> 6) * scale;
+		
+		// 检查是否超出可用宽度
+		if (textWidth + charWidth > availableWidth) {
+			// 截断文本
+			displayText = text.substr(0, i);
+			break;
+		}
+		
+		textWidth += charWidth;
+	}
+	
+	// 如果displayText为空（即第一个字符就超出区域），则至少显示一个字符
+	if (displayText.empty() && !text.empty()) {
+		displayText = text.substr(0, 1);
+		if (!Characters.contains(displayText[0])) {
+			LoadCharacter(displayText[0]);
+		}
+		textWidth = (Characters[displayText[0]].Advance >> 6) * scale;
+	}
+	
+	// 计算起始位置（水平居中）
+	float x = region.getx() + (availableWidth - textWidth) / 2.0f;
+	float y = region.gety() + (availableHeight - fontSize * scale) / 2.0f;
+
+	// 渲染截断后的文本
+	RenderText(displayText, x, y, scale, color);
 }
 
 void Font::RenderChar(wchar_t text, float x, float y_origin, float scale, const glm::vec4& color) {
@@ -341,4 +392,139 @@ Character Font::GetCharacter(wchar_t c)
 		if (!LoadCharacter(c))return Characters[L'?'];
 	}
 	return Characters[c];
+}
+
+void Font::RenderTextVertical(const std::string& text, float x, float y, float scale, const glm::vec4& color) {
+	std::wstring wtext = string2wstring(text);
+	RenderTextVertical(wtext, x, y, scale, color);
+}
+
+void Font::RenderTextVertical(const std::wstring& text, float x, float y_origin, float scale, const glm::vec4& color) {
+	float y = WindowInfo.height - y_origin - fontSize * scale;
+	if (this == nullptr) {
+		Log << "Font is nullptr" << op::endl;
+		spare_font->RenderTextVertical(text, x, y_origin, scale, color);
+		return;
+	}
+	//检查是否包含未加载的字符
+	for (auto c = text.begin(); c != text.end(); ++c) {
+		if (!Characters.contains(*c)) {
+			LoadCharacter(*c);
+		}
+	}
+	// 设置正交投影矩阵
+	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(WindowInfo.width), 0.0f, static_cast<float>(WindowInfo.height));
+	// 设置字体着色器中的投影矩阵
+	shader.use();
+	shader.setMat4("projection", projection);
+	shader.setVec3("textColor", color);
+	shader.setFloat("alphaMultiplier", color.a);
+	// 启用混合以处理文本的透明度
+	GLCall(glEnable(GL_BLEND));
+	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+	GLCall(glActiveTexture(GL_TEXTURE0));
+	VAO.Bind();
+	
+	float current_y = y;
+	// 垂直方向从上到下渲染文本
+	for (auto c = text.begin(); c != text.end(); ++c) {
+		Character ch = Characters[*c];
+
+		float xpos = x + ch.Bearing.x * scale;
+		float ypos = current_y - (ch.Size.y - ch.Bearing.y) * scale;
+
+		float w = ch.Size.x * scale;
+		float h = ch.Size.y * scale;
+
+		// 更新 VBO
+		float vertices[6][4] = {
+			{ xpos,     ypos + h,   0.0f, 0.0f },
+			{ xpos,     ypos,       0.0f, 1.0f },
+			{ xpos + w, ypos,       1.0f, 1.0f },
+
+			{ xpos,     ypos + h,   0.0f, 0.0f },
+			{ xpos + w, ypos,       1.0f, 1.0f },
+			{ xpos + w, ypos + h,   1.0f, 0.0f }
+		};
+
+		// 绑定纹理
+		GLCall(glBindTexture(GL_TEXTURE_2D, ch.TextureID));
+
+		// 更新顶点缓冲
+		VBO.Bind();
+		VBO.BufferSubData(0, sizeof(vertices), vertices);
+		VertexBuffer::Unbind();
+
+		// 绘制
+		GLCall(glDrawArrays(GL_TRIANGLES, 0, 6));
+
+		// 移动到下一个字符位置（向下移动）
+		current_y -= ch.Size.y * scale * 1.2f; // 添加一点额外间距
+	}
+
+	VertexArray::Unbind();
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
+void Font::RenderTextVerticalBetween(const std::string& text, Region region, float scale, const glm::vec4& color) {
+	std::wstring wtext = string2wstring(text);
+	RenderTextVerticalBetween(wtext, region, scale, color);
+}
+
+void Font::RenderTextVerticalBetween(const std::wstring& text, Region region, float scale, const glm::vec4& color) {
+	if (this == nullptr) {
+		Log << "Font is nullptr" << op::endl;
+		spare_font->RenderTextVerticalBetween(text, region, scale, color);
+		return;
+	}
+
+	//计算可用的区域高度
+	float availableWidth = region.getxend() - region.getx();
+	float availableHeight = region.getyend() - region.gety();
+
+	if (availableWidth <= 0 || availableHeight <= 0 || text.empty()) {
+		return; // 没有可用空间或文本为空，直接返回
+	}
+
+	// 测量文本高度，同时加载未加载的字符
+	float textHeight = 0.0f;
+	std::wstring displayText = text;
+	
+	for (size_t i = 0; i < text.length(); ++i) {
+		wchar_t c = text[i];
+		if (!Characters.contains(c)) {
+			LoadCharacter(c);
+		}
+		
+		Character ch = Characters[c];
+		float charHeight = ch.Size.y * scale * 1.2f; // 添加一点额外间距
+		
+		// 检查是否超出可用高度
+		if (textHeight + charHeight > availableHeight) {
+			// 截断文本
+			displayText = text.substr(0, i);
+			break;
+		}
+		
+		textHeight += charHeight;
+	}
+	
+	// 如果displayText为空（即第一个字符就超出区域），则至少显示一个字符
+	if (displayText.empty() && !text.empty()) {
+		displayText = text.substr(0, 1);
+		if (!Characters.contains(displayText[0])) {
+			LoadCharacter(displayText[0]);
+		}
+		textHeight = Characters[displayText[0]].Size.y * scale * 1.2f;
+	}
+	
+	// 计算起始位置（垂直居中）
+	float x = region.getx() + (availableWidth - fontSize * scale) / 2.0f;
+	float y = region.gety() + (availableHeight - textHeight) / 2.0f;
+
+	// 转换为屏幕坐标系（y轴反转）
+	float screen_y = WindowInfo.height - y - textHeight;
+	
+	// 渲染截断后的垂直文本
+	RenderTextVertical(displayText, x, y, scale, color);
 }

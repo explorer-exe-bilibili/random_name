@@ -34,35 +34,77 @@ namespace core
         operator glm::vec3() const { return glm::vec3(r / 255.0f, g / 255.0f, b / 255.0f); }
     };
     namespace color{extern Color white, black, red, green, blue;}
-    struct Region {
+
+    class Region {
         float x,xend;
         float y,yend;
+        bool screenRatio=true;
+    public:
         Region() : x(0), y(0), xend(0), yend(0) {}
-        Region(float x, float y, float xend, float yend) : x(x), y(y), xend(xend), yend(yend) {}
-        Region(const Region& region) : x(region.x), y(region.y), xend(region.xend), yend(region.yend) {}
-        Region(const glm::vec4& region) : x(region.x), y(region.y), xend(region.z), yend(region.w) {}
-        operator glm::vec4() const { return glm::vec4(x, y, xend, yend); }
+        Region(double x, double y, double xend, double yend, bool Ratio=true) : x(x), y(y), xend(xend), yend(yend), screenRatio(Ratio) {}
+        Region(const Region& region) : x(region.x), y(region.y), xend(region.xend), yend(region.yend), screenRatio(region.screenRatio) {}
+        Region(const glm::vec4& region) : x(region.x), y(region.y), xend(region.z), yend(region.w), screenRatio(true) {}
+        
+        float getx() const { return screenRatio ? x * WindowInfo.width : x; }
+        float gety() const { return screenRatio ? y * WindowInfo.height : y; }
+        float getxend() const { return screenRatio ? xend * WindowInfo.width : xend; }
+        float getyend() const { return screenRatio ? yend * WindowInfo.height : yend; }
+        bool getRatio() const { return screenRatio; }
+        
+        void setx(float x) { this->x = x; }
+        void sety(float y) { this->y = y; }
+        void setxend(float xend) { this->xend = xend; }
+        void setyend(float yend) { this->yend = yend; }
+        void setRatio(bool Ratio) { this->screenRatio = Ratio; }
+
+        operator glm::vec4() const { if(!screenRatio)return glm::vec4(x, y, xend, yend);
+             else return glm::vec4(x*WindowInfo.width, y*WindowInfo.height, xend*WindowInfo.width, yend*WindowInfo.height);}
     };
 
-    struct Point {
+    class Point {
         float x,y;
+        bool screenRatio=true;
+    public:
         Point() : x(0), y(0) {}
-        Point(float x, float y) : x(x), y(y) {}
-        Point(const Point& point) : x(point.x), y(point.y) {}
-        Point(const glm::vec2& point) : x(point.x), y(point.y) {}
-        operator glm::vec2() const { return glm::vec2(x, y); }
+        Point(float x, float y, bool Ratio=true) : x(x), y(y), screenRatio(Ratio) {}
+        Point(const Point& point) : x(point.x), y(point.y), screenRatio(point.screenRatio) {}
+        Point(const glm::vec2& point) : x(point.x), y(point.y), screenRatio(true) {}
+        
+        float getx() const { return screenRatio ? x * WindowInfo.width : x; }
+        float gety() const { return screenRatio ? y * WindowInfo.height : y; }
+        bool getRatio() const { return screenRatio; }
+        
+        void setx(float x) { this->x = x; }
+        void sety(float y) { this->y = y; }
+        void setRatio(bool Ratio) { this->screenRatio = Ratio; }
+
+        operator glm::vec2() const { if(!screenRatio)return glm::vec2(x, y);
+             else return glm::vec2(x/WindowInfo.width, y/WindowInfo.height); }
     };
 
-    struct Size
+    class Size
     {
-        int width;
-        int height;
+        float width;
+        float height;
+        bool screenRatio=true;
+    public:
         Size() : width(0), height(0) {}
-        Size(int w, int h) : width(w), height(h) {}
-        Size(const Size& size) : width(size.width), height(size.height) {}
-        Size(const glm::vec2& size) : width(size.x), height(size.y) {}
-        operator glm::vec2() const { return glm::vec2(width, height); }
+        Size(float w, float h, bool Ratio=true) : width(w), height(h), screenRatio(Ratio) {}
+        Size(const Size& size) : width(size.width), height(size.height), screenRatio(size.screenRatio) {}
+        Size(const glm::vec2& size) : width(size.x), height(size.y), screenRatio(true) {}
+        
+        float getw() const { return screenRatio ? width * WindowInfo.width : width; }
+        float geth() const { return screenRatio ? height * WindowInfo.height : height; }
+        bool getRatio() const { return screenRatio; }
+        
+        void setw(float w) { width = w; }
+        void seth(float h) { height = h; }
+        void setRatio(bool Ratio) { this->screenRatio = Ratio; }
+
+        operator glm::vec2() const { if(!screenRatio)return glm::vec2(width, height);
+             else return glm::vec2(width/WindowInfo.width, height/WindowInfo.height); }
     };
+
     std::string wstring2string(const std::wstring& wstr);
     std::wstring string2wstring(const std::string& str);
     extern bool Debugging;

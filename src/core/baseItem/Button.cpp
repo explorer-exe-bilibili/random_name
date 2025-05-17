@@ -55,14 +55,15 @@ void Button::Draw() {
     }
     if (enableText) {
         if (font) {
-            font->RenderText(text, region.x, region.y, 1.0f, color);
+            font->RenderTextBetween(text, region, 1.0f, color);
         }
     }
     
 }
 bool core::Button::OnClick(Point point)
 {
-    if (point.x >= region.x && point.x <= region.xend && point.y >= region.y && point.y <= region.yend)
+    if (point.getx() >= region.getx() && point.getx() <= region.getxend() && 
+    point.gety() >= region.gety() && point.gety() <= region.getyend())
     {
         Log << "Button "<<text<<" clicked" << op::endl;
         if (ClickFunc) ClickFunc();
@@ -102,14 +103,14 @@ void Button::MoveTo(const Region& region, const bool enableFluent, const int tim
             for (int i = 0; i < steps && !button.stopRequested; ++i) {
                 // 计算当前步骤应该在的位置
                 float progress = float(i) / steps;
-                float newX = startRegion.x + (targetRegion.x - startRegion.x) * progress;
-                float newY = startRegion.y + (targetRegion.y - startRegion.y) * progress;
-                
+                float newX = startRegion.getx() + (targetRegion.getx() - startRegion.getx()) * progress;
+                float newY = startRegion.gety() + (targetRegion.gety() - startRegion.gety()) * progress;
+
                 {
                     std::lock_guard<std::mutex> lock(button.animMutex);
                     if (!button.stopRequested) {
-                        button.region.x = newX;
-                        button.region.y = newY;
+                        button.region.setx(newX);
+                        button.region.sety(newY);
                     }
                 }
                 

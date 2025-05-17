@@ -45,15 +45,15 @@ void Bitmap::Draw(Region region)
     }
 
     // 如果区域宽高为零，则使用屏幕大小
-    if (region.xend == region.x || region.yend == region.y) {
-        region.xend = WindowInfo.width;
-        region.yend = WindowInfo.height;
+    if (region.getxend() == region.getx() || region.getyend() == region.gety()) {
+        region.setxend(WindowInfo.width);
+        region.setyend(WindowInfo.height);
     }
 
     // 确保区域有效
-    if (region.xend < region.x || region.yend < region.y) {
-        Log<<Level::Error << "Bitmap::Draw() invalid region: " << region.x << "," << region.y
-            << " to " << region.xend << "," << region.yend << op::endl;
+    if (region.getxend() < region.getx() || region.getyend() < region.gety()) {
+        Log<<Level::Error << "Bitmap::Draw() invalid region: " << region.getx() << "," << region.gety()
+            << " to " << region.getxend() << "," << region.getyend() << op::endl;
         return;
     }
 
@@ -64,8 +64,8 @@ void Bitmap::Draw(Region region)
     };
 
     // 左上角和右下角坐标
-    glm::vec3 topLeft = screenToNDC(region.x, region.y);
-    glm::vec3 bottomRight = screenToNDC(region.xend, region.yend);
+    glm::vec3 topLeft = screenToNDC(region.getx(), region.gety());
+    glm::vec3 bottomRight = screenToNDC(region.getxend(), region.getyend());
 
     texture->Draw(topLeft, bottomRight);
 }

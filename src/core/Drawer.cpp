@@ -58,8 +58,8 @@ glm::vec2 Drawer::ScreenToNDC(float x, float y) const {
 }
 
 void Drawer::DrawLine(Point start, Point end, Color color, bool dashed) {
-    glm::vec2 p1 = ScreenToNDC(start.x, start.y);
-    glm::vec2 p2 = ScreenToNDC(end.x, end.y);
+    glm::vec2 p1 = ScreenToNDC(start.getx(), start.gety());
+    glm::vec2 p2 = ScreenToNDC(end.getx(), end.gety());
 
     float vertices[] = {
         p1.x, p1.y,
@@ -95,8 +95,8 @@ void Drawer::DrawLine(Point start, Point end, Color color, bool dashed) {
 }
 
 void Drawer::DrawSquare(Region region, Color color, bool filled) {
-    glm::vec2 p1 = ScreenToNDC(region.x, region.y);
-    glm::vec2 p2 = ScreenToNDC(region.xend, region.yend);
+    glm::vec2 p1 = ScreenToNDC(region.getx(), region.gety());
+    glm::vec2 p2 = ScreenToNDC(region.getxend(), region.getyend());
 
     float vertices[] = {
         p1.x, p1.y,  // 左下角
@@ -133,8 +133,8 @@ void Drawer::DrawCircle(Point center, float radius, Color color, bool filled) {
     const int segments = 36; // 分段数，可以根据需要调整
     std::vector<float> vertices;
 
-    glm::vec2 centerNDC = ScreenToNDC(center.x, center.y);
-    
+    glm::vec2 centerNDC = ScreenToNDC(center.getx(), center.gety());
+
     // 使用WindowInfo的值来保持一致性
     float radiusX = radius / (WindowInfo.width / 2.0f);
     float radiusY = radius / (WindowInfo.height / 2.0f);
@@ -174,9 +174,9 @@ void Drawer::DrawCircle(Point center, float radius, Color color, bool filled) {
 }
 
 void Drawer::DrawTriangle(Point p1, Point p2, Point p3, Color color, bool filled) {
-    glm::vec2 v1 = ScreenToNDC(p1.x, p1.y);
-    glm::vec2 v2 = ScreenToNDC(p2.x, p2.y);
-    glm::vec2 v3 = ScreenToNDC(p3.x, p3.y);
+    glm::vec2 v1 = ScreenToNDC(p1.getx(), p1.gety());
+    glm::vec2 v2 = ScreenToNDC(p2.getx(), p2.gety());
+    glm::vec2 v3 = ScreenToNDC(p3.getx(), p3.gety());
 
     float vertices[] = {
         v1.x, v1.y,
