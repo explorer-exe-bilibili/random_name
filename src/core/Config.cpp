@@ -302,12 +302,6 @@ void Config::setScreenSize(int width, int height) {
     screenHeight = height;
 }
 
-// 设置窗口尺寸
-void Config::setWindowSize(int width, int height) {
-    windowWidth = width;
-    windowHeight = height;
-}
-
 // 获取屏幕比例尺寸
 int Config::getScreenScaled(const std::string& name, int defaultValue) {
     std::string value = get(name, "");
@@ -328,34 +322,6 @@ int Config::getScreenScaled(const std::string& name, int defaultValue) {
         } 
         else if (name.find("height") != std::string::npos || name.back() == 'y' || name.back() == 'Y') {
             return static_cast<int>(doubleValue * screenHeight);
-        }
-    } catch (const std::exception& e) {
-        Log << Level::Error << "Error converting scaled value: " << e.what();
-    }
-    
-    return defaultValue;
-}
-
-// 获取窗口比例尺寸
-int Config::getWindowScaled(const std::string& name, int defaultValue) {
-    std::string value = get(name, "");
-    if (value.empty()) {
-        return defaultValue;
-    }
-    
-    try {
-        double doubleValue = std::stod(value);
-        // 如果值大于1，则视为绝对像素值
-        if (doubleValue > 1.0) {
-            return static_cast<int>(doubleValue);
-        }
-        
-        // 否则视为比例值
-        if (name.find("width") != std::string::npos || name.back() == 'x' || name.back() == 'X') {
-            return static_cast<int>(doubleValue * windowWidth);
-        } 
-        else if (name.find("height") != std::string::npos || name.back() == 'y' || name.back() == 'Y') {
-            return static_cast<int>(doubleValue * windowHeight);
         }
     } catch (const std::exception& e) {
         Log << Level::Error << "Error converting scaled value: " << e.what();

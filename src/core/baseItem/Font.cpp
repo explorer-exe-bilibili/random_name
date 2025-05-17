@@ -36,10 +36,11 @@ out vec4 color;
 
 uniform sampler2D text;
 uniform vec3 textColor;
+uniform float alphaMultiplier;
 
 void main()
 {
-	float alpha = texture(text, TexCoords).r;
+	float alpha = texture(text, TexCoords).r * alphaMultiplier;
 	color = vec4(textColor, alpha);
 }
 )";
@@ -119,15 +120,16 @@ Font::~Font() {
 	FT_Done_Face(face);
 }
 
-void Font::RenderText(const std::string& text,float x, float y,float scale, const glm::vec3& color){
+void Font::RenderText(const std::string& text,float x, float y,float scale, const glm::vec4& color){
 	std::wstring wtext = string2wstring(text);
 	RenderText(wtext, x, y, scale, color);
 }
 
-void Font::RenderText(const std::wstring& text, float x, float y, float scale, const glm::vec3& color) {
+void Font::RenderText(const std::wstring& text, float x, float y_origin, float scale, const glm::vec4& color) {
+	float y=WindowInfo.height-y_origin-fontSize*scale;
 	if(this==nullptr){
 		Log<<"Font is nullptr"<<op::endl;
-		spare_font->RenderText(text, x, y, scale, color);
+		spare_font->RenderText(text, x, y_origin, scale, color);
 		return;
 	}
 	//检查是否包含未加载的字符
@@ -138,11 +140,12 @@ void Font::RenderText(const std::wstring& text, float x, float y, float scale, c
 		}
 	}
 	// 设置正交投影矩阵
-	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(screenInfo.width), 0.0f, static_cast<float>(screenInfo.height));
+	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(WindowInfo.width), 0.0f, static_cast<float>(WindowInfo.height));
 	// 设置字体着色器中的投影矩阵
 	shader.use();
 	shader.setMat4("projection", projection);
 	shader.setVec3("textColor", color);
+	shader.setFloat("alphaMultiplier", color.a);
 	// 启用混合以处理文本的透明度
 	GLCall(glEnable(GL_BLEND));
 	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
@@ -186,13 +189,22 @@ void Font::RenderText(const std::wstring& text, float x, float y, float scale, c
 
 	VertexArray::Unbind();
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glDisable(GL_BLEND);
 }
 
-void Font::RendChar(wchar_t text, float x, float y, float scale, const glm::vec3& color) {
+void Font::RenderTextBetween(const std::string& text, float x, float y, float scale, const glm::vec4& color) {
+	std::wstring wtext=string2wstring(text);
+	RenderTextBetween(wtext, x, y, scale, color);
+}
+
+void Font::RenderTextBetween(const std::wstring& text,float x,float y,float scale,const glm::vec4& color){
+	
+}
+
+void Font::RenderChar(wchar_t text, float x, float y_origin, float scale, const glm::vec4& color) {
+	float y = WindowInfo.height - y_origin - fontSize * scale;
 	if (this == nullptr) {
 		Log << "Font is nullptr" << op::endl;
-		spare_font->RendChar(text, x, y, scale, color);
+		spare_font->RenderChar(text, x, y, scale, color);
 		return;
 	}
 	//检查是否包含未加载的字符
@@ -201,11 +213,12 @@ void Font::RendChar(wchar_t text, float x, float y, float scale, const glm::vec3
 		LoadCharacter(text);
 	}
 	// 设置正交投影矩阵
-	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(screenInfo.width), 0.0f, static_cast<float>(screenInfo.height));
+	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(WindowInfo.width), 0.0f, static_cast<float>(WindowInfo.height));
 	// 设置字体着色器中的投影矩阵
 	shader.use();
 	shader.setMat4("projection", projection);
 	shader.setVec3("textColor", color);
+	shader.setFloat("alphaMultiplier", color.a);
 	// 启用混合以处理文本的透明度
 	GLCall(glEnable(GL_BLEND));
 	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
@@ -244,7 +257,6 @@ void Font::RendChar(wchar_t text, float x, float y, float scale, const glm::vec3
 
 	VertexArray::Unbind();
 	glBindTexture(GL_TEXTURE_2D, 0);
-	glDisable(GL_BLEND);
 }
 
 bool Font::operator==(const Font& b) const

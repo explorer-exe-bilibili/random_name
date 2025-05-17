@@ -25,10 +25,11 @@ void SetOpenGLContextInvalid() {
 }
 
 void GLClearError(const char* function, const char* file, int line) {
-    
-	while (GLenum error = glGetError()) {
-		Log<<Level::Warn<<"[OpenGL Error]("<<error<<")" << function << " " << file << ":" << line << op::endl;
-	}	
+    // 只清除错误，不打印日志
+    // 这可以避免日志被大量错误消息淹没
+    while (glGetError() != GL_NO_ERROR) {
+        // 仅清除错误，不记录
+    }
 }
 
 bool GLLogCall(const char* function, const char* file, int line) {

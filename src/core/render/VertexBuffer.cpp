@@ -11,7 +11,6 @@ VertexBuffer::VertexBuffer(const void* data, unsigned int size) : size(size) {
     Bind();
     GLCall(glBufferData(GL_ARRAY_BUFFER, size, data, GL_STATIC_DRAW));
     Unbind();
-    Log<<Level::Info<<"VertexBuffer::VertexBuffer(const void* data, unsigned int size) "<<rendererID<<op::endl;
     if (rendererID == 0) {
         Log<<Level::Error<<"VertexBuffer::VertexBuffer(const void* data, unsigned int size) rendererID is 0"<<op::endl;
         return;
@@ -21,7 +20,6 @@ VertexBuffer::VertexBuffer(const void* data, unsigned int size) : size(size) {
 VertexBuffer::VertexBuffer(const VertexBuffer& vb) : size(vb.size) {
     // 生成新的缓冲区ID
     GLCall(glGenBuffers(1, &rendererID));
-    Log<<Level::Info<<"VertexBuffer::VertexBuffer(const VertexBuffer& vb) "<<rendererID<<op::endl;
     if (rendererID == 0) {
         Log<<Level::Error<<"VertexBuffer::VertexBuffer(const VertexBuffer& vb) rendererID is 0"<<op::endl;
         return;
@@ -57,7 +55,6 @@ VertexBuffer::VertexBuffer(const VertexBuffer& vb) : size(vb.size) {
 }
 
 VertexBuffer::~VertexBuffer() {
-    Log<<Level::Info<<"VertexBuffer::~VertexBuffer() "<<rendererID<<op::endl;
     GLCall(glDeleteBuffers(1, &rendererID));
 }
 

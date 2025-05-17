@@ -40,15 +40,14 @@ void Bitmap::Draw(Region region)
         return;
     }
     // 检查屏幕信息是否合法
-    if (screenInfo.width <= 0 || screenInfo.height <= 0) {
-        Log<<Level::Error << "Bitmap::Draw() invalid screen size: " << screenInfo.width << "x" << screenInfo.height << op::endl;
+    if (WindowInfo.width <= 0 || WindowInfo.height <= 0) {
         return;
     }
 
     // 如果区域宽高为零，则使用屏幕大小
     if (region.xend == region.x || region.yend == region.y) {
-        region.xend = screenInfo.width;
-        region.yend = screenInfo.height;
+        region.xend = WindowInfo.width;
+        region.yend = WindowInfo.height;
     }
 
     // 确保区域有效
@@ -59,8 +58,8 @@ void Bitmap::Draw(Region region)
     }
 
     auto screenToNDC = [this](const float sx, const float sy) {
-        float ndcX = (sx / screenInfo.width) * 2.0f - 1.0f;
-        float ndcY = 1.0f - (sy / screenInfo.height) * 2.0f;
+        float ndcX = (sx / WindowInfo.width) * 2.0f - 1.0f;
+        float ndcY = 1.0f - (sy / WindowInfo.height) * 2.0f;
         return glm::vec3(ndcX, ndcY, 0.0f);
     };
 

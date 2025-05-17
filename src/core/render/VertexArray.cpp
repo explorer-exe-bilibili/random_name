@@ -7,7 +7,6 @@ using namespace core;
 
 VertexArray::VertexArray() {
     GLCall(glGenVertexArrays(1, &rendererID));
-    Log<<Level::Info<<"VertexArray::VertexArray() "<<rendererID<<op::endl;
 }
 
 VertexArray::VertexArray(const VertexArray& va) {
@@ -78,12 +77,10 @@ VertexArray::VertexArray(const VertexArray& va) {
 }
 
 VertexArray::~VertexArray() {
-    Log<<Level::Info<<"VertexArray::~VertexArray() "<<rendererID<<op::endl;
     GLCall(glDeleteVertexArrays(1, &rendererID));
 }
 
 void VertexArray::AddBuffer(const VertexBuffer& vb, unsigned int index, unsigned int size, unsigned int type, bool normalized, unsigned int stride, const void* pointer) const {
-    Log<<Level::Info<<"VertexArray::AddBuffer() VAO:"<<rendererID<<"VBO:"<<vb.getRendererID()<<op::endl;
     Bind();
     vb.Bind();
     GLCall(glVertexAttribPointer(index, size, type, normalized ? GL_TRUE : GL_FALSE, stride, pointer));

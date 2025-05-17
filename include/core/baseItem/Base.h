@@ -20,12 +20,12 @@ namespace core
         ScreenInfo(const ScreenInfo& info)
             : width(info.width), height(info.height), aspectRatio(info.aspectRatio),
               dpi(info.dpi), pixelRatio(info.pixelRatio), window(info.window) {}
-    } extern screenInfo;
+    } extern WindowInfo, screenInfo;
 
     struct Color{
-        char r,g,b,a;
-        Color() : r(0), g(0), b(0), a(0) {}
-        Color(char r, char g, char b, char a) : r(r), g(g), b(b), a(a) {}
+        unsigned char r,g,b,a;
+        Color() : r(0), g(0), b(0), a(255) {}
+        Color(unsigned char r,unsigned char g,unsigned char b,unsigned char a) : r(r), g(g), b(b), a(a) {}
         Color(const Color& color) : r(color.r), g(color.g), b(color.b), a(color.a) {}
         Color(const glm::vec3& color) : r(color.r * 255), g(color.g * 255), b(color.b * 255), a(255) {}
         Color(const glm::vec4& color) : r(color.r * 255), g(color.g * 255), b(color.b * 255), a(color.a * 255) {}
@@ -65,4 +65,5 @@ namespace core
     };
     std::string wstring2string(const std::wstring& wstr);
     std::wstring string2wstring(const std::string& str);
+    extern bool Debugging;
 }

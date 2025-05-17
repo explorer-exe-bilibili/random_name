@@ -6,7 +6,9 @@
 
 using namespace core;
 
-ScreenInfo core::screenInfo;
+ScreenInfo core::WindowInfo,core::screenInfo;
+bool core::Debugging=false;
+// 初始化静态成员变量
 namespace core {
     namespace color {
         Color white(255, 255, 255, 255);

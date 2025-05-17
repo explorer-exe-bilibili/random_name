@@ -34,8 +34,6 @@ private:
     // 屏幕和窗口尺寸缓存
     int screenWidth = 0;
     int screenHeight = 0;
-    int windowWidth = 0;
-    int windowHeight = 0;
 
     // 构造函数私有化
     Config();
@@ -91,9 +89,7 @@ public:
     
     // 尺寸相关功能
     void setScreenSize(int width, int height);
-    void setWindowSize(int width, int height);
     int getScreenScaled(const std::string& name, int defaultValue = 0);
-    int getWindowScaled(const std::string& name, int defaultValue = 0);
     
     // 清理资源
     void cleanup();

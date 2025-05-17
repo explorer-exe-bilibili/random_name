@@ -25,12 +25,17 @@ class Font {
     static std::shared_ptr<Font> spare_font;
 public:
     Font(const std::string& fontPath, bool needPreLoad = true);
-    ~Font();
+    ~Font(); 
+    void RenderText(const std::wstring& text, float x, float y, float scale, const glm::vec4& color);
+    void RenderText(const std::string& text, float x, float y, float scale, const glm::vec4& color);
+    void RenderTextBetween(const std::wstring& text, float x, float y, float scale, const glm::vec4& color);
+    void RenderTextBetween(const std::string& text, float x, float y, float scale, const glm::vec4& color);
+    void RenderTextVertical(const std::wstring& text, float x, float y, float scale, const glm::vec4& color);
+    void RenderTextVertical(const std::string& text, float x, float y, float scale, const glm::vec4& color);
+    void RenderTextVerticalBetween(const std::wstring& text, float x, float y, float scale, const glm::vec4& color);
+    void RenderTextVerticalBetween(const std::string& text, float x, float y, float scale, const glm::vec4& color);
 
-    void RenderText(const std::wstring& text, float x, float y, float scale, const glm::vec3& color);
-    void RenderText(const std::string& text, float x, float y, float scale, const glm::vec3& color);
-
-    void RendChar(wchar_t text, float x, float y, float scale, const glm::vec3& color);
+    void RenderChar(wchar_t text, float x, float y, float scale, const glm::vec4& color);
 
     float GetFontSize() const;
 

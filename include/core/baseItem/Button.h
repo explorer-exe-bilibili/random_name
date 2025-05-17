@@ -17,7 +17,7 @@ public:
     ~Button();
 
     void Draw();
-    void OnClick(Point point);
+    bool OnClick(Point point);
     void MoveTo(const Region& region, const bool enableFluent=false ,const int time=0);
     void SetClickFunc(std::function<void()> func) {this->ClickFunc = func;}
 
@@ -27,6 +27,7 @@ public:
     void SetRegion(const Region& region) {this->region = region;}
     void SetFontID(int FontID);
     void SetFont(const std::shared_ptr<core::Font>& font) {this->font = font;}
+    void SetColor(const Color& color) {this->color = color;}
 
     void SetEnableText(bool enable) {this->enableText = enable;}
     void SetEnable(bool enable) {this->enable = enable;}
@@ -40,9 +41,9 @@ private:
     std::string text="";
     std::shared_ptr<core::Bitmap> bitmap;
     std::function<void()> ClickFunc;
-    int FontID=0;    float fontSize=0;
+    int FontID=0;
+    float fontSize=0;
     std::shared_ptr<core::Font> font;
-    
     // 线程安全相关成员
     std::mutex animMutex;                   // 线程同步互斥锁
     std::atomic<bool> animationRunning{false}; // 标记动画是否在运行

@@ -5,7 +5,6 @@
 
 // 检查OpenGL上下文是否有效的辅助函数声明
 bool IsOpenGLContextValid();
-void SetOpenGLContextInvalid();
 
 #define GLCall(a) \
     if (IsOpenGLContextValid()) { \
@@ -20,3 +19,5 @@ void SetOpenGLContextInvalid();
 void GLClearError(const char* function, const char* file, int line);
 
 bool GLLogCall(const char* function, const char* file, int line);
+
+void SetOpenGLContextInvalid();

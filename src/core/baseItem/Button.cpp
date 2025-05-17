@@ -2,11 +2,12 @@
 
 #include "core/explorer.h"
 #include "core/log.h"
+#include "core/Drawer.h"
 
 using namespace core;
 
 Button::Button(const std::string& text, int FontID, const Region& region, const std::shared_ptr<core::Bitmap>& bitmap) :
- text(text), FontID(FontID), region(region), bitmap(bitmap) {}
+ text(text), FontID(FontID), region(region), bitmap(bitmap){}
 
 Button::Button(const Button& button) :
     region(button.region),
@@ -46,6 +47,9 @@ Button::~Button() {
 
 void Button::Draw() {
     // Draw the button
+    if(Debugging){
+        Drawer::getInstance()->DrawSquare(region, Color(255, 0, 0, 255));
+    }
     if (enableBitmap && bitmap) {
         bitmap->Draw(region);
     }
@@ -56,13 +60,15 @@ void Button::Draw() {
     }
     
 }
-void core::Button::OnClick(Point point)
+bool core::Button::OnClick(Point point)
 {
     if (point.x >= region.x && point.x <= region.xend && point.y >= region.y && point.y <= region.yend)
     {
         Log << "Button "<<text<<" clicked" << op::endl;
         if (ClickFunc) ClickFunc();
+        return true;
     }
+    return false;
 }
 
 void Button::MoveTo(const Region& region, const bool enableFluent, const int time)
