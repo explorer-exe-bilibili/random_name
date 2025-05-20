@@ -1,4 +1,5 @@
 #include "mainloop.h"
+#include <SDL.h>
 #ifdef _WIN32
 #include <windows.h>
 #endif
@@ -6,7 +7,8 @@
 using namespace core;
 using namespace std;
 
-int main()
+// 当使用SDL2时，main函数需要被重新定义为SDL_main
+int main(int argc, char* argv[])
 {
 #ifdef DEBUG_MODE
     Log<<Level::Info<<"运行在Debug模式"<<op::endl;
@@ -17,6 +19,11 @@ int main()
         Log<<Level::Error<<"Failed to initialize"<<op::endl;
         return -1;
     }
+    
+    // 初始化FPS计算
+    lastFPSUpdateTime = glfwGetTime();
+    frameCount = 0;
+    currentFPS = 0.0;
     
     // 渲染循环
     while (!glfwWindowShouldClose(core::WindowInfo.window)) {
@@ -86,12 +93,13 @@ int init(){
     }
     core::WindowInfo.width = 800;
     core::WindowInfo.height = 600;
-
     Log<<Level::Info<<"Init explorer"<<op::endl;
     core::Explorer::getInstance();
 
     currentScreen = new screen::MainScreen();
-
+    core::Explorer::getInstance()->getAudio()->loadMusic("bgm", "C:\\Users\\j1387\\source\\repos\\explorer-exe-bilibili\\random_name\\files\\music\\backsound.mp3");
+    core::Explorer::getInstance()->getAudio()->playMusic("bgm", -1);
+    core::Explorer::getInstance()->getAudio()->setMusicVolume(50);
     Log<<Level::Info<<"starting render loop"<<op::endl<<op::flush;
     return 0;
 }
@@ -99,10 +107,15 @@ int init(){
 int cleanup() {
     Log<<Level::Info<<"Cleaning up"<<op::endl<<op::flush;
     
-    // 先释放Explorer实例以确保所有OpenGL资源被正确释放
-    Log<<Level::Info<<"Releasing Explorer instance"<<op::endl<<op::flush;
-    core::Explorer::getInstance().reset();
+    // 确保在退出时清理所有SDL资源
+    if (currentScreen) {
+        delete currentScreen;
+        currentScreen = nullptr;
+    }
     
+    // 清理其他资源
+    core::Explorer::getInstance2().reset();
+
     // 标记OpenGL上下文即将失效，防止后续OpenGL调用引起问题
     SetOpenGLContextInvalid();
     
@@ -112,7 +125,12 @@ int cleanup() {
     
     // 然后再终止GLFW
     Log<<Level::Info<<"Terminating GLFW"<<op::endl<<op::flush;
+
+    // 终止GLFW
     glfwTerminate();
+    
+    // SDL会在程序退出时自动清理，但显式调用可确保顺序
+    SDL_Quit();
 
     // 安全停止日志系统
     Log<<Level::Info<<"Shutting down logging system"<<op::endl<<op::flush;

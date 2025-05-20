@@ -105,6 +105,30 @@
         "xtree": "cpp",
         "xutility": "cpp",
         "coroutine": "cpp",
-        "*.rh": "cpp"
+        "*.rh": "cpp"    
+    },
+    // 排除old_src文件夹中的文件进行错误检查
+    "C_Cpp.files.exclude": {
+        "**/old_src/**": true
+    },
+    // 从搜索和文件监视中排除old_src文件夹
+    "files.watcherExclude": {
+        "**/old_src/**": true
+    },
+    // 排除old_src文件夹进行编辑器检查和验证
+    "files.exclude": {
+        "**/old_src/**": false  // 设为false以便在文件浏览器中仍然可见，但不进行处理
+    },
+    // 禁用old_src文件夹中的文件的智能功能
+    "editor.semanticHighlighting.enabled": {
+        "**/old_src/**": false
+    },
+    // 禁用old_src文件夹中的格式化
+    "[cpp]": {
+        "editor.formatOnSave": false,
+        "editor.defaultFormatter": "ms-vscode.cpptools"
+    },
+    "C_Cpp.formatting": {
+        "**/old_src/**": "disabled"
     }
 }

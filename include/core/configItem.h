@@ -1,0 +1,51 @@
+#pragma once 
+
+#define POOL_COUNT "pool_count"
+#define MODE "mode"
+#define SPECIAL "special"
+#define NAMES1 "names1"
+#define NAMES2 "names2"
+#define NAMES3 "names3"
+#define NAMES4 "names4"
+#define OVERLAY1 "overlay1"
+#define OVERLAY2 "overlay2"
+#define OVERLAY3 "overlay3"
+#define OVERLAY4 "overlay4"
+
+#define NAME_COLOR "name_color"
+#define NAME_COLOR_6_STAR "name_color_6_star"
+#define TEXTB "text_b"
+#define TEXTG "text_g"
+#define TEXTR "text_r"
+#define TEXTA "text_a"
+
+#define CLICK_MUSIC "click_music"
+#define ENTER_MUSIC "enter_music"
+#define OFFMUSIC "off_music"
+#define INWINDOW "in_window"
+#define OFF_VIDEO "off_video"
+#define USE_VIDEO_BACKGROUND "use_video_background"
+#define VIDEO_BACKGROUND_PATH "video_background_path"
+#define NOSMOOTHUI "no_smooth_ui"
+
+#define FLOATWINDOW "float_window_switch"
+#define FLOAT_WINDOW_WIDTH "float_window_width"
+#define FLOAT_WINDOW_HEIGHT "float_window_height"
+#define FLOAT_WINDOW_X "float_window_x"
+#define FLOAT_WINDOW_Y "float_window_y"
+#define FLOAT_WINDOW_IMG "float_window_img"
+
+#define WINDOW_WIDTH "window_width"
+#define WINDOW_HEIGHT "window_height"
+#define WINDOW_X "window_x"
+#define WINDOW_Y "window_y"
+#define VERTICAL_SYNC "vertical_sync"
+#define WINDOW_TITLE "window_title"
+#define BACKGROUND_IMG "background_img"
+
+#define DEBUG "debug"
+
+// FPS显示相关配置
+#define SHOW_FPS "show_fps"
+#define FPS_POSITION_X "fps_position_x"
+#define FPS_POSITION_Y "fps_position_y"

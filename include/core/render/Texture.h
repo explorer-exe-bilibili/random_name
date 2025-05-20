@@ -38,7 +38,7 @@ namespace core {
         * @param bottomRight 右下角坐标
         * @param angle 旋转角度
         * */
-        void Draw(const glm::vec3& topLeft, const glm::vec3& bottomRight, float angle = 0.0f) const;
+        void Draw(const glm::vec3& topLeft, const glm::vec3& bottomRight, float angle = 0.0f, float alpha = 1.0f) const;
 
 
         operator bool() const {return textureID != 0;}

@@ -70,6 +70,10 @@ void Config::add(const std::string& name, int value) {
     configItems[name] = std::to_string(value);
 }
 
+void Config::add(const std::string& name, unsigned int value) {
+    configItems[name] = std::to_string(value);
+}
+
 void Config::add(const std::string& name, double value) {
     configItems[name] = std::to_string(value);
 }
@@ -164,6 +168,11 @@ void Config::set(const std::string& name, int value) {
     saveToFile(); // 自动保存
 }
 
+void Config::set(const std::string& name, unsigned int value) {
+    configItems[name] = std::to_string(value);
+    saveToFile(); // 自动保存
+}
+
 void Config::set(const std::string& name, double value) {
     // 修复：直接设置值，避免调用其他重载
     configItems[name] = std::to_string(value);
@@ -178,22 +187,39 @@ void Config::set(const std::string& name, bool value) {
 
 void Config::setifno(const std::string &name, const std::string &value)
 {
+    Log<<Level::Info << "Config::setifno() setting default string value for: " << name << " to " << value << op::endl;
     if (configItems.find(name) == configItems.end()) {
         configItems[name] = value;
-        saveToFile(); // 自动保存
+    }
+}
+
+void Config::setifno(const std::string &name, const char* value)
+{
+    Log<<Level::Info << "Config::setifno() setting default string value for: " << name << " to " << value << op::endl;
+    if (configItems.find(name) == configItems.end()) {
+        configItems[name] = value;
     }
 }
 
 void Config::setifno(const std::string &name, int value)
 {
+    Log<<Level::Info << "Config::setifno() setting default int value for: " << name << " to " << value << op::endl;
     if (configItems.find(name) == configItems.end()) {
         configItems[name] = std::to_string(value);
-        saveToFile(); // 自动保存
+    }
+}
+
+void Config::setifno(const std::string &name, unsigned int value)
+{
+    Log<<Level::Info << "Config::setifno() setting default unsigned int value for: " << name << " to " << value << op::endl;
+    if (configItems.find(name) == configItems.end()) {
+        configItems[name] = std::to_string(value);
     }
 }
 
 void Config::setifno(const std::string &name, double value)
 {
+    Log<<Level::Info << "Config::setifno() setting default double value for: " << name << " to " << value << op::endl;
     if (configItems.find(name) == configItems.end()) {
         configItems[name] = std::to_string(value);
         saveToFile(); // 自动保存
@@ -202,6 +228,7 @@ void Config::setifno(const std::string &name, double value)
 
 void Config::setifno(const std::string &name, bool value)
 {
+    Log<<Level::Info << "Config::setifno() setting default bool value for: " << name << " to " << value << op::endl;
     if (configItems.find(name) == configItems.end()) {
         configItems[name] = value ? "1" : "0";
         saveToFile(); // 自动保存

@@ -32,6 +32,7 @@ file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
 file(GLOB_RECURSE HEADERS "include/*.hpp" "include/*.h")
 
 # 查找所有依赖库
+find_package(FFMPEG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
 find_package(Freetype CONFIG REQUIRED)
@@ -39,33 +40,38 @@ find_package(glm CONFIG REQUIRED)
 find_package(glad CONFIG REQUIRED)
 find_package(OpenGL REQUIRED)
 find_package(utf8cpp CONFIG REQUIRED)
-find_path(STB_INCLUDE_DIRS "stb.h")
+find_package(SDL2 CONFIG REQUIRED)
+find_package(SDL2_mixer CONFIG REQUIRED)
+find_package(Stb REQUIRED)
 
 # 创建可执行文件
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     $<$<CONFIG:Debug>:DEBUG_MODE>
 )
+target_include_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_INCLUDE_DIRS})
 # 包含头文件目录
 target_include_directories(${PROJECT_NAME} PRIVATE 
     include
     ${FREETYPE_INCLUDE_DIRS}
     ${GLM_INCLUDE_DIRS}
-    ${STB_INCLUDE_DIRS}
+    ${Stb_INCLUDE_DIR}
+    ${FFMPEG_LIBRARY_DIRS}
 )
-
-# 启用STB图像库的实现
-target_compile_definitions(${PROJECT_NAME} PRIVATE)
 
 # 链接所有库
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     glfw
     nlohmann_json::nlohmann_json
-    freetype
-    glm
+    Freetype::Freetype
+    glm::glm
     glad::glad
     ${OPENGL_LIBRARIES}
-    utf8cpp
+    utf8::cpp utf8cpp::utf8cpp
+    $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+    $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+    $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
+    ${FFMPEG_LIBRARIES}
 )
 # 平台特定设置
 if(WIN32)
@@ -93,6 +99,14 @@ elseif(UNIX)
     if(X11_FOUND)
         target_include_directories(${PROJECT_NAME} PRIVATE ${X11_INCLUDE_DIR})
         target_link_libraries(${PROJECT_NAME} PRIVATE ${X11_LIBRARIES})
+    endif()
+    # 对于系统安装的依赖，提供备选查找方式
+    if(NOT TARGET glfw)
+        find_package(glfw3 REQUIRED)
+        if(TARGET glfw3)
+            set_target_properties(glfw3 PROPERTIES IMPORTED_GLOBAL TRUE)
+            add_library(glfw ALIAS glfw3)
+        endif()
     endif()
 endif()
 

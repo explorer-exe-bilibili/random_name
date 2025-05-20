@@ -1,6 +1,9 @@
 #include "mainloop.h"
 
 #include <memory>
+#include <string>
+#include <iomanip>
+#include <sstream>
 
 #include "core/log.h"
 #include "core/explorer.h"
@@ -12,6 +15,12 @@
 using namespace core;
 
 screen::Screen *currentScreen = nullptr;
+
+// 初始化FPS相关变量
+double lastFPSUpdateTime = 0.0;
+int frameCount = 0;
+double currentFPS = 0.0;
+bool showFPS = true; // 默认显示FPS
 
 // 窗口大小改变时的回调函数
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -37,7 +46,41 @@ int mainloop() {
     glfwGetFramebufferSize(WindowInfo.window, &width, &height);
     GLCall(glViewport(0, 0, width, height));
 
+    // FPS计算
+    // 获取当前时间
+    double currentTime = glfwGetTime();
+    frameCount++;
+    
+    // 每秒更新一次FPS值
+    if (currentTime - lastFPSUpdateTime >= 1.0) {
+        currentFPS = frameCount / (currentTime - lastFPSUpdateTime);
+        // 重置计数器
+        frameCount = 0;
+        lastFPSUpdateTime = currentTime;
+        
+        // 输出FPS日志
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(1) << currentFPS;
+        Log << Level::Debug << "FPS: " << ss.str() << op::endl;
+    }
+
+    // 绘制场景
     currentScreen->Draw();
+      // 如果启用了FPS显示，则绘制FPS文本
+    if (showFPS) {
+        // 创建FPS文本
+        std::stringstream ss;
+        ss << std::fixed << std::setprecision(1) << "FPS: " << currentFPS;
+        std::string fpsText = ss.str();
+        
+        // 使用Explorer获取默认字体并渲染FPS文本
+        Font* font = Explorer::getInstance()->getFont(0); // 使用默认字体
+        if (font) {
+            // 在屏幕右上角渲染FPS文本
+            font->RenderText(fpsText, 0, 0, 0.5f, color::black);
+        }
+    }
+    
     // 交换前后缓冲区
     glfwSwapBuffers(WindowInfo.window);
 
@@ -57,6 +100,13 @@ void KeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods) {
             switch (key) {
                 case GLFW_KEY_ESCAPE:
                     glfwSetWindowShouldClose(window, GLFW_TRUE);
+                    break;
+                case GLFW_KEY_F:
+                    // 按F键切换FPS显示
+                    if (mods & GLFW_MOD_CONTROL) {
+                        showFPS = !showFPS;
+                        Log << Level::Info << "FPS display " << (showFPS ? "enabled" : "disabled") << op::endl;
+                    }
                     break;
                 default:
                     break;

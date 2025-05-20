@@ -1,128 +1,45 @@
-name: Build for Multiple Platforms
+name: Build
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ main, master ]
   pull_request:
-    branches: [ "master" ]
-    
+    branches: [ main, master ]
+  workflow_dispatch:
+
 jobs:
   build:
-    runs-on: windows-latest
-    timeout-minutes: 60  # 设置超时时间为60分钟
-
     strategy:
+      fail-fast: false
       matrix:
-        platform: ['x64','x86','arm64']
+        os: [windows-latest, ubuntu-latest]
+        include:
+          - os: windows-latest
+            triplet: x64-windows
+          - os: ubuntu-latest
+            triplet: x64-linux
+
+    runs-on: ${{ matrix.os }}
+    
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
       with:
         submodules: true
 
-
-    - name: Set system locale to Simplified Chinese
+    - name: Install Linux Dependencies
+      if: matrix.os == 'ubuntu-latest'
       run: |
-        Set-WinSystemLocale zh-CN
-        Set-Culture zh-CN
-        
-    - name: Download ChineseSimplified.isl
-      run: |
-        Invoke-WebRequest -Uri "https://raw.github.com/jrsoftware/issrc/main/Files/Languages/Unofficial/ChineseSimplified.isl" -OutFile "C:\Program Files (x86)\Inno Setup 6\Languages\ChineseSimplified.isl"
+        sudo apt-get update
+        sudo apt-get install -y libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
 
-    - name: Cache vcpkg
-      uses: actions/cache@v2
+    - name: Setup vcpkg
+      uses: lukka/run-vcpkg@v11
       with:
-        path: |
-          ${{ github.workspace }}/vcpkg
-          ${{ github.workspace }}/vcpkg_installed
-        key: ${{ runner.os }}-vcpkg-${{ matrix.platform }}-${{ hashFiles('**/vcpkg.json') }}
-        restore-keys: |
-          ${{ runner.os }}-vcpkg-${{ matrix.platform }}-${{ hashFiles('**/vcpkg.json') }}
-        
-    - name: Install vcpkg
-      if: steps.cache.outputs.cache-hit != 'true'
-      run: |
-        git clone https://github.com/microsoft/vcpkg.git
-        .\vcpkg\bootstrap-vcpkg.bat
+        vcpkgGitCommitId: '2023.10.19'
 
-    - name: Setup MSBuild——安装 MSBuild
-      uses: microsoft/setup-msbuild@v1
-
-    - name: Restore dependencies
-      env:
-        VCPKG_FEATURE_FLAGS: manifests,static
-        VCPKG_CRT_LINKAGE: static
-        VCPKG_LIBRARY_LINKAGE: static
-        VCPKG_ROOT: ${{ github.workspace }}\vcpkg
-      run: |
-        set VCPKG_FEATURE_FLAGS=manifests
-        .\vcpkg\vcpkg integrate install
-
-    - name: Check MSVC version
-      run: |
-        msbuild /version
-    
-    - name: Build Solution for ${{ matrix.platform }}
-      env:
-        VCPKG_ROOT: ${{ github.workspace }}/vcpkg
-      run: |
-        chcp
-        chcp 65001
-        $platform_lower = "${{ matrix.platform }}".ToLower()
-        $env:VCPKG_DEFAULT_TRIPLET="${platform_lower}-windows-static"
-        msbuild /m /p:AdditionalOptions="/utf-8" /p:Configuration=Release /p:RuntimeLibrary=MultiThreaded /p:Platform=${{ matrix.platform }} /p:VcpkgTriplet=${platform_lower}-windows-static random.sln
-
-
-    - name: Package Artifact for ${{ matrix.platform }}
-      run: |
-        $outputPath = "${{ github.workspace }}\${{ matrix.platform }}\Release"
-        $filesPath = "${{ github.workspace }}\files"
-        $platform_lower = "${{ matrix.platform }}".ToLower()
-        if ($platform_lower -eq "x86") {
-          $outputPath = "${{ github.workspace }}\win32\Release"
-        }
-        if (Test-Path $outputPath) {
-          Compress-Archive -Path $outputPath\*.exe, $filesPath\ -DestinationPath "${{ matrix.platform }}.zip"
-          echo "ARTIFACT_NAME=${{ matrix.platform }}.zip" >> $env:GITHUB_ENV
-        } else {
-          Write-Error "The path '$outputPath' does not exist."
-          exit 1
-        }
-    - name: Upload Artifact for ${{ matrix.platform }}
-      uses: actions/upload-artifact@v3
+    - name: Configure and Build
+      uses: lukka/run-cmake@v10
       with:
-        name: ${{ env.ARTIFACT_NAME }}
-        path: ${{ env.ARTIFACT_NAME }}
-  
-    - name: Generate Inno Setup Installer
-      env:
-        GITHUB_ACTIONS: true
-        SOURCE_DIR: ${{ github.workspace }}
-        OUTPUT_DIR: ${{ github.workspace }}\installer\Output
-      run: |
-        iscc installer_action\${{ matrix.platform }}.iss
-    
-    - name: Upload Installer for ${{ matrix.platform }}
-      uses: actions/upload-artifact@v3
-      with:
-          name: ${{ matrix.platform }}_installer
-          path: installer\Output\*.exe
-
-    - name: Create Release
-      id: create_release
-      uses: softprops/action-gh-release@v2.0.8
-      with:
-        files: |
-          ${{ env.ARTIFACT_NAME }}
-          ${{ github.workspace }}\installer\Output\random_name_${{ matrix.platform }}-setup.exe
-        prerelease: true
-        make_latest: false
-        name: "Release action${{ github.ref_name }}"
-        body: |
-          Release from github actions
-          This is a pre-release for the current build.
-          - Commit: ${{ github.sha }}
-          - Changes: ${{ github.event.head_commit.message }}
-        tag_name: action${{ github.ref_name }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        configurePreset: 'ninja-multi-vcpkg'
+        buildPreset: 'ninja-multi-vcpkg-release'
+        configurePresetAdditionalArgs: "['-DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}']"

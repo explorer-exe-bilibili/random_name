@@ -7,26 +7,30 @@
 #include <mutex>
 #include <atomic>
 #include <memory>
+#include "../explorer.h"
 
 namespace core {
 class Button {
 public:
-    Button(const std::string& text="", int FontID=0, const Region& region=Region(), const std::shared_ptr<core::Bitmap>& bitmap=std::make_shared<core::Bitmap>());
+    Button(const std::string& text="", int FontID=0, const Region& region=Region(), Bitmap* bitmap=nullptr);
     Button(const Button& button);
     Button& operator=(const Button& button);
     ~Button();
 
-    void Draw();
+    void Draw(unsigned char alpha=255);
     bool OnClick(Point point);
-    void MoveTo(const Region& region, const bool enableFluent=false ,const int time=0);
+    void MoveTo(const Region& region, const bool enableFluent=false, const float speed=50.0f, std::function<void()> onComplete=nullptr);
     void SetClickFunc(std::function<void()> func) {this->ClickFunc = func;}
 
 
     void SetText(const std::string& text) {this->text = text;}
-    void SetBitmap(const std::shared_ptr<core::Bitmap>& bitmap) {this->bitmap = bitmap;}
+    void SetBitmap(Bitmap* bitmap) {this->bitmap = bitmap;}
+    void SetBitmap(const std::string& bitmapID){
+        if(core::Explorer::getInstance()->isBitmapLoaded(bitmapID))
+            this->bitmap = core::Explorer::getInstance()->getBitmap(bitmapID);}
     void SetRegion(const Region& region) {this->region = region;}
     void SetFontID(int FontID);
-    void SetFont(const std::shared_ptr<core::Font>& font) {this->font = font;}
+    void SetFont(Font* font) {this->font = font;}
     void SetColor(const Color& color) {this->color = color;}
 
     void SetEnableText(bool enable) {this->enableText = enable;}
@@ -39,11 +43,11 @@ private:
     bool enable=true;
     bool enableBitmap=true;
     std::string text="";
-    std::shared_ptr<core::Bitmap> bitmap;
+    Bitmap* bitmap;
     std::function<void()> ClickFunc;
     int FontID=0;
     float fontSize=0;
-    std::shared_ptr<core::Font> font;
+    Font* font;
     // 线程安全相关成员
     std::mutex animMutex;                   // 线程同步互斥锁
     std::atomic<bool> animationRunning{false}; // 标记动画是否在运行

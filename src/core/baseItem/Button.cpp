@@ -6,7 +6,7 @@
 
 using namespace core;
 
-Button::Button(const std::string& text, int FontID, const Region& region, const std::shared_ptr<core::Bitmap>& bitmap) :
+Button::Button(const std::string& text, int FontID, const Region& region, Bitmap* bitmap) :
  text(text), FontID(FontID), region(region), bitmap(bitmap){}
 
 Button::Button(const Button& button) :
@@ -45,17 +45,20 @@ Button::~Button() {
     // 清理资源
 }
 
-void Button::Draw() {
+void Button::Draw(unsigned char alpha) {
     // Draw the button
+    if(!enable)return;
     if(Debugging){
         Drawer::getInstance()->DrawSquare(region, Color(255, 0, 0, 255));
     }
     if (enableBitmap && bitmap) {
-        bitmap->Draw(region);
+        bitmap->Draw(region, alpha/255.0f);
     }
     if (enableText) {
         if (font) {
-            font->RenderTextBetween(text, region, 1.0f, color);
+            Color tmp=color;
+            tmp.a=alpha;
+            font->RenderTextBetween(text, region, 1.0f, tmp);
         }
     }
     
@@ -72,8 +75,9 @@ bool core::Button::OnClick(Point point)
     return false;
 }
 
-void Button::MoveTo(const Region& region, const bool enableFluent, const int time)
+void Button::MoveTo(const Region& region, const bool enableFluent, const float speed_, std::function<void()> onComplete)
 {
+    float speed=speed_*WindowInfo.width/1920.0f*100;
     // 先停止可能正在进行的动画
     {
         std::lock_guard<std::mutex> lock(animMutex);
@@ -85,39 +89,79 @@ void Button::MoveTo(const Region& region, const bool enableFluent, const int tim
     }
 
     if (enableFluent)
-    {
-        // 创建一个shared_ptr来捕获this指针，确保对象在线程运行期间不会被销毁
+    {        // 创建一个shared_ptr来捕获this指针，确保对象在线程运行期间不会被销毁        
         std::shared_ptr<Button> self = std::shared_ptr<Button>(this, [](Button*){});  // 自定义删除器，不实际删除对象
+
+        // 创建回调函数的副本，以便在线程中使用
+        std::shared_ptr<std::function<void()>> callback = nullptr;
+        if (onComplete) {
+            callback = std::make_shared<std::function<void()>>(onComplete);
+        }
 
         animationRunning = true;
         stopRequested = false;
 
-        // Smooth movement logic here
-        std::thread([self=std::move(self), targetRegion=region, time]{
+        // 基于速度的平滑移动逻辑
+        std::thread([self=std::move(self), targetRegion=region, speed, callback]{
             auto& button = *self;  // 通过引用访问按钮，简化语法
-            float steps = 100.0f;  // Number of steps for smooth movement
-            float delay = float(time) / steps;  // Delay between each step
             
             Region startRegion = button.region;  // 保存起始位置
+              // 计算总距离（考虑所有四个角的变化）
+            float dx1 = (targetRegion.getx() - startRegion.getx()) * WindowInfo.width;
+            float dy1 = (targetRegion.gety() - startRegion.gety()) * WindowInfo.height;
+            float dx2 = (targetRegion.getxend() - startRegion.getxend()) * WindowInfo.width;
+            float dy2 = (targetRegion.getyend() - startRegion.getyend()) * WindowInfo.height;
+            
+            // 使用最大的距离变化作为移动距离
+            float distance1 = std::sqrt(dx1*dx1 + dy1*dy1);  // 左上角的距离
+            float distance2 = std::sqrt(dx2*dx2 + dy2*dy2);  // 右下角的距离
+            float distance = std::max(distance1, distance2);
+            
+            // 如果距离太小，直接设置位置并返回
+            if (distance < 1.0f) {
+                std::lock_guard<std::mutex> lock(button.animMutex);
+                button.region = targetRegion;
+                button.animationRunning = false;
+                
+                // 如果有回调函数，则执行它
+                if (callback && *callback) {
+                    (*callback)();
+                }
+                
+                return;
+            }
+            
+            // 基于速度计算总时间（毫秒）
+            int totalTime = static_cast<int>((distance / speed));
+            float steps = 100.0f;  // 移动步数
+            float delay = totalTime / steps;  // 每步之间的延迟
+            
+            startRegion = button.region;  // 保存起始位置
             
             for (int i = 0; i < steps && !button.stopRequested; ++i) {
                 // 计算当前步骤应该在的位置
                 float progress = float(i) / steps;
                 float newX = startRegion.getx() + (targetRegion.getx() - startRegion.getx()) * progress;
+                float newXend = startRegion.getxend() + (targetRegion.getxend() - startRegion.getxend()) * progress;
                 float newY = startRegion.gety() + (targetRegion.gety() - startRegion.gety()) * progress;
-
+                float newYend = startRegion.getyend() + (targetRegion.getyend() - startRegion.getyend()) * progress;
+                newX/=WindowInfo.width;
+                newXend/=WindowInfo.width;
+                newY/=WindowInfo.height;
+                newYend/=WindowInfo.height;
                 {
                     std::lock_guard<std::mutex> lock(button.animMutex);
                     if (!button.stopRequested) {
                         button.region.setx(newX);
+                        button.region.setxend(newXend);
                         button.region.sety(newY);
+                        button.region.setyend(newYend);
                     }
                 }
                 
                 std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(delay)));
             }
-            
-            // 如果没有被请求停止，确保最终位置精确
+              // 如果没有被请求停止，确保最终位置精确
             if (!button.stopRequested) {
                 std::lock_guard<std::mutex> lock(button.animMutex);
                 button.region = targetRegion;
@@ -131,6 +175,9 @@ void Button::MoveTo(const Region& region, const bool enableFluent, const int tim
         // 如果不使用流畅移动，直接设置位置
         std::lock_guard<std::mutex> lock(animMutex);
         this->region = region;
+        if (onComplete) {
+            onComplete();
+        }
     }
 }
 

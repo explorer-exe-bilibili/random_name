@@ -5,7 +5,7 @@
 #include <vector>
 #include <memory>
 #include <filesystem>
-
+#include "configItem.h"
 
 namespace core {
 
@@ -41,6 +41,7 @@ private:
     // 使用set直接设置值，无需使用add手动添加
     void add(const std::string& name, const std::string& value);
     void add(const std::string& name, int value);
+    void add(const std::string& name, unsigned int value);
     void add(const std::string& name, double value);
     void add(const std::string& name, bool value);
     
@@ -69,12 +70,15 @@ public:
     // 替换配置值
     void set(const std::string& name, const std::string& value);
     void set(const std::string& name, int value);
+    void set(const std::string& name, unsigned int value);
     void set(const std::string& name, double value);
     void set(const std::string& name, bool value);
     
     // 设置默认值（如果不存在则添加）
     void setifno(const std::string& name, const std::string& value);
+    void setifno(const std::string& name, const char* value);
     void setifno(const std::string& name, int value);
+    void setifno(const std::string& name, unsigned int value);
     void setifno(const std::string& name, double value);
     void setifno(const std::string& name, bool value);
     // 删除配置项

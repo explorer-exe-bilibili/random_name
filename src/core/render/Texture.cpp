@@ -38,10 +38,12 @@ out vec4 FragColor;
 
 in vec2 TexCoord;
 uniform sampler2D texture1;
+uniform float alpha = 1.0;
 
 void main()
 {
-    FragColor = texture(texture1, TexCoord);
+    vec4 texColor = texture(texture1, TexCoord);
+    FragColor = vec4(texColor.rgb, texColor.a * alpha);
 }
 )";
 
@@ -68,6 +70,13 @@ void Texture::init() {
     Log<<Level::Info<<"Texture::init() "<<op::endl;
     inited = true;
     DefaultShaderProgram = std::make_shared<Shader>(DefaultVertexShaderSource, DefaultFragmentShaderSource);
+    
+    // 设置默认着色器的alpha值
+    if (*DefaultShaderProgram) {
+        DefaultShaderProgram->Bind();
+        DefaultShaderProgram->setFloat("alpha", 1.0f);  // 默认为不透明
+    }
+    
     va = new VertexArray;
     // 创建并绑定 VAO
     va->Bind();
@@ -143,7 +152,7 @@ void Texture::bind() const {
     GLCall(glBindTexture(GL_TEXTURE_2D, textureID));
 }
 
-void Texture::Draw(const glm::vec3& topLeft, const glm::vec3& bottomRight, float angle) const {
+void Texture::Draw(const glm::vec3& topLeft, const glm::vec3& bottomRight, float angle, float alpha) const {
     if (textureID==0) {
         Log<<Level::Error<<"Texture::Draw() textureID is 0"<<op::endl;
         return;
@@ -166,6 +175,12 @@ void Texture::Draw(const glm::vec3& topLeft, const glm::vec3& bottomRight, float
     // 绑定纹理
     bind();
     shader->setInt("texture1", 0);
+    // 设置透明度
+    shader->setFloat("alpha", alpha);
+
+    // 启用混合
+    GLCall(glEnable(GL_BLEND));
+    GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
 
     // 绘制
     if(customerVAO) {
@@ -189,6 +204,11 @@ bool Texture::setCustomerShaderProgram(const std::string& vertexShader, const st
     if (customerShaderProgram) 
         customerShaderProgram.reset();
     customerShaderProgram = std::make_shared<Shader>(vertexShader, fragmentShader);
+    // 确保自定义shader支持alpha
+    if (*customerShaderProgram) {
+        customerShaderProgram->Bind();
+        customerShaderProgram->setFloat("alpha", 1.0f);  // 默认值为1.0（不透明）
+    }
     return true;
 }
 
@@ -196,6 +216,11 @@ bool Texture::setCustomerShaderProgram(const Shader& shader) {
     if (customerShaderProgram)
         customerShaderProgram.reset();
     customerShaderProgram = std::make_shared<Shader>(shader);
+    // 确保自定义shader支持alpha
+    if (*customerShaderProgram) {
+        customerShaderProgram->Bind();
+        customerShaderProgram->setFloat("alpha", 1.0f);  // 默认值为1.0（不透明）
+    }
     return true;
 }
 
