@@ -12,7 +12,7 @@
 
 namespace core
 {
-
+class Bitmap;
 struct Character {
     unsigned int     TextureID;  // 字符纹理ID
     glm::ivec2 Size;             // 字符大小
@@ -26,8 +26,7 @@ class Font {
     static std::shared_ptr<Font> spare_font;
 public:
     Font(const std::string& fontPath, bool needPreLoad = true);
-    ~Font(); 
-    // 渲染文本
+    ~Font();    // 渲染文本
     void RenderText(const std::wstring& text, float x, float y, float scale, const glm::vec4& color);
     void RenderText(const std::string& text, float x, float y, float scale, const glm::vec4& color);
     // 居中渲染文本
@@ -39,6 +38,10 @@ public:
     // 垂直居中渲染文本
     void RenderTextVerticalBetween(const std::wstring& text, Region region, float scale, const glm::vec4& color);
     void RenderTextVerticalBetween(const std::string& text, Region region, float scale, const glm::vec4& color);
+
+    // 将文字渲染到Bitmap对象上
+    void RenderTextToBitmap(const std::wstring& text, std::shared_ptr<Bitmap> bitmap, float x, float y, float scale, const glm::vec4& color);
+    void RenderTextToBitmap(const std::string& text, std::shared_ptr<Bitmap> bitmap, float x, float y, float scale, const glm::vec4& color);
 
     void RenderChar(wchar_t text, float x, float y, float scale, const glm::vec4& color);
 

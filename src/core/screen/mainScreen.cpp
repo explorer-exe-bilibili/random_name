@@ -74,6 +74,7 @@ MainScreen::~MainScreen() {
             Log << Level::Error << "清理视频播放器时发生未知异常" << op::endl;
         }
     }
+    background = nullptr;
 }
 
 bool MainScreen::Click(int x, int y) {

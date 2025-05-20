@@ -32,6 +32,7 @@ file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
 file(GLOB_RECURSE HEADERS "include/*.hpp" "include/*.h")
 
 # 查找所有依赖库
+find_package(WebP CONFIG REQUIRED)
 find_package(FFMPEG REQUIRED)
 find_package(glfw3 CONFIG REQUIRED)
 find_package(nlohmann_json CONFIG REQUIRED)
@@ -72,6 +73,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
     $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
     ${FFMPEG_LIBRARIES}
+    WebP::webp WebP::webpdecoder WebP::webpdemux
 )
 # 平台特定设置
 if(WIN32)

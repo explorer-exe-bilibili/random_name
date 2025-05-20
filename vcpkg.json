@@ -13,6 +13,7 @@
     "glad",
     "glfw3",
     "glm",
+    "libwebp",
     "nlohmann-json",
     "sdl2",
     {

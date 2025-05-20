@@ -16,14 +16,17 @@ public:    Bitmap(const std::string& filePath){Load(filePath);}
             delete[] rgbData;
             rgbData = nullptr;
         }
-        // texture是shared_ptr，会自动释放 
-    }    bool Load(const std::string& filePath);
+    }
+    bool Load(const std::string& filePath);
+    bool LoadWebP(const std::string& filePath); // 加载WebP格式图像
     bool CreateFromRGBData(const unsigned char* data, int width, int height, bool createTexture = true, bool directRGB = false);
     void setPixel(int x, int y, unsigned char r, unsigned char g, unsigned char b, unsigned char a = 255);
-    
-    // 在主线程中调用此方法创建纹理
+      // 在主线程中调用此方法创建纹理
     void CreateTextureFromBuffer();
     bool HasTexture() const { return texture != nullptr; }
+    
+    // 获取纹理ID（用于帧缓冲操作）
+    unsigned int GetTextureID() const { return texture ? texture->getTextureID() : 0; }
     
     void Draw(Region region, float alpha=1.0f);
 

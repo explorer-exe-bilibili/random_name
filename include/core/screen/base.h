@@ -21,7 +21,7 @@ protected:
     static bool inited;
 public:
     Screen(const std::string& ID) : ID(ID) {}
-    virtual ~Screen()=default;
+    virtual ~Screen(){background=nullptr;};
     virtual void init()=0;
     void initBackground();
     virtual bool Click(int x, int y);

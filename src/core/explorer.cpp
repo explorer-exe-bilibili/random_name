@@ -177,7 +177,7 @@ void Explorer::loadImagesFromDirectory(const std::string &directory)
                 std::string extension = entry.path().extension().string();
                 std::transform(extension.begin(), extension.end(), extension.begin(), ::tolower);
 
-                if (extension == ".jpg" || extension == ".jpeg" || extension == ".png")
+                if (extension == ".jpg" || extension == ".jpeg" || extension == ".png" || extension == ".webp")
                 {
                     std::string filename = entry.path().stem().string();
                     std::string filepath = entry.path().string();

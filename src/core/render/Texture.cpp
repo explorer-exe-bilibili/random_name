@@ -67,7 +67,7 @@ void Texture::init() {
         return;
     }
     if (inited) return;
-    Log<<Level::Info<<"Texture::init() "<<op::endl;
+    Log<<Level::Info<<"Texture::init() "<<textureID<<op::endl;
     inited = true;
     DefaultShaderProgram = std::make_shared<Shader>(DefaultVertexShaderSource, DefaultFragmentShaderSource);
     
@@ -97,7 +97,6 @@ Texture::Texture(const unsigned char* data, int width, int height, bool isRGB)
     : width(width), height(height), textureID(0) {
     init();
     GLCall(glGenTextures(1, &textureID));
-    Log<<Level::Info<<"Texture::Texture(const unsigned char* data, int width, int height, isRGB=" << (isRGB ? "true" : "false") << ") "<<textureID<<op::endl;
     if (data == nullptr) {
         Log<<Level::Error<<"Texture::Texture(const unsigned char* data, int width, int height) data is null"<<op::endl;
         return;
@@ -127,7 +126,6 @@ Texture::Texture(const unsigned char* data, int width, int height, bool isRGB)
 
 Texture::Texture(const int width, const int height, bool isRGB)
     : width(width), height(height), textureID(0) {
-    Log<<Level::Info<<"Texture::Texture(const int width, const int height, isRGB=" << (isRGB ? "true" : "false") << ") "<<width<<" "<<height<<op::endl;
     init();
     GLCall(glGenTextures(1, &textureID));
     if(textureID == 0) {

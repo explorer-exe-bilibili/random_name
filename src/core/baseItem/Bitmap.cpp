@@ -6,6 +6,9 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>
 #include <chrono>
+#include <webp/decode.h> // WebP 解码库
+#include <algorithm>  // 用于 transform
+#include <cctype>     // 用于 tolower
 
 
 
@@ -20,9 +23,6 @@ Bitmap::Bitmap(int width, int height, bool createTexture, bool useRGB) {
         texture = std::make_shared<Texture>(width, height, useRGB);
         if (!texture) {
             Log << Level::Error << "Failed to create empty bitmap of size " << width << "x" << height << op::endl;
-        } else {
-            Log << Level::Info << "Created empty bitmap of size " << width << "x" << height 
-                << (useRGB ? " (RGB format)" : " (RGBA format)") << op::endl;
         }
     } else {
         // 不创建纹理，只分配内存
@@ -38,6 +38,18 @@ bool Bitmap::Load(const std::string& filePath)
         Log<<Level::Warn << "Bitmap::Load() texture already loaded" << op::endl;
         texture.reset();  // 释放旧的纹理
     }
+    
+    // 检查文件扩展名，确定是否是WebP文件
+    std::string extension = filePath.substr(filePath.find_last_of(".") + 1);
+    std::transform(extension.begin(), extension.end(), extension.begin(), 
+                  [](unsigned char c){ return std::tolower(c); });
+    
+    if (extension == "webp") {
+        // 如果是WebP文件，使用LoadWebP方法
+        return LoadWebP(filePath);
+    }
+    
+    // 非WebP文件，使用STB加载
     int width, height, channels;
     Log<<Level::Info << "Loading image: " << filePath << op::endl;
     unsigned char* data = stbi_load(filePath.c_str(), &width, &height, &channels, 4);
@@ -47,9 +59,97 @@ bool Bitmap::Load(const std::string& filePath)
         stbi_image_free(data);
         Log<<Level::Info << "Loaded image: " << filePath << op::endl;
         return true;
-    }    Log<<Level::Error << "Failed to load image: " << filePath << op::endl;
+    }    
+    Log<<Level::Error << "Failed to load image: " << filePath << op::endl;
     Log<<Level::Error << "stbi_load error: " << stbi_failure_reason() << op::endl;
     return false;
+}
+
+bool Bitmap::LoadWebP(const std::string& filePath)
+{
+    if (texture)    
+    {
+        Log<<Level::Warn << "Bitmap::LoadWebP() texture already loaded" << op::endl;
+        texture.reset();  // 释放旧的纹理
+    }
+    
+    Log<<Level::Info << "Loading WebP image: " << filePath << op::endl;
+    
+    // 打开文件
+    FILE* file = fopen(filePath.c_str(), "rb");
+    if (!file) {
+        Log<<Level::Error << "Failed to open WebP file: " << filePath << op::endl;
+        return false;
+    }
+    
+    // 获取文件大小
+    fseek(file, 0, SEEK_END);
+    long fileSize = ftell(file);
+    fseek(file, 0, SEEK_SET);
+    
+    // 读取WebP文件内容
+    uint8_t* webpData = new uint8_t[fileSize];
+    if (fread(webpData, fileSize, 1, file) != 1) {
+        Log<<Level::Error << "Failed to read WebP file: " << filePath << op::endl;
+        fclose(file);
+        delete[] webpData;
+        return false;
+    }
+    fclose(file);
+    
+    // 获取WebP图像信息
+    WebPBitstreamFeatures features;
+    VP8StatusCode status = WebPGetFeatures(webpData, fileSize, &features);
+    if (status != VP8_STATUS_OK) {
+        Log<<Level::Error << "Failed to get WebP features: " << filePath << ", status code: " << status << op::endl;
+        delete[] webpData;
+        return false;
+    }
+    
+    int width = features.width;
+    int height = features.height;
+    bool hasAlpha = features.has_alpha != 0;
+    
+    // 解码WebP数据
+    uint8_t* decodedData = nullptr;
+    if (hasAlpha) {
+        // 解码为RGBA
+        decodedData = WebPDecodeRGBA(webpData, fileSize, &width, &height);
+    } else {
+        // 解码为RGB并添加Alpha通道
+        uint8_t* rgbData = WebPDecodeRGB(webpData, fileSize, &width, &height);
+        if (rgbData) {
+            decodedData = new uint8_t[width * height * 4];
+            for (int i = 0; i < width * height; i++) {
+                decodedData[i * 4]     = rgbData[i * 3];     // R
+                decodedData[i * 4 + 1] = rgbData[i * 3 + 1]; // G
+                decodedData[i * 4 + 2] = rgbData[i * 3 + 2]; // B
+                decodedData[i * 4 + 3] = 255;                // A (完全不透明)
+            }
+            WebPFree(rgbData);
+        }
+    }
+    
+    delete[] webpData; // 释放原始WebP数据
+    
+    if (!decodedData) {
+        Log<<Level::Error << "Failed to decode WebP image: " << filePath << op::endl;
+        return false;
+    }
+    
+    // 创建纹理
+    texture = std::make_shared<Texture>(decodedData, width, height);
+    
+    // 释放解码后的数据
+    if (hasAlpha) {
+        WebPFree(decodedData);
+    } else {
+        delete[] decodedData;
+    }
+    
+    Log<<Level::Info << "Loaded WebP image: " << filePath << " (width: " << width 
+        << ", height: " << height << ", has alpha: " << (hasAlpha ? "yes" : "no") << ")" << op::endl;
+    return true;
 }
 
 bool Bitmap::CreateFromRGBData(const unsigned char* data, int width, int height, bool createTexture, bool directRGB) {
@@ -77,8 +177,6 @@ bool Bitmap::CreateFromRGBData(const unsigned char* data, int width, int height,
         if (directRGB) {
             // 直接使用RGB数据创建纹理，跳过RGB转RGBA的过程
             texture = std::make_shared<Texture>(data, width, height, true);
-            
-            Log<<Level::Info << "Created texture directly from RGB data of size " << width << "x" << height << op::endl;
         } else {
             // 从RGB数据创建RGBA数据（添加Alpha通道）
             unsigned char* rgbaData = new unsigned char[width * height * 4];
@@ -104,9 +202,6 @@ bool Bitmap::CreateFromRGBData(const unsigned char* data, int width, int height,
         rgbData = new unsigned char[width * height * 3];
         memcpy(rgbData, data, width * height * 3);
     }
-    
-    Log<<Level::Info << "Created bitmap from RGB data of size " << width << "x" << height 
-                     << (createTexture ? " with texture" : " without texture") << op::endl;
     return true;
 }
 
