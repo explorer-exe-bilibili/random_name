@@ -93,11 +93,11 @@ void Texture::init() {
     Log<<Level::Info<<"Texture::init() DefaultShaderProgram "<<unsigned int(*DefaultShaderProgram.get())<<op::endl;
 }
 
-Texture::Texture(const unsigned char* data, int width, int height)
+Texture::Texture(const unsigned char* data, int width, int height, bool isRGB)
     : width(width), height(height), textureID(0) {
     init();
     GLCall(glGenTextures(1, &textureID));
-    Log<<Level::Info<<"Texture::Texture(const unsigned char* data, int width, int height) "<<textureID<<op::endl;
+    Log<<Level::Info<<"Texture::Texture(const unsigned char* data, int width, int height, isRGB=" << (isRGB ? "true" : "false") << ") "<<textureID<<op::endl;
     if (data == nullptr) {
         Log<<Level::Error<<"Texture::Texture(const unsigned char* data, int width, int height) data is null"<<op::endl;
         return;
@@ -111,7 +111,13 @@ Texture::Texture(const unsigned char* data, int width, int height)
         return;
     }
     bind();
-    GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
+    if (isRGB) {
+        // 使用RGB格式
+        GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data));
+    } else {
+        // 使用RGBA格式
+        GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, data));
+    }
     GLCall(glGenerateMipmap(GL_TEXTURE_2D));
     GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
     GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));
@@ -119,9 +125,9 @@ Texture::Texture(const unsigned char* data, int width, int height)
     GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR));
 }
 
-Texture::Texture(const int width, const int height)
+Texture::Texture(const int width, const int height, bool isRGB)
     : width(width), height(height), textureID(0) {
-    Log<<Level::Info<<"Texture::Texture(const int width, const int height) "<<width<<" "<<height<<op::endl;
+    Log<<Level::Info<<"Texture::Texture(const int width, const int height, isRGB=" << (isRGB ? "true" : "false") << ") "<<width<<" "<<height<<op::endl;
     init();
     GLCall(glGenTextures(1, &textureID));
     if(textureID == 0) {
@@ -129,7 +135,13 @@ Texture::Texture(const int width, const int height)
         return;
     }
     bind();
-    GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+    if (isRGB) {
+        // 使用RGB格式
+        GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr));
+    } else {
+        // 使用RGBA格式
+        GLCall(glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, nullptr));
+    }
     GLCall(glGenerateMipmap(GL_TEXTURE_2D));
     GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT));
     GLCall(glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT));

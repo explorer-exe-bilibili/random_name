@@ -97,6 +97,6 @@ void MainScreen::Draw(){
     Screen::Draw();
     // 绘制覆盖层
     for(auto& o:overlays){
-        o->Draw(100);
+        o->Draw();
     }
 }

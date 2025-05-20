@@ -39,9 +39,9 @@ void SetConfigItems(){
     config->setifno(FLOAT_WINDOW_Y, screenWidth*0.9);
     config->setifno(FLOAT_WINDOW_IMG, "files/imgs/floatWindow.png");
     config->setifno(DEBUG, 0);
-    config->setifno(TEXTR, 0);
-    config->setifno(TEXTG, 0);
-    config->setifno(TEXTB, 0);
+    config->setifno(TEXTR, 255);
+    config->setifno(TEXTG, 255);
+    config->setifno(TEXTB, 255);
     config->setifno(TEXTA, 255);
     config->setifno(USE_VIDEO_BACKGROUND, true);
     config->setifno(VIDEO_BACKGROUND_PATH, "files/video/bg.webm");

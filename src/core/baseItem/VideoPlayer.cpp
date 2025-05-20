@@ -205,12 +205,13 @@ std::shared_ptr<Bitmap> VideoPlayer::getCurrentFrame() {
     // 在主线程中创建Bitmap对象，不会有跨线程问题
     if (!frameData || !frameData->data) {
         return nullptr;
-    }
+    }    // 创建位图（此时在主线程中，可以安全创建纹理），使用RGB格式避免数据转换
+    std::shared_ptr<Bitmap> bitmap = std::make_shared<Bitmap>(frameData->width, frameData->height, true, true);
     
-    // 创建位图（此时在主线程中，可以安全创建纹理）
-    std::shared_ptr<Bitmap> bitmap = std::make_shared<Bitmap>(frameData->width, frameData->height, false);
-    bitmap->CreateFromRGBData(frameData->data, frameData->width, frameData->height, false);
+    // 直接从原始数据创建纹理，使用RGB格式避免RGB到RGBA的转换，大幅减少内存使用
+    bitmap->CreateFromRGBData(frameData->data, frameData->width, frameData->height, true, true);
     
+    // frameData 会在函数结束时自动释放
     return bitmap;
 }
 
