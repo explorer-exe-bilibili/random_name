@@ -7,19 +7,7 @@ namespace audio {
 
 // 背景音乐
 constexpr const char* BGM = "bgm";
-constexpr const char* MENU_BGM = "menu_bgm";
-constexpr const char* GAME_BGM = "game_bgm";
-
 // 界面音效
 constexpr const char* CLICK = "click";
-constexpr const char* ENTER = "enter";
-constexpr const char* BACK = "back";
-constexpr const char* ERROR = "error";
-constexpr const char* SUCCESS = "success";
-
-// 游戏音效
-constexpr const char* START = "start";
-constexpr const char* WIN = "win";
-constexpr const char* LOSE = "lose";
 
 } // namespace audio
