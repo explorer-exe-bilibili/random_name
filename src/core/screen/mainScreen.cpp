@@ -28,8 +28,7 @@ void MainScreen::init() {
     overlays.resize(Config::getInstance()->getInt(POOL_COUNT));
     for(int i = 0; i < overlays.size(); ++i) {
         overlays[i] = std::make_shared<Button>();
-    }
-    for(int i = 0; i < buttons.size(); ++i) {
+    }    for(int i = 0; i < buttons.size(); ++i) {
         buttons[i] = std::make_shared<Button>();
     }
     float x=0.2,tmp=(1-x*2)/Config::getInstance()->getInt(POOL_COUNT);
@@ -51,6 +50,15 @@ void MainScreen::init() {
         overlays[i]->SetEnable(true);
         x += tmp;
     }
+    
+    // 设置按钮
+    buttons[set]->SetRegion({0.7, 0.8, 0.9, 0.9});
+    buttons[set]->SetText("设置");
+    buttons[set]->SetClickFunc([]() {
+        // 切换到设置屏幕
+        SwitchToScreen("settings");
+    });
+    buttons[set]->SetEnable(true);
 
     background = core::Explorer::getInstance()->getBitmap("1");
     
@@ -100,4 +108,18 @@ void MainScreen::Draw(){
     for(auto& o:overlays){
         o->Draw();
     }
+}
+
+void MainScreen::enter(){
+    // 在主屏幕进入时注册所有屏幕
+    static bool screensRegistered = false;
+    
+    if (!screensRegistered) {
+        // 注册主屏幕
+        RegisterScreen("main", std::make_shared<MainScreen>());
+        
+        screensRegistered = true;
+    }
+    
+    Log << Level::Info << "进入主屏幕" << op::endl;
 }

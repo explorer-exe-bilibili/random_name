@@ -13,6 +13,7 @@ class MainScreen : public Screen {
         void init() override;
         bool Click(int x, int y) override;
         void Draw() override;
+        void enter() override;
     private:
         void changeMode(); 
     };

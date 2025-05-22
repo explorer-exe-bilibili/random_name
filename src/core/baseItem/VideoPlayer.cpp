@@ -2,6 +2,7 @@
 
 #include "core/log.h"
 #include "core/baseItem/Bitmap.h"
+#include "core/render/HWAccelMonitor.h"
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -129,10 +130,15 @@ bool VideoPlayer::load(const std::string& path) {
         Log << Level::Error << "无法分配数据包" << op::endl;
         cleanup();
         return false;
-    }
-
-    Log << Level::Info << "视频文件加载成功: " << videoPath 
+    }    Log << Level::Info << "视频文件加载成功: " << videoPath 
     << " (" << width << "x" << height << " @ " << fps << "fps)" << op::endl;
+    
+    // 尝试初始化硬件加速
+    if (initHardwareAcceleration()) {
+        Log << Level::Info << "成功启用硬件加速解码" << op::endl;
+    } else {
+        Log << Level::Info << "使用软件解码" << op::endl;
+    }
     
     return true;
 }
@@ -145,17 +151,21 @@ void VideoPlayer::play() {
         Log << Level::Error << "视频文件未加载或无效" << op::endl;
         playing = false;
         return;
-    }
-
-    shouldExit = false;
+    }    shouldExit = false;
     
-    // 确保没有正在运行的解码线程
+    // 确保没有正在运行的解码线程    
     if (decoderThread.joinable()) {
         decoderThread.join();
     }
     
-    decoderThread = std::thread(&VideoPlayer::decodeThread, this);
-    Log << Level::Info << "视频开始播放" << op::endl;
+    // 根据是否启用硬件加速选择解码线程函数
+    if (useHardwareAccel) {
+        decoderThread = std::thread(&VideoPlayer::decodeThreadHW, this);
+        Log << Level::Info << "视频开始播放 (硬件加速)" << op::endl;
+    } else {
+        decoderThread = std::thread(&VideoPlayer::decodeThread, this);
+        Log << Level::Info << "视频开始播放 (软件解码)" << op::endl;
+    }
 }
 
 void VideoPlayer::stop() {
@@ -205,11 +215,20 @@ std::shared_ptr<Bitmap> VideoPlayer::getCurrentFrame() {
     // 在主线程中创建Bitmap对象，不会有跨线程问题
     if (!frameData || !frameData->data) {
         return nullptr;
-    }    // 创建位图（此时在主线程中，可以安全创建纹理），使用RGB格式避免数据转换
+    }    
+    
+    // 创建位图（此时在主线程中，可以安全创建纹理），使用RGB格式避免数据转换
     std::shared_ptr<Bitmap> bitmap = std::make_shared<Bitmap>(frameData->width, frameData->height, true, true);
     
     // 直接从原始数据创建纹理，使用RGB格式避免RGB到RGBA的转换，大幅减少内存使用
     bitmap->CreateFromRGBData(frameData->data, frameData->width, frameData->height, true, true);
+    
+    // 更新性能监控数据
+    if (HWAccelMonitor::getInstance().isHardwareAccelEnabled()) {
+        // 如果启用了硬件加速但仍使用软件解码路径，可能是硬件渲染失败，记录下来
+        HWAccelMonitor::getInstance().recordHWError("硬件加速已启用但使用了软件解码路径");
+    }
+    HWAccelMonitor::getInstance().updateSWFrameCount();
     
     // frameData 会在函数结束时自动释放
     return bitmap;
@@ -387,8 +406,7 @@ void VideoPlayer::cleanup() {
         avformat_free_context(formatContext);
         formatContext = nullptr;
     }
-    
-    videoStreamIndex = -1;
+      videoStreamIndex = -1;
     videoStream = nullptr;
     width = 0;
     height = 0;
@@ -399,5 +417,12 @@ void VideoPlayer::cleanup() {
         std::lock_guard<std::mutex> lock(frameMutex);
         currentFrameData = nullptr;
         frameReady = false;
+    }
+    
+    // 清理硬件加速资源
+    if (useHardwareAccel) {
+        std::lock_guard<std::mutex> lock(hwTextureMutex);
+        hwTexture = nullptr;
+        cleanupHardwareAcceleration();
     }
 }

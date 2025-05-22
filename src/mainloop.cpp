@@ -14,8 +14,6 @@
 
 using namespace core;
 
-screen::Screen *currentScreen = nullptr;
-
 // 初始化FPS相关变量
 double lastFPSUpdateTime = 0.0;
 int frameCount = 0;
@@ -61,12 +59,17 @@ int mainloop() {
         // 输出FPS日志
         std::stringstream ss;
         ss << std::fixed << std::setprecision(1) << currentFPS;
-        Log << Level::Debug << "FPS: " << ss.str() << op::endl;
-    }
+        Log << Level::Debug << "FPS: " << ss.str() << op::endl;    }
 
     // 绘制场景
-    currentScreen->Draw();
-      // 如果启用了FPS显示，则绘制FPS文本
+    // 使用屏幕管理系统的当前屏幕
+    if (screen::Screen::getCurrentScreen()) {
+        screen::Screen::getCurrentScreen()->Draw();
+    } else {
+        Log << Level::Error << "当前屏幕为空，无法绘制" << op::endl;
+    }
+    
+    // 如果启用了FPS显示，则绘制FPS文本
     if (showFPS) {
         // 创建FPS文本
         std::stringstream ss;
@@ -126,9 +129,7 @@ void MouseButtonEvent(GLFWwindow* window, int button, int action, int mods) {
     switch (action) {
         case GLFW_PRESS:
             Log << Level::Info << "Mouse button pressed at (" << x << ", " << y << "): " << button << op::endl;
-            if (currentScreen) {
-                currentScreen->Click(static_cast<int>(x), static_cast<int>(y));
-            }
+            screen::Screen::getCurrentScreen()->Click(static_cast<int>(x), static_cast<int>(y));
             break;
         case GLFW_RELEASE:
             Log << Level::Info << "Mouse button released at (" << x << ", " << y << "): " << button << op::endl;

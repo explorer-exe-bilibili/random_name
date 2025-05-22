@@ -48,7 +48,7 @@ int Explorer::init()
     // 尝试加载默认字体
     try
     {
-        loadFont(0, R"(C:\Users\j1387\source\repos\explorer-exe-bilibili\random_name\files\fonts\QS.ttf)", false);
+        loadFont(0, R"(files\fonts\spare.ttf)", false);
     }
     catch (const std::exception &e)
     {

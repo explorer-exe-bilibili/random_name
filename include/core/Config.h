@@ -5,6 +5,7 @@
 #include <vector>
 #include <memory>
 #include <filesystem>
+#include <nlohmann/json.hpp>
 #include "configItem.h"
 
 namespace core {
@@ -87,6 +88,9 @@ public:
     // 读写配置文件
     bool readFromFile();
     bool saveToFile();
+    bool createEmptyConfigFile();
+    bool tryRepairJsonFile(std::string& content);
+    bool tryLegacyFileFormat();
     
     // 切换布尔值
     bool toggleBool(const std::string& name);
@@ -94,6 +98,10 @@ public:
     // 尺寸相关功能
     void setScreenSize(int width, int height);
     int getScreenScaled(const std::string& name, int defaultValue = 0);
+    
+    // JSON相关功能
+    nlohmann::json getAsJson(const std::string& name, const nlohmann::json& defaultValue = nlohmann::json());
+    void setJson(const std::string& name, const nlohmann::json& value);
     
     // 清理资源
     void cleanup();
