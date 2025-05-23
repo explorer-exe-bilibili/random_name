@@ -96,22 +96,18 @@ int init(){
     Log<<Level::Info<<"Init explorer"<<op::endl;
     core::Explorer::getInstance();
 
-    currentScreen = new screen::MainScreen();
     core::Explorer::getInstance()->getAudio()->loadMusic("bgm", "C:\\Users\\j1387\\source\\repos\\explorer-exe-bilibili\\random_name\\files\\music\\backsound.mp3");
     core::Explorer::getInstance()->getAudio()->playMusic("bgm", -1);
     core::Explorer::getInstance()->getAudio()->setMusicVolume(50);
+    screen::Screen::RegisterScreen(screen::ScreenID::MainMenu, std::make_shared<screen::MainScreen>());
+    screen::Screen::SwitchToScreen(screen::ScreenID::MainMenu);
+    screen::Screen::RegisterScreen(screen::ScreenID::Settings, std::make_shared<screen::SettingScreen>());
     Log<<Level::Info<<"starting render loop"<<op::endl<<op::flush;
     return 0;
 }
 
 int cleanup() {
     Log<<Level::Info<<"Cleaning up"<<op::endl<<op::flush;
-    
-    // 确保在退出时清理所有SDL资源
-    if (currentScreen) {
-        delete currentScreen;
-        currentScreen = nullptr;
-    }
     
     // 清理其他资源
     core::Explorer::getInstance2().reset();

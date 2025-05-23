@@ -13,12 +13,17 @@ struct AVPacket;
 struct SwsContext;
 struct AVStream;
 struct FrameData;
+struct AVBufferRef;
+enum AVHWDeviceType;
 
 namespace core
 {
 class Bitmap;
 class VideoPlayer
-{    void decodeThread();
+{   
+    void decodeThread();
+    void decodeThreadHW(); // 添加硬件加速解码线程
+    bool initHardwareAcceleration(); // 添加硬件加速初始化函数
     std::shared_ptr<FrameData> convertFrameToFrameData(AVFrame* frame);
     void cleanup();
 public:
@@ -34,14 +39,17 @@ public:
     void update();
     bool isPlaying() const{return playing && !shouldExit;}
     bool isPaused() const{return !playing && !shouldExit;}
+    bool isUsingHardwareAcceleration() const{return useHardwareAccel;}
     std::shared_ptr<core::Bitmap> getCurrentFrame();
 
     void setLoop(bool loop);
     void setVolume(int volume);
 private:
-    std::atomic<bool> loop;
-    std::atomic<bool> playing;
-    std::atomic<bool> shouldExit;    std::thread decoderThread;
+    std::atomic<bool> loop{true};
+    std::atomic<bool> playing{true};
+    std::atomic<bool> shouldExit{true};
+    std::atomic<bool> useHardwareAccel{true};
+    std::thread decoderThread;
     std::mutex frameMutex;
     std::shared_ptr<FrameData> currentFrameData = nullptr;
     std::atomic<bool> frameReady{false};
@@ -55,6 +63,12 @@ private:
     AVFrame* rgbFrame=nullptr;
     AVPacket* packet=nullptr;
 
+    // 硬件加速相关
+    AVBufferRef* hwDeviceCtx = nullptr;
+    AVFrame* hwFrame = nullptr;
+    AVHWDeviceType hwType;
+
+    // 视频文件相关
     int videoStreamIndex = -1;
     double frameDelay = 0.0;
     int width=0;

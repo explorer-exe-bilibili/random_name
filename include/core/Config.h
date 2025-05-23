@@ -64,7 +64,7 @@ public:
     // 获取配置值
     std::string get(const std::string& name, const std::string& defaultValue = "");
     std::string getPath(const std::string& name, const std::string& defaultValue = "");
-    int getInt(const std::string& name, int defaultValue = 0);
+    long getInt(const std::string& name, long defaultValue = 0);
     double getDouble(const std::string& name, double defaultValue = 0.0);
     bool getBool(const std::string& name, bool defaultValue = false);
     
@@ -97,7 +97,6 @@ public:
     
     // 尺寸相关功能
     void setScreenSize(int width, int height);
-    int getScreenScaled(const std::string& name, int defaultValue = 0);
     
     // JSON相关功能
     nlohmann::json getAsJson(const std::string& name, const nlohmann::json& defaultValue = nlohmann::json());
@@ -105,9 +104,6 @@ public:
     
     // 清理资源
     void cleanup();
-    
-    // 调试功能
-    void printAllConfigItems();
 };
 
 } // namespace core

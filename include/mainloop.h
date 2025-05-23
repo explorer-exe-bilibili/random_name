@@ -13,6 +13,7 @@
 #include "core/screen/mainScreen.h"
 #include "core/explorer.h"
 #include "core/Config.h"
+#include "core/screen/SettingScreen.h"
 
 int mainloop();
 void KeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods);
@@ -21,8 +22,6 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 int init();
 int cleanup();
-
-extern screen::Screen *currentScreen;
 
 void SetConfigItems();
 

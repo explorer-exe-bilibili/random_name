@@ -45,11 +45,13 @@ public:
     float GetFontSize() const;
 
     bool operator==(const Font&) const;
+    bool isLoaded() const{return isOK;};
 private:
     bool LoadCharacter(wchar_t c);
     Character GetCharacter(wchar_t c);
+    float CalculateDynamicScale(float baseScale) const;
 
-
+    bool isOK=false;
     float fontSize; // 字体大小
     std::map<wchar_t, Character> Characters;
     VertexArray VAO;

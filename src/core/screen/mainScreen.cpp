@@ -1,5 +1,7 @@
 #include "core/screen/mainScreen.h"
 
+#include "core/screen/SettingScreen.h"
+
 #include "core/log.h"
 #include "core/explorer.h"
 #include "core/config.h"
@@ -7,17 +9,19 @@
 using namespace screen;
 using namespace core;
 
+#define SETICON "'"
+
 enum{
-    o1=0,
-    o2,
-    o3,
-    o4,
-    set,
+    set=0,
     offVideo,
     his,
     x1,
     x10,
-    exitButton
+    exitButton,
+    o1,
+    o2,
+    o3,
+    o4
 };
 
 void MainScreen::init() {
@@ -25,43 +29,48 @@ void MainScreen::init() {
     mode=Config::getInstance()->getInt("mode", 0);
     buttons.clear();
     buttons.resize(10);
+    for(int i = 0; i < buttons.size(); ++i) {
+        buttons[i] = std::make_shared<Button>();
+    }
     overlays.resize(Config::getInstance()->getInt(POOL_COUNT));
     for(int i = 0; i < overlays.size(); ++i) {
         overlays[i] = std::make_shared<Button>();
-    }    for(int i = 0; i < buttons.size(); ++i) {
-        buttons[i] = std::make_shared<Button>();
     }
     float x=0.2,tmp=(1-x*2)/Config::getInstance()->getInt(POOL_COUNT);
     for(int i=0; i< Config::getInstance()->getInt(POOL_COUNT); i++)
     {
-        buttons[i]->SetRegion({x,0.1,x+tmp*0.8,0.2});
-        buttons[i]->SetBitmap("over"+std::to_string(i+1));
-        buttons[i]->SetText("over"+std::to_string(i+1));
-        buttons[i]->SetEnableText(false);
-        buttons[i]->SetClickFunc([this, i] {
+        buttons[i+o1]->SetRegion({x,0.1,x+tmp*0.8,0.2});
+        buttons[i+o1]->SetBitmap(BitmapID(int(BitmapID::Overlay0)+i));
+        buttons[i+o1]->SetText("over"+std::to_string(i+1));
+        buttons[i+o1]->SetEnableText(false);
+        buttons[i+o1]->SetClickFunc([this, i] {
             mode = i;
             changeMode();
         });
-        buttons[i]->SetEnable(true);
-        overlays[i]->SetBitmap("over"+std::to_string(i+1));
+        buttons[i+o1]->SetEnable(true);
+        overlays[i]->SetBitmap(BitmapID(int(BitmapID::Overlay0)+i));
         overlays[i]->SetText("over"+std::to_string(i+1));
         overlays[i]->SetRegion({1,0.25,1.68,0.75});
         overlays[i]->SetEnableText(false);
         overlays[i]->SetEnable(true);
         x += tmp;
     }
-    
-    // 设置按钮
-    buttons[set]->SetRegion({0.7, 0.8, 0.9, 0.9});
-    buttons[set]->SetText("设置");
-    buttons[set]->SetClickFunc([]() {
-        // 切换到设置屏幕
-        SwitchToScreen("settings");
+    buttons[set]->SetEnableBitmap(false);
+    buttons[set]->SetText(SETICON);
+    buttons[set]->SetFontID(FontID::Icon);
+    buttons[set]->SetRegion({0.1,0.82,0.12,0.86});
+    buttons[set]->SetColor({211,188,142,255});
+    buttons[set]->SetClickFunc([this] {
+        Log << Level::Info << "进入设置界面" << op::endl;
+        if(screens[ScreenID::Settings] == nullptr) {
+            RegisterScreen(ScreenID::Settings, std::make_shared<screen::SettingScreen>());
+        }
+        Screen::SwitchToScreen(ScreenID::Settings);
     });
     buttons[set]->SetEnable(true);
+    buttons[set]->SetFontScale(0.35f);
+    background = core::Explorer::getInstance()->getBitmap(BitmapID::Background);
 
-    background = core::Explorer::getInstance()->getBitmap("1");
-    
     tmp=0;
     for(auto& b:overlays){
         int t=tmp-mode;
@@ -110,13 +119,12 @@ void MainScreen::Draw(){
     }
 }
 
-void MainScreen::enter(){
+void MainScreen::enter(int){
     // 在主屏幕进入时注册所有屏幕
     static bool screensRegistered = false;
     
     if (!screensRegistered) {
         // 注册主屏幕
-        RegisterScreen("main", std::make_shared<MainScreen>());
         
         screensRegistered = true;
     }

@@ -20,7 +20,7 @@ void NameScreen::Draw() {
     
 }
 
-void NameScreen::enter() {
+void NameScreen::enter(int) {
     alpha=0;
     
 }

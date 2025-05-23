@@ -6,6 +6,7 @@
 #include <mutex>
 #include <glad/glad.h>
 #include <glm/ext/matrix_clip_space.hpp>
+#include <filesystem>
 
 #include "core/render/GLBase.h"
 #include "core/baseItem/Base.h"
@@ -51,6 +52,9 @@ Shader Font::shader;
 Font::Font(const std::string& fontPath,bool needPreLoad)
 {
 	std::cout << "loading Font file "<<fontPath<<std::endl;
+	if(!std::filesystem::exists(fontPath)){
+		return;
+	}
 	if (!shader)
 	{
 		shader.init(vertexShader, fragmentShader);
@@ -74,6 +78,7 @@ Font::Font(const std::string& fontPath,bool needPreLoad)
 	if (FT_New_Face(ft, fontPath.c_str(), 0, &face)) {
 		std::cerr << "无法加载字体: " << fontPath << std::endl;
 		FT_Done_FreeType(ft);
+		isOK=false;
 		return;
 	}
 	fontSize = 48;
@@ -108,6 +113,7 @@ Font::Font(const std::string& fontPath,bool needPreLoad)
 	VertexArray::Unbind();
 	VertexBuffer::Unbind();
 	std::cout << "Load font finished"<<fontPath<<std::endl;
+	isOK=true;
 }
 
 Font::~Font() {
@@ -126,6 +132,7 @@ void Font::RenderText(const std::string& text,float x, float y,float scale, cons
 }
 
 void Font::RenderText(const std::wstring& text, float x, float y_origin, float scale, const glm::vec4& color) {
+	scale = CalculateDynamicScale(scale);
 	float y=WindowInfo.height-y_origin-fontSize*scale;
 	if(this==nullptr){
 		Log<<"Font is nullptr"<<op::endl;
@@ -196,13 +203,13 @@ void Font::RenderTextBetween(const std::string& text, Region region, float scale
 	RenderTextBetween(wtext, region, scale, color);
 }
 
-void Font::RenderTextBetween(const std::wstring& text, Region region, float scale, const glm::vec4& color) {
+void Font::RenderTextBetween(const std::wstring& text, Region region, float scale_, const glm::vec4& color) {
 	if (this == nullptr) {
 		Log << "Font is nullptr" << op::endl;
-		spare_font->RenderTextBetween(text, region, scale, color);
+		spare_font->RenderTextBetween(text, region, scale_, color);
 		return;
 	}
-
+	float scale = CalculateDynamicScale(scale_);
 	//计算可用的区域宽度
 	float availableWidth = region.getxend() - region.getx();
 	float availableHeight = region.getyend() - region.gety();
@@ -248,10 +255,11 @@ void Font::RenderTextBetween(const std::wstring& text, Region region, float scal
 	float y = region.gety() + (availableHeight - fontSize * scale) / 2.0f;
 
 	// 渲染截断后的文本
-	RenderText(displayText, x, y, scale, color);
+	RenderText(displayText, x, y, scale_, color);
 }
 
 void Font::RenderChar(wchar_t text, float x, float y_origin, float scale, const glm::vec4& color) {
+	scale = CalculateDynamicScale(scale);
 	float y = WindowInfo.height - y_origin - fontSize * scale;
 	if (this == nullptr) {
 		Log << "Font is nullptr" << op::endl;
@@ -400,6 +408,7 @@ void Font::RenderTextVertical(const std::string& text, float x, float y, float s
 }
 
 void Font::RenderTextVertical(const std::wstring& text, float x, float y_origin, float scale, const glm::vec4& color) {
+	scale = CalculateDynamicScale(scale);
 	float y = WindowInfo.height - y_origin - fontSize * scale;
 	if (this == nullptr) {
 		Log << "Font is nullptr" << op::endl;
@@ -471,12 +480,13 @@ void Font::RenderTextVerticalBetween(const std::string& text, Region region, flo
 	RenderTextVerticalBetween(wtext, region, scale, color);
 }
 
-void Font::RenderTextVerticalBetween(const std::wstring& text, Region region, float scale, const glm::vec4& color) {
+void Font::RenderTextVerticalBetween(const std::wstring& text, Region region, float scale_, const glm::vec4& color) {
 	if (this == nullptr) {
 		Log << "Font is nullptr" << op::endl;
-		spare_font->RenderTextVerticalBetween(text, region, scale, color);
+		spare_font->RenderTextVerticalBetween(text, region, scale_, color);
 		return;
 	}
+	float scale = CalculateDynamicScale(scale_);
 
 	//计算可用的区域高度
 	float availableWidth = region.getxend() - region.getx();
@@ -526,5 +536,26 @@ void Font::RenderTextVerticalBetween(const std::wstring& text, Region region, fl
 	float screen_y = WindowInfo.height - y - textHeight;
 	
 	// 渲染截断后的垂直文本
-	RenderTextVertical(displayText, x, y, scale, color);
+	RenderTextVertical(displayText, x, y, scale_, color);
+}
+
+// 添加一个计算动态缩放因子的私有方法
+float Font::CalculateDynamicScale(float baseScale) const {
+    // 获取窗口当前尺寸
+    float currentWidth = static_cast<float>(WindowInfo.width);
+    float currentHeight = static_cast<float>(WindowInfo.height);
+    
+    // 选择一个参考尺寸（可以根据需要调整）
+    const float referenceWidth = 800.0f;
+    const float referenceHeight = 600.0f;
+    
+    // 计算当前窗口与参考尺寸的比例
+    float widthRatio = currentWidth / referenceWidth;
+    float heightRatio = currentHeight / referenceHeight;
+    
+    // 使用较小的比例以确保在任何方向上都不会太大
+    float scaleFactor = std::min(widthRatio, heightRatio);
+    
+    // 应用用户提供的基础缩放并返回
+    return baseScale * scaleFactor;
 }

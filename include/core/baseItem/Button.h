@@ -12,7 +12,7 @@
 namespace core {
 class Button {
 public:
-    Button(const std::string& text="", int FontID=0, const Region& region=Region(), Bitmap* bitmap=nullptr);
+    Button(const std::string& text="", FontID fontid=FontID::Default, const Region& region=Region(), Bitmap* bitmap=nullptr);
     Button(const Button& button);
     Button& operator=(const Button& button);
     ~Button();
@@ -28,25 +28,34 @@ public:
     void SetBitmap(const std::string& bitmapID){
         if(core::Explorer::getInstance()->isBitmapLoaded(bitmapID))
             this->bitmap = core::Explorer::getInstance()->getBitmap(bitmapID);}
+    void SetBitmap(BitmapID id) {
+        if(core::Explorer::getInstance()->isBitmapLoaded(id))
+            this->bitmap = core::Explorer::getInstance()->getBitmap(id);}
     void SetRegion(const Region& region) {this->region = region;}
-    void SetFontID(int FontID);
+    void SetFontID(FontID id);
     void SetFont(Font* font) {this->font = font;}
     void SetColor(const Color& color) {this->color = color;}
+    void SetFillColor(const Color& color) {this->fillColor = color;}
+    void SetFontScale(float scale) { this->fontScale = scale; }
 
     void SetEnableText(bool enable) {this->enableText = enable;}
     void SetEnable(bool enable) {this->enable = enable;}
     void SetEnableBitmap(bool enable) {this->enableBitmap = enable;}
-private:
+    void SetEnableFill(bool enable) {this->enableFill = enable;}
+protected:
     Region region;
     Color color=Color(255, 255, 255, 255);
+    Color fillColor=Color(0, 0, 0, 255);
     bool enableText=true;
     bool enable=true;
     bool enableBitmap=true;
+    bool enableFill=false;
     std::string text="";
     Bitmap* bitmap;
     std::function<void()> ClickFunc;
-    int FontID=0;
+    FontID fontid=FontID::Default;
     float fontSize=0;
+    float fontScale=1.0f;
     Font* font;
     // 线程安全相关成员
     std::mutex animMutex;                   // 线程同步互斥锁

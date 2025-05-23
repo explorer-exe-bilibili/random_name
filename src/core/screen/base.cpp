@@ -1,5 +1,5 @@
 #include "core/screen/base.h"
-#include "core/baseItem/VideoPlayer.h"
+#include "core/baseItem/Video/VideoPlayer.h"
 #include "core/Config.h"
 #include "core/log.h"
 
@@ -7,57 +7,31 @@ using namespace screen;
 using namespace core;
 
 bool Screen::inited = false;
+std::shared_ptr<Screen> Screen::currentScreen = nullptr;
+ScreenID Screen::currentScreenID = ScreenID::MainMenu;
+std::map<ScreenID, std::shared_ptr<Screen>> Screen::screens;
 bool Screen::useVideoBackground = false;
-std::shared_ptr<core::VideoPlayer> Screen::videoBackground = nullptr;
-
-void Screen::initBackground() {
-    if(inited)return;
-    // 初始化按钮和背景
-    // 初始化视频背景
-    inited=true;
-    background = core::Explorer::getInstance()->getBitmap("1");
-    useVideoBackground = Config::getInstance()->getBool(USE_VIDEO_BACKGROUND, true);
-    if (useVideoBackground) {
-        std::string videoPath = Config::getInstance()->get(VIDEO_BACKGROUND_PATH, "files/video/bg.webm");
-        videoBackground = std::make_shared<VideoPlayer>();
-        if (videoBackground->load(videoPath)) {
-            videoBackground->setLoop(true);
-            videoBackground->play();
-            Log << Level::Info << "视频背景初始化成功" << op::endl;
-        } else {
-            useVideoBackground = false;
-            Log << Level::Error << "视频背景初始化失败，使用静态背景" << op::endl;
-        }
-    }
-}
+core::VideoPlayer* Screen::videoBackground = nullptr;
 
 void Screen::Draw() {
-    if (useVideoBackground && videoBackground && videoBackground->isPlaying()) {
-        // 获取当前视频帧作为背景
-        auto frame = videoBackground->getCurrentFrame();
-        if (frame) {
-            // 确保帧有纹理，如果没有则创建
-            if (!frame->HasTexture()) {
-                frame->CreateTextureFromBuffer();
-            }
-            
-            // 绘制视频帧作为背景
-            frame->Draw({0, 0, 1, 1});
-        } else {
-            // 回退到普通背景绘制
-            if(background)
-            background->Draw({0, 0, 1, 1});
-            Log << Level::Error << "获取视频帧失败，使用静态背景" << op::endl;
-        }
-    } else {
-        // 使用普通背景绘制
-        if(background)
-        background->Draw({0, 0, 1, 1});
+    std::shared_ptr<Bitmap> currentFrame;
+    if(useVideoBackground)currentFrame=videoBackground->getCurrentFrame();
+    if(currentFrame){
+        currentFrame->CreateTextureFromBuffer();
+        currentFrame->Draw({0,0,1,1},1);
     }
-    
     for (const auto& button : buttons) {
         if(button)
             button->Draw();
+    }
+}
+
+void Screen::init() {
+    if (inited) return;
+    inited = true;
+    useVideoBackground = Config::getInstance()->getBool(USE_VIDEO_BACKGROUND);
+    if (useVideoBackground) {
+        videoBackground = Explorer::getInstance()->getVideo(VideoID::Background);
     }
 }
 
@@ -71,4 +45,22 @@ bool Screen::Click(int x, int y) {
             }
     }
     return return_value;
+}
+
+void Screen::RegisterScreen(ScreenID id, std::shared_ptr<Screen> screen) {
+    if (!screens.contains(id)) {
+        screens[id] = screen;
+    } else {
+        Log << Level::Error << "Screen with ID " << static_cast<int>(id) << " already exists." << op::endl;
+    }
+}
+
+bool Screen::SwitchToScreen(ScreenID id) {
+    currentScreenID = id;
+    if (screens.contains(id)) {
+        currentScreen = screens[id];
+        currentScreen->enter(0);
+        return true;
+    }
+    return false;
 }

@@ -105,7 +105,10 @@
         "xtree": "cpp",
         "xutility": "cpp",
         "coroutine": "cpp",
-        "*.rh": "cpp"    
+        "*.rh": "cpp",
+        "unordered_set": "cpp",
+        "csignal": "cpp",
+        "future": "cpp"
     },
     // 排除old_src文件夹中的文件进行错误检查
     "C_Cpp.files.exclude": {

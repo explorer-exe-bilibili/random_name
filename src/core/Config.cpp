@@ -134,14 +134,14 @@ std::string Config::getPath(const std::string& name, const std::string& defaultV
     return fsPath.string();
 }
 
-int Config::getInt(const std::string& name, int defaultValue) {
+long Config::getInt(const std::string& name, long defaultValue) {
     std::string value = get(name, "");
     if (value.empty()) {
         return defaultValue;
     }
     
     try {
-        return std::stoi(value);
+        return std::stol(value);
     } catch (const std::exception& e) {
         std::cerr << "Error converting value to int: " << e.what() << std::endl;
         return defaultValue;
@@ -720,5 +720,15 @@ bool Config::tryLegacyFileFormat() {
         Log << Level::Error << "No valid configuration entries found in legacy format" << op::endl;
         return false;
     }
+}
+
+bool Config::toggleBool(const std::string& name) {
+    if (configItems.contains(name)) {
+        bool currentValue = getBool(name);
+        set(name, !currentValue);
+        return !currentValue;
+    }
+    return false; // 如果没有找到配置项，返回false
+
 }
 }

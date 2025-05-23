@@ -44,6 +44,7 @@ find_package(utf8cpp CONFIG REQUIRED)
 find_package(SDL2 CONFIG REQUIRED)
 find_package(SDL2_mixer CONFIG REQUIRED)
 find_package(Stb REQUIRED)
+find_package(tinyfiledialogs CONFIG REQUIRED)
 
 # 创建可执行文件
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
@@ -58,6 +59,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE
     ${GLM_INCLUDE_DIRS}
     ${Stb_INCLUDE_DIR}
     ${FFMPEG_LIBRARY_DIRS}
+    ${PORTABLE_FILE_DIALOGS_INCLUDE_DIRS}
 )
 
 # 链接所有库
@@ -74,6 +76,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
     ${FFMPEG_LIBRARIES}
     WebP::webp WebP::webpdecoder WebP::webpdemux
+    tinyfiledialogs::tinyfiledialogs
 )
 # 平台特定设置
 if(WIN32)

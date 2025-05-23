@@ -29,9 +29,16 @@ namespace core
         Color(const Color& color) : r(color.r), g(color.g), b(color.b), a(color.a) {}
         Color(const glm::vec3& color) : r(color.r * 255), g(color.g * 255), b(color.b * 255), a(255) {}
         Color(const glm::vec4& color) : r(color.r * 255), g(color.g * 255), b(color.b * 255), a(color.a * 255) {}
+        Color(const long value){
+            r=(unsigned char)((value>>24)&0xFF);
+            g=(unsigned char)((value>>16)&0xFF);
+            b=(unsigned char)((value>>8)&0xFF);
+            a=(unsigned char)(value&0xFF);
+        }
         
         operator glm::vec4() const { return glm::vec4(r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f); }
         operator glm::vec3() const { return glm::vec3(r / 255.0f, g / 255.0f, b / 255.0f); }
+        operator unsigned int() const { return (unsigned int)(r << 24 | g << 16 | b << 8 | a); }
     };
     namespace color{extern Color white, black, red, green, blue;}
 

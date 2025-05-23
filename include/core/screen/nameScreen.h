@@ -13,7 +13,6 @@ public:
     NameScreen(std::string name):Screen(name){init();}
     void Draw() override;
     void init() override;
-    void enter() override;
-    void enter2() override;
+    void enter(int mode) override;
 };
 }

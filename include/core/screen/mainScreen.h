@@ -8,12 +8,12 @@ class MainScreen : public Screen {
     std::vector<std::shared_ptr<core::Button>> overlays;
     
     public:
-        MainScreen() : Screen("Main") { initBackground(); init(); }
+        MainScreen() : Screen("Main") { Screen::init(); init(); }
         ~MainScreen();
         void init() override;
         bool Click(int x, int y) override;
         void Draw() override;
-        void enter() override;
+        void enter(int) override;
     private:
         void changeMode(); 
     };

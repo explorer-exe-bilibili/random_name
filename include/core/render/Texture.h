@@ -14,7 +14,8 @@
 
 
 
-namespace core {    class Texture {
+namespace core {
+class Texture {
     public:
         Texture(const unsigned char* data, const int width, const int height, bool isRGB = false);
         Texture(const int width, const int height, bool isRGB = false);

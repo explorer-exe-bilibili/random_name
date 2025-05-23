@@ -6,8 +6,8 @@
 
 using namespace core;
 
-Button::Button(const std::string& text, int FontID, const Region& region, Bitmap* bitmap) :
- text(text), FontID(FontID), region(region), bitmap(bitmap){}
+Button::Button(const std::string& text, FontID fontid, const Region& region, Bitmap* bitmap) :
+ text(text), fontid(fontid), region(region), bitmap(bitmap){}
 
 Button::Button(const Button& button) :
     region(button.region),
@@ -17,7 +17,7 @@ Button::Button(const Button& button) :
     text(button.text),
     bitmap(button.bitmap),
     ClickFunc(button.ClickFunc),
-    FontID(button.FontID) {}
+    fontid(button.fontid) {}
 
 Button& Button::operator=(const Button& button) {
     if (this != &button) {
@@ -28,7 +28,7 @@ Button& Button::operator=(const Button& button) {
         text = button.text;
         bitmap = button.bitmap;
         ClickFunc = button.ClickFunc;
-        FontID = button.FontID;
+        fontid = button.fontid;
     }
     return *this;
 }
@@ -54,11 +54,14 @@ void Button::Draw(unsigned char alpha) {
     if (enableBitmap && bitmap) {
         bitmap->Draw(region, alpha/255.0f);
     }
+    if(enableFill) {
+        Drawer::getInstance()->DrawSquare(region, fillColor,true);
+    }
     if (enableText) {
         if (font) {
             Color tmp=color;
             tmp.a=alpha;
-            font->RenderTextBetween(text, region, 1.0f, tmp);
+            font->RenderTextBetween(text, region, fontScale, tmp);
         }
     }
     
@@ -181,9 +184,8 @@ void Button::MoveTo(const Region& region, const bool enableFluent, const float s
     }
 }
 
-void Button::SetFontID(int FontID)
-{    this->FontID = FontID;
-    if (FontID == 0) {
-        font = core::Explorer::getInstance()->getFont(FontID);
-    }
+void Button::SetFontID(FontID id)
+{
+    this->fontid = id;
+    font = core::Explorer::getInstance()->getFont(fontid);
 }

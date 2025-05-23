@@ -19,13 +19,10 @@
 #define TEXTR "text_r"
 #define TEXTA "text_a"
 
-#define CLICK_MUSIC "click_music"
-#define ENTER_MUSIC "enter_music"
-#define OFFMUSIC "off_music"
+#define OFF_MUSIC "off_music"
 #define INWINDOW "in_window"
 #define OFF_VIDEO "off_video"
 #define USE_VIDEO_BACKGROUND "use_video_background"
-#define VIDEO_BACKGROUND_PATH "video_background_path"
 #define NOSMOOTHUI "no_smooth_ui"
 
 #define FLOATWINDOW "float_window_switch"
@@ -41,11 +38,17 @@
 #define WINDOW_Y "window_y"
 #define VERTICAL_SYNC "vertical_sync"
 #define WINDOW_TITLE "window_title"
-#define BACKGROUND_IMG "background_img"
+
+#define BACKGROUND_IMG_PATH "background_img_path"
+#define IMGS_PATH "imgs_path"
+#define VIDEO_BACKGROUND_PATH "video_background_path"
+#define DEFAULT_FONT_PATH "default_font_path"
+#define ICON_FONT_PATH "icon_font_path"
+#define VIDEO_BACKGROUND_PATH "video_background_path"
+#define CLICK_MUSIC_PATH "click_music_path"
+#define ENTER_MUSIC_PATH "enter_music_path"
+#define BACKGROUND_MUSIC_PATH "background_music_path"
+#define BGM_PATH BACKGROUND_MUSIC_PATH
 
 #define DEBUG "debug"
-
-// FPS显示相关配置
 #define SHOW_FPS "show_fps"
-#define FPS_POSITION_X "fps_position_x"
-#define FPS_POSITION_Y "fps_position_y"

@@ -1,4 +1,5 @@
 #include "core/explorer.h"
+#include "core/Config.h"
 #include "core/log.h"
 #include <filesystem>
 #include <algorithm>
@@ -39,20 +40,32 @@ int Explorer::init()
         Log << Level::Warn << "音频系统初始化失败，但将继续执行" << op::endl;
     }
 
-    loadImagesFromDirectory("files/imgs");
+    loadImagesFromDirectory(Config::getInstance()->getPath(IMGS_PATH));
 
     // 列出所有加载成功的图像
     Log << Level::Info << "Listing all loaded images after initialization:" << op::endl;
     listLoadedBitmaps();
-
     // 尝试加载默认字体
     try
     {
-        loadFont(0, R"(files\fonts\spare.ttf)", false);
+        loadFont(FontID::Default, Config::getInstance()->getPath(DEFAULT_FONT_PATH), false);
+        loadFont(FontID::Icon, Config::getInstance()->getPath(ICON_FONT_PATH), false);
     }
     catch (const std::exception &e)
     {
         Log << Level::Error << "Failed to load font: " << e.what() << op::endl;
+    }
+
+    // 尝试加载背景视频
+    if (Config::getInstance()->getBool(USE_VIDEO_BACKGROUND))
+    {
+        videos[VideoID::Background] = std::make_shared<VideoPlayer>();
+        videos[VideoID::Background]->setLoop(true);
+        if (!videos[VideoID::Background]->load(Config::getInstance()->getPath(VIDEO_BACKGROUND_PATH)))
+        {
+            Log << Level::Error << "Failed to load background video" << op::endl;
+        }
+        else videos[VideoID::Background]->play();
     }
 
     Log << Level::Info << "Explorer initialization finished" << op::endl;
@@ -72,7 +85,7 @@ bool Explorer::loadBitmap(const std::string &name, const std::string &path)
         if (bitmap->Load(path))
         {
             // 如果成功加载，将其存储在映射表中
-            bitmaps[name] = bitmap;
+            Name_bitmaps[name] = bitmap;
             Log << Level::Info << "Bitmap loaded successfully: " << name << " (width: " << bitmap->getWidth()
                 << ", height: " << bitmap->getHeight()
                 << ", texture valid: " << (*bitmap ? "true" : "false") << ")" << op::endl;
@@ -92,17 +105,37 @@ bool Explorer::loadBitmap(const std::string &name, const std::string &path)
     return false;
 }
 
-Bitmap* Explorer::getBitmap(const std::string &name)
+bool Explorer::loadBitmap(BitmapID id, const std::string &path)
 {
-    if (bitmaps.find(name) == bitmaps.end())
-    {
-        Log << Level::Error << "Bitmap not found: " << name << op::endl;
-        Log << Level::Info << "Available bitmaps: " << op::endl;
-        listLoadedBitmaps();
+    Log << Level::Info << "Loading bitmap: " << static_cast<int>(id) << " from path: " << path << op::endl;
 
-        return nullptr;
+    try
+    {
+        // 创建新的Bitmap实例
+        auto bitmap = std::make_shared<Bitmap>();
+
+        // 尝试加载图像文件
+        if (bitmap->Load(path))
+        {
+            // 如果成功加载，将其存储在映射表中
+            bitmaps[id] = bitmap;
+            Log << Level::Info << "Bitmap loaded successfully: " << static_cast<int>(id) << " (width: " << bitmap->getWidth()
+                << ", height: " << bitmap->getHeight()
+                << ", texture valid: " << (*bitmap ? "true" : "false") << ")" << op::endl;
+            return true;
+        }
+        else
+        {
+            Log << Level::Error << "Failed to load bitmap: " << static_cast<int>(id) << " from path: " << path << op::endl;
+        }
     }
-    return bitmaps[name].get();
+    catch (const std::exception &e)
+    {
+        Log << Level::Error << "Exception while loading bitmap: " << static_cast<int>(id)
+            << " from path: " << path << " - " << e.what() << op::endl;
+    }
+
+    return false;
 }
 
 void Explorer::listLoadedBitmaps()
@@ -111,28 +144,129 @@ void Explorer::listLoadedBitmaps()
     int index = 0;
     for (const auto &pair : bitmaps)
     {
-        Log << Level::Info << "[" << index++ << "] ID: '" << pair.first << "', "
+        Log << Level::Info << "[" << index++ << "] ID: '" << static_cast<int>(pair.first) << "', "
+            << "size: " << pair.second->getWidth() << "x" << pair.second->getHeight() << op::endl;
+    }
+    for(const auto &pair : Name_bitmaps)
+    {
+        Log << Level::Info << "[" << index++ << "] Name: '" << pair.first << "', "
             << "size: " << pair.second->getWidth() << "x" << pair.second->getHeight() << op::endl;
     }
 }
 
-Font* Explorer::getFont(int id)
-{
-    if (fonts.find(id) == fonts.end())
-    {
-        Log << Level::Error << "Font not found: " << id << op::endl;
-        return fonts[0].get(); // 返回默认的Font对象
-    }
-    return fonts[id].get();
-}
-
-int Explorer::loadFont(const unsigned int ID, const std::string &path, bool needPreLoad)
+int Explorer::loadFont(FontID id, const std::string &path, bool needPreLoad)
 {
     Log << Level::Info << "Loading font from path: " << path << op::endl;
-    auto font = std::make_shared<Font>(path, needPreLoad);
-    fonts[ID] = font;
-    Log << Level::Info << "Font loaded successfully: " << ID << op::endl;
-    return ID;
+    try {
+        auto font = std::make_shared<Font>(path, needPreLoad);
+        if (!font->isLoaded())
+        {
+            throw std::runtime_error("Font failed to load properly");
+        }
+        fonts[id] = font;
+        Log << Level::Info << "Font loaded successfully: " << static_cast<int>(id) << op::endl;
+        return static_cast<int>(id);
+    } catch (const std::exception &e) {
+        Log << Level::Warn << "Failed to load font from path: " << path << " - " << e.what() << op::endl;
+        Log << Level::Info << "Attempting to load system font as fallback..." << op::endl;
+        
+        // 定义跨平台的字体列表
+        std::vector<std::string> fallbackFonts;
+        
+        #ifdef _WIN32
+        // Windows 系统字体
+        fallbackFonts = {
+            "C:\\Windows\\Fonts\\msyh.ttc",     // 微软雅黑
+            "C:\\Windows\\Fonts\\simsun.ttc",   // 宋体
+            "C:\\Windows\\Fonts\\simhei.ttf",   // 黑体
+            "C:\\Windows\\Fonts\\msyhl.ttc",    // 微软雅黑细体
+            "C:\\Windows\\Fonts\\arial.ttf",    // Arial
+            "C:\\Windows\\Fonts\\segoeui.ttf"   // Segoe UI
+        };
+        #elif defined(__APPLE__)
+        // macOS 系统字体
+        fallbackFonts = {
+            "/System/Library/Fonts/PingFang.ttc",      // 苹方
+            "/Library/Fonts/Arial Unicode.ttf",        // Arial Unicode
+            "/System/Library/Fonts/STHeiti Light.ttc", // 华文黑体
+            "/System/Library/Fonts/AppleSDGothicNeo.ttc" // Apple SD Gothic Neo
+        };
+        #else
+        // Linux 系统字体
+        fallbackFonts = {
+            "/usr/share/fonts/truetype/droid/DroidSansFallbackFull.ttf",
+            "/usr/share/fonts/truetype/noto/NotoSansCJK-Regular.ttc",
+            "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc",
+            "/usr/share/fonts/truetype/wqy/wqy-microhei.ttc",
+            "/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf",
+            "/usr/share/fonts/TTF/DejaVuSans.ttf"
+        };
+        #endif
+        
+        // 使用堆栈中的备选字体
+        for (const auto& systemFont : fallbackFonts) {
+            try {
+                Log << Level::Info << "Trying system font: " << systemFont << op::endl;
+                auto font = std::make_shared<Font>(systemFont, needPreLoad);
+                if (font->isLoaded())
+                {
+                    fonts[id] = font;
+                    Log << Level::Info << "Fallback system font loaded successfully: " << systemFont << op::endl;
+                    return static_cast<int>(id);
+                }
+                Log << Level::Warn << "Font created but not properly loaded: " << systemFont << op::endl;
+            } catch (const std::exception &e) {
+                Log << Level::Warn << "Exception loading system font: " << systemFont << " - " << e.what() << op::endl;
+            }
+        }
+        
+        // 尝试让系统自动查找一些通用字体名称
+        const std::vector<std::string> genericFontNames = {
+            "Arial",
+            "DejaVu Sans",
+            "Helvetica",
+            "Liberation Sans",
+            "Droid Sans"
+        };
+        
+        for (const auto& fontName : genericFontNames) {
+            try {
+                Log << Level::Info << "Trying generic font name: " << fontName << op::endl;
+                auto font = std::make_shared<Font>(fontName, needPreLoad);
+                if (font->isLoaded())
+                {
+                    fonts[id] = font;
+                    Log << Level::Info << "Generic font loaded successfully: " << fontName << op::endl;
+                    return static_cast<int>(id);
+                }
+                Log << Level::Warn << "Generic font created but not properly loaded: " << fontName << op::endl;
+            } catch (const std::exception &e) {
+                Log << Level::Warn << "Exception loading generic font: " << fontName << " - " << e.what() << op::endl;
+            }
+        }
+    }
+    
+    // 所有尝试都失败了，返回错误代码
+    Log << Level::Error << "Failed to load any font for ID: " << static_cast<int>(id) << op::endl;
+    return -1;
+}
+
+bool Explorer::loadVideo(VideoID id, const std::string &path)
+{
+    Log << Level::Info << "Loading video from path: " << path << op::endl;
+    auto video = std::make_shared<VideoPlayer>();
+    if (video->load(path))
+    {
+        video->pause();
+        videos[id] = video;
+        Log << Level::Info << "Video loaded successfully: " << static_cast<int>(id) << op::endl;
+        return true;
+    }
+    else
+    {
+        Log << Level::Error << "Failed to load video: " << static_cast<int>(id) << op::endl;
+        return false;
+    }
 }
 
 void Explorer::loadImagesFromDirectory(const std::string &directory)
@@ -183,15 +317,20 @@ void Explorer::loadImagesFromDirectory(const std::string &directory)
                     std::string filepath = entry.path().string();
 
                     Log << Level::Info << "Found image file: " << filename << extension << op::endl;
+                    BitmapID id = StringToBitmapID(filename);
+                    if (id != BitmapID::Unknown)
+                    {
+                        Log << Level::Info << "Loaded image ID: " << static_cast<int>(id) << op::endl;
 
-                    if (loadBitmap(filename, filepath))
-                    {
-                        count++;
-                        Log << Level::Info << "Successfully loaded image: " << filename << op::endl;
-                    }
-                    else
-                    {
-                        Log << Level::Error << "Failed to load image: " << filename << op::endl;
+                        if (loadBitmap(id, filepath))
+                        {
+                            count++;
+                            Log << Level::Info << "Successfully loaded image: " << filename << op::endl;
+                        }
+                        else
+                        {
+                            Log << Level::Error << "Failed to load image: " << filename << op::endl;
+                        }
                     }
                 }
             }
@@ -206,7 +345,7 @@ void Explorer::loadImagesFromDirectory(const std::string &directory)
     }
 }
 
-// ===== 音频相关函数实现 =====
+// ===== 多媒体相关函数实现 =====
 
 bool Explorer::initAudio()
 {
@@ -224,4 +363,71 @@ Audio* Explorer::getAudio()
         initAudio();
     }
     return audio.get();
+}
+
+VideoPlayer* Explorer::getVideo(VideoID id)
+{
+    if (videos.contains(id))
+    {
+        return videos[id].get();
+    }
+    return nullptr;
+}
+
+
+
+// 大小写不敏感的字符串比较辅助函数
+constexpr bool iequals(std::string_view a, std::string_view b) {
+    if (a.size() != b.size()) return false;
+    for (size_t i = 0; i < a.size(); ++i) {
+        if (std::tolower(a[i]) != std::tolower(b[i])) return false;
+    }
+    return true;
+}
+
+// 大小写不敏感的字符串转BitmapID函数
+constexpr BitmapID core::StringToBitmapID(std::string_view str) {
+    if (iequals(str, "Unknown")) return BitmapID::Unknown;
+    if (iequals(str, "Background")) return BitmapID::Background;
+    if (iequals(str, "Exit")) return BitmapID::Exit;
+    if (iequals(str, "NameBg")) return BitmapID::NameBg;
+    if (iequals(str, "Pink1Button")) return BitmapID::Pink1Button;
+    if (iequals(str, "Blue1Button")) return BitmapID::Blue1Button;
+    if (iequals(str, "Pink10Button")) return BitmapID::Pink10Button;
+    if (iequals(str, "Blue10Button")) return BitmapID::Blue10Button;
+    if (iequals(str, "SettingButton")) return BitmapID::SettingButton;
+    if (iequals(str, "MainScreenButton")) return BitmapID::MainScreenButton;
+    if (iequals(str, "PinkBall")) return BitmapID::PinkBall;
+    if (iequals(str, "BlueBall")) return BitmapID::BlueBall;
+    if (iequals(str, "Primogem")) return BitmapID::Primogem;
+    if (iequals(str, "MasterlessDust")) return BitmapID::MasterlessDust;
+    if (iequals(str, "MasterlessGlitter")) return BitmapID::MasterlessGlitter;
+    if (iequals(str, "Element_AnemoBg")) return BitmapID::Element_AnemoBg;
+    if (iequals(str, "Element_CryoBg")) return BitmapID::Element_CryoBg;
+    if (iequals(str, "Element_DendroBg")) return BitmapID::Element_DendroBg;
+    if (iequals(str, "Element_ElectroBg")) return BitmapID::Element_ElectroBg;
+    if (iequals(str, "Element_HydroBg")) return BitmapID::Element_HydroBg;
+    if (iequals(str, "Element_PyroBg")) return BitmapID::Element_PyroBg;
+    if (iequals(str, "Weapon_3starBg")) return BitmapID::Weapon_3starBg;
+    if (iequals(str, "Weapon_4starBg")) return BitmapID::Weapon_4starBg;
+    if (iequals(str, "Weapon_5starBg")) return BitmapID::Weapon_5starBg;
+    if (iequals(str, "Weapon_bowBg")) return BitmapID::Weapon_bowBg;
+    if (iequals(str, "Weapon_claymoreBg")) return BitmapID::Weapon_claymoreBg;
+    if (iequals(str, "Weapon_swordBg")) return BitmapID::Weapon_swordBg;
+    if (iequals(str, "Weapon_polearmBg")) return BitmapID::Weapon_polearmBg;
+    if (iequals(str, "Weapon_catalystBg")) return BitmapID::Weapon_catalystBg;
+    if (iequals(str, "Overlay0")) return BitmapID::Overlay0;
+    if (iequals(str, "Overlay1")) return BitmapID::Overlay1;
+    if (iequals(str, "Overlay2")) return BitmapID::Overlay2;
+    if (iequals(str, "Overlay3")) return BitmapID::Overlay3;
+    if (iequals(str, "Overlay4")) return BitmapID::Overlay4;
+    if (iequals(str, "Overlay5")) return BitmapID::Overlay5;
+    if (iequals(str, "Overlay6")) return BitmapID::Overlay6;
+    if (iequals(str, "Overlay7")) return BitmapID::Overlay7;
+    if (iequals(str, "Overlay8")) return BitmapID::Overlay8;
+    if (iequals(str, "Overlay9")) return BitmapID::Overlay9;
+    if (iequals(str, "Overlay10")) return BitmapID::Overlay10;
+    
+    // 如果没有匹配，返回默认值
+    return BitmapID::Unknown;
 }

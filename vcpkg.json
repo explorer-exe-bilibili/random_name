@@ -43,8 +43,14 @@
         "avcodec",
         "avformat",
         "swscale",
-        "swresample"
+        "swresample",
+        "opengl",
+        "dav1d",
+        "amf",
+        "nvcodec",
+        "qsv"
       ]
-    }
+    },
+    "tinyfiledialogs"
   ]
 }
