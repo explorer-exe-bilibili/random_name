@@ -25,7 +25,7 @@ VertexBuffer::VertexBuffer(const VertexBuffer& vb) : size(vb.size) {
         return;
     }
     // 保存当前绑定的缓冲区，以便后续恢复
-    GLint previousBuffer;
+    GLint previousBuffer=0;
     GLCall(glGetIntegerv(GL_ARRAY_BUFFER_BINDING, &previousBuffer));
     
     // 绑定源缓冲区并获取数据

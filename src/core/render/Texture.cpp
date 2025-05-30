@@ -90,7 +90,7 @@ void Texture::init() {
     // 解绑 VAO
     VertexArray::Unbind();
     Log<<Level::Info<<"Texture::init() Success"<<op::endl;
-    Log<<Level::Info<<"Texture::init() DefaultShaderProgram "<<unsigned int(*DefaultShaderProgram.get())<<op::endl;
+    Log<<Level::Info<<"Texture::init() DefaultShaderProgram "<<(unsigned int)(*DefaultShaderProgram.get())<<op::endl;
 }
 
 Texture::Texture(const unsigned char* data, int width, int height, bool isRGB)

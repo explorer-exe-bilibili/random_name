@@ -14,14 +14,15 @@ namespace screen{
 enum class ScreenID {
     MainMenu,
     Settings,
-    Name
+    Name,
+    Video
 };
 
 class Screen {
 protected:
-    std::string ID;
     std::vector<std::shared_ptr<core::Button>> buttons;
     core::Bitmap* background;
+    ScreenID ID;
     static bool useVideoBackground;
     static core::VideoPlayer* videoBackground;
     static bool inited;
@@ -29,7 +30,7 @@ protected:
     static std::shared_ptr<Screen> currentScreen;
     static std::map<ScreenID, std::shared_ptr<Screen>> screens;
 public:
-    Screen(const std::string& ID) : ID(ID) {}
+    Screen(ScreenID ID) : ID(ID) {}
     virtual ~Screen(){background=nullptr;};
     virtual void init();
     virtual bool Click(int x, int y);
@@ -38,7 +39,7 @@ public:
     virtual void enter(int param)=0;
     virtual void exit(){};
 
-    std::string getID() const { return ID; }
+    ScreenID getID() const { return ID; }
     static std::shared_ptr<Screen> getCurrentScreen() { return currentScreen; }
 
     // 屏幕管理系统功能

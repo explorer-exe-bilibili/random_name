@@ -2,9 +2,7 @@
 #include "core/log.h"
 
 #include <iostream>
-//#include <GL/glew.h>
 #include <glad/glad.h>
-#include "core/baseItem/Video/HWAccelMonitor.h"
 
 // 用于标记OpenGL上下文状态的全局变量
 static bool g_OpenGLContextValid = true;
@@ -52,22 +50,7 @@ bool GLLogCall(const char* function, const char* file, int line)
         }
 
         Log << Level::Error << "[OpenGL Error] (" << errorName << ": " << error << "): " 
-            << function << " " << file << ":" << line 
-            << (HWAccelMonitor::getInstance().isHardwareAccelEnabled() ? 
-               " [硬件加速已启用: " + HWAccelMonitor::getInstance().getHWAccelType() + "]" : 
-               " [软件渲染]") << op::endl;
-        std::cout << "[OpenGL Error] (" << errorName << ": " << error << "): " 
-            << function << " " << file << ":" << line 
-            << (HWAccelMonitor::getInstance().isHardwareAccelEnabled() ? 
-               " [硬件加速已启用: " + HWAccelMonitor::getInstance().getHWAccelType() + "]" : 
-               " [软件渲染]") << std::endl;
-        // 如果使用硬件加速，记录此错误
-        if (HWAccelMonitor::getInstance().isHardwareAccelEnabled()) {
-            HWAccelMonitor::getInstance().logHWError(
-                std::string("[OpenGL Error] (") + errorName + ": " + std::to_string(error) + 
-                "): " + function + " " + file + ":" + std::to_string(line));
-        }
-        
+            << function << " " << file << ":" << line << op::endl;
         return false;
     }
     return true;

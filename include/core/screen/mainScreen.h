@@ -8,7 +8,7 @@ class MainScreen : public Screen {
     std::vector<std::shared_ptr<core::Button>> overlays;
     
     public:
-        MainScreen() : Screen("Main") { Screen::init(); init(); }
+        MainScreen() : Screen(ScreenID::MainMenu) { Screen::init(); init(); }
         ~MainScreen();
         void init() override;
         bool Click(int x, int y) override;

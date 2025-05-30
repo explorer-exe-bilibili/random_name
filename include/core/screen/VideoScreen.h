@@ -10,11 +10,20 @@ namespace core
 
 namespace screen
 {
+enum class VideoID
+{
+    Unknown = -1,
+    Single3Star,
+    Single4Star,
+    Single5Star,
+    Group4Star,
+    Group5Star,
+};
 class VideoScreen : public Screen
 {
     core::VideoPlayer* videoPlayer=nullptr;
 public:
-    VideoScreen():Screen("Video"){};
+    VideoScreen():Screen(ScreenID::Video){};
     ~VideoScreen();
 
     void enter(int videoID) override;

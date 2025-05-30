@@ -10,7 +10,7 @@ class NameScreen : public Screen {
     std::shared_ptr<core::Font> NameFont;
     unsigned char alpha=0;
 public:
-    NameScreen(std::string name):Screen(name){init();}
+    NameScreen():Screen(ScreenID::Name){init();}
     void Draw() override;
     void init() override;
     void enter(int mode) override;

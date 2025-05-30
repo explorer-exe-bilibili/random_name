@@ -40,6 +40,7 @@ enum class BitmapID{
     Weapon_swordBg,
     Weapon_polearmBg,
     Weapon_catalystBg,
+    floatWindow,
     Overlay0,
     Overlay1,
     Overlay2,
@@ -57,7 +58,8 @@ enum class FontID{
     Default=0,
     Normal,
     Name,
-    Icon
+    Icon,
+    Unknown
 };
 enum class VideoID{
     Background=0,
@@ -65,7 +67,8 @@ enum class VideoID{
     Signal4star,
     Signal5star,
     Multi4star,
-    Multi5star
+    Multi5star,
+    Unknown
 };
 
 class Explorer {

@@ -48,7 +48,11 @@
         "dav1d",
         "amf",
         "nvcodec",
-        "qsv"
+        "qsv",
+        "fdk-aac",
+        "sdl2",
+        "soxr",
+        "opencl"
       ]
     },
     "tinyfiledialogs"

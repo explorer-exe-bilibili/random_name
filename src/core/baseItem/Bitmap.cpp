@@ -1,7 +1,7 @@
 #include "core/baseItem/Bitmap.h"
 
 #include "core/log.h"
-#include "core/baseItem/base.h"
+#include "core/baseItem/Base.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb_image.h>

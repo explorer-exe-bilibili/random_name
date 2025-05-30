@@ -1,7 +1,7 @@
 #pragma once
 
 #include "core/baseItem/Base.h"
-#include <glfw/glfw3.h>
+#include <GLFW/glfw3.h>
 #include "core/render/Shader.h"
 #include "core/render/VertexArray.h"
 #include "core/render/VertexBuffer.h"

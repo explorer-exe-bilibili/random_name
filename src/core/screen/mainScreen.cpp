@@ -4,7 +4,7 @@
 
 #include "core/log.h"
 #include "core/explorer.h"
-#include "core/config.h"
+#include "core/Config.h"
 
 using namespace screen;
 using namespace core;
@@ -83,7 +83,7 @@ MainScreen::~MainScreen() {
     // 清理视频播放器资源
     if (videoBackground) {
         try {
-            videoBackground->stop();
+            videoBackground->close();
             videoBackground = nullptr;
         } catch (const std::exception& e) {
             Log << Level::Error << "清理视频播放器时发生异常: " << e.what() << op::endl;

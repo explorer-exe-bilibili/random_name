@@ -12,7 +12,8 @@ enum class SettingButtonType{
     Switch,
     Textbox,
     ColorSelect,
-    PathSelect
+    PathSelect,
+    FileSelect
 };
 enum SettingButtonAction{
     None=0,
@@ -21,26 +22,47 @@ enum SettingButtonAction{
     ReloadVideo=1<<2,
     ReloadPhoto=1<<3,
     ResetWindowTitle=1<<4,
-    IsBitmap=1<<5,
-    IsVideo=1<<6,
-    IsNameFile=1<<7,
-    IsFile=1<<8,
-    IsDir=1<<9
+    CountBetween=1<<5
+};
+enum class FileType{
+    All=0,
+    Video,
+    Picture,
+    NameFile,
+    Audio,
+    Font,
+    Unknown
+};
+class sItem{
+public:
+    FileType fileType=FileType::All;
+    SettingButtonAction action=SettingButtonAction::None;
+    SettingButtonType type=SettingButtonType::Switch;
+    core::BitmapID bitmapID=core::BitmapID::Unknown;
+    core::FontID fontID=core::FontID::Unknown;
+    core::VideoID videoID=core::VideoID::Unknown;
+    core::Color color=core::Color(0,0,0,255);
+    std::string name;
+    std::string configName;
+    std::string fileChooseWindowName;
+    std::string bitmapName;
+    std::string audioID;
+    std::string outOfLimitOutPut;
+    int minCount=0;
+    int maxCount=0;
 };
 class SettingButton
 {
-    std::string name;
-    SettingButtonType type;
+    sItem item;
     core::Region TextRegion;
     core::Region ButtonRegion;
-    std::string ConfigName;
     std::shared_ptr<core::Button> button=nullptr;
     std::shared_ptr<core::Button> button2=nullptr;
     core::Font* font=nullptr;
+    int number=0;
     int page=-1;
-    int actions=0;
 public:
-    SettingButton(const std::string& name, SettingButtonType type, int number, int page);
+    SettingButton(sItem item,int number, int page);
     ~SettingButton() {}
 
     void Draw(int currentPage, unsigned char alpha = 255)const;
@@ -48,17 +70,20 @@ public:
     operator bool() const { return page>=0; }
 private:
     core::Color selectColor();
-    std::string selectPath(const std::vector<FileTypeFilter>& filter={{"所有文件","*.*"}});
+    std::string selectFile();
+    std::string selectPath();
     void openFile();
     void checkActions();
+    void updateConfig();
 };
 class SettingScreen : public Screen
 {
     std::vector<SettingButton> buttons;
     std::vector<std::string> titles;
     int currentPage=0;
+    void loadButtons();
 public:
-    SettingScreen() : Screen("Settings") {init();}
+    SettingScreen() : Screen(ScreenID::Settings) {init();}
     ~SettingScreen() {}
 
     void init() override;
