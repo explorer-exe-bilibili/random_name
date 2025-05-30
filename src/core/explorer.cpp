@@ -416,6 +416,7 @@ constexpr BitmapID core::StringToBitmapID(std::string_view str) {
     if (iequals(str, "Weapon_swordBg")) return BitmapID::Weapon_swordBg;
     if (iequals(str, "Weapon_polearmBg")) return BitmapID::Weapon_polearmBg;
     if (iequals(str, "Weapon_catalystBg")) return BitmapID::Weapon_catalystBg;
+    if (iequals(str, "SettingBg")) return BitmapID::SettingBg;
     if (iequals(str, "Overlay0")) return BitmapID::Overlay0;
     if (iequals(str, "Overlay1")) return BitmapID::Overlay1;
     if (iequals(str, "Overlay2")) return BitmapID::Overlay2;

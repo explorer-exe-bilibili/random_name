@@ -14,11 +14,8 @@ bool Screen::useVideoBackground = false;
 core::VideoPlayer* Screen::videoBackground = nullptr;
 
 void Screen::Draw() {
-    Bitmap* currentFrame=nullptr;
-    if(useVideoBackground){
-        currentFrame=videoBackground->getCurrentFrame().get();
-    }
-    else if(background)currentFrame=background;
+    std::shared_ptr<Bitmap> currentFrame;
+    if(useVideoBackground)currentFrame=videoBackground->getCurrentFrame();
     if(currentFrame){
         currentFrame->CreateTextureFromBuffer();
         currentFrame->Draw({0,0,1,1},1);

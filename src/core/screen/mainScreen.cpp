@@ -83,7 +83,7 @@ MainScreen::~MainScreen() {
     // 清理视频播放器资源
     if (videoBackground) {
         try {
-            videoBackground->close();
+            videoBackground->stop();
             videoBackground = nullptr;
         } catch (const std::exception& e) {
             Log << Level::Error << "清理视频播放器时发生异常: " << e.what() << op::endl;

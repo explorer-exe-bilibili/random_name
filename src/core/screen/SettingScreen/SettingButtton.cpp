@@ -66,6 +66,8 @@ SettingButton::SettingButton(sItem item_, int number, int page)
         button->SetFontID(FontID::Normal);
         button->SetRegion(ButtonRegion);
         button->SetEnableText(true);
+        button->SetFontScale(0.3);
+        button->SetBitmap(BitmapID::SettingButton);
         if(item.type==SettingButtonType::Switch){
             button->SetText(Config::getInstance()->getBool(item.configName) ? "开" : "关");
             button->SetClickFunc([this]{
@@ -101,6 +103,9 @@ SettingButton::SettingButton(sItem item_, int number, int page)
             button2->SetEnableBitmap(true);
             button2->SetEnableText(true);
             button2->SetEnableFill(false);
+            button2->SetFontID(FontID::Normal);
+            button2->SetFontScale(0.3);
+            button2->SetColor({0,0,0,255});
             button2->SetClickFunc([this]{
                 openFile();
             });
@@ -124,6 +129,9 @@ SettingButton::SettingButton(sItem item_, int number, int page)
             button2->SetEnableBitmap(true);
             button2->SetEnableText(true);
             button2->SetEnableFill(false);
+            button2->SetFontID(FontID::Normal);
+            button2->SetFontScale(0.3);
+            button2->SetColor({0,0,0,255});
             button2->SetClickFunc([this]{
                 openFile();
             });

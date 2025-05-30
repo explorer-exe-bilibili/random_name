@@ -1,5 +1,4 @@
 #include "core/baseItem/Video/VideoPlayer.h"
-#include "core/baseItem/Video/HWAccelMonitor.h"
 
 #include "core/log.h"
 #include "core/baseItem/Bitmap.h"
@@ -222,13 +221,6 @@ std::shared_ptr<Bitmap> VideoPlayer::getCurrentFrame() {
     
     // 直接从原始数据创建纹理，使用RGB格式避免RGB到RGBA的转换，大幅减少内存使用
     bitmap->CreateFromRGBData(frameData->data, frameData->width, frameData->height, true, true);
-    
-    // 更新性能监控数据
-    if (HWAccelMonitor::getInstance().isHardwareAccelEnabled()) {
-        // 如果启用了硬件加速但仍使用软件解码路径，可能是硬件渲染失败，记录下来
-        HWAccelMonitor::getInstance().logHWError("硬件加速已启用但使用了软件解码路径");
-    }
-    HWAccelMonitor::getInstance().updateHWFrameCount();
     
     // frameData 会在函数结束时自动释放
     return bitmap;
@@ -493,10 +485,6 @@ bool VideoPlayer::initHardwareAcceleration() {
                 Log << Level::Info << "成功初始化 " << (char*)av_hwdevice_get_type_name(type)
                     << " 硬件加速" << op::endl;
                 
-                // 通知硬件加速监控
-                HWAccelMonitor::getInstance().setHardwareAccelEnabled(true);
-                HWAccelMonitor::getInstance().setHWAccelType(av_hwdevice_get_type_name(type));
-                
                 return true;
             }
         }
@@ -681,9 +669,6 @@ void VideoPlayer::decodeThreadHW() {
                     }
                 }
                 lastFrameTime = av_gettime_relative();
-                
-                // 更新硬件加速性能监控
-                HWAccelMonitor::getInstance().updateHWFrameCount();
             }
         }
         

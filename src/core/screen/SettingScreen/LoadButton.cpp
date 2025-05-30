@@ -23,6 +23,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i["configName"] = OVERLAY1;
     i["fileChooseWindowName"] = "选择卡池1图片";
     i["fileType"] = FileType::Picture;
+    i["type"] = screen::SettingButtonType::FileSelect;
     i["number"] = 1;
     i["bitmapID"] = 0;
     p["item"].push_back(i); 
@@ -31,6 +32,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i["configName"] = OVERLAY2;
     i["fileChooseWindowName"] = "选择卡池2图片";
     i["fileType"] = FileType::Picture;
+    i["type"] = screen::SettingButtonType::FileSelect;
     i["number"] = 2;
     i["bitmapID"] = 1;
     p["item"].push_back(i);
@@ -39,6 +41,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i["configName"] = OVERLAY3;
     i["fileChooseWindowName"] = "选择卡池3图片";
     i["fileType"] = FileType::Picture;
+    i["type"] = screen::SettingButtonType::FileSelect;
     i["number"] = 3;
     i["bitmapID"] = 2;
     p["item"].push_back(i);
@@ -47,11 +50,12 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i["configName"] = OVERLAY4;
     i["fileChooseWindowName"] = "选择卡池4图片";
     i["fileType"] = FileType::Picture;
+    i["type"] = screen::SettingButtonType::FileSelect;
     i["number"] = 4;
     i["bitmapID"] = 3;
     p["item"].push_back(i);
     i.clear();
-    
+
     i["name"] = "图片移动的速度";
     i["configName"] = EXCHANGE_SPEED;
     i["type"] = screen::SettingButtonType::Textbox;
@@ -62,7 +66,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i["number"] = 11;
     p["item"].push_back(i);
     i.clear();
-    
+
     i["name"] = "默认卡池序号";
     i["configName"] = MODE;
     i["type"] = screen::SettingButtonType::Textbox;
@@ -84,6 +88,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i["configName"] = NAMES1;
     i["fileChooseWindowName"] = "选择卡池1名单";
     i["fileType"] = FileType::NameFile;
+    i["type"] = screen::SettingButtonType::FileSelect;
     i["number"] = 1;
     p["item"].push_back(i);
     i.clear();
@@ -91,6 +96,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i["configName"] = NAMES2;
     i["fileChooseWindowName"] = "选择卡池2名单";
     i["fileType"] = FileType::NameFile;
+    i["type"] = screen::SettingButtonType::FileSelect;
     i["number"] = 2;
     p["item"].push_back(i);
     i.clear();
@@ -98,6 +104,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i["configName"] = NAMES3;
     i["fileChooseWindowName"] = "选择卡池3名单";
     i["fileType"] = FileType::NameFile;
+    i["type"] = screen::SettingButtonType::FileSelect;
     i["number"] = 3;
     p["item"].push_back(i);
     i.clear();
@@ -105,6 +112,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i["configName"] = NAMES4;
     i["fileChooseWindowName"] = "选择卡池4名单";
     i["fileType"] = FileType::NameFile;
+    i["type"] = screen::SettingButtonType::FileSelect;
     i["number"] = 4;
     p["item"].push_back(i);
     i.clear();
@@ -146,6 +154,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i["configName"] = SIGNAL_3_STAR_VIDEO_PATH;
     i["fileChooseWindowName"] = "选择单发3星视频";
     i["fileType"] = FileType::Video;
+    i["type"] = screen::SettingButtonType::FileSelect;
     i["number"] = 1;
     p["item"].push_back(i);
     i.clear();
@@ -153,6 +162,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i["configName"] = SIGNAL_4_STAR_VIDEO_PATH;
     i["fileChooseWindowName"] = "选择单发4星视频";
     i["fileType"] = FileType::Video;
+    i["type"] = screen::SettingButtonType::FileSelect;
     i["number"] = 2;
     p["item"].push_back(i);
     i.clear();
@@ -160,6 +170,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i["configName"] = SIGNAL_5_STAR_VIDEO_PATH;
     i["fileChooseWindowName"] = "选择单发5星视频";
     i["fileType"] = FileType::Video;
+    i["type"] = screen::SettingButtonType::FileSelect;
     i["number"] = 3;
     p["item"].push_back(i);
     i.clear();
@@ -167,6 +178,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i["configName"] = GROUP_4_STAR_VIDEO_PATH;
     i["fileChooseWindowName"] = "选择十发4星视频";
     i["fileType"] = FileType::Video;
+    i["type"] = screen::SettingButtonType::FileSelect;
     i["number"] = 4;
     p["item"].push_back(i);
     i.clear();
@@ -174,6 +186,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i["configName"] = GROUP_5_STAR_VIDEO_PATH;
     i["fileChooseWindowName"] = "选择十发5星视频";
     i["fileType"] = FileType::Video;
+    i["type"] = screen::SettingButtonType::FileSelect;
     i["number"] = 5;
     p["item"].push_back(i);
     i.clear();
@@ -263,6 +276,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i["configName"] = FLOAT_WINDOW_IMG;
     i["fileChooseWindowName"] = "选择悬浮窗图片";
     i["fileType"] = FileType::Picture;
+    i["type"] = screen::SettingButtonType::FileSelect;
     i["actions"]= screen::SettingButtonAction::Restart;
     i["number"] = 11;
     i["bitmapID"] = BitmapID::floatWindow;
@@ -329,13 +343,11 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i["actions"] = screen::SettingButtonAction::Restart;
     p["item"].push_back(i);
     i.clear();
-    
-    i["name"] = "图片资源目录";
-    i["type"] = screen::SettingButtonType::Textbox;
-    i["number"] = 7;
+      i["name"] = "图片资源目录";
     i["configName"] = IMGS_PATH;
-    i["actions"] = screen::SettingButtonAction::Restart;
     i["type"] = screen::SettingButtonType::PathSelect;
+    i["actions"] = screen::SettingButtonAction::Restart;
+    i["number"] = 7;
     p["item"].push_back(i);
     i.clear();
     
@@ -350,7 +362,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p.clear();
     
     // 写入JSON文件
-    if (!Config::getInstance()->getBool(USE_JSON_SETTINGS, false)) {
+    if (Config::getInstance()->getBool(USE_JSON_SETTINGS, false)) {
         std::ofstream file(jsonpath);
         if (file.is_open()) {
             try {
@@ -373,69 +385,72 @@ static nlohmann::json RollBack(std::string jsonpath) {
 }
 
 void SettingScreen::loadButtons() {
-    buttons.clear();
+    s_buttons.clear();
     titles.clear();
     nlohmann::json jsonData;
     if(Config::getInstance()->getBool(USE_JSON_SETTINGS,0)){
-        std::ifstream file("settings.json");
+        std::ifstream file("files/settings.json");
         if (!file.is_open()) {
             Log << Level::Error << "无法打开设置文件" << op::endl;
-            return;
+            jsonData = RollBack("files/settings.json");
         }
         try {
             file >> jsonData;
         } catch (const nlohmann::json::parse_error& e) {
             Log << Level::Error << "JSON解析错误: " << e.what() << op::endl;
-            return;
+            jsonData = RollBack("files/settings.json");
         }
         file.close();
         if (jsonData.is_null()) {
             Log << Level::Error << "JSON数据为空" << op::endl;
-            return;
-        }
-        if (!jsonData.is_array()) {
-            Log << Level::Error << "JSON数据格式错误，应该是数组" << op::endl;
-            return;
+            jsonData = RollBack("files/settings.json");
+        }        if (!jsonData.contains("pages") || !jsonData["pages"].is_array()) {
+            Log << Level::Error << "JSON数据格式错误，应该包含pages数组" << op::endl;
+            jsonData = RollBack("files/settings.json");
         }
     }
-    else jsonData = RollBack("settings.json");
-    if (jsonData.is_null()) {
-        Log << Level::Error << "JSON数据为空" << op::endl;
+    else jsonData = RollBack("files/settings.json");
+    int page = 0;
+    try{
+        for (const auto& item : jsonData["pages"]) {
+            titles.push_back(item.value("title", "未知标题"));
+            for (const auto& button : item["item"]) {
+                sItem item;
+                item.name = button.value("name", "未知按钮");
+                item.configName = button.value("configName", "Unknown");
+                item.bitmapName = button.value("bitmapName", "");
+                item.type = button.value("type", SettingButtonType::Switch);
+                item.action = button.value("actions", SettingButtonAction::None);
+                if(item.type==SettingButtonType::FileSelect){
+                    item.fileType = button.value("fileType", FileType::All);
+                    item.fileChooseWindowName = button.value("fileChooseWindowName", "选择文件");
+                    if(item.fileType==FileType::Audio){
+                        item.audioID = button.value("audioID", "Unknown");
+                    }
+                    else if(item.fileType==FileType::Video){
+                        item.videoID = button.value("videoID", core::VideoID::Unknown);
+                    }
+                    else if(item.fileType==FileType::Picture){
+                        item.bitmapID = button.value("bitmapID", core::BitmapID::Unknown);
+                    }
+                    else if(item.fileType==FileType::Font){
+                        item.fontID = button.value("fontID", core::FontID::Unknown);
+                    }
+                }
+                else if(item.action&SettingButtonAction::CountBetween){
+                    item.minCount = button.value("minCount", 0);
+                    item.maxCount = button.value("maxCount", 0);
+                    item.outOfLimitOutPut = button.value("outOfLimitOutPut", "");
+                }
+                int number=button.value("number", 0);
+                s_buttons.emplace_back(item, number, page);
+            }
+            page++;
+        }
+    }
+    catch(std::exception& e){
+        Log << Level::Error << "加载设置按钮时出错: " << e.what() << op::endl;
         return;
     }
-    int page = 0;
-    for (const auto& item : jsonData) {
-        for (const auto& button : item["item"]) {
-            sItem item;
-            item.name = button.value("name", "未知按钮");
-            item.configName = button.value("configName", "Unknown");
-            item.bitmapName = button.value("bitmapName", "");
-            item.type = button.value("type", SettingButtonType::Switch);
-            item.action = button.value("actions", SettingButtonAction::None);
-            if(item.type==SettingButtonType::FileSelect){
-                item.fileType = button.value("fileType", FileType::All);
-                if(item.fileType==FileType::Audio){
-                    item.audioID = button.value("audioID", "Unknown");
-                }
-                else if(item.fileType==FileType::Video){
-                    item.videoID = button.value("videoID", core::VideoID::Unknown);
-                }
-                else if(item.fileType==FileType::Picture){
-                    item.bitmapID = button.value("bitmapID", core::BitmapID::Unknown);
-                }
-                else if(item.fileType==FileType::Font){
-                    item.fontID = button.value("fontID", core::FontID::Unknown);
-                }
-            }
-            else if(item.action&SettingButtonAction::CountBetween){
-                item.minCount = button.value("minCount", 0);
-                item.maxCount = button.value("maxCount", 0);
-                item.outOfLimitOutPut = button.value("outOfLimitOutPut", "");
-            }
-            int number=button.value("number", 0);
-            buttons.emplace_back(item, number, page);
-        }
-        titles.push_back(item.value("title", "未知标题"));
-        page++;
-    }
+    this->pages=page;
 }

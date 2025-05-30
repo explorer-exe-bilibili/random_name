@@ -78,10 +78,12 @@ private:
 };
 class SettingScreen : public Screen
 {
-    std::vector<SettingButton> buttons;
+    std::vector<SettingButton> s_buttons;
     std::vector<std::string> titles;
     int currentPage=0;
+    int pages=-1;
     void loadButtons();
+    void changePage(bool forward);
 public:
     SettingScreen() : Screen(ScreenID::Settings) {init();}
     ~SettingScreen() {}

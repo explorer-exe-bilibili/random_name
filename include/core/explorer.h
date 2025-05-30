@@ -40,6 +40,7 @@ enum class BitmapID{
     Weapon_swordBg,
     Weapon_polearmBg,
     Weapon_catalystBg,
+    SettingBg,
     floatWindow,
     Overlay0,
     Overlay1,
