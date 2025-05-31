@@ -1,6 +1,7 @@
 #pragma once 
 #include "base.h"
 #include "core/baseItem/Base.h"
+#include "core/log.h"
 
 namespace screen
 {
@@ -119,7 +120,7 @@ class SettingButton
     int page=-1;
 public:
     SettingButton(sItem item,int number, int page);
-    ~SettingButton() {Log << core::Level::Info << "SettingButton析构" << op::endl;}
+    ~SettingButton()=default;
 
     void Draw(int currentPage, unsigned char alpha = 255)const;
     bool Click(core::Point point);
@@ -134,12 +135,29 @@ private:
 };
 class SettingScreen : public Screen
 {
-    std::vector<SettingButton> s_buttons;
+    std::vector<std::shared_ptr<SettingButton>> s_buttons;
     std::vector<std::string> titles;
     int currentPage=0;
     int pages=-1;
+      // 页面切换动画相关
+    enum class TransitionType {
+        Fade,       // 淡入淡出
+        Slide       // 滑动
+    };
+    
+    bool isTransitioning = false;
+    int targetPage = 0;
+    std::chrono::steady_clock::time_point transitionStartTime;
+    float transitionDuration = 0.3f; // 动画持续时间（秒）
+    float currentPageAlpha = 1.0f;   // 当前页面的透明度
+    float targetPageAlpha = 0.0f;    // 目标页面的透明度
+    TransitionType transitionType = TransitionType::Fade;  // 动画类型
+    float slideOffset = 0.0f;        // 滑动偏移量
+    
     void loadButtons();
     void changePage(bool forward);
+    void updatePageTransition(); // 更新页面切换动画
+    float calculateTransitionAlpha(bool isCurrentPage); // 计算页面透明度
 public:
     SettingScreen() : Screen(ScreenID::Settings) {init();}
     ~SettingScreen() {}
@@ -148,5 +166,11 @@ public:
     void enter(int) override;
     void Draw() override;
     bool Click(int x, int y) override;
+      // 页面切换动画配置
+    void setTransitionDuration(float duration) { transitionDuration = duration; }
+    float getTransitionDuration() const { return transitionDuration; }
+    bool isPageTransitioning() const { return isTransitioning; }
+    void setTransitionType(TransitionType type) { transitionType = type; }
+    TransitionType getTransitionType() const { return transitionType; }
 };
 } // namespace screen

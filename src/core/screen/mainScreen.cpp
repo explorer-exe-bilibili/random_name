@@ -59,13 +59,14 @@ void MainScreen::init() {
     buttons[set]->SetText(SETICON);
     buttons[set]->SetFontID(FontID::Icon);
     buttons[set]->SetRegion({0.1,0.82,0.12,0.86});
-    buttons[set]->SetColor({211,188,142,255});
-    buttons[set]->SetClickFunc([this] {
+    buttons[set]->SetColor({211,188,142,255});    buttons[set]->SetClickFunc([this] {
         Log << Level::Info << "进入设置界面" << op::endl;
         if(screens[ScreenID::Settings] == nullptr) {
             RegisterScreen(ScreenID::Settings, std::make_shared<screen::SettingScreen>());
         }
-        Screen::SwitchToScreen(ScreenID::Settings);
+        Screen::SwitchToScreenWithFade(ScreenID::Settings, 0.5f, []() {
+            Log << Level::Info << "屏幕切换到设置界面完成" << op::endl;
+        });
     });
     buttons[set]->SetEnable(true);
     buttons[set]->SetFontScale(0.35f);

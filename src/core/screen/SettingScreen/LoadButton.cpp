@@ -443,11 +443,12 @@ void SettingScreen::loadButtons() {
                     item.outOfLimitOutPut = button.value("outOfLimitOutPut", "");
                 }
                 int number=button.value("number", 0);
-                s_buttons.emplace_back(item, number, page);
+                s_buttons.push_back(std::make_shared<SettingButton>(item, number, page));
             }
             page++;
         }
     }
+
     catch(std::exception& e){
         Log << Level::Error << "加载设置按钮时出错: " << e.what() << op::endl;
         return;

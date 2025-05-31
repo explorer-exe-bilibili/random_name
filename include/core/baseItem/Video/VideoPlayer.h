@@ -5,16 +5,17 @@
 #include <mutex>
 #include <thread>
 #include <atomic>
+#include <queue>
 
 struct AVFormatContext;
 struct AVCodecContext;
 struct AVFrame;
 struct AVPacket;
 struct SwsContext;
+struct SwrContext;
 struct AVStream;
 struct FrameData;
 struct AVBufferRef;
-enum AVHWDeviceType;
 
 namespace core
 {
@@ -22,9 +23,10 @@ class Bitmap;
 class VideoPlayer
 {   
     void decodeThread();
-    void decodeThreadHW(); // 添加硬件加速解码线程
-    bool initHardwareAcceleration(); // 添加硬件加速初始化函数
+    void decodeThreadAudio();
+    void decodeThreadVideo();
     std::shared_ptr<FrameData> convertFrameToFrameData(AVFrame* frame);
+    void applyVolume(uint8_t* audioBuffer, int bufferSize, int channels);
     void cleanup();
 public:
     VideoPlayer();
@@ -36,10 +38,8 @@ public:
     void stop();
     void pause();
     void resume();
-    void update();
     bool isPlaying() const{return playing && !shouldExit;}
     bool isPaused() const{return !playing && !shouldExit;}
-    bool isUsingHardwareAcceleration() const{return useHardwareAccel;}
     std::shared_ptr<core::Bitmap> getCurrentFrame();
 
     void setLoop(bool loop);
@@ -48,28 +48,30 @@ private:
     std::atomic<bool> loop{true};
     std::atomic<bool> playing{true};
     std::atomic<bool> shouldExit{true};
-    std::atomic<bool> useHardwareAccel{true};
+    std::thread decoderThreadAudio;
+    std::thread decoderThreadVideo;
     std::thread decoderThread;
     std::mutex frameMutex;
     std::shared_ptr<FrameData> currentFrameData = nullptr;
-    std::atomic<bool> frameReady{false};
-
+    std::atomic<bool> frameReady{false};    // SDL音频相关
+    uint32_t audioDeviceID = 0;
+    std::atomic<float> volume{1.0f}; // 音量范围：0.0-1.0
+    
     // FFmpeg 相关
     AVFormatContext* formatContext=nullptr;
     AVCodecContext* codecContext=nullptr;
+    AVCodecContext* audioCodecContext=nullptr;
     AVStream* videoStream=nullptr;
     SwsContext* swsContext=nullptr;
+    SwrContext* swrContext=nullptr;
     AVFrame* frame=nullptr;
     AVFrame* rgbFrame=nullptr;
-    AVPacket* packet=nullptr;
-
-    // 硬件加速相关
-    AVBufferRef* hwDeviceCtx = nullptr;
-    AVFrame* hwFrame = nullptr;
-    AVHWDeviceType hwType;
+    std::queue<AVPacket*> packetVideoQueue;
+    std::queue<AVPacket*> packetAudioQueue;
 
     // 视频文件相关
     int videoStreamIndex = -1;
+    int audioStreamIndex = -1;
     double frameDelay = 0.0;
     int width=0;
     int height=0;

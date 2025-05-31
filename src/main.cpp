@@ -103,9 +103,9 @@ int init(){
     Log<<Level::Info<<"Init explorer"<<op::endl;
     core::Explorer::getInstance();
 
-    core::Explorer::getInstance()->getAudio()->loadMusic("bgm", "C:\\Users\\j1387\\source\\repos\\explorer-exe-bilibili\\random_name\\files\\music\\backsound.mp3");
-    core::Explorer::getInstance()->getAudio()->playMusic("bgm", -1);
-    core::Explorer::getInstance()->getAudio()->setMusicVolume(50);
+    // core::Explorer::getInstance()->getAudio()->loadMusic("bgm", "C:\\Users\\j1387\\source\\repos\\explorer-exe-bilibili\\random_name\\files\\music\\backsound.mp3");
+    // core::Explorer::getInstance()->getAudio()->playMusic("bgm", -1);
+    // core::Explorer::getInstance()->getAudio()->setMusicVolume(50);
     screen::Screen::RegisterScreen(screen::ScreenID::MainMenu, std::make_shared<screen::MainScreen>());
     screen::Screen::SwitchToScreen(screen::ScreenID::MainMenu);
     screen::Screen::RegisterScreen(screen::ScreenID::Settings, std::make_shared<screen::SettingScreen>());

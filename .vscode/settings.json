@@ -7,11 +7,6 @@
     "terminal.integrated.env.windows": {
         "PYTHONIOENCODING": "utf-8"
     },
-    
-    // C++ 相关设置
-    "C_Cpp.default.intelliSenseMode": "windows-msvc-x64",
-    "C_Cpp.loggingLevel": "Information",
-    
     // CMake 和 vcpkg 设置
     "cmake.configureArgs": [
         "-DVCPKG_APPLOCAL_DEPS=ON",
