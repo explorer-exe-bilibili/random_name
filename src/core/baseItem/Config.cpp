@@ -113,10 +113,39 @@ void Config::add(const std::string& name, bool value) {
 
 // 获取配置值
 std::string Config::get(const std::string& name, const std::string& defaultValue) {
-    auto it = configItems.find(name);
-    if (it != configItems.end()) {
-        return it->second;
+    // 添加输入参数验证
+    if (name.empty()) {
+        Log << Level::Warn << "Config::get() called with empty name" << op::endl;
+        return defaultValue;
     }
+    
+    try {
+        // 验证name字符串的内存有效性
+        const char* nameData = name.c_str();
+        if (nameData == nullptr) {
+            Log << Level::Error << "Config::get() - name string data is null" << op::endl;
+            return defaultValue;
+        }
+        
+        auto it = configItems.find(name);
+        if (it != configItems.end()) {
+            // 验证返回值的有效性
+            if (it->second.length() > 10000) { // 合理的长度检查
+                Log << Level::Warn << "Config::get() - value too long for key: " << name << op::endl;
+                return defaultValue;
+            }
+            return it->second;
+        }
+    }
+    catch (const std::exception& e) {
+        Log << Level::Error << "Config::get() - Exception: " << e.what() << " for key: " << name << op::endl;
+        return defaultValue;
+    }
+    catch (...) {
+        Log << Level::Error << "Config::get() - Unknown exception for key: " << name << op::endl;
+        return defaultValue;
+    }
+    
     return defaultValue;
 }
 

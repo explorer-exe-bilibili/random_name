@@ -2,6 +2,8 @@
 #include <SDL.h>
 #ifdef _WIN32
 #include <windows.h>
+#include <io.h>
+#include <fcntl.h>
 #endif
 
 using namespace core;
@@ -10,6 +12,11 @@ using namespace std;
 // 当使用SDL2时，main函数需要被重新定义为SDL_main
 int main(int argc, char* argv[])
 {
+#ifdef _WIN32
+    // 设置控制台编码为 UTF-8
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+#endif
 #ifdef DEBUG_MODE
     Log<<Level::Info<<"运行在Debug模式"<<op::endl;
 #else

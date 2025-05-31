@@ -1,4 +1,18 @@
 {
+    // 编码设置
+    "files.encoding": "utf8",
+    "files.autoGuessEncoding": true,
+    
+    // 终端编码设置
+    "terminal.integrated.env.windows": {
+        "PYTHONIOENCODING": "utf-8"
+    },
+    
+    // C++ 相关设置
+    "C_Cpp.default.intelliSenseMode": "windows-msvc-x64",
+    "C_Cpp.loggingLevel": "Information",
+    
+    // CMake 和 vcpkg 设置
     "cmake.configureArgs": [
         "-DVCPKG_APPLOCAL_DEPS=ON",
         "-DX_VCPKG_APPLOCAL_DEPS_INSTALL=ON"
@@ -122,16 +136,11 @@
     "files.exclude": {
         "**/old_src/**": false  // 设为false以便在文件浏览器中仍然可见，但不进行处理
     },
-    // 禁用old_src文件夹中的文件的智能功能
-    "editor.semanticHighlighting.enabled": {
-        "**/old_src/**": false
-    },
-    // 禁用old_src文件夹中的格式化
+    "editor.semanticHighlighting.enabled":"configuredByTheme",
     "[cpp]": {
         "editor.formatOnSave": false,
         "editor.defaultFormatter": "ms-vscode.cpptools"
     },
-    "C_Cpp.formatting": {
-        "**/old_src/**": "disabled"
-    }
+    "C_Cpp.formatting": "vcFormat",
+    "C_Cpp.errorSquiggles": "disabled"
 }

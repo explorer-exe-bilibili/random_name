@@ -452,5 +452,5 @@ void SettingScreen::loadButtons() {
         Log << Level::Error << "加载设置按钮时出错: " << e.what() << op::endl;
         return;
     }
-    this->pages=page;
+    this->pages=page-1;
 }

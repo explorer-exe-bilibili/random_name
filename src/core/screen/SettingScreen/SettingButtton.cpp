@@ -1,4 +1,5 @@
 #include "core/screen/SettingScreen.h"
+#include "core/log.h"
 
 #include "core/Config.h"
 #include <tinyfiledialogs/tinyfiledialogs.h>
@@ -41,6 +42,27 @@ static std::vector<FileTypeFilter> getFiltersForType(FileType fileType) {
 
 SettingButton::SettingButton(sItem item_, int number, int page)
     : item(item_), number(number), page(page) {
+        
+        // 验证传入的item参数
+        if (item.configName.empty()) {
+            Log << Level::Warn << "SettingButton constructor - configName is empty for item: " << item.name << op::endl;
+            item.configName = "unknown_config"; // 设置默认值
+        }
+        
+        // 验证configName字符串的完整性
+        try {
+            size_t len = item.configName.length();
+            const char* data = item.configName.c_str();
+            if (data == nullptr || len == 0 || len > 1000) {
+                Log << Level::Error << "SettingButton constructor - invalid configName for item: " << item.name << op::endl;
+                item.configName = "unknown_config"; // 设置安全的默认值
+            }
+        }
+        catch (...) {
+            Log << Level::Error << "SettingButton constructor - exception accessing configName for item: " << item.name << op::endl;
+            item.configName = "unknown_config"; // 设置安全的默认值
+        }
+        
         font=core::Explorer::getInstance()->getFont(FontID::Normal);
         Region Button2Region;
         if(number<=10){
@@ -69,12 +91,32 @@ SettingButton::SettingButton(sItem item_, int number, int page)
         button->SetFontScale(0.3);
         button->SetBitmap(BitmapID::SettingButton);
         if(item.type==SettingButtonType::Switch){
-            button->SetText(Config::getInstance()->getBool(item.configName) ? "开" : "关");
-            button->SetClickFunc([this]{
-                Config::getInstance()->toggleBool(item.configName);
-                button->SetText(Config::getInstance()->getBool(item.configName) ? "开" : "关");
-                checkActions();
-            });
+            // 安全地访问configName
+            std::string safeConfigName;
+            try {
+                if (!item.configName.empty()) {
+                    safeConfigName = item.configName;
+                } else {
+                    Log << Level::Warn << "Switch button has empty configName" << op::endl;
+                    safeConfigName = "unknown_config";
+                }
+                
+                button->SetText(Config::getInstance()->getBool(safeConfigName) ? "开" : "关");
+                button->SetClickFunc([this, safeConfigName]{
+                    try {
+                        Config::getInstance()->toggleBool(safeConfigName);
+                        button->SetText(Config::getInstance()->getBool(safeConfigName) ? "开" : "关");
+                        checkActions();
+                    }
+                    catch (const std::exception& e) {
+                        Log << Level::Error << "Error in switch button click: " << e.what() << op::endl;
+                    }
+                });
+            }
+            catch (const std::exception& e) {
+                Log << Level::Error << "Error setting up switch button: " << e.what() << op::endl;
+                button->SetText("错误");
+            }
         }
         else if(item.type==SettingButtonType::Textbox){
             button->SetText("文本框");
@@ -85,14 +127,25 @@ SettingButton::SettingButton(sItem item_, int number, int page)
         }
         else if(item.type==SettingButtonType::ColorSelect){
             button->SetText("选择颜色");
-            button->SetClickFunc([this]{
-                // 处理颜色选择的点击事件
-                Color color = selectColor();
-                Config::getInstance()->set(item.configName,color);
-                button->SetFillColor(Config::getInstance()->getInt(item.configName));
-                button->SetEnableBitmap(false);
-                button->SetEnableFill(true);
-                checkActions();
+            button->SetClickFunc([this, configName = item.configName]{
+                // 安全地访问configName
+                try {
+                    if (configName.empty()) {
+                        Log << Level::Error << "ColorSelect button has empty configName" << op::endl;
+                        return;
+                    }
+                    
+                    // 处理颜色选择的点击事件
+                    Color color = selectColor();
+                    Config::getInstance()->set(configName,color);
+                    button->SetFillColor(Config::getInstance()->getInt(configName));
+                    button->SetEnableBitmap(false);
+                    button->SetEnableFill(true);
+                    checkActions();
+                }
+                catch (const std::exception& e) {
+                    Log << Level::Error << "Error in color select button: " << e.what() << op::endl;
+                }
             });
         }
         else if(item.type==SettingButtonType::FileSelect){
@@ -110,15 +163,27 @@ SettingButton::SettingButton(sItem item_, int number, int page)
                 openFile();
             });
             button->SetText("选择");
-            button->SetClickFunc([this]{
-                std::string path=selectFile();
-                Config::getInstance()->set(item.configName,path);
-                button->SetText(Config::getInstance()->get(item.configName));
-                button->SetText(path);
-                button->SetEnableFill(false);
-                button->SetEnableBitmap(true);
-                button->SetBitmap(BitmapID::SettingButton);
-                checkActions();
+            button->SetClickFunc([this, configName = item.configName]{
+                try {
+                    if (configName.empty()) {
+                        Log << Level::Error << "FileSelect button has empty configName" << op::endl;
+                        return;
+                    }
+                    
+                    std::string path=selectFile();
+                    if (!path.empty()) {
+                        Config::getInstance()->set(configName,path);
+                        button->SetText(Config::getInstance()->get(configName));
+                        button->SetText(path);
+                        button->SetEnableFill(false);
+                        button->SetEnableBitmap(true);
+                        button->SetBitmap(BitmapID::SettingButton);
+                        checkActions();
+                    }
+                }
+                catch (const std::exception& e) {
+                    Log << Level::Error << "Error in file select button: " << e.what() << op::endl;
+                }
             });
         }
         else if(item.type==SettingButtonType::PathSelect){
@@ -136,15 +201,27 @@ SettingButton::SettingButton(sItem item_, int number, int page)
                 openFile();
             });
             button->SetText("选择");
-            button->SetClickFunc([this]{
-                std::string path=selectPath();
-                Config::getInstance()->set(item.configName,path);
-                button->SetText(Config::getInstance()->get(item.configName));
-                button->SetText(path);
-                button->SetEnableFill(false);
-                button->SetEnableBitmap(true);
-                button->SetBitmap(BitmapID::SettingButton);
-                checkActions();
+            button->SetClickFunc([this, configName = item.configName]{
+                try {
+                    if (configName.empty()) {
+                        Log << Level::Error << "PathSelect button has empty configName" << op::endl;
+                        return;
+                    }
+                    
+                    std::string path=selectPath();
+                    if (!path.empty()) {
+                        Config::getInstance()->set(configName,path);
+                        button->SetText(Config::getInstance()->get(configName));
+                        button->SetText(path);
+                        button->SetEnableFill(false);
+                        button->SetEnableBitmap(true);
+                        button->SetBitmap(BitmapID::SettingButton);
+                        checkActions();
+                    }
+                }
+                catch (const std::exception& e) {
+                    Log << Level::Error << "Error in path select button: " << e.what() << op::endl;
+                }
             });
         }
 }
@@ -203,7 +280,47 @@ core::Color SettingButton::selectColor(){
 }
 
 std::string SettingButton::selectFile() {
-    std::string defaultPath = Config::getInstance()->get(item.configName);
+    // 检查 configName 是否有效
+    if (item.configName.empty()) {
+        Log << Level::Error << "SettingButton::selectFile() - configName is empty" << op::endl;
+        return "";
+    }
+    
+    // 验证字符串内存是否有效
+    try {
+        // 尝试访问字符串的基本属性以检测内存损坏
+        size_t len = item.configName.length();
+        if (len == 0 || len > 1000) { // 合理的长度检查
+            Log << Level::Error << "SettingButton::selectFile() - configName has invalid length: " << len << op::endl;
+            return "";
+        }
+        
+        // 检查字符串是否包含有效字符
+        const char* data = item.configName.c_str();
+        if (data == nullptr) {
+            Log << Level::Error << "SettingButton::selectFile() - configName data is null" << op::endl;
+            return "";
+        }
+        
+        Log << Level::Debug << "SettingButton::selectFile() - configName: " << item.configName << op::endl;
+    }
+    catch (const std::exception& e) {
+        Log << Level::Error << "SettingButton::selectFile() - Exception while accessing configName: " << e.what() << op::endl;
+        return "";
+    }
+    catch (...) {
+        Log << Level::Error << "SettingButton::selectFile() - Unknown exception while accessing configName" << op::endl;
+        return "";
+    }
+    
+    std::string defaultPath;
+    try {
+        defaultPath = Config::getInstance()->get(item.configName);
+    }
+    catch (const std::exception& e) {
+        Log << Level::Error << "SettingButton::selectFile() - Exception in Config::get(): " << e.what() << op::endl;
+        return "";
+    }
     
     // 准备过滤器数组
     std::vector<const char*> filterPatterns;

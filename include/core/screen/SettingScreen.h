@@ -35,6 +35,62 @@ enum class FileType{
 };
 class sItem{
 public:
+    // 默认构造函数，确保字符串成员正确初始化
+    sItem() : fileType(FileType::All), 
+              action(SettingButtonAction::None), 
+              type(SettingButtonType::Switch),
+              bitmapID(core::BitmapID::Unknown),
+              fontID(core::FontID::Unknown),
+              videoID(core::VideoID::Unknown),
+              color(core::Color(0,0,0,255)),
+              name(""),
+              configName(""),
+              fileChooseWindowName(""),
+              bitmapName(""),
+              audioID(""),
+              outOfLimitOutPut(""),
+              minCount(0),
+              maxCount(0) {}
+    
+    // 拷贝构造函数，确保字符串正确复制
+    sItem(const sItem& other) : fileType(other.fileType),
+                                action(other.action),
+                                type(other.type),
+                                bitmapID(other.bitmapID),
+                                fontID(other.fontID),
+                                videoID(other.videoID),
+                                color(other.color),
+                                name(other.name),
+                                configName(other.configName),
+                                fileChooseWindowName(other.fileChooseWindowName),
+                                bitmapName(other.bitmapName),
+                                audioID(other.audioID),
+                                outOfLimitOutPut(other.outOfLimitOutPut),
+                                minCount(other.minCount),
+                                maxCount(other.maxCount) {}
+    
+    // 赋值操作符
+    sItem& operator=(const sItem& other) {
+        if (this != &other) {
+            fileType = other.fileType;
+            action = other.action;
+            type = other.type;
+            bitmapID = other.bitmapID;
+            fontID = other.fontID;
+            videoID = other.videoID;
+            color = other.color;
+            name = other.name;
+            configName = other.configName;
+            fileChooseWindowName = other.fileChooseWindowName;
+            bitmapName = other.bitmapName;
+            audioID = other.audioID;
+            outOfLimitOutPut = other.outOfLimitOutPut;
+            minCount = other.minCount;
+            maxCount = other.maxCount;
+        }
+        return *this;
+    }
+    
     FileType fileType=FileType::All;
     SettingButtonAction action=SettingButtonAction::None;
     SettingButtonType type=SettingButtonType::Switch;
@@ -63,7 +119,7 @@ class SettingButton
     int page=-1;
 public:
     SettingButton(sItem item,int number, int page);
-    ~SettingButton() {}
+    ~SettingButton() {Log << core::Level::Info << "SettingButton析构" << op::endl;}
 
     void Draw(int currentPage, unsigned char alpha = 255)const;
     bool Click(core::Point point);
