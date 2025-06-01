@@ -21,6 +21,17 @@ VideoPlayer::VideoPlayer() : playing(false), loop(false), shouldExit(false) {
         SDL_InitSubSystem(SDL_INIT_AUDIO);
         Log << Level::Info << "SDL音频子系统初始化成功" << op::endl;
     }
+    
+    // 初始化音视频同步相关参数
+    audioClock = 0.0;
+    videoClock = 0.0;
+    frameTimer = 0.0;
+    videoCurrentPts = 0.0;
+    videoPtsDrift = 0.0;
+    lastFramePts = 0.0;
+    frameLastDelay = 0.0;
+    startTime = std::chrono::steady_clock::now();
+    
     Log << Level::Info << "视频播放器创建成功" << op::endl;
 }
 
@@ -201,7 +212,19 @@ void VideoPlayer::play() {
         Log << Level::Error << "视频文件未加载或无效" << op::endl;
         playing = false;
         return;
-    }    shouldExit = false;
+    }
+    
+    // 重置同步时钟
+    startTime = std::chrono::steady_clock::now();
+    audioClock = 0.0;
+    videoClock = 0.0;
+    frameTimer = 0.0;
+    videoCurrentPts = 0.0;
+    videoPtsDrift = 0.0;
+    lastFramePts = 0.0;
+    frameLastDelay = 0.0;
+    
+    shouldExit = false;
     if(audioStreamIndex>=0 && audioDeviceID > 0){
         // 确保音频设备已打开并开始播放
         SDL_PauseAudioDevice(audioDeviceID, 0); // 启动音频设备
@@ -694,4 +717,60 @@ void VideoPlayer::cleanup() {
     std::lock_guard<std::mutex> lock(frameMutex);
     currentFrameData = nullptr;
     frameReady = false;
+}
+
+// ================= 音视频同步功能实现 =================
+
+double VideoPlayer::convertPtsToSeconds(int64_t pts, AVRational timeBase) {
+    if (pts == AV_NOPTS_VALUE) {
+        return 0.0;
+    }
+    return av_q2d(timeBase) * pts;
+}
+
+double VideoPlayer::getAudioClock() {
+    std::lock_guard<std::mutex> lock(clockMutex);
+    return audioClock.load();
+}
+
+double VideoPlayer::getVideoClock() {
+    std::lock_guard<std::mutex> lock(clockMutex);
+    return videoClock.load();
+}
+
+double VideoPlayer::synchronizeVideo(AVFrame* srcFrame, double pts) {
+    double frame_delay;
+    
+    if (pts != 0.0) {
+        // 如果有有效的PTS，使用它
+        videoClock = pts;
+    } else {
+        // 否则，根据上一帧计算
+        pts = videoClock.load();
+    }
+    
+    // 更新视频时钟下一帧时间
+    frame_delay = av_q2d(formatContext->streams[videoStreamIndex]->time_base);
+    // 如果是重复帧，调整延迟
+    frame_delay += srcFrame->repeat_pict * (frame_delay * 0.5);
+    videoClock = pts + frame_delay;
+    
+    return pts;
+}
+
+void VideoPlayer::updateAudioClock(double audioTimestamp, int audioDataSize) {
+    std::lock_guard<std::mutex> lock(clockMutex);
+    
+    // 计算音频时长
+    double audioDuration = 0.0;
+    if (audioCodecContext && audioDataSize > 0) {
+        // 计算当前音频块的播放时长
+        int bytesPerSample = av_get_bytes_per_sample(AV_SAMPLE_FMT_S16);
+        int totalBytes = audioDataSize;
+        int samplesCount = totalBytes / (bytesPerSample * audioCodecContext->ch_layout.nb_channels);
+        audioDuration = (double)samplesCount / audioCodecContext->sample_rate;
+    }
+    
+    // 更新音频时钟
+    audioClock = audioTimestamp + audioDuration;
 }

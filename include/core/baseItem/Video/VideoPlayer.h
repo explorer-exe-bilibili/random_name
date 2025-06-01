@@ -16,6 +16,7 @@ struct SwrContext;
 struct AVStream;
 struct FrameData;
 struct AVBufferRef;
+struct AVRational;
 
 namespace core
 {
@@ -28,6 +29,14 @@ class VideoPlayer
     std::shared_ptr<FrameData> convertFrameToFrameData(AVFrame* frame);
     void applyVolume(uint8_t* audioBuffer, int bufferSize, int channels);
     void cleanup();
+    
+    // 音视频同步辅助函数
+    double getAudioClock();
+    double getVideoClock();
+    double synchronizeVideo(AVFrame* srcFrame, double pts);
+    double convertPtsToSeconds(int64_t pts, AVRational timeBase);
+    void updateAudioClock(double audioTimestamp, int audioDataSize);
+    
 public:
     VideoPlayer();
     ~VideoPlayer();
@@ -57,6 +66,17 @@ private:
     uint32_t audioDeviceID = 0;
     std::atomic<float> volume{1.0f}; // 音量范围：0.0-1.0
     
+    // 音视频同步相关
+    std::atomic<double> audioClock{0.0};     // 音频时钟
+    std::atomic<double> videoClock{0.0};     // 视频时钟
+    std::atomic<double> frameTimer{0.0};     // 帧计时器
+    std::atomic<double> videoCurrentPts{0.0}; // 当前视频PTS
+    std::atomic<double> videoPtsDrift{0.0};   // 视频PTS漂移
+    std::atomic<double> lastFramePts{0.0};    // 上一帧PTS
+    std::atomic<double> frameLastDelay{0.0};  // 上一帧延迟
+    std::mutex clockMutex;                    // 时钟同步锁
+    std::chrono::steady_clock::time_point startTime;  // 播放开始时间
+    
     // FFmpeg 相关
     AVFormatContext* formatContext=nullptr;
     AVCodecContext* codecContext=nullptr;
@@ -77,6 +97,9 @@ private:
     int height=0;
     double fps=0.0;
     std::string videoPath;
+
+    // 音视频同步相关
+    double syncThreshold{0.01}; // 同步阈值，单位：秒
 };
 } // namespace core
 
