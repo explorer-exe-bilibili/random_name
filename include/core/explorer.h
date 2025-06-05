@@ -71,6 +71,17 @@ enum class VideoID{
     Multi5star,
     Unknown
 };
+enum class AudioID{
+    bgm=0,
+    click,
+    enter,
+    star3,
+    star4,
+    star5,
+    starfull,
+    Unknown
+};
+constexpr const char* AudioIDToString(AudioID id);
 
 class Explorer {
     std::shared_ptr<GLFWwindow> window;
@@ -112,6 +123,9 @@ public:
     bool loadBitmap(BitmapID id, const std::string& path);
     int loadFont(FontID id, const std::string& path, bool needPreLoad = true);
     bool loadVideo(VideoID id, const std::string& path);
+    bool loadAudio(AudioID id, const std::string& path);
+
+    bool playAudio(AudioID id, int loop = 0);
 
     void loadImagesFromDirectory(const std::string& directory);
     void listLoadedBitmaps();

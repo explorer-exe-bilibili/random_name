@@ -1,5 +1,12 @@
 #include "mainloop.h"
 #include <SDL.h>
+#include <stdio.h>
+#include "core/screen/mainScreen.h"
+#include "core/screen/SettingScreen.h"
+#include "core/screen/VideoScreen.h"
+#include "core/screen/nameScreen.h"
+
+
 #ifdef _WIN32
 #include <windows.h>
 #include <io.h>
@@ -19,6 +26,7 @@ int main(int argc, char* argv[])
 #endif
 #ifdef DEBUG_MODE
     Log<<Level::Info<<"运行在Debug模式"<<op::endl;
+    // _wchdir(L"..");
 #else
     Log<<Level::Info<<"运行在非Debug模式"<<op::endl;
 #endif
@@ -103,12 +111,13 @@ int init(){
     Log<<Level::Info<<"Init explorer"<<op::endl;
     core::Explorer::getInstance();
 
-    // core::Explorer::getInstance()->getAudio()->loadMusic("bgm", "C:\\Users\\j1387\\source\\repos\\explorer-exe-bilibili\\random_name\\files\\music\\backsound.mp3");
-    // core::Explorer::getInstance()->getAudio()->playMusic("bgm", -1);
-    // core::Explorer::getInstance()->getAudio()->setMusicVolume(50);
+    core::Explorer::getInstance()->playAudio(AudioID::bgm, -1);
+    core::Explorer::getInstance()->getAudio()->setMusicVolume(50);
     screen::Screen::RegisterScreen(screen::ScreenID::MainMenu, std::make_shared<screen::MainScreen>());
     screen::Screen::SwitchToScreen(screen::ScreenID::MainMenu);
     screen::Screen::RegisterScreen(screen::ScreenID::Settings, std::make_shared<screen::SettingScreen>());
+    screen::Screen::RegisterScreen(screen::ScreenID::Video,std::make_shared<screen::VideoScreen>());
+    screen::Screen::RegisterScreen(screen::ScreenID::Name,std::make_shared<screen::NameScreen>());
     Log<<Level::Info<<"starting render loop"<<op::endl<<op::flush;
     return 0;
 }

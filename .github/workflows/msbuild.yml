@@ -1,45 +1,160 @@
-name: Build
+name: Build and Package
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main, master, openGL ]
+    tags: [ 'v*' ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main, master, openGL ]
   workflow_dispatch:
+
+env:
+  VCPKG_BINARY_SOURCES: "clear;x-gha,readwrite"
 
 jobs:
   build:
     strategy:
       fail-fast: false
       matrix:
-        os: [windows-latest, ubuntu-latest]
         include:
           - os: windows-latest
             triplet: x64-windows
+            arch: x64
+            cmake_preset: ninja-multi-vcpkg
+            build_preset: ninja-multi-vcpkg-release
+          - os: windows-latest
+            triplet: x86-windows
+            arch: x86
+            cmake_preset: ninja-multi-vcpkg
+            build_preset: ninja-multi-vcpkg-release
+          - os: windows-latest
+            triplet: arm64-windows
+            arch: ARM64
+            cmake_preset: ninja-multi-vcpkg
+            build_preset: ninja-multi-vcpkg-release
           - os: ubuntu-latest
             triplet: x64-linux
+            arch: x64
+            cmake_preset: ninja-multi-vcpkg
+            build_preset: ninja-multi-vcpkg-release
 
     runs-on: ${{ matrix.os }}
     
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout
+      uses: actions/checkout@v4
       with:
         submodules: true
+
+    - name: Export GitHub Actions cache environment variables
+      uses: actions/github-script@v7
+      with:
+        script: |
+          core.exportVariable('ACTIONS_CACHE_URL', process.env.ACTIONS_CACHE_URL || '');
+          core.exportVariable('ACTIONS_RUNTIME_TOKEN', process.env.ACTIONS_RUNTIME_TOKEN || '');
 
     - name: Install Linux Dependencies
       if: matrix.os == 'ubuntu-latest'
       run: |
         sudo apt-get update
-        sudo apt-get install -y libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev
+        sudo apt-get install -y \
+          libx11-dev libxrandr-dev libxinerama-dev libxcursor-dev libxi-dev \
+          libasound2-dev libpulse-dev libaudio-dev libsamplerate0-dev \
+          libsndio-dev libwayland-dev libxkbcommon-dev libdrm-dev libxss-dev
 
     - name: Setup vcpkg
       uses: lukka/run-vcpkg@v11
       with:
-        vcpkgGitCommitId: '2023.10.19'
+        vcpkgGitCommitId: 'f26ec398c25c4980f33a50391f00a75f7ad62ef7'
 
-    - name: Configure and Build
+    - name: Configure CMake
       uses: lukka/run-cmake@v10
       with:
-        configurePreset: 'ninja-multi-vcpkg'
-        buildPreset: 'ninja-multi-vcpkg-release'
+        configurePreset: ${{ matrix.cmake_preset }}
         configurePresetAdditionalArgs: "['-DVCPKG_TARGET_TRIPLET=${{ matrix.triplet }}']"
+
+    - name: Build
+      uses: lukka/run-cmake@v10
+      with:
+        buildPreset: ${{ matrix.build_preset }}
+
+    - name: Create Release Directory Structure
+      shell: bash
+      run: |
+        mkdir -p release/${{ matrix.arch }}
+        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          cp -r build/bin/Release/* release/${{ matrix.arch }}/
+          cp -r files release/${{ matrix.arch }}/
+          if [[ -f "OIP-C.ico" ]]; then
+            cp OIP-C.ico release/${{ matrix.arch }}/
+          fi
+        else
+          cp -r build/bin/* release/${{ matrix.arch }}/
+          cp -r files release/${{ matrix.arch }}/
+        fi
+
+    - name: Create Windows Installer (Windows only)
+      if: matrix.os == 'windows-latest'
+      shell: pwsh
+      run: |
+        # 安装 Inno Setup
+        choco install innosetup -y
+        
+        # 更新安装脚本中的路径
+        $issFile = "installer/${{ matrix.arch }}.iss"
+        if (Test-Path $issFile) {
+          $content = Get-Content $issFile -Raw
+          $content = $content -replace 'D:\\Users\\explorer\\Source\\Repos\\random_name', "${{ github.workspace }}"
+          $content = $content -replace 'D:\\Users\\explorer\\source\\repos\\random_name\\release', "${{ github.workspace }}\\release"
+          Set-Content $issFile $content
+          
+          # 编译安装程序
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" $issFile
+        }
+
+    - name: Create Archive
+      shell: bash
+      run: |
+        cd release
+        if [[ "${{ matrix.os }}" == "windows-latest" ]]; then
+          7z a -tzip "random_name_${{ matrix.arch }}_windows.zip" ${{ matrix.arch }}/*
+        else
+          tar -czf "random_name_${{ matrix.arch }}_linux.tar.gz" ${{ matrix.arch }}/*
+        fi
+
+    - name: Upload Build Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: random-name-${{ matrix.arch }}-${{ matrix.os }}
+        path: |
+          release/*.zip
+          release/*.tar.gz
+          release/${{ matrix.arch }}/*.exe
+        retention-days: 30
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Download All Artifacts
+      uses: actions/download-artifact@v4
+      with:
+        path: artifacts
+
+    - name: Create Release
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          artifacts/**/*.zip
+          artifacts/**/*.tar.gz
+          artifacts/**/*.exe
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

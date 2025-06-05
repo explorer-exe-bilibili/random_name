@@ -59,7 +59,9 @@ int mainloop() {
         // 输出FPS日志
         std::stringstream ss;
         ss << std::fixed << std::setprecision(1) << currentFPS;
-        Log << Level::Debug << "FPS: " << ss.str() << op::endl;    }
+        Log << Level::Debug << "FPS: " << ss.str() << op::endl;
+        Log<<Level::Info<<"Current screen :"<<(int)screen::Screen::getCurrentScreen()->getID()<<op::endl;
+    }
 
     // 绘制场景
     // 使用屏幕管理系统的当前屏幕

@@ -46,6 +46,8 @@
 #define VIDEO_BACKGROUND_PATH "video_background_path"
 #define DEFAULT_FONT_PATH "default_font_path"
 #define ICON_FONT_PATH "icon_font_path"
+#define NAME_FONT_PATH "name_font_path"
+#define TEXT_FONT_PATH "text_font_path"
 #define VIDEO_BACKGROUND_PATH "video_background_path"
 #define SIGNAL_3_STAR_VIDEO_PATH "signal_3_star_video_path"
 #define SIGNAL_4_STAR_VIDEO_PATH "signal_4_star_video_path"
@@ -60,3 +62,4 @@
 #define DEBUG "debug"
 #define SHOW_FPS "show_fps"
 #define USE_JSON_SETTINGS "use_json_settings"
+#define VOLUME "volume"

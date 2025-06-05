@@ -49,6 +49,7 @@ public:
     void resume();
     bool isPlaying() const{return playing && !shouldExit;}
     bool isPaused() const{return !playing && !shouldExit;}
+    bool isCompleted() const{return isFinished.load();}
     std::shared_ptr<core::Bitmap> getCurrentFrame();
 
     void setLoop(bool loop);
@@ -57,6 +58,10 @@ private:
     std::atomic<bool> loop{true};
     std::atomic<bool> playing{true};
     std::atomic<bool> shouldExit{true};
+    std::atomic<bool> isFinished{false}; // 是否已完成播放
+    std::atomic<bool> reachedEOF{false}; // 是否已读取完所有数据包
+    std::atomic<bool> videoDecodeFinished{false}; // 视频解码是否完成
+    std::atomic<bool> audioDecodeFinished{false}; // 音频解码是否完成
     std::thread decoderThreadAudio;
     std::thread decoderThreadVideo;
     std::thread decoderThread;

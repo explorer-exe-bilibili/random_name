@@ -30,48 +30,6 @@ Explorer::~Explorer()
     audio.reset();
 }
 
-int Explorer::init()
-{
-    Log << Level::Info << "Explorer initialization started" << op::endl;
-
-    // 初始化音频系统 - 注意：SDL_Init应该先于其他SDL组件调用
-    if (!initAudio())
-    {
-        Log << Level::Warn << "音频系统初始化失败，但将继续执行" << op::endl;
-    }
-
-    loadImagesFromDirectory(Config::getInstance()->getPath(IMGS_PATH));
-
-    // 列出所有加载成功的图像
-    Log << Level::Info << "Listing all loaded images after initialization:" << op::endl;
-    listLoadedBitmaps();
-    // 尝试加载默认字体
-    try
-    {
-        loadFont(FontID::Default, Config::getInstance()->getPath(DEFAULT_FONT_PATH), false);
-        loadFont(FontID::Icon, Config::getInstance()->getPath(ICON_FONT_PATH), false);
-    }
-    catch (const std::exception &e)
-    {
-        Log << Level::Error << "Failed to load font: " << e.what() << op::endl;
-    }
-
-    // 尝试加载背景视频
-    if (Config::getInstance()->getBool(USE_VIDEO_BACKGROUND))
-    {
-        videos[VideoID::Background] = std::make_shared<VideoPlayer>();
-        videos[VideoID::Background]->setLoop(true);
-        if (!videos[VideoID::Background]->load(Config::getInstance()->getPath(VIDEO_BACKGROUND_PATH)))
-        {
-            Log << Level::Error << "Failed to load background video" << op::endl;
-        }
-        else videos[VideoID::Background]->play();
-    }
-
-    Log << Level::Info << "Explorer initialization finished" << op::endl;
-    return 0;
-}
-
 bool Explorer::loadBitmap(const std::string &name, const std::string &path)
 {
     Log << Level::Info << "Loading bitmap: " << name << " from path: " << path << op::endl;
@@ -269,6 +227,23 @@ bool Explorer::loadVideo(VideoID id, const std::string &path)
     }
 }
 
+bool Explorer::loadAudio(AudioID id, const std::string &path)
+{
+    Log << Level::Info << "Loading audio from path: " << path << op::endl;
+    return getAudio()->loadMusic(AudioIDToString(id),path);
+}
+
+bool Explorer::playAudio(AudioID id, int loop)
+{
+    Log << Level::Info << "Playing audio: " << AudioIDToString(id) << " with loop count: " << loop << op::endl;
+    if (getAudio()->isMusicPlaying())
+    {
+        Log << Level::Warn << "Audio is already playing, stopping current audio first." << op::endl;
+        getAudio()->stopMusic();
+    }
+    return getAudio()->playMusic(AudioIDToString(id), loop);
+}
+
 void Explorer::loadImagesFromDirectory(const std::string &directory)
 {
     Log << Level::Info << "Loading images from directory: " << directory << op::endl;
@@ -417,6 +392,7 @@ constexpr BitmapID core::StringToBitmapID(std::string_view str) {
     if (iequals(str, "Weapon_polearmBg")) return BitmapID::Weapon_polearmBg;
     if (iequals(str, "Weapon_catalystBg")) return BitmapID::Weapon_catalystBg;
     if (iequals(str, "SettingBg")) return BitmapID::SettingBg;
+    if (iequals(str,"floatWindow")) return BitmapID::floatWindow;
     if (iequals(str, "Overlay0")) return BitmapID::Overlay0;
     if (iequals(str, "Overlay1")) return BitmapID::Overlay1;
     if (iequals(str, "Overlay2")) return BitmapID::Overlay2;
@@ -431,4 +407,16 @@ constexpr BitmapID core::StringToBitmapID(std::string_view str) {
     
     // 如果没有匹配，返回默认值
     return BitmapID::Unknown;
+}
+
+constexpr const char* core::AudioIDToString(AudioID id) {
+    switch (id) {
+        case AudioID::bgm: return "bgm";
+        case AudioID::click: return "click";
+        case AudioID::star3: return "star3";
+        case AudioID::star4: return "star4";
+        case AudioID::star5: return "star5";
+        case AudioID::starfull: return "starfull";
+        default: return "Unknown";
+    }
 }

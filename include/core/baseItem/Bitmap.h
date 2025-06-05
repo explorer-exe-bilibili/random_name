@@ -1,7 +1,7 @@
 #pragma once
 
 #include "../render/Texture.h"
-#include "base.h"
+#include "Base.h"
 
 
 namespace core

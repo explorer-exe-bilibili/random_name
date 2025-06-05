@@ -10,12 +10,13 @@ using namespace screen;
 using namespace core;
 
 void SettingScreen::init() {
+    Screen::init();
     background=core::Explorer::getInstance()->getBitmap(BitmapID::SettingBg);
-    buttons.clear();
     std::shared_ptr<Button> next=std::make_shared<Button>(Button());
     std::shared_ptr<Button> last=std::make_shared<Button>(Button());
+    std::shared_ptr<Button> back=std::make_shared<Button>(Button());
     next->SetFontID(FontID::Icon);
-    next->SetRegion({0.93,0.9,0.96,0.93});
+    next->SetRegion({0.94,0.905,0.97,0.935});
     next->SetColor(Color(0xFFB266));
     next->SetClickFunc([this]{
         changePage(true);
@@ -24,22 +25,21 @@ void SettingScreen::init() {
     next->SetFontScale(0.25);
     next->SetText(NEXT);
     last->SetFontID(FontID::Icon);
-    last->SetRegion({0.9,0.9,0.93,0.93});
+    last->SetRegion({0.89,0.905,0.92,0.935});
     last->SetColor(Color(0xFFB266));
     last->SetClickFunc([this]{
         changePage(false);
-    });    last->SetEnableBitmap(false);
+    });
+    last->SetEnableBitmap(false);
     last->SetFontScale(0.25);
     last->SetText(LAST);
-    std::shared_ptr<Button> back=std::make_shared<Button>(Button());
     back->SetBitmap(BitmapID::Exit);
-    back->SetClickFunc([]{SwitchToScreenWithFade(ScreenID::MainMenu);});
-    back->SetRegion({0.9,0.05,0.95,0.1});
+    back->SetClickFunc([]{Screen::SwitchToScreenWithFade(ScreenID::MainMenu);});
+    back->SetRegion({0.9,0.03,0.95,-1});
     back->SetEnableText(false);
     back->SetEnableBitmap(true);
     back->SetEnableFill(false);
     back->SetText("返回");
-    
     buttons.push_back(next);
     buttons.push_back(last);
     buttons.push_back(back);
@@ -66,7 +66,7 @@ void SettingScreen::Draw() {
     updatePageTransition();
     
     if(background){
-        background->Draw({0, 0, 1, 1}, 0.75);
+        background->Draw({0, 0, 1, 1}, 0.75f * alpha);
     }
 
     for (const auto& button : buttons) {
@@ -138,7 +138,7 @@ void SettingScreen::enter(int) {
 bool SettingScreen::Click(int x, int y) {
     if(Screen::Click(x, y))return true;
     for(auto& button : s_buttons) if(button)
-        if(button->Click(Point(x, y,false)))return true;
+        if(button->Click(Point(x, y,false),currentPage))return true;
     for(auto& b:buttons)if(b)
         if(b->OnClick(Point(x,y,false)))return true;
     return false;

@@ -69,6 +69,8 @@ void SetConfigItems(){
     config->setifno(GROUP_5_STAR_VIDEO_PATH,"files/video/group-5star.webm");
     config->setifno(DEFAULT_FONT_PATH,"files/fonts/spare.ttf");
     config->setifno(ICON_FONT_PATH,"files/fonts/icon.ttf");
+    config->setifno(NAME_FONT_PATH,"files/fonts/QS.ttf");
+    config->setifno(TEXT_FONT_PATH,"files/fonts/text.ttf");
     config->setifno(CLICK_MUSIC_PATH, "files/music/click.mp3");
     config->setifno(ENTER_MUSIC_PATH,"files/music/enter.mp3");
     config->setifno(BACKGROUND_MUSIC_PATH,"files/music/bgm.mp3");
@@ -76,6 +78,7 @@ void SetConfigItems(){
     config->setifno(DEBUG, 0);
     config->setifno(SHOW_FPS,0);
     config->setifno(USE_JSON_SETTINGS, 0);
+    config->setifno(VOLUME, 50);
     
     core::Debugging=config->getBool(DEBUG);
 

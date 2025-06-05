@@ -20,6 +20,7 @@ public:
     void Draw(unsigned char alpha=255);
     bool OnClick(Point point);
     void MoveTo(const Region& region, const bool enableFluent=false, const float speed=50.0f, std::function<void()> onComplete=nullptr);
+    void FadeOut(float duration, unsigned char startAlpha=255, unsigned char endAlpha=0, std::function<void()> onComplete=nullptr);
     void SetClickFunc(std::function<void()> func) {this->ClickFunc = func;}
 
 
@@ -34,6 +35,7 @@ public:
     void SetRegion(const Region& region) {this->region = region;}
     void SetFontID(FontID id);
     void SetFont(Font* font) {this->font = font;}
+    void SetTextCenterd(bool isCentered){this->isCentered = isCentered;}
     void SetColor(const Color& color) {this->color = color;}
     void SetFillColor(const Color& color) {this->fillColor = color;}
     void SetFontScale(float scale) { this->fontScale = scale; }
@@ -50,16 +52,23 @@ protected:
     bool enable=true;
     bool enableBitmap=true;
     bool enableFill=false;
+    bool isCentered=true; // 是否居中显示文本
     std::string text="";
     Bitmap* bitmap;
     std::function<void()> ClickFunc;
     FontID fontid=FontID::Default;
     float fontSize=0;
     float fontScale=1.0f;
-    Font* font;
+    Font* font;    
     // 线程安全相关成员
     std::mutex animMutex;                   // 线程同步互斥锁
     std::atomic<bool> animationRunning{false}; // 标记动画是否在运行
     std::atomic<bool> stopRequested{false}; // 请求停止标志
+    
+    // 淡出动画相关成员
+    std::atomic<bool> fadeAnimationRunning{false}; // 标记淡出动画是否在运行
+    std::atomic<bool> fadeStopRequested{false}; // 请求停止淡出动画标志
+    std::atomic<unsigned char> currentFadeAlpha{255}; // 当前淡出透明度值
+    mutable std::mutex fadeMutex;           // 淡出动画线程同步互斥锁
 };
 }

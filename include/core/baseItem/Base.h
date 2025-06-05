@@ -43,6 +43,7 @@ namespace core
     namespace color{extern Color white, black, red, green, blue;}
 
     class Region {
+    protected:
         float x,xend;
         float y,yend;
         bool screenRatio=true;
@@ -55,7 +56,9 @@ namespace core
         float getx() const { return screenRatio ? x * WindowInfo.width : x; }
         float gety() const { return screenRatio ? y * WindowInfo.height : y; }
         float getxend() const { return screenRatio ? xend * WindowInfo.width : xend; }
-        float getyend() const { return screenRatio ? yend * WindowInfo.height : yend; }
+        float getyend() const;
+        float getWidth() const {return getxend()-getx();}
+        float getHeight() const {return getyend()-gety();}
         bool getRatio() const { return screenRatio; }
         
         void setx(float x) { this->x = x; }
@@ -64,8 +67,7 @@ namespace core
         void setyend(float yend) { this->yend = yend; }
         void setRatio(bool Ratio) { this->screenRatio = Ratio; }
 
-        operator glm::vec4() const { if(!screenRatio)return glm::vec4(x, y, xend, yend);
-             else return glm::vec4(x*WindowInfo.width, y*WindowInfo.height, xend*WindowInfo.width, yend*WindowInfo.height);}
+        operator glm::vec4() const { return glm::vec4(getx(), gety(), getxend(), getyend()); }
     };
 
     class Point {
@@ -114,5 +116,7 @@ namespace core
 
     std::string wstring2string(const std::wstring& wstr);
     std::wstring string2wstring(const std::string& str);
+    size_t utf8_length(const std::string& str);
+    void quit();
     extern bool Debugging;
 }

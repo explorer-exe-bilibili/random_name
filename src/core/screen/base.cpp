@@ -11,7 +11,9 @@ std::shared_ptr<Screen> Screen::currentScreen = nullptr;
 ScreenID Screen::currentScreenID = ScreenID::MainMenu;
 std::map<ScreenID, std::shared_ptr<Screen>> Screen::screens;
 bool Screen::useVideoBackground = false;
+bool Screen::OffVideo = false;
 core::VideoPlayer* Screen::videoBackground = nullptr;
+std::vector<NameEntry> Screen::nameItems;
 
 // 淡入淡出相关静态成员初始化
 TransitionState Screen::transitionState = TransitionState::Stable;
@@ -20,11 +22,11 @@ float Screen::transitionDuration = 0.5f;
 std::shared_ptr<Screen> Screen::nextScreen = nullptr;
 std::function<void()> Screen::transitionCompleteCallback = nullptr;
 std::mutex Screen::transitionMutex;
-
+static int param = 0;
 void Screen::Draw() {
     // 更新过渡状态
-    updateTransition();
-    
+    updateTransition(param);
+
     // 获取当前alpha值
     float alpha = getCurrentAlpha();
     
@@ -48,6 +50,7 @@ void Screen::init() {
     static bool inited = false;
     if (inited) return;
     inited = true;
+    OffVideo=Config::getInstance()->getBool(OFF_VIDEO);
     useVideoBackground = Config::getInstance()->getBool(USE_VIDEO_BACKGROUND);
     if (useVideoBackground) {
         videoBackground = Explorer::getInstance()->getVideo(VideoID::Background);
@@ -74,11 +77,13 @@ void Screen::RegisterScreen(ScreenID id, std::shared_ptr<Screen> screen) {
     }
 }
 
-bool Screen::SwitchToScreen(ScreenID id) {
+bool Screen::SwitchToScreen(ScreenID id,int param) {
     currentScreenID = id;
     if (screens.contains(id)) {
+        if(currentScreen)
+            currentScreen->exit();
         currentScreen = screens[id];
-        currentScreen->enter(0);
+        currentScreen->enter(param);
         return true;
     }
     return false;
@@ -104,7 +109,7 @@ float Screen::getCurrentAlpha() {
     return 1.0f;
 }
 
-void Screen::updateTransition() {
+void Screen::updateTransition(int param) {
     std::lock_guard<std::mutex> lock(transitionMutex);
     
     if (transitionState == TransitionState::Stable) {
@@ -122,7 +127,7 @@ void Screen::updateTransition() {
             if (nextScreen) {
                 currentScreen = nextScreen;
                 currentScreenID = nextScreen->getID();
-                currentScreen->enter(0);
+                currentScreen->enter(param);
                 
                 // 开始淡入
                 transitionState = TransitionState::FadeIn;
@@ -137,15 +142,14 @@ void Screen::updateTransition() {
             if (transitionCompleteCallback) {
                 auto callback = transitionCompleteCallback;
                 transitionCompleteCallback = nullptr;
-                return;
+                callback();
             }
         }
     }
 }
 
-bool Screen::SwitchToScreenWithFade(ScreenID id, float fadeTime, std::function<void()> onComplete) {
+bool Screen::SwitchToScreenWithFade(ScreenID id,int param_, float fadeTime, std::function<void()> onComplete) {
     std::lock_guard<std::mutex> lock(transitionMutex);
-    
     // 检查目标屏幕是否存在
     if (!screens.contains(id)) {
         Log << Level::Error << "Screen with ID " << static_cast<int>(id) << " not found." << op::endl;
@@ -165,7 +169,8 @@ bool Screen::SwitchToScreenWithFade(ScreenID id, float fadeTime, std::function<v
         }
         return true;
     }
-    
+
+    param = param_;
     // 设置过渡参数
     transitionDuration = fadeTime;
     nextScreen = screens[id];
@@ -179,4 +184,11 @@ bool Screen::SwitchToScreenWithFade(ScreenID id, float fadeTime, std::function<v
         << " to screen " << static_cast<int>(id) << " (duration: " << fadeTime << "s)" << op::endl;
     
     return true;
+}
+
+void Screen::setUseVideoBackground(bool use) {
+        useVideoBackground = use;
+        if (use && videoBackground == nullptr) {
+            videoBackground = core::Explorer::getInstance()->getVideo(core::VideoID::Background);
+        }
 }

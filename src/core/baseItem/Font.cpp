@@ -134,11 +134,6 @@ void Font::RenderText(const std::string& text,float x, float y,float scale, cons
 void Font::RenderText(const std::wstring& text, float x, float y_origin, float scale, const glm::vec4& color) {
 	scale = CalculateDynamicScale(scale);
 	float y=WindowInfo.height-y_origin-fontSize*scale;
-	if(this==nullptr){
-		Log<<"Font is nullptr"<<op::endl;
-		spare_font->RenderText(text, x, y_origin, scale, color);
-		return;
-	}
 	//检查是否包含未加载的字符
 	for (auto c = text.begin(); c != text.end(); ++c) {
 		if (!Characters.contains(*c))
@@ -204,11 +199,6 @@ void Font::RenderTextBetween(const std::string& text, Region region, float scale
 }
 
 void Font::RenderTextBetween(const std::wstring& text, Region region, float scale_, const glm::vec4& color) {
-	if (this == nullptr) {
-		Log << "Font is nullptr" << op::endl;
-		spare_font->RenderTextBetween(text, region, scale_, color);
-		return;
-	}
 	float scale = CalculateDynamicScale(scale_);
 	//计算可用的区域宽度
 	float availableWidth = region.getxend() - region.getx();
@@ -258,14 +248,47 @@ void Font::RenderTextBetween(const std::wstring& text, Region region, float scal
 	RenderText(displayText, x, y, scale_, color);
 }
 
+void Font::RenderTextCentered(const std::string& text, Region region, float scale, const glm::vec4& color) {
+	std::wstring wtext = string2wstring(text);
+	RenderTextCentered(wtext, region, scale, color);
+}
+
+void Font::RenderTextCentered(const std::wstring& text, Region region, float scale_, const glm::vec4& color) {
+	float scale = CalculateDynamicScale(scale_);
+	
+	// 计算可用的区域宽度和高度
+	float availableWidth = region.getxend() - region.getx();
+	float availableHeight = region.getyend() - region.gety();
+
+	if (availableWidth <= 0 || availableHeight <= 0 || text.empty()) {
+		return; // 没有可用空间或文本为空，直接返回
+	}
+
+	// 加载所有未加载的字符
+	for (auto c = text.begin(); c != text.end(); ++c) {
+		if (!Characters.contains(*c)) {
+			LoadCharacter(*c);
+		}
+	}
+
+	// 测量完整文本的宽度
+	float textWidth = 0.0f;
+	for (auto c = text.begin(); c != text.end(); ++c) {
+		Character ch = Characters[*c];
+		textWidth += (ch.Advance >> 6) * scale;
+	}
+	
+	// 计算起始位置（水平和垂直居中）
+	float x = region.getx() + (availableWidth - textWidth) / 2.0f;
+	float y = region.gety() + (availableHeight - fontSize * scale) / 2.0f;
+
+	// 渲染完整文本（不截断）
+	RenderText(text, x, y, scale_, color);
+}
+
 void Font::RenderChar(wchar_t text, float x, float y_origin, float scale, const glm::vec4& color) {
 	scale = CalculateDynamicScale(scale);
 	float y = WindowInfo.height - y_origin - fontSize * scale;
-	if (this == nullptr) {
-		Log << "Font is nullptr" << op::endl;
-		spare_font->RenderChar(text, x, y, scale, color);
-		return;
-	}
 	//检查是否包含未加载的字符
 	if (!Characters.contains(text))
 	{
@@ -318,6 +341,96 @@ void Font::RenderChar(wchar_t text, float x, float y_origin, float scale, const 
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void Font::RenderCharFitRegion(wchar_t text, float x, float y, float xend, float yend, const glm::vec4& color) {
+	// 检查区域有效性
+	if (xend <= x || yend <= y) {
+		return; // 无效区域，直接返回
+	}
+
+	// 检查是否包含未加载的字符
+	if (!Characters.contains(text)) {
+		LoadCharacter(text);
+	}
+
+	Character ch = Characters[text];
+	
+	// 计算可用区域的宽度和高度
+	float availableWidth = xend - x;
+	float availableHeight = yend - y;
+	
+	// 计算字符的实际尺寸（不含缩放）
+	float charWidth = static_cast<float>(ch.Size.x);
+	float charHeight = static_cast<float>(ch.Size.y);
+	
+	// 如果字符尺寸为0，则无法渲染
+	if (charWidth <= 0 || charHeight <= 0) {
+		return;
+	}
+	
+	// 计算缩放因子，确保字符能完全填充区域
+	float scaleX = availableWidth / charWidth;
+	float scaleY = availableHeight / charHeight;
+	
+	// 使用较小的缩放因子以确保字符不会超出区域
+	float scale = std::min(scaleX, scaleY);
+	
+	// 计算居中位置
+	float scaledWidth = charWidth * scale;
+	float scaledHeight = charHeight * scale;
+	float centerX = x + (availableWidth - scaledWidth) / 2.0f;
+	float centerY = y + (availableHeight - scaledHeight) / 2.0f;
+	
+	// 转换坐标系（OpenGL坐标系转换）
+	float render_y = WindowInfo.height - centerY - scaledHeight;
+	
+	// 设置正交投影矩阵
+	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(WindowInfo.width), 0.0f, static_cast<float>(WindowInfo.height));
+	
+	// 设置着色器
+	shader.use();
+	shader.setMat4("projection", projection);
+	shader.setVec3("textColor", color);
+	shader.setFloat("alphaMultiplier", color.a);
+	
+	// 启用混合以处理文本的透明度
+	GLCall(glEnable(GL_BLEND));
+	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
+	GLCall(glActiveTexture(GL_TEXTURE0));
+	VAO.Bind();
+
+	// 计算字符渲染位置
+	float xpos = centerX + ch.Bearing.x * scale;
+	float ypos = render_y - (ch.Size.y - ch.Bearing.y) * scale;
+
+	float w = ch.Size.x * scale;
+	float h = ch.Size.y * scale;
+
+	// 更新 VBO
+	float vertices[6][4] = {
+		{ xpos,     ypos + h,   0.0f, 0.0f },
+		{ xpos,     ypos,       0.0f, 1.0f },
+		{ xpos + w, ypos,       1.0f, 1.0f },
+
+		{ xpos,     ypos + h,   0.0f, 0.0f },
+		{ xpos + w, ypos,       1.0f, 1.0f },
+		{ xpos + w, ypos + h,   1.0f, 0.0f }
+	};
+
+	// 绑定纹理
+	GLCall(glBindTexture(GL_TEXTURE_2D, ch.TextureID));
+
+	// 更新顶点缓冲
+	VBO.Bind();
+	VBO.BufferSubData(0, sizeof(vertices), vertices);
+	VertexBuffer::Unbind();
+
+	// 绘制
+	GLCall(glDrawArrays(GL_TRIANGLES, 0, 6));
+
+	VertexArray::Unbind();
+	glBindTexture(GL_TEXTURE_2D, 0);
+}
+
 bool Font::operator==(const Font& b) const
 {
 	if (face == b.face)return true;
@@ -326,11 +439,6 @@ bool Font::operator==(const Font& b) const
 static std::mutex mx;
 bool Font::LoadCharacter(wchar_t c)
 {
-	if (this == nullptr) {
-		Log << "Font is nullptr" << op::endl;
-		spare_font->LoadCharacter(c);
-		return false;
-	}
 	//检查是否已经加载过
 	if (Characters.contains(c))return true;
 	mx.lock();
@@ -391,10 +499,6 @@ float Font::GetFontSize() const
 
 Character Font::GetCharacter(wchar_t c)
 {
-	if (this == nullptr) {
-		Log << "Font is nullptr" << op::endl;
-		return spare_font->GetCharacter(c);
-	}
 	if (!Characters.contains(c))
 	{
 		if (!LoadCharacter(c))return Characters[L'?'];
@@ -410,11 +514,6 @@ void Font::RenderTextVertical(const std::string& text, float x, float y, float s
 void Font::RenderTextVertical(const std::wstring& text, float x, float y_origin, float scale, const glm::vec4& color) {
 	scale = CalculateDynamicScale(scale);
 	float y = WindowInfo.height - y_origin - fontSize * scale;
-	if (this == nullptr) {
-		Log << "Font is nullptr" << op::endl;
-		spare_font->RenderTextVertical(text, x, y_origin, scale, color);
-		return;
-	}
 	//检查是否包含未加载的字符
 	for (auto c = text.begin(); c != text.end(); ++c) {
 		if (!Characters.contains(*c)) {
@@ -481,11 +580,6 @@ void Font::RenderTextVerticalBetween(const std::string& text, Region region, flo
 }
 
 void Font::RenderTextVerticalBetween(const std::wstring& text, Region region, float scale_, const glm::vec4& color) {
-	if (this == nullptr) {
-		Log << "Font is nullptr" << op::endl;
-		spare_font->RenderTextVerticalBetween(text, region, scale_, color);
-		return;
-	}
 	float scale = CalculateDynamicScale(scale_);
 
 	//计算可用的区域高度
@@ -531,9 +625,6 @@ void Font::RenderTextVerticalBetween(const std::wstring& text, Region region, fl
 	// 计算起始位置（垂直居中）
 	float x = region.getx() + (availableWidth - fontSize * scale) / 2.0f;
 	float y = region.gety() + (availableHeight - textHeight) / 2.0f;
-
-	// 转换为屏幕坐标系（y轴反转）
-	float screen_y = WindowInfo.height - y - textHeight;
 	
 	// 渲染截断后的垂直文本
 	RenderTextVertical(displayText, x, y, scale_, color);

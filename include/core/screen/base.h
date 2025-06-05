@@ -11,6 +11,7 @@
 #include "core/baseItem/Button.h"
 #include "core/baseItem/Bitmap.h"
 #include "core/baseItem/Video/VideoPlayer.h"
+#include "core/nameRandomer.h"
 
 
 namespace screen{
@@ -18,7 +19,8 @@ enum class ScreenID {
     MainMenu,
     Settings,
     Name,
-    Video
+    Video,
+    ListName,
 };
 
 enum class TransitionState {
@@ -33,10 +35,12 @@ protected:
     core::Bitmap* background;
     ScreenID ID;
     static bool useVideoBackground;
+    static bool OffVideo;
     static core::VideoPlayer* videoBackground;
     static ScreenID currentScreenID;
     static std::shared_ptr<Screen> currentScreen;
     static std::map<ScreenID, std::shared_ptr<Screen>> screens;
+    static std::vector<core::NameEntry> nameItems;
 
     // 淡入淡出相关成员
     static TransitionState transitionState;
@@ -50,7 +54,7 @@ protected:
     static float getCurrentAlpha();
     
     // 更新过渡状态
-    static void updateTransition();
+    static void updateTransition(int param = 0);
 public:
     Screen(ScreenID ID) : ID(ID) {}
     virtual ~Screen(){background=nullptr;};
@@ -64,13 +68,16 @@ public:
     ScreenID getID() const { return ID; }
     static std::shared_ptr<Screen> getCurrentScreen() { return currentScreen; }    // 屏幕管理系统功能
     static void RegisterScreen(ScreenID id, std::shared_ptr<Screen> screen);
-    static bool SwitchToScreen(ScreenID id);
+    static bool SwitchToScreen(ScreenID id,int param = 0); // 切换到指定屏幕
     
     // 淡入淡出功能
-    static bool SwitchToScreenWithFade(ScreenID id, float fadeTime = 0.5f, std::function<void()> onComplete = nullptr);
+    static bool SwitchToScreenWithFade(ScreenID id, int param=0,float fadeTime = 0.5f, std::function<void()> onComplete = nullptr);
     static void SetTransitionDuration(float duration) { transitionDuration = duration; }
     static float GetTransitionDuration() { return transitionDuration; }
     static TransitionState GetTransitionState() { return transitionState; }
+
+    static void setOFFVideo(bool off) { OffVideo = off; }
+    static void setUseVideoBackground(bool use);
 private:
 };
 

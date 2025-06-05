@@ -3,6 +3,8 @@
 #include "core/explorer.h"
 #include "core/log.h"
 #include "core/Drawer.h"
+#include <thread>
+#include <chrono>
 
 using namespace core;
 
@@ -36,9 +38,10 @@ Button& Button::operator=(const Button& button) {
 Button::~Button() {
     // 请求停止所有可能运行的动画线程
     stopRequested = true;
+    fadeStopRequested = true;
     
     // 等待一小段时间，让线程有机会响应停止请求
-    if (animationRunning) {
+    if (animationRunning || fadeAnimationRunning) {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
     
@@ -48,11 +51,18 @@ Button::~Button() {
 void Button::Draw(unsigned char alpha) {
     // Draw the button
     if(!enable)return;
+    
+    // 如果淡出动画正在运行，使用淡出动画的alpha值，否则使用传入的alpha值
+    unsigned char finalAlpha = alpha;
+    if (fadeAnimationRunning) {
+        finalAlpha = currentFadeAlpha.load();
+    }
+    
     if(Debugging){
         Drawer::getInstance()->DrawSquare(region, Color(255, 0, 0, 255));
     }
     if (enableBitmap && bitmap) {
-        bitmap->Draw(region, alpha/255.0f);
+        bitmap->Draw(region, finalAlpha/255.0f);
     }
     if(enableFill) {
         Drawer::getInstance()->DrawSquare(region, fillColor,true);
@@ -60,8 +70,9 @@ void Button::Draw(unsigned char alpha) {
     if (enableText) {
         if (font) {
             Color tmp=color;
-            tmp.a=alpha;
-            font->RenderTextBetween(text, region, fontScale, tmp);
+            tmp.a=finalAlpha;
+            if(isCentered)font->RenderTextBetween(text, region, fontScale, tmp);
+            else font->RenderText(text, region.getx(), region.gety(), fontScale, tmp);
         }
     }
     
@@ -188,4 +199,95 @@ void Button::SetFontID(FontID id)
 {
     this->fontid = id;
     font = core::Explorer::getInstance()->getFont(fontid);
+}
+
+void Button::FadeOut(float duration, unsigned char startAlpha, unsigned char endAlpha, std::function<void()> onComplete)
+{
+    // 先停止可能正在进行的淡出动画
+    {
+        std::lock_guard<std::mutex> lock(fadeMutex);
+        if (fadeAnimationRunning) {
+            fadeStopRequested = true;
+            // 等待先前的淡出动画线程意识到停止请求
+            std::this_thread::sleep_for(std::chrono::milliseconds(20));
+        }
+    }
+
+    // 创建一个shared_ptr来捕获this指针，确保对象在线程运行期间不会被销毁
+    std::shared_ptr<Button> self = std::shared_ptr<Button>(this, [](Button*){});  // 自定义删除器，不实际删除对象
+
+    // 创建回调函数的副本，以便在线程中使用
+    std::shared_ptr<std::function<void()>> callback = nullptr;
+    if (onComplete) {
+        callback = std::make_shared<std::function<void()>>(onComplete);
+    }
+
+    fadeAnimationRunning = true;
+    fadeStopRequested = false;
+    currentFadeAlpha = startAlpha;
+
+    // 基于时间的淡出动画逻辑
+    std::thread([self=std::move(self), duration, startAlpha, endAlpha, callback]{
+        auto& button = *self;  // 通过引用访问按钮，简化语法
+        
+        // 如果持续时间太小，直接设置最终alpha值并返回
+        if (duration <= 0.0f) {
+            std::lock_guard<std::mutex> lock(button.fadeMutex);
+            button.currentFadeAlpha = endAlpha;
+            button.fadeAnimationRunning = false;
+            
+            // 如果有回调函数，则执行它
+            if (callback && *callback) {
+                (*callback)();
+            }
+            
+            return;
+        }
+        
+        // 计算动画参数
+        int totalTimeMs = static_cast<int>(duration * 1000);  // 转换为毫秒
+        float steps = 60.0f;  // 60步，约60FPS
+        float delay = totalTimeMs / steps;  // 每步之间的延迟
+        int alphaDiff = static_cast<int>(endAlpha) - static_cast<int>(startAlpha);
+        
+        for (int i = 0; i <= steps && !button.fadeStopRequested; ++i) {
+            // 计算当前步骤应该的alpha值
+            float progress = float(i) / steps;
+            
+            // 使用ease-in-out缓动函数使动画更平滑
+            float easedProgress = progress < 0.5f ? 
+                2.0f * progress * progress : 
+                1.0f - 2.0f * (1.0f - progress) * (1.0f - progress);
+            
+            unsigned char newAlpha = static_cast<unsigned char>(
+                startAlpha + alphaDiff * easedProgress
+            );
+            
+            {
+                std::lock_guard<std::mutex> lock(button.fadeMutex);
+                if (!button.fadeStopRequested) {
+                    button.currentFadeAlpha = newAlpha;
+                }
+            }
+            
+            // 如果这是最后一步，不需要等待
+            if (i < steps) {
+                std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(delay)));
+            }
+        }
+        
+        // 如果没有被请求停止，确保最终alpha值精确
+        if (!button.fadeStopRequested) {
+            std::lock_guard<std::mutex> lock(button.fadeMutex);
+            button.currentFadeAlpha = endAlpha;
+        }
+        
+        button.fadeAnimationRunning = false;
+        
+        // 如果有回调函数，则执行它
+        if (callback && *callback) {
+            (*callback)();
+        }
+        
+    }).detach();
 }

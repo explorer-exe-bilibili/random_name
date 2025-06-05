@@ -123,7 +123,7 @@ public:
     ~SettingButton()=default;
 
     void Draw(int currentPage, unsigned char alpha = 255)const;
-    bool Click(core::Point point);
+    bool Click(core::Point point,int page);
     operator bool() const { return page>=0; }
 private:
     core::Color selectColor();

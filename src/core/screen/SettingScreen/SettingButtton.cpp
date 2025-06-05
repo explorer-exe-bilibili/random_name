@@ -239,7 +239,8 @@ void SettingButton::Draw(int currentPage, unsigned char alpha)const {
     }
 }
 
-bool SettingButton::Click(Point point) {
+bool SettingButton::Click(Point point,int page) {
+    if(page!=this->page)return false;
     if (button && button->OnClick(point)) {
         return true;
     }
@@ -256,24 +257,24 @@ core::Color SettingButton::selectColor(){
     char hexColor[8];
     sprintf(hexColor, "#%02x%02x%02x", currentColor.r, currentColor.g, currentColor.b);
     
+    // 创建用于接收结果的RGB数组
+    unsigned char resultRGB[3] = {0, 0, 0};
+    
     // 调用 tinyfiledialogs 的颜色选择器
     const char* result = tinyfd_colorChooser(
         "选择颜色",  // 对话框标题
         hexColor,    // 默认颜色（十六进制格式）
-        NULL,        // 自定义颜色数组（可选）
-        NULL         // 自定义颜色数组大小（可选）
+        NULL,        // 默认RGB数组（可选，因为已提供十六进制）
+        resultRGB    // 输出的RGB值数组
     );
     
     // 如果用户选择了颜色（未取消）
     if (result != NULL) {
-        unsigned int r, g, b;
-        // 解析返回的十六进制颜色字符串
-        if (sscanf(result, "#%02x%02x%02x", &r, &g, &b) == 3) {
-            currentColor.r = static_cast<unsigned char>(r);
-            currentColor.g = static_cast<unsigned char>(g);
-            currentColor.b = static_cast<unsigned char>(b);
-            // 保持 alpha 值不变
-        }
+        // 使用返回的RGB数组值，这样更直接且安全
+        currentColor.r = resultRGB[0];
+        currentColor.g = resultRGB[1];
+        currentColor.b = resultRGB[2];
+        // 保持 alpha 值不变
     }
     
     return currentColor;

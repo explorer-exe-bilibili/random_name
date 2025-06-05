@@ -1,0 +1,325 @@
+{
+    "pages": [
+        {
+            "item": [
+                {
+                    "bitmapID": 0,
+                    "configName": "overlay1",
+                    "fileChooseWindowName": "选择卡池1图片",
+                    "fileType": 2,
+                    "name": "卡池1图片",
+                    "number": 1,
+                    "type": 4
+                },
+                {
+                    "bitmapID": 1,
+                    "configName": "overlay2",
+                    "fileChooseWindowName": "选择卡池2图片",
+                    "fileType": 2,
+                    "name": "卡池2图片",
+                    "number": 2,
+                    "type": 4
+                },
+                {
+                    "bitmapID": 2,
+                    "configName": "overlay3",
+                    "fileChooseWindowName": "选择卡池3图片",
+                    "fileType": 2,
+                    "name": "卡池3图片",
+                    "number": 3,
+                    "type": 4
+                },
+                {
+                    "bitmapID": 3,
+                    "configName": "overlay4",
+                    "fileChooseWindowName": "选择卡池4图片",
+                    "fileType": 2,
+                    "name": "卡池4图片",
+                    "number": 4,
+                    "type": 4
+                },
+                {
+                    "actions": 32,
+                    "configName": "exchange_speed",
+                    "maxCount": 10000,
+                    "minCount": 1,
+                    "name": "图片移动的速度",
+                    "number": 11,
+                    "outOfLimitOutPut": "输入一个1-10000之间的数字",
+                    "type": 1
+                },
+                {
+                    "actions": 32,
+                    "configName": "mode",
+                    "maxCount": 4,
+                    "minCount": 1,
+                    "name": "默认卡池序号",
+                    "number": 12,
+                    "outOfLimitOutPut": "输入一个1-4之间的数字",
+                    "type": 1
+                }
+            ],
+            "title": "图片"
+        },
+        {
+            "item": [
+                {
+                    "configName": "names1",
+                    "fileChooseWindowName": "选择卡池1名单",
+                    "fileType": 3,
+                    "name": "卡池1名单",
+                    "number": 1,
+                    "type": 4
+                },
+                {
+                    "configName": "names2",
+                    "fileChooseWindowName": "选择卡池2名单",
+                    "fileType": 3,
+                    "name": "卡池2名单",
+                    "number": 2,
+                    "type": 4
+                },
+                {
+                    "configName": "names3",
+                    "fileChooseWindowName": "选择卡池3名单",
+                    "fileType": 3,
+                    "name": "卡池3名单",
+                    "number": 3,
+                    "type": 4
+                },
+                {
+                    "configName": "names4",
+                    "fileChooseWindowName": "选择卡池4名单",
+                    "fileType": 3,
+                    "name": "卡池4名单",
+                    "number": 4,
+                    "type": 4
+                },
+                {
+                    "configName": "name_color",
+                    "name": "抽卡时名字的颜色",
+                    "number": 5,
+                    "type": 2
+                },
+                {
+                    "configName": "name_color_6_star",
+                    "name": "抽卡时6星名字的颜色",
+                    "number": 6,
+                    "type": 2
+                },
+                {
+                    "configName": "text_color",
+                    "name": "抽卡时小名字的颜色",
+                    "number": 7,
+                    "type": 2
+                },
+                {
+                    "actions": 32,
+                    "configName": "special",
+                    "maxCount": 4,
+                    "minCount": 0,
+                    "name": "抽背卡池",
+                    "number": 11,
+                    "outOfLimitOutPut": "输入一个0-4之间的数字（0表示禁用）",
+                    "type": 1
+                }
+            ],
+            "title": "名单与卡池"
+        },
+        {
+            "item": [
+                {
+                    "configName": "signal_3_star_video_path",
+                    "fileChooseWindowName": "选择单发3星视频",
+                    "fileType": 1,
+                    "name": "单发3星视频",
+                    "number": 1,
+                    "type": 4
+                },
+                {
+                    "configName": "signal_4_star_video_path",
+                    "fileChooseWindowName": "选择单发4星视频",
+                    "fileType": 1,
+                    "name": "单发4星视频",
+                    "number": 2,
+                    "type": 4
+                },
+                {
+                    "configName": "signal_5_star_video_path",
+                    "fileChooseWindowName": "选择单发5星视频",
+                    "fileType": 1,
+                    "name": "单发5星视频",
+                    "number": 3,
+                    "type": 4
+                },
+                {
+                    "configName": "group_4_star_video_path",
+                    "fileChooseWindowName": "选择十发4星视频",
+                    "fileType": 1,
+                    "name": "十发4星视频",
+                    "number": 4,
+                    "type": 4
+                },
+                {
+                    "configName": "group_5_star_video_path",
+                    "fileChooseWindowName": "选择十发5星视频",
+                    "fileType": 1,
+                    "name": "十发5星视频",
+                    "number": 5,
+                    "type": 4
+                },
+                {
+                    "configName": "off_video",
+                    "name": "关闭视频",
+                    "number": 11,
+                    "type": 0
+                },
+                {
+                    "configName": "off_music",
+                    "name": "关闭音乐",
+                    "number": 12,
+                    "type": 0
+                }
+            ],
+            "title": "视频"
+        },
+        {
+            "item": [
+                {
+                    "configName": "float_window_switch",
+                    "name": "悬浮窗",
+                    "number": 1,
+                    "type": 0
+                },
+                {
+                    "actions": 32,
+                    "configName": "float_window_x",
+                    "maxCount": 0,
+                    "minCount": 1,
+                    "name": "初始x坐标",
+                    "number": 2,
+                    "outOfLimitOutPut": "大小不能大于屏幕",
+                    "type": 1
+                },
+                {
+                    "actions": 32,
+                    "configName": "float_window_y",
+                    "maxCount": 0,
+                    "minCount": 1,
+                    "name": "初始y坐标",
+                    "number": 3,
+                    "outOfLimitOutPut": "大小不能大于屏幕",
+                    "type": 1
+                },
+                {
+                    "actions": 32,
+                    "configName": "float_window_width",
+                    "maxCount": 0,
+                    "minCount": 1,
+                    "name": "宽度",
+                    "number": 4,
+                    "outOfLimitOutPut": "大小不能大于屏幕",
+                    "type": 1
+                },
+                {
+                    "actions": 32,
+                    "configName": "float_window_height",
+                    "maxCount": 0,
+                    "minCount": 1,
+                    "name": "高度",
+                    "number": 5,
+                    "outOfLimitOutPut": "大小不能大于屏幕",
+                    "type": 1
+                },
+                {
+                    "actions": 32,
+                    "configName": "float_window_mu",
+                    "maxCount": 1,
+                    "minCount": 0,
+                    "name": "滑动系数",
+                    "number": 6,
+                    "outOfLimitOutPut": "大小不能超过1或小于0",
+                    "type": 1
+                },
+                {
+                    "actions": 1,
+                    "bitmapID": 29,
+                    "configName": "float_window_img",
+                    "fileChooseWindowName": "选择悬浮窗图片",
+                    "fileType": 2,
+                    "name": "悬浮窗图片",
+                    "number": 11,
+                    "type": 4
+                },
+                {
+                    "actions": 32,
+                    "configName": "float_window_alpha",
+                    "maxCount": 255,
+                    "minCount": 0,
+                    "name": "悬浮窗图片透明度",
+                    "number": 12,
+                    "outOfLimitOutPut": "大小不能超过255或小于0",
+                    "type": 1
+                }
+            ],
+            "title": "悬浮窗"
+        },
+        {
+            "item": [
+                {
+                    "configName": "in_window",
+                    "name": "窗口模式",
+                    "number": 1,
+                    "type": 0
+                },
+                {
+                    "actions": 16,
+                    "configName": "window_title",
+                    "name": "标题",
+                    "number": 2,
+                    "type": 1
+                },
+                {
+                    "configName": "use_json_settings",
+                    "name": "设置页面使用json文件",
+                    "number": 3,
+                    "type": 0
+                },
+                {
+                    "configName": "font_compatibility",
+                    "name": "字体兼容模式(出现字体错误再开)",
+                    "number": 4,
+                    "type": 0
+                },
+                {
+                    "actions": 1,
+                    "configName": "debug",
+                    "name": "调试模式",
+                    "number": 5,
+                    "type": 0
+                },
+                {
+                    "actions": 1,
+                    "configName": "no_video_preload",
+                    "name": "省内存模式(不预加载视频)",
+                    "number": 6,
+                    "type": 0
+                },
+                {
+                    "actions": 1,
+                    "configName": "imgs_path",
+                    "name": "图片资源目录",
+                    "number": 7,
+                    "type": 3
+                },
+                {
+                    "configName": "no_smooth_ui",
+                    "name": "关闭动画",
+                    "number": 8,
+                    "type": 0
+                }
+            ],
+            "title": "杂项"
+        }
+    ]
+}
