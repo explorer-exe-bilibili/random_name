@@ -90,6 +90,46 @@ jobs:
         where link
         cl /? >nul 2>&1 && echo "MSVC compiler found" || echo "MSVC compiler NOT found"
 
+
+    - name: Install system dependencies (Linux ARM64)
+      if: matrix.use_system_deps == true
+      shell: bash
+      run: |
+        sudo apt-get update
+        
+        # 安装基础构建工具
+        sudo apt-get install -y \
+          build-essential cmake ninja-build pkg-config git
+        
+        # 安装 FFMPEG 开发库
+        sudo apt-get install -y \
+          libavcodec-dev \
+          libavformat-dev \
+          libavutil-dev \
+          libswscale-dev \
+          libswresample-dev \
+          libavfilter-dev
+        
+        # 安装其他图形和音频库
+        sudo apt-get install -y \
+          libfreetype6-dev \
+          libglfw3-dev \
+          libglm-dev \
+          libwebp-dev \
+          nlohmann-json3-dev \
+          libsdl2-dev \
+          libsdl2-mixer-dev \
+          libopengl-dev \
+          libgl1-mesa-dev \
+          libglu1-mesa-dev
+        
+        # 安装 X11 开发库
+        sudo apt-get install -y \
+          libx11-dev \
+          libxrandr-dev \
+          libxinerama-dev \
+          libxcursor-dev \
+          libxi-dev
     - name: Setup build environment
       shell: bash
       run: |

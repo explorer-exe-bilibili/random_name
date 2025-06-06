@@ -269,30 +269,33 @@ install(TARGETS ${PROJECT_NAME} DESTINATION bin)
 # 复制必要的资源文件到输出目录
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/files DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
 
-# 复制 DLL 文件
-add_custom_target(copy_dlls ALL)
-if(WIN32)
-    # 根据链接模式复制不同的 DLL
-    if(USE_MIXED_LINKING)
-        # 混合链接：只复制 FFMPEG 相关的 DLL
-        add_custom_command(TARGET copy_dlls POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E make_directory
-                "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release"
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/bin/*av*.dll"
-                "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/"
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/bin/*sw*.dll"
-                "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release/"
-            COMMENT "Copying FFMPEG DLLs for mixed linking"
+# 复制 DLL 文件 - 直接修复
+if(WIN32 AND VCPKG_TARGET_TRIPLET MATCHES "static")
+    # 静态链接：不需要复制 DLL，创建空目标
+    add_custom_target(copy_dlls ALL
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release"
+        COMMAND ${CMAKE_COMMAND} -E echo "Static linking - no DLLs to copy"
+        COMMENT "Static linking mode"
+    )
+elseif(WIN32)
+    # 动态链接：复制 DLL
+    add_custom_target(copy_dlls ALL)
+    set(VCPKG_BIN_DIR "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/bin")
+    
+    add_custom_command(TARGET copy_dlls POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release"
+        COMMAND ${CMAKE_COMMAND} -E echo "Checking for DLLs in ${VCPKG_BIN_DIR}"
+        COMMAND if exist "${VCPKG_BIN_DIR}" (
+            ${CMAKE_COMMAND} -E copy_directory "${VCPKG_BIN_DIR}" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release"
+        ) else (
+            echo "No DLL directory found"
         )
-    else()
-        # 标准模式：复制所有必要的 DLL
-        add_custom_command(TARGET copy_dlls POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_directory
-                "${CMAKE_BINARY_DIR}/vcpkg_installed/${VCPKG_TARGET_TRIPLET}/bin"
-                "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release"
-            COMMENT "Copying all DLLs for dynamic linking"
-        )
-    endif()
+        COMMENT "Copying DLLs for dynamic linking"
+    )
+else()
+    # 非 Windows 平台
+    add_custom_target(copy_dlls ALL
+        COMMAND ${CMAKE_COMMAND} -E echo "Non-Windows platform - no DLLs to copy"
+        COMMENT "Non-Windows platform"
+    )
 endif()
