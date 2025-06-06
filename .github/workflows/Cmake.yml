@@ -299,17 +299,22 @@ jobs:
         name: random_name_${{ matrix.arch }}_${{ runner.os }}_installer
         path: ~/installer/Output/*.exe
         retention-days: 30
+        
+    - name: lookup ~
+      run: |
+        echo "Home directory is $HOME"
+        ls -la ~/
 
     - name: Create Release
       id: create_release
-      uses: softprops/action-gh-release@v2
+      uses: softprops/action-gh-release@v2.0.8
       with:
         files: |
           ~/random_name_${{ matrix.arch }}_${{ runner.os }}.tar.gz
           ~/installer/Output/*.exe
-        pre-release: true
+        prerelease: true
         make_latest: false
-        name: Release action ${{ github.ref_name }}
+        name: "Release action${{ github.ref_name }}"
         body: |
           Release from github actions
           This is a pre-release for the current build.
