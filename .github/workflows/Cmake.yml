@@ -74,15 +74,64 @@ jobs:
       with:
         submodules: true
     
-    # 设置构建环境
     - name: Setup build environment
       shell: bash
       run: |
         if [[ "${{ runner.os }}" == "Linux" ]]; then
+          # 更新包管理器
           sudo apt-get update
-          sudo apt-get install -y nasm yasm pkg-config ninja-build
+          
+          # 安装基础构建工具
+          sudo apt-get install -y \
+            build-essential \
+            cmake \
+            ninja-build \
+            pkg-config \
+            git \
+            curl \
+            zip \
+            unzip \
+            tar
+          
+          # 安装多媒体相关工具
+          sudo apt-get install -y \
+            nasm \
+            yasm
+          
+          # 安装 autotools 套件
+          sudo apt-get install -y \
+            autoconf \
+            automake \
+            autotools-dev \
+            libtool \
+            libltdl-dev \
+            gettext \
+            flex \
+            bison \
+            gperf
+          
+          # 安装开发库
+          sudo apt-get install -y \
+            libx11-dev \
+            libxrandr-dev \
+            libxinerama-dev \
+            libxcursor-dev \
+            libxi-dev \
+            libgl1-mesa-dev \
+            libasound2-dev \
+            python3-dev \
+            python3-setuptools
+            
         elif [[ "${{ runner.os }}" == "macOS" ]]; then
-          brew install nasm yasm ninja
+          brew install \
+            nasm \
+            yasm \
+            ninja \
+            autoconf \
+            automake \
+            libtool \
+            gettext \
+            pkg-config
         fi
 
     - name: Cache vcpkg
