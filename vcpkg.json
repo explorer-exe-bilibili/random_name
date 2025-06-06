@@ -36,13 +36,19 @@
     },
     "tinyfiledialogs"
   ],
-    "features": {
+  "features": {
     "full-audio": {
       "description": "Full audio support (excludes ARM64 Windows)",
       "dependencies": [
         {
           "name": "sdl2-mixer",
-          "features": ["libflac", "libmodplug", "mpg123", "wavpack","opusfile"],
+          "features": [
+            "libflac",
+            "libmodplug",
+            "mpg123",
+            "wavpack",
+            "opusfile"
+          ],
           "platform": "!(windows & arm64)"
         }
       ]
@@ -52,10 +58,18 @@
       "dependencies": [
         {
           "name": "sdl2-mixer",
-          "features": ["libflac", "libmodplug", "mpg123","opusfile"]
+          "features": [
+            "libflac",
+            "libmodplug",
+            "mpg123",
+            "opusfile"
+          ]
         }
       ]
     }
   },
-  "default-features": ["full-audio"]
+  "default-features": [
+    "full-audio"
+  ],
+  "builtin-baseline": "f26ec398c25c4980f33a50391f00a75f7ad62ef7"
 }
