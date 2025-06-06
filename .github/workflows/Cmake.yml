@@ -121,7 +121,8 @@ jobs:
           libsdl2-mixer-dev \
           libopengl-dev \
           libgl1-mesa-dev \
-          libglu1-mesa-dev
+          libglu1-mesa-dev \
+          utf8cpp glm
         
         # 安装 X11 开发库
         sudo apt-get install -y \
