@@ -67,7 +67,7 @@ jobs:
 
     env:
       VCPKG_TARGET_TRIPLET: ${{ matrix.vcpkg_triplet }}
-      
+
     steps:
     - name: Checkout
       uses: actions/checkout@v4
@@ -85,7 +85,9 @@ jobs:
     - name: Configure CMake
       shell: bash
       run: |
-        cmake build
+        mkdir -p build
+        cd build
+        cmake ..
 
     - name: Build
       shell: bash
