@@ -257,10 +257,7 @@ jobs:
         find build -type f -exec file {} \; | grep -i "executable\|mach-o\|elf"
         
         echo "=== Checking specific paths ==="
-        ls -la build/ || true
         ls -la build/bin/ || true
-        ls -la build/Release/ || true
-        ls -la build/Debug/ || true
 
     - name: Create Archive (Debug Version)
       shell: bash
