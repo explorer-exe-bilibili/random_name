@@ -74,6 +74,17 @@ jobs:
       with:
         submodules: true
     
+    # 设置构建环境
+    - name: Setup build environment
+      shell: bash
+      run: |
+        if [[ "${{ runner.os }}" == "Linux" ]]; then
+          sudo apt-get update
+          sudo apt-get install -y nasm yasm pkg-config ninja-build
+        elif [[ "${{ runner.os }}" == "macOS" ]]; then
+          brew install nasm yasm ninja
+        fi
+
     - name: Cache vcpkg
       uses: actions/cache@v4
       with:
@@ -82,18 +93,29 @@ jobs:
         restore-keys: |
           vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
 
+    - name: Cache Download
+      uses: actions/cache@v4
+      with:
+        path: C:/vcpkg/downloads
+        key: vcpkg
+        restore-keys: |
+          vcpkg
+
     - name: Configure CMake
       shell: bash
       run: |
-        mkdir -p build
-        cd build
-        cmake ..
+        cmake -B build -S . \
+          -DCMAKE_BUILD_TYPE=Release \
+          -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
+          -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
+          -DVCPKG_TARGET_TRIPLET=${{ env.VCPKG_TARGET_TRIPLET }} \
+          -G Ninja
 
     - name: Build
       shell: bash
       run: |
         cd build
-        cmake --build . --config Release
+        cmake --build . --config Release --parallel 4
 
     - name: Create Archive
       shell: bash
