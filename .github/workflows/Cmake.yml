@@ -132,20 +132,25 @@ jobs:
             libtool \
             gettext \
             pkg-config
+        elif [[ "${{ runner.os }}" == "Windows" ]]; then
+          # Windows 通常不需要额外安装，但可以安装 Ninja 作为备选
+          choco install ninja -y || true
         fi
 
     - name: Cache vcpkg
       uses: actions/cache@v4
       with:
         path: ${{ github.workspace }}/build/vcpkg-installed
-        key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
+        key: vcpkg-${{ runner.os }}-${{matrix.arch}}-${{ hashFiles('**/vcpkg.json') }}
         restore-keys: |
-          vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
+          vcpkg-${{ runner.os }}-${{matrix.arch}}-${{ hashFiles('**/vcpkg.json') }}
 
     - name: Cache Download
       uses: actions/cache@v4
       with:
-        path: C:/vcpkg/downloads
+        path: |
+          C:/vcpkg/downloads
+          ~/.cache/vcpkg
         key: vcpkg
         restore-keys: |
           vcpkg
@@ -169,11 +174,27 @@ jobs:
     - name: Create Archive
       shell: bash
       run: |
-        cd build/bin
-        cp Release/* .
-        mkdir ~/installer_files
-        cp * ~/installer_files
-        tar -czf ~/random_name_${{ matrix.arch }}_${{ matrix.os }}.tar.gz *
+        mkdir -p ~/installer_files
+        
+        if [[ "${{ runner.os }}" == "Windows" ]]; then
+          # Windows 二进制在 Release 子目录中
+          find build -name "*.exe" -path "*/Release/*" -exec cp {} ~/installer_files/ \;
+          find build -name "*.dll" -path "*/Release/*" -exec cp {} ~/installer_files/ \; 2>/dev/null || true
+        else
+          # Linux/macOS 二进制在 bin 目录或直接在 build 目录中
+          find build -type f -executable -name "*random_name*" -exec cp {} ~/installer_files/ \; 2>/dev/null || true
+          find build/bin -type f -executable -exec cp {} ~/installer_files/ \; 2>/dev/null || true
+        fi
+        
+        cd ~/installer_files
+        if [ "$(ls -A .)" ]; then
+          echo "Archive contents:"
+          ls -la
+          tar -czf ~/random_name_${{ matrix.arch }}_${{ runner.os }}.tar.gz *
+        else
+          echo "No files found to archive"
+          exit 1
+        fi
 
     - name: Create Installer
       if: matrix.os == 'windows-latest' || matrix.os == 'windows-11-arm'
@@ -185,6 +206,7 @@ jobs:
       shell: pwsh
       run: |
         iscc installer_action\common.iss
+      continue-on-error: true
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4

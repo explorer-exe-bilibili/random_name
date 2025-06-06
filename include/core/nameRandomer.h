@@ -3,6 +3,8 @@
 #include <string>
 #include <random>
 #include <vector>
+#include <memory>
+#include <fstream>
 
 namespace core
 {

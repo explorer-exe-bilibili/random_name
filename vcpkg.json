@@ -19,9 +19,6 @@
       "name": "sdl2-mixer",
       "features": [
         "mpg123",
-        "wavpack",
-        "timidity",
-        "fluidsynth",
         "libflac",
         "libmodplug",
         "opusfile"
@@ -32,26 +29,18 @@
     {
       "name": "ffmpeg",
       "features": [
-        "x264",
-        "x265",
         "vpx",
         "zlib",
-        "mp3lame",
         "opus",
-        "vorbis",
         "avcodec",
         "avformat",
         "swscale",
         "swresample",
         "opengl",
         "dav1d",
-        "amf",
-        "nvcodec",
-        "qsv",
         "fdk-aac",
         "sdl2",
-        "soxr",
-        "opencl"
+        "soxr"
       ]
     },
     "tinyfiledialogs"
