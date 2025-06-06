@@ -10,11 +10,12 @@
 
 #define MyAppSourceDir GetEnv('SOURCE_DIR')
 #define MyAppOutputDir GetEnv('OUTPUT_DIR')
+#define ARCH GetEnv('ARCH')
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{2E45DD0E-4708-435D-A7FC-170C376DB79A}
+AppId={{2E45DD0E-4708-435D-A7FC-170C376DB79A}}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -24,10 +25,10 @@ DisableProgramGroupPage=yes
 ; Uncomment the following line to run in non administrative install mode (install for current user only.)
 ;PrivilegesRequired=lowest
 OutputDir={#MyAppOutputDir}
-OutputBaseFilename=random_name_arm64-setup
+OutputBaseFilename=random_name_{#ARCH}-setup
 SetupIconFile={#MyAppSourceDir}\OIP-C.ico
 Compression=lzma
-
+PrivilegesRequiredOverridesAllowed=dialog
 SolidCompression=yes
 WizardStyle=modern
 
@@ -63,8 +64,7 @@ Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
 
 [Files]
-Source: "{#MyAppSourceDir}\ARM64\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#MyAppSourceDir}\ARM64\Release\upgrade.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#MyAppSourceDir}"; DestDir: "{app}"; Flags: ignoreversion
 Source: "{#MyAppSourceDir}\files\*"; DestDir: "{app}\files"; Flags: ignoreversion recursesubdirs createallsubdirs
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 

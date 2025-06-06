@@ -12,8 +12,9 @@ void ListNameScreen::init() {
     
 }
 
-void ListNameScreen::Click(int x, int y) {
+bool ListNameScreen::Click(int x, int y) {
     // 点击处理代码
+    return false;
 }
 
 void ListNameScreen::Draw() {

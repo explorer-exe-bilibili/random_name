@@ -1,10 +1,44 @@
 cmake_minimum_required(VERSION 3.15)
 
+# 检查是否在GitHub Actions环境中
+if(DEFINED ENV{GITHUB_ACTIONS})
+    message(STATUS "Running in GitHub Actions environment")
+    set(IN_GITHUB_ACTIONS TRUE)
+else()
+    message(STATUS "Running in local development environment")
+    set(IN_GITHUB_ACTIONS FALSE)
+endif()
+
 # 确保在任何其他操作之前设置 vcpkg 集成
+if(NOT IN_GITHUB_ACTIONS)
+    if(WIN32)
+        set(VCPKG_TARGET_TRIPLET "x64-windows" CACHE STRING "Vcpkg target triplet")
+    elseif(APPLE)
+        set(VCPKG_TARGET_TRIPLET "x64-osx" CACHE STRING "Vcpkg target triplet")
+    else()
+        set(VCPKG_TARGET_TRIPLET "x64-linux" CACHE STRING "Vcpkg target triplet")
+    endif()
+    else()
+    if(DEFINED ENV{VCPKG_TARGET_TRIPLET})
+        set(VCPKG_TARGET_TRIPLET $ENV{VCPKG_TARGET_TRIPLET} CACHE STRING "Vcpkg target triplet")
+    else()
+        if(WIN32)
+            set(VCPKG_TARGET_TRIPLET "x64-windows-static" CACHE STRING "Vcpkg target triplet")
+        elseif(APPLE)
+            set(VCPKG_TARGET_TRIPLET "x64-osx" CACHE STRING "Vcpkg target triplet")
+        else()
+            set(VCPKG_TARGET_TRIPLET "x64-linux" CACHE STRING "Vcpkg target triplet")
+        endif()
+    endif()
+endif()
+
+# vcpkg 工具链文件设置（在 project() 之前）
 if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
     if(DEFINED ENV{VCPKG_ROOT})
         set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
             CACHE STRING "Vcpkg toolchain file")
+    else()
+        set(CMAKE_TOOLCHAIN_FILE "")
     endif()
 endif()
 
@@ -40,22 +74,19 @@ find_package(tinyfiledialogs CONFIG REQUIRED)
 
 # 创建可执行文件
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
-
-# 设置编译定义
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     $<$<CONFIG:Debug>:DEBUG_MODE>
 )
-
+target_include_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_INCLUDE_DIRS})
 # 包含头文件目录
 target_include_directories(${PROJECT_NAME} PRIVATE 
     include
     ${FREETYPE_INCLUDE_DIRS}
     ${GLM_INCLUDE_DIRS}
     ${Stb_INCLUDE_DIR}
-    ${FFMPEG_LIBRARY_DIRS}
     ${PORTABLE_FILE_DIALOGS_INCLUDE_DIRS}
 )
-
+target_link_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_LIBRARY_DIRS})
 # 链接所有库
 target_link_libraries(${PROJECT_NAME} PRIVATE 
     glfw
@@ -74,28 +105,16 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 )
 # 平台特定设置
 if(WIN32)
-    target_compile_options(${PROJECT_NAME} PRIVATE /utf-8)
-    # 设置可执行文件名称
-    set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "random")
+    # Windows平台特定链接
+    target_link_libraries(${PROJECT_NAME} PRIVATE opengl32)
     
-    # 使用 POST_BUILD 命令复制图标文件，而不是 configure_file
+    # 添加Windows资源文件（如图标）
     if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/OIP-C.ico")
-        add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-            COMMAND ${CMAKE_COMMAND} -E copy_if_different
-                "${CMAKE_CURRENT_SOURCE_DIR}/OIP-C.ico"
-                "$<TARGET_FILE_DIR:${PROJECT_NAME}>/OIP-C.ico"
-            COMMENT "Copying icon file"
-        )
+        configure_file("${CMAKE_CURRENT_SOURCE_DIR}/OIP-C.ico" 
+                       "${CMAKE_BINARY_DIR}/bin/OIP-C.ico" COPYONLY)
     endif()
-    
-    # 复制 DLL 文件
-    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different
-            "$<TARGET_FILE_DIR:${PROJECT_NAME}>/../vcpkg_installed/${VCPKG_TARGET_TRIPLET}/bin/*"
-            "$<TARGET_FILE_DIR:${PROJECT_NAME}>"
-        COMMAND_EXPAND_LISTS
-    )
 elseif(APPLE)
+    # macOS平台特定链接
     find_library(COCOA_LIBRARY Cocoa)
     find_library(IOKIT_LIBRARY IOKit)
     find_library(COREVIDEO_LIBRARY CoreVideo)
@@ -105,17 +124,36 @@ elseif(APPLE)
         ${COREVIDEO_LIBRARY}
     )
 elseif(UNIX)
+    # Linux平台特定链接
     find_package(X11 REQUIRED)
-    target_link_libraries(${PROJECT_NAME} PRIVATE ${X11_LIBRARIES})
+    if(X11_FOUND)
+        target_include_directories(${PROJECT_NAME} PRIVATE ${X11_INCLUDE_DIR})
+        target_link_libraries(${PROJECT_NAME} PRIVATE ${X11_LIBRARIES})
+    endif()
+    # 对于系统安装的依赖，提供备选查找方式
+    if(NOT TARGET glfw)
+        find_package(glfw3 REQUIRED)
+        if(TARGET glfw3)
+            set_target_properties(glfw3 PROPERTIES IMPORTED_GLOBAL TRUE)
+            add_library(glfw ALIAS glfw3)
+        endif()
+    endif()
 endif()
 
-# 复制资源文件
-add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-    COMMAND ${CMAKE_COMMAND} -E copy_directory
-        "${CMAKE_CURRENT_SOURCE_DIR}/files"
-        "$<TARGET_FILE_DIR:${PROJECT_NAME}>/files"
-)
 
-# 安装规则
+# 设置安装规则
 install(TARGETS ${PROJECT_NAME} DESTINATION bin)
-install(DIRECTORY files/ DESTINATION bin/files)
+
+# 复制必要的资源文件到输出目录
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/files DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+
+# 使所有目标都依赖于vcpkg manifest模式中安装的所有库
+add_custom_target(copy_dlls ALL)
+if(WIN32)
+    add_custom_command(TARGET copy_dlls POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+            "${CMAKE_BINARY_DIR}/vcpkg_installed/x64-windows/bin"
+            "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Release"
+    )
+    target_compile_options(${PROJECT_NAME} PRIVATE /utf-8)
+endif()

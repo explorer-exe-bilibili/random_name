@@ -1,0 +1,150 @@
+name: Build
+
+on:
+  push:
+    branches: [ main, master, openGL ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main, master, openGL ]
+  workflow_dispatch:
+
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # Windows x64
+          - os: windows-latest
+            arch: x64
+            c_compiler: cl
+            cpp_compiler: cl
+            vcpkg_triplet: x64-windows-static-release
+
+         # Windows ARM64
+          - os: windows-11-arm
+            arch: arm64
+            c_compiler: cl
+            cpp_compiler: cl
+            vcpkg_triplet: arm64-windows-static-release
+         # Windows x86
+          - os: windows-latest
+            arch: x86
+            c_compiler: cl
+            cpp_compiler: cl
+            vcpkg_triplet: x86-windows-static
+
+          # Linux x64
+          - os: ubuntu-latest
+            arch: x64
+            c_compiler: gcc
+            cpp_compiler: g++
+            vcpkg_triplet: x64-linux-release
+          
+          # Linux ARM64 (需要自托管 runner)
+          - os: ubuntu-24.04-arm
+            arch: arm64
+            c_compiler: gcc
+            cpp_compiler: g++
+            vcpkg_triplet: arm64-linux-release
+          
+          # macOS x64
+          - os: macos-13  # Intel-based
+            arch: x64
+            c_compiler: clang
+            cpp_compiler: clang++
+            vcpkg_triplet: x64-osx-release
+          
+          # macOS ARM64 (Apple Silicon)
+          - os: macos-latest  # M1/M2-based
+            arch: arm64
+            c_compiler: clang
+            cpp_compiler: clang++
+            vcpkg_triplet: arm64-osx-release
+
+    env:
+      VCPKG_TARGET_TRIPLET: ${{ matrix.vcpkg_triplet }}
+
+    runs-on: ${{ matrix.os }}
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+      with:
+        submodules: true
+    
+    - name: Cache vcpkg
+      uses: actions/cache@v4
+      with:
+        path: ${{ github.workspace }}/build/vcpkg-installed
+        key: vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
+        restore-keys: |
+          vcpkg-${{ runner.os }}-${{ hashFiles('**/vcpkg.json') }}
+
+    - name: Configure CMake
+      shell: bash
+      run: |
+        cmake build
+
+    - name: Build
+      shell: bash
+      run: |
+        cd build
+        cmake --build . --config Release
+
+    - name: Create Archive
+      shell: bash
+      run: |
+        cd build/bin
+        cp Release/* .
+        mkdir ~/installer_files
+        cp * ~/installer_files
+        tar -czf ~/random_name_${{ matrix.arch }}_${{ matrix.os }}.tar.gz *
+
+    - name: Create Installer
+      if: matrix.os == 'windows-latest' || matrix.os == 'windows-11-arm'
+      env: 
+        GITHUB_ACTIONS: true
+        SOURCE_DIR: ~/installer_files
+        INSTALLER_DIR: ~/installer/Output
+        ARCH: ${{ matrix.arch }}
+      shell: pwsh
+      run: |
+        iscc installer_action\common.iss
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: random_name_${{ matrix.arch }}_${{ matrix.os }}
+        path: ~/random_name_${{ matrix.arch }}_${{ matrix.os }}.tar.gz
+        retention-days: 30
+
+    - name: Upload Installer
+      if: matrix.os == 'windows-latest' || matrix.os == 'windows-11-arm'
+      uses: actions/upload-artifact@v4
+      with:
+        name: random_name_${{ matrix.arch }}_${{ matrix.os }}_installer
+        path: ~/installer/Output/*.exe
+        retention-days: 30
+
+    - name: Create Release
+      id: create_release
+      uses: softprops/action-gh-release@v2
+      with:
+        files: |
+          ~/random_name_${{ matrix.arch }}_${{ matrix.os }}.tar.gz
+          ~/installer/Output/*.exe
+        pre-release: true
+        make_latest: false
+        name: Release action ${{ github.ref_name }}
+        body: |
+          Release from github actions
+          This is a pre-release for the current build.
+          - Commit: ${{ github.sha }}
+          - Changes: ${{ github.event.head_commit.message }}
+        tag_name: action${{ github.ref_name }}
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

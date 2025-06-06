@@ -9,8 +9,8 @@ public:
     ~ListNameScreen();
 
     void init() override;
-    void Click(int x,int y) override;
+    bool Click(int x,int y) override;
     void Draw() override;
-    void enter() override;
+    void enter();
 };
 }
