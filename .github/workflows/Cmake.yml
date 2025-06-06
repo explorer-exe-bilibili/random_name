@@ -219,20 +219,19 @@ jobs:
       shell: bash
       run: |
         mkdir -p ~/installer_files
-        
-        # 复制所有可能的二进制文件进行调试
-        find build -type f \( -name "*random_name*" -o -executable \) ! -path "*/CMakeFiles/*" -exec cp {} ~/installer_files/ \; 2>/dev/null || true
+
+        if( [[ "${{ runner.os }}" == "Windows" ]] ); then
+          cp -r build/bin/Release/*.exe ~/installer_files/
+          cp -r build/bin/Release/*.dll ~/installer_files/
+          cp -r build/bin/Release/files ~/installer_files/
+        else
+          cp -r build/bin/* ~/installer_files/
+        fi
         
         cd ~/installer_files
-        echo "Files copied for debugging:"
         ls -la
         
-        if [ "$(ls -A .)" ]; then
-          tar -czf ~/random_name_${{ matrix.arch }}_${{ runner.os }}.tar.gz *
-        else
-          echo "Still no files found - this indicates a build configuration issue"
-          exit 1
-        fi
+        tar -czf ~/random_name_${{ matrix.arch }}_${{ runner.os }}.tar.gz *
 
     - name: Create Installer
       if: matrix.os == 'windows-latest' || matrix.os == 'windows-11-arm'

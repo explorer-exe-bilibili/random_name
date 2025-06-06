@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.15)
 
+option(USE_SYSTEM_DEPS "Use system-installed dependencies" OFF)# 添加系统依赖选项
+
 # 检查是否在GitHub Actions环境中
 if(DEFINED ENV{GITHUB_ACTIONS})
     message(STATUS "Running in GitHub Actions environment")
@@ -8,50 +10,50 @@ else()
     message(STATUS "Running in local development environment")
     set(IN_GITHUB_ACTIONS FALSE)
 endif()
-
-# 确保在任何其他操作之前设置 vcpkg 集成
-if(NOT IN_GITHUB_ACTIONS)
-    if(WIN32)
-        set(VCPKG_TARGET_TRIPLET "x64-windows" CACHE STRING "Vcpkg target triplet")
-    elseif(APPLE)
-        set(VCPKG_TARGET_TRIPLET "x64-osx" CACHE STRING "Vcpkg target triplet")
-    else()
-        set(VCPKG_TARGET_TRIPLET "x64-linux" CACHE STRING "Vcpkg target triplet")
-    endif()
-else()
-    if(DEFINED ENV{VCPKG_TARGET_TRIPLET})
-        set(VCPKG_TARGET_TRIPLET $ENV{VCPKG_TARGET_TRIPLET} CACHE STRING "Vcpkg target triplet")
-    else()
+if(NOT USE_SYSTEM_DEPS)
+    # 确保在任何其他操作之前设置 vcpkg 集成
+    if(NOT IN_GITHUB_ACTIONS)
         if(WIN32)
-            set(VCPKG_TARGET_TRIPLET "x64-windows-static" CACHE STRING "Vcpkg target triplet")
+            set(VCPKG_TARGET_TRIPLET "x64-windows" CACHE STRING "Vcpkg target triplet")
         elseif(APPLE)
             set(VCPKG_TARGET_TRIPLET "x64-osx" CACHE STRING "Vcpkg target triplet")
         else()
             set(VCPKG_TARGET_TRIPLET "x64-linux" CACHE STRING "Vcpkg target triplet")
         endif()
-    endif()
-endif()
-
-# 检测是否使用混合链接模式
-set(USE_MIXED_LINKING FALSE)
-if(WIN32 AND VCPKG_TARGET_TRIPLET MATCHES "static-dynamic-ffmpeg")
-    set(USE_MIXED_LINKING TRUE)
-    message(STATUS "Using mixed linking: Static libraries + Dynamic FFMPEG")
-endif()
-
-# vcpkg 工具链文件设置（在 project() 之前）
-if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
-    if(DEFINED ENV{VCPKG_ROOT})
-        set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
-            CACHE STRING "Vcpkg toolchain file")
-    elseif(DEFINED ENV{VCPKG_INSTALLATION_ROOT})
-        set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake"
-            CACHE STRING "Vcpkg toolchain file")
     else()
-        set(CMAKE_TOOLCHAIN_FILE "")
+        if(DEFINED ENV{VCPKG_TARGET_TRIPLET})
+            set(VCPKG_TARGET_TRIPLET $ENV{VCPKG_TARGET_TRIPLET} CACHE STRING "Vcpkg target triplet")
+        else()
+            if(WIN32)
+                set(VCPKG_TARGET_TRIPLET "x64-windows-static" CACHE STRING "Vcpkg target triplet")
+            elseif(APPLE)
+                set(VCPKG_TARGET_TRIPLET "x64-osx" CACHE STRING "Vcpkg target triplet")
+            else()
+                set(VCPKG_TARGET_TRIPLET "x64-linux" CACHE STRING "Vcpkg target triplet")
+            endif()
+        endif()
+    endif()
+
+    # 检测是否使用混合链接模式
+    set(USE_MIXED_LINKING FALSE)
+    if(WIN32 AND VCPKG_TARGET_TRIPLET MATCHES "static-dynamic-ffmpeg")
+        set(USE_MIXED_LINKING TRUE)
+        message(STATUS "Using mixed linking: Static libraries + Dynamic FFMPEG")
+    endif()
+
+    # vcpkg 工具链文件设置（在 project() 之前）
+    if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
+        if(DEFINED ENV{VCPKG_ROOT})
+            set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
+                CACHE STRING "Vcpkg toolchain file")
+        elseif(DEFINED ENV{VCPKG_INSTALLATION_ROOT})
+            set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake"
+                CACHE STRING "Vcpkg toolchain file")
+        else()
+            set(CMAKE_TOOLCHAIN_FILE "")
+        endif()
     endif()
 endif()
-
 # 设置项目名称和版本
 project(random_name VERSION 1.0.0 LANGUAGES CXX)
 
@@ -62,8 +64,6 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # 设置可执行文件输出目录
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
-# 添加系统依赖选项
-option(USE_SYSTEM_DEPS "Use system-installed dependencies" OFF)
 
 # 添加源文件
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
