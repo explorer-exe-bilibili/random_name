@@ -62,67 +62,109 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # 设置可执行文件输出目录
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
+# 添加系统依赖选项
+option(USE_SYSTEM_DEPS "Use system-installed dependencies" OFF)
 
 # 添加源文件
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
 file(GLOB_RECURSE HEADERS "include/*.hpp" "include/*.h")
-
-# 查找依赖库 - 根据链接模式调整
-if(USE_MIXED_LINKING)
-    # 混合链接模式：FFMPEG 动态，其他静态
-    message(STATUS "Configuring mixed linking for Windows")
+if(USE_SYSTEM_DEPS)
+    message(STATUS "Using system dependencies")
     
-    # 首先尝试查找动态 FFMPEG
-    set(CMAKE_FIND_LIBRARY_SUFFIXES_BACKUP ${CMAKE_FIND_LIBRARY_SUFFIXES})
-    set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.a" ".lib")
+    # 使用 pkg-config 查找系统库
+    find_package(PkgConfig REQUIRED)
     
-    find_package(PkgConfig QUIET)
-    if(PKG_CONFIG_FOUND)
-        pkg_check_modules(FFMPEG QUIET libavcodec libavformat libavutil libswscale)
-    endif()
-    
-    if(NOT FFMPEG_FOUND)
-        find_package(FFMPEG QUIET)
-    endif()
-    
-    # 恢复库搜索后缀
-    set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES_BACKUP})
-    
-    # 如果动态 FFMPEG 查找失败，回退到标准方式
-    if(NOT FFMPEG_FOUND)
-        message(WARNING "Dynamic FFMPEG not found, falling back to standard linking")
-        find_package(FFMPEG REQUIRED)
-    endif()
-    
-    # 其他库保持静态（vcpkg 会根据 triplet 自动处理）
-    find_package(WebP CONFIG REQUIRED)
-    find_package(glfw3 CONFIG REQUIRED)
-    find_package(nlohmann_json CONFIG REQUIRED)
-    find_package(Freetype CONFIG REQUIRED)
-    find_package(glm CONFIG REQUIRED)
-    find_package(glad CONFIG REQUIRED)
+    # 查找系统安装的库
+    pkg_check_modules(FFMPEG REQUIRED libavcodec libavformat libavutil libswscale libswresample)
+    find_package(glfw3 REQUIRED)
+    find_package(nlohmann_json REQUIRED)
+    find_package(Freetype REQUIRED)
     find_package(OpenGL REQUIRED)
-    find_package(utf8cpp CONFIG REQUIRED)
-    find_package(SDL2 CONFIG REQUIRED)
-    find_package(SDL2_mixer CONFIG REQUIRED)
-    find_package(Stb REQUIRED)
-    find_package(tinyfiledialogs CONFIG REQUIRED)
+    
+    # SDL2
+    pkg_check_modules(SDL2 REQUIRED sdl2)
+    pkg_check_modules(SDL2_MIXER REQUIRED SDL2_mixer)
+    
+    # WebP
+    pkg_check_modules(WEBP REQUIRED libwebp)
+    
+    # 设置系统依赖的链接
+    target_link_libraries(${PROJECT_NAME} PRIVATE
+        ${FFMPEG_LIBRARIES}
+        glfw
+        nlohmann_json::nlohmann_json
+        Freetype::Freetype
+        ${OPENGL_LIBRARIES}
+        ${SDL2_LIBRARIES}
+        ${SDL2_MIXER_LIBRARIES}
+        ${WEBP_LIBRARIES}
+    )
+    
+    target_include_directories(${PROJECT_NAME} PRIVATE
+        ${FFMPEG_INCLUDE_DIRS}
+        ${SDL2_INCLUDE_DIRS}
+        ${SDL2_MIXER_INCLUDE_DIRS}
+        ${WEBP_INCLUDE_DIRS}
+    )
     
 else()
-    # 标准模式：按 triplet 设置链接
-    find_package(WebP CONFIG REQUIRED)
-    find_package(FFMPEG REQUIRED)
-    find_package(glfw3 CONFIG REQUIRED)
-    find_package(nlohmann_json CONFIG REQUIRED)
-    find_package(Freetype CONFIG REQUIRED)
-    find_package(glm CONFIG REQUIRED)
-    find_package(glad CONFIG REQUIRED)
-    find_package(OpenGL REQUIRED)
-    find_package(utf8cpp CONFIG REQUIRED)
-    find_package(SDL2 CONFIG REQUIRED)
-    find_package(SDL2_mixer CONFIG REQUIRED)
-    find_package(Stb REQUIRED)
-    find_package(tinyfiledialogs CONFIG REQUIRED)
+    # 查找依赖库 - 根据链接模式调整
+    if(USE_MIXED_LINKING)
+        # 混合链接模式：FFMPEG 动态，其他静态
+        message(STATUS "Configuring mixed linking for Windows")
+        
+        # 首先尝试查找动态 FFMPEG
+        set(CMAKE_FIND_LIBRARY_SUFFIXES_BACKUP ${CMAKE_FIND_LIBRARY_SUFFIXES})
+        set(CMAKE_FIND_LIBRARY_SUFFIXES ".dll.a" ".lib")
+        
+        find_package(PkgConfig QUIET)
+        if(PKG_CONFIG_FOUND)
+            pkg_check_modules(FFMPEG QUIET libavcodec libavformat libavutil libswscale)
+        endif()
+        
+        if(NOT FFMPEG_FOUND)
+            find_package(FFMPEG QUIET)
+        endif()
+        
+        # 恢复库搜索后缀
+        set(CMAKE_FIND_LIBRARY_SUFFIXES ${CMAKE_FIND_LIBRARY_SUFFIXES_BACKUP})
+        
+        # 如果动态 FFMPEG 查找失败，回退到标准方式
+        if(NOT FFMPEG_FOUND)
+            message(WARNING "Dynamic FFMPEG not found, falling back to standard linking")
+            find_package(FFMPEG REQUIRED)
+        endif()
+        
+        # 其他库保持静态（vcpkg 会根据 triplet 自动处理）
+        find_package(WebP CONFIG REQUIRED)
+        find_package(glfw3 CONFIG REQUIRED)
+        find_package(nlohmann_json CONFIG REQUIRED)
+        find_package(Freetype CONFIG REQUIRED)
+        find_package(glm CONFIG REQUIRED)
+        find_package(glad CONFIG REQUIRED)
+        find_package(OpenGL REQUIRED)
+        find_package(utf8cpp CONFIG REQUIRED)
+        find_package(SDL2 CONFIG REQUIRED)
+        find_package(SDL2_mixer CONFIG REQUIRED)
+        find_package(Stb REQUIRED)
+        find_package(tinyfiledialogs CONFIG REQUIRED)
+        
+    else()
+        # 标准模式：按 triplet 设置链接
+        find_package(WebP CONFIG REQUIRED)
+        find_package(FFMPEG REQUIRED)
+        find_package(glfw3 CONFIG REQUIRED)
+        find_package(nlohmann_json CONFIG REQUIRED)
+        find_package(Freetype CONFIG REQUIRED)
+        find_package(glm CONFIG REQUIRED)
+        find_package(glad CONFIG REQUIRED)
+        find_package(OpenGL REQUIRED)
+        find_package(utf8cpp CONFIG REQUIRED)
+        find_package(SDL2 CONFIG REQUIRED)
+        find_package(SDL2_mixer CONFIG REQUIRED)
+        find_package(Stb REQUIRED)
+        find_package(tinyfiledialogs CONFIG REQUIRED)
+    endif()
 endif()
 
 # 创建可执行文件

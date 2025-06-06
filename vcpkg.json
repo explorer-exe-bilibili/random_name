@@ -15,15 +15,6 @@
     "libwebp",
     "nlohmann-json",
     "sdl2",
-    {
-      "name": "sdl2-mixer",
-      "features": [
-        "mpg123",
-        "libflac",
-        "libmodplug",
-        "opusfile"
-      ]
-    },
     "stb",
     "utfcpp",
     {
@@ -44,5 +35,27 @@
       ]
     },
     "tinyfiledialogs"
-  ]
+  ],
+    "features": {
+    "full-audio": {
+      "description": "Full audio support (excludes ARM64 Windows)",
+      "dependencies": [
+        {
+          "name": "sdl2-mixer",
+          "features": ["libflac", "libmodplug", "mpg123", "wavpack","opusfile"],
+          "platform": "!(windows & arm64)"
+        }
+      ]
+    },
+    "basic-audio": {
+      "description": "Basic audio support (ARM64 Windows compatible)",
+      "dependencies": [
+        {
+          "name": "sdl2-mixer",
+          "features": ["libflac", "libmodplug", "mpg123","opusfile"]
+        }
+      ]
+    }
+  },
+  "default-features": ["full-audio"]
 }
