@@ -251,12 +251,6 @@ jobs:
     - name: Debug Build Output
       shell: bash
       run: |
-        echo "=== Complete build directory listing ==="
-        find build -type f | sort
-        
-        echo "=== Binary files ==="
-        find build -type f -exec file {} \; | grep -i "executable\|mach-o\|elf"
-        
         echo "=== Checking specific paths ==="
         ls -la build/bin/ || true
 
