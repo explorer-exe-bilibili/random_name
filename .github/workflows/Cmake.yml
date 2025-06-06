@@ -217,12 +217,18 @@ jobs:
     - name: Configure CMake
       shell: bash
       run: |
+        if [[ "${{ matrix.arch }}" == "arm64" && "${{ runner.os }}" == "Windows" ]]; then
+          VCPKG_FEATURES="basic-audio"
+        else
+          VCPKG_FEATURES="full-audio"
+        fi
         if [[ "${{ matrix.use_system_deps }}" == "true" ]]; then
           cmake -B build -S . \
             -DCMAKE_BUILD_TYPE=Release \
             -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
             -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
             -DVCPKG_TARGET_TRIPLET=${{ env.VCPKG_TARGET_TRIPLET }} \
+            -DVCPKG_MANIFEST_FEATURES="$VCPKG_FEATURES" \
             -DUSE_SYSTEM_DEPS=ON\
             -G Ninja
         else
@@ -231,6 +237,7 @@ jobs:
             -DCMAKE_C_COMPILER=${{ matrix.c_compiler }} \
             -DCMAKE_CXX_COMPILER=${{ matrix.cpp_compiler }} \
             -DVCPKG_TARGET_TRIPLET=${{ env.VCPKG_TARGET_TRIPLET }} \
+            -DVCPKG_MANIFEST_FEATURES="$VCPKG_FEATURES" \
             -G Ninja
         fi
 

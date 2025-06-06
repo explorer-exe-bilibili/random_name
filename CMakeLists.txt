@@ -68,6 +68,11 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 # 添加源文件
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
 file(GLOB_RECURSE HEADERS "include/*.hpp" "include/*.h")
+
+
+# 创建可执行文件
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+
 if(USE_SYSTEM_DEPS)
     message(STATUS "Using system dependencies")
     
@@ -81,6 +86,11 @@ if(USE_SYSTEM_DEPS)
     find_package(Freetype REQUIRED)
     find_package(OpenGL REQUIRED)
     
+    find_package(glm REQUIRED)
+    find_package(glad REQUIRED)
+    find_package(utf8cpp REQUIRED)
+    find_package(Stb REQUIRED)
+    find_package(tinyfiledialogs REQUIRED)
     # SDL2
     pkg_check_modules(SDL2 REQUIRED sdl2)
     pkg_check_modules(SDL2_MIXER REQUIRED SDL2_mixer)
@@ -98,6 +108,10 @@ if(USE_SYSTEM_DEPS)
         ${SDL2_LIBRARIES}
         ${SDL2_MIXER_LIBRARIES}
         ${WEBP_LIBRARIES}
+        glm::glm
+        glad::glad
+        utf8::cpp utf8cpp::utf8cpp
+        tinyfiledialogs::tinyfiledialogs
     )
     
     target_include_directories(${PROJECT_NAME} PRIVATE
@@ -105,6 +119,14 @@ if(USE_SYSTEM_DEPS)
         ${SDL2_INCLUDE_DIRS}
         ${SDL2_MIXER_INCLUDE_DIRS}
         ${WEBP_INCLUDE_DIRS}
+        include
+        ${FREETYPE_INCLUDE_DIRS}
+        ${GLM_INCLUDE_DIRS}
+        ${Stb_INCLUDE_DIR}
+        ${PORTABLE_FILE_DIALOGS_INCLUDE_DIRS}
+    )
+    target_link_directories(${PROJECT_NAME} PRIVATE
+        ${FFMPEG_LIBRARY_DIRS}
     )
     
 else()
@@ -165,47 +187,44 @@ else()
         find_package(Stb REQUIRED)
         find_package(tinyfiledialogs CONFIG REQUIRED)
     endif()
+
+    # 编译定义
+    target_compile_definitions(${PROJECT_NAME} PRIVATE
+        $<$<CONFIG:Debug>:DEBUG_MODE>
+    )
+
+    # 包含头文件目录
+    target_include_directories(${PROJECT_NAME} PRIVATE 
+        include
+        ${FFMPEG_INCLUDE_DIRS}
+        ${FREETYPE_INCLUDE_DIRS}
+        ${GLM_INCLUDE_DIRS}
+        ${Stb_INCLUDE_DIR}
+        ${PORTABLE_FILE_DIALOGS_INCLUDE_DIRS}
+    )
+
+    # 链接目录
+    if(FFMPEG_LIBRARY_DIRS)
+        target_link_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_LIBRARY_DIRS})
+    endif()
+
+    # 链接所有库
+    target_link_libraries(${PROJECT_NAME} PRIVATE 
+        glfw
+        nlohmann_json::nlohmann_json
+        Freetype::Freetype
+        glm::glm
+        glad::glad
+        ${OPENGL_LIBRARIES}
+        utf8::cpp utf8cpp::utf8cpp
+        $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
+        $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
+        $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
+        ${FFMPEG_LIBRARIES}
+        WebP::webp WebP::webpdecoder WebP::webpdemux
+        tinyfiledialogs::tinyfiledialogs
+    )
 endif()
-
-# 创建可执行文件
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
-
-# 编译定义
-target_compile_definitions(${PROJECT_NAME} PRIVATE
-    $<$<CONFIG:Debug>:DEBUG_MODE>
-)
-
-# 包含头文件目录
-target_include_directories(${PROJECT_NAME} PRIVATE 
-    include
-    ${FFMPEG_INCLUDE_DIRS}
-    ${FREETYPE_INCLUDE_DIRS}
-    ${GLM_INCLUDE_DIRS}
-    ${Stb_INCLUDE_DIR}
-    ${PORTABLE_FILE_DIALOGS_INCLUDE_DIRS}
-)
-
-# 链接目录
-if(FFMPEG_LIBRARY_DIRS)
-    target_link_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_LIBRARY_DIRS})
-endif()
-
-# 链接所有库
-target_link_libraries(${PROJECT_NAME} PRIVATE 
-    glfw
-    nlohmann_json::nlohmann_json
-    Freetype::Freetype
-    glm::glm
-    glad::glad
-    ${OPENGL_LIBRARIES}
-    utf8::cpp utf8cpp::utf8cpp
-    $<TARGET_NAME_IF_EXISTS:SDL2::SDL2main>
-    $<IF:$<TARGET_EXISTS:SDL2::SDL2>,SDL2::SDL2,SDL2::SDL2-static>
-    $<IF:$<TARGET_EXISTS:SDL2_mixer::SDL2_mixer>,SDL2_mixer::SDL2_mixer,SDL2_mixer::SDL2_mixer-static>
-    ${FFMPEG_LIBRARIES}
-    WebP::webp WebP::webpdecoder WebP::webpdemux
-    tinyfiledialogs::tinyfiledialogs
-)
 
 # 平台特定设置
 if(WIN32)
