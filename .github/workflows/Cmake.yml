@@ -342,7 +342,6 @@ jobs:
         GITHUB_ACTIONS: true
         SOURCE_DIR: ~/installer_files
         OUTPUT_DIR: ~/installer/Output
-        OUTPUT_DIR: ~/installer/Output
         ARCH: ${{ matrix.arch }}
         ICON_PATH: ${{ github.workspace }}/OIP-C.ico
       shell: pwsh
