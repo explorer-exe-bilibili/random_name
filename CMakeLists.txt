@@ -85,19 +85,65 @@ if(USE_SYSTEM_DEPS)
     find_package(nlohmann_json REQUIRED)
     find_package(Freetype REQUIRED)
     find_package(OpenGL REQUIRED)
-    
     find_package(glm REQUIRED)
-    find_package(glad REQUIRED)
-    find_package(utf8cpp REQUIRED)
-    find_package(Stb REQUIRED)
-    find_package(tinyfiledialogs REQUIRED)
+
+    # 特殊处理 GLAD - 优先使用我们安装的版本
+    find_package(glad QUIET)
+    if(NOT glad_FOUND)
+        # 回退到手动查找
+        find_path(GLAD_INCLUDE_DIR 
+            NAMES glad/glad.h
+            PATHS /usr/local/include /usr/include
+        )
+        find_library(GLAD_LIBRARY
+            NAMES glad libglad
+            PATHS /usr/local/lib /usr/lib /usr/lib/aarch64-linux-gnu
+        )
+        
+        if(GLAD_INCLUDE_DIR AND GLAD_LIBRARY)
+            add_library(glad::glad STATIC IMPORTED)
+            set_target_properties(glad::glad PROPERTIES
+                IMPORTED_LOCATION "${GLAD_LIBRARY}"
+                INTERFACE_INCLUDE_DIRECTORIES "${GLAD_INCLUDE_DIR}"
+            )
+            message(STATUS "Found GLAD: ${GLAD_LIBRARY}")
+        else()
+            message(FATAL_ERROR "GLAD not found. Please install GLAD development package.")
+        endif()
+    endif()
+
     # SDL2
     pkg_check_modules(SDL2 REQUIRED sdl2)
     pkg_check_modules(SDL2_MIXER REQUIRED SDL2_mixer)
     
     # WebP
     pkg_check_modules(WEBP REQUIRED libwebp)
+    # stb 通常是 header-only，可能需要手动处理
+    find_path(STB_INCLUDE_DIR 
+        NAMES stb_image.h
+        PATHS /usr/include/stb /usr/local/include/stb /usr/include /usr/local/include ~
+    )
+    if(STB_INCLUDE_DIR)
+        add_library(stb INTERFACE)
+        target_include_directories(stb INTERFACE ${STB_INCLUDE_DIR})
+        add_library(stb::stb ALIAS stb)
+        message(STATUS "Found STB: ${STB_INCLUDE_DIR}")
+    else()
+        message(WARNING "STB not found, you may need to install libstb-dev")
+    endif()
     
+    # tinyfiledialogs - 可能需要手动安装
+    find_library(TINYFILEDIALOGS_LIBRARY NAMES tinyfiledialogs)
+    if(TINYFILEDIALOGS_LIBRARY)
+        add_library(tinyfiledialogs::tinyfiledialogs UNKNOWN IMPORTED)
+        set_target_properties(tinyfiledialogs::tinyfiledialogs PROPERTIES
+            IMPORTED_LOCATION "${TINYFILEDIALOGS_LIBRARY}"
+        )
+    else()
+        message(WARNING "tinyfiledialogs not found, some features may be disabled")
+        # 创建一个空的目标作为占位符
+        add_library(tinyfiledialogs::tinyfiledialogs INTERFACE)
+    endif()
     # 设置系统依赖的链接
     target_link_libraries(${PROJECT_NAME} PRIVATE
         ${FFMPEG_LIBRARIES}

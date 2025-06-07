@@ -121,8 +121,7 @@ jobs:
           libsdl2-mixer-dev \
           libopengl-dev \
           libgl1-mesa-dev \
-          libglu1-mesa-dev \
-          utf8cpp glm
+          libglu1-mesa-dev 
         
         # 安装 X11 开发库
         sudo apt-get install -y \
@@ -131,6 +130,69 @@ jobs:
           libxinerama-dev \
           libxcursor-dev \
           libxi-dev
+        # 手动安装 GLAD (因为系统包管理器通常没有 glad)
+        echo "Installing GLAD manually..."
+        cd /tmp
+        git clone https://github.com/Dav1dde/glad.git
+        cd glad
+        python3 -m pip install --user .
+        glad --generator=c --spec=gl --api=gl=3.3 --profile=core --out-path=/tmp/glad_generated
+        
+        # 创建系统级安装
+        sudo mkdir -p /usr/local/include/glad
+        sudo mkdir -p /usr/local/lib
+        sudo cp -r /tmp/glad_generated/include/* /usr/local/include/
+        
+        # 编译 GLAD 库
+        cd /tmp/glad_generated
+        gcc -c src/glad.c -I include -fPIC
+        ar rcs libglad.a glad.o
+        sudo cp libglad.a /usr/local/lib/
+        
+        # 创建 CMake 配置文件
+        sudo mkdir -p /usr/local/lib/cmake/glad
+        sudo tee /usr/local/lib/cmake/glad/gladConfig.cmake > /dev/null << 'EOF'
+        # GLAD CMake configuration
+        
+        find_path(GLAD_INCLUDE_DIR 
+          NAMES glad/glad.h
+          PATHS /usr/local/include
+          NO_DEFAULT_PATH
+        )
+        
+        find_library(GLAD_LIBRARY
+          NAMES glad libglad
+          PATHS /usr/local/lib
+          NO_DEFAULT_PATH
+        )
+        
+        if(GLAD_INCLUDE_DIR AND GLAD_LIBRARY)
+          set(GLAD_FOUND TRUE)
+          add_library(glad::glad STATIC IMPORTED)
+          set_target_properties(glad::glad PROPERTIES
+            IMPORTED_LOCATION "${GLAD_LIBRARY}"
+            INTERFACE_INCLUDE_DIRECTORIES "${GLAD_INCLUDE_DIR}"
+          )
+        else()
+          set(GLAD_FOUND FALSE)
+        endif()
+        
+        mark_as_advanced(GLAD_INCLUDE_DIR GLAD_LIBRARY)
+        EOF
+        
+        echo "GLAD installation completed"
+
+        # 下载stb
+        echo "Installing STB..."
+        cd /tmp
+        git clone https://github.com/nothings/stb.git
+        cd stb
+        mkdir build
+        cd build
+        cmake ..
+        make
+        sudo make install
+
     - name: Setup build environment
       shell: bash
       run: |
@@ -200,7 +262,7 @@ jobs:
     - name: Cache vcpkg
       uses: actions/cache@v4
       with:
-        path: ${{ github.workspace }}/build/vcpkg-installed
+        path: ${{ github.workspace }}/build/vcpkg_installed
         key: vcpkg-${{ runner.os }}-${{matrix.arch}}-${{ hashFiles('**/vcpkg.json') }}
         restore-keys: |
           vcpkg-${{ runner.os }}-${{matrix.arch}}-${{ hashFiles('**/vcpkg.json') }}
@@ -214,6 +276,7 @@ jobs:
         key: vcpkg
         restore-keys: |
           vcpkg
+        enableCrossOsArchive: true
 
     - name: Configure CMake
       shell: bash
@@ -277,10 +340,11 @@ jobs:
       env: 
         GITHUB_ACTIONS: true
         SOURCE_DIR: ~/installer_files
-        INSTALLER_DIR: ~/installer/Output
+        OUTPUT_DIR: ~/installer/Output
         ARCH: ${{ matrix.arch }}
       shell: pwsh
       run: |
+        mkdir -p ~/installer/Output
         iscc installer_action\common.iss
       continue-on-error: true
 
