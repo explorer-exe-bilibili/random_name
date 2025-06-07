@@ -260,9 +260,9 @@ jobs:
         mkdir -p ~/installer_files
 
         if( [[ "${{ runner.os }}" == "Windows" ]] ); then
-          cp -r build/bin/Release/*.exe ~/installer_files/
-          cp -r build/bin/Release/*.dll ~/installer_files/
-          cp -r build/bin/Release/files ~/installer_files/
+          cp -r build/bin/*.exe ~/installer_files/
+          cp -r build/bin/*.dll ~/installer_files/ || true
+          cp -r build/bin/files ~/installer_files/
         else
           cp -r build/bin/* ~/installer_files/
         fi
@@ -298,19 +298,20 @@ jobs:
         name: random_name_${{ matrix.arch }}_${{ runner.os }}_installer
         path: ~/installer/Output/*.exe
         retention-days: 30
-        
-    - name: lookup ~
+
+    - name: prepare_release
       run: |
-        echo "Home directory is $HOME"
-        ls -la ~/
+       cp ~/random_name_${{ matrix.arch }}_${{ runner.os }}.tar.gz ${{github.workspace}}/random_name_${{ matrix.arch }}_${{ runner.os }}.tar.gz || true
+       mkdir -p ${{github.workspace}}/installer_program 
+       cp ~/installer/Output/*.exe ${{github.workspace}}/installer_program || true
 
     - name: Create Release
       id: create_release
       uses: softprops/action-gh-release@v2.0.8
       with:
         files: |
-          ~/random_name_${{ matrix.arch }}_${{ runner.os }}.tar.gz
-          ~/installer/Output/*.exe
+          ${{ github.workspace }}/random_name_${{ matrix.arch }}_${{ runner.os }}.tar.gz
+          ${{ github.workspace }}/installer_program/*.exe
         prerelease: true
         make_latest: false
         name: "Release action${{ github.ref_name }}"
