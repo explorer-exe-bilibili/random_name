@@ -39,18 +39,25 @@ jobs:
 
           # Linux x64
           - os: ubuntu-latest
-            arch: x64
+            arch: x64-gcc
             c_compiler: gcc
             cpp_compiler: g++
             vcpkg_triplet: x64-linux-release
+
+          # Linux x64
+          - os: ubuntu-latest
+            arch: x64-clang
+            c_compiler: clang
+            cpp_compiler: clang++
+            vcpkg_triplet: x64-linux-release
           
-          # Linux ARM64 (需要自托管 runner)
-          - os: ubuntu-24.04-arm
-            arch: arm64
-            c_compiler: gcc
-            cpp_compiler: g++
-            vcpkg_triplet: arm64-linux-release
-            use_system_deps: true
+          # # Linux ARM64 (需要自托管 runner)
+          # - os: ubuntu-24.04-arm
+          #   arch: arm64
+          #   c_compiler: gcc
+          #   cpp_compiler: g++
+          #   vcpkg_triplet: arm64-linux-release
+          #   use_system_deps: true
 
           # macOS x64
           - os: macos-13  # Intel-based
@@ -346,8 +353,7 @@ jobs:
         ICON_PATH: ${{ github.workspace }}/OIP-C.ico
       shell: pwsh
       run: |
-        mkdir -p ~/installer/Output
-        mkdir -p ~/installer/Output
+        mkdir -p ~/installer/Output || true
         iscc installer_action\common.iss
       continue-on-error: true
 

@@ -723,21 +723,47 @@ std::shared_ptr<FrameData> VideoPlayer::convertFrameToFrameData(AVFrame* frame) 
         return nullptr;
     }
 
+    // 验证frame参数的有效性
+    if (width <= 0 || height <= 0) {
+        Log << Level::Error << "无效的视频尺寸: " << width << "x" << height << op::endl;
+        return nullptr;
+    }
+
     // 获取RGB数据
     unsigned char* rgbData = frame->data[0];
     int rgbLinesize = frame->linesize[0];
     
+    // 验证linesize的合理性
+    if (rgbLinesize < width * 3) {
+        Log << Level::Error << "RGB行大小异常: " << rgbLinesize << " < " << (width * 3) << op::endl;
+        return nullptr;
+    }
+    
     // 创建帧数据结构
     std::shared_ptr<FrameData> frameData = std::make_shared<FrameData>(width, height);
+    if (!frameData || !frameData->data) {
+        Log << Level::Error << "无法分配FrameData内存" << op::endl;
+        return nullptr;
+    }
     
     // 如果帧行大小等于宽度*3（每像素3字节RGB），可以直接使用数据
     if (rgbLinesize == width * 3) {
-        memcpy(frameData->data, rgbData, width * height * 3);
+        size_t copySize = static_cast<size_t>(width) * height * 3;
+        memcpy(frameData->data, rgbData, copySize);
     } else {
         // 处理行大小不等于宽度*3的情况（通常因为内存对齐）
         for (int y = 0; y < height; y++) {
-            // 复制每一行，忽略填充字节
-            memcpy(frameData->data + y * width * 3, rgbData + y * rgbLinesize, width * 3);
+            size_t destOffset = static_cast<size_t>(y) * width * 3;
+            size_t srcOffset = static_cast<size_t>(y) * rgbLinesize;
+            size_t copySize = static_cast<size_t>(width) * 3;
+            
+            // 边界检查
+            if (destOffset + copySize > static_cast<size_t>(width) * height * 3) {
+                Log << Level::Error << "目标缓冲区越界" << op::endl;
+                return nullptr;
+            }
+            
+            memcpy(frameData->data + destOffset, rgbData + srcOffset, copySize);
         }
     }
     
