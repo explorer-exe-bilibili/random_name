@@ -264,7 +264,6 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.workspace }}/build/vcpkg_installed
-        path: ${{ github.workspace }}/build/vcpkg_installed
         key: vcpkg-${{ runner.os }}-${{matrix.arch}}-${{ hashFiles('**/vcpkg.json') }}
         restore-keys: |
           vcpkg-${{ runner.os }}-${{matrix.arch}}-${{ hashFiles('**/vcpkg.json') }}
@@ -278,7 +277,6 @@ jobs:
         key: vcpkg
         restore-keys: |
           vcpkg
-        enableCrossOsArchive: true
         enableCrossOsArchive: true
 
     - name: Configure CMake
