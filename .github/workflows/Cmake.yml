@@ -122,6 +122,7 @@ jobs:
           libopengl-dev \
           libgl1-mesa-dev \
           libglu1-mesa-dev 
+          libglu1-mesa-dev 
         
         # 安装 X11 开发库
         sudo apt-get install -y \
@@ -130,22 +131,22 @@ jobs:
           libxinerama-dev \
           libxcursor-dev \
           libxi-dev
-        # 手动安装 GLAD (因为系统包管理器通常没有 glad)
-        echo "Installing GLAD manually..."
+        
+        # 手动安装 GLAD (使用新的 GLAD2 语法)
+        echo "Installing GLAD2..."
         cd /tmp
-        git clone https://github.com/Dav1dde/glad.git
-        cd glad
-        python3 -m pip install --user .
-        glad --generator=c --spec=gl --api=gl=3.3 --profile=core --out-path=/tmp/glad_generated
+        
+        # 使用 GLAD2 的正确语法生成 OpenGL 3.3 Core Profile
+        python3 -m glad c --api="gl:core=3.3" --out-path=/tmp/glad_generated
         
         # 创建系统级安装
-        sudo mkdir -p /usr/local/include/glad
+        sudo mkdir -p /usr/local/include
         sudo mkdir -p /usr/local/lib
         sudo cp -r /tmp/glad_generated/include/* /usr/local/include/
         
         # 编译 GLAD 库
         cd /tmp/glad_generated
-        gcc -c src/glad.c -I include -fPIC
+        gcc -c src/gl.c -I include -fPIC -o glad.o
         ar rcs libglad.a glad.o
         sudo cp libglad.a /usr/local/lib/
         
@@ -155,7 +156,7 @@ jobs:
         # GLAD CMake configuration
         
         find_path(GLAD_INCLUDE_DIR 
-          NAMES glad/glad.h
+          NAMES glad/gl.h
           PATHS /usr/local/include
           NO_DEFAULT_PATH
         )
@@ -173,8 +174,10 @@ jobs:
             IMPORTED_LOCATION "${GLAD_LIBRARY}"
             INTERFACE_INCLUDE_DIRECTORIES "${GLAD_INCLUDE_DIR}"
           )
+          message(STATUS "Found GLAD: ${GLAD_LIBRARY}")
         else()
           set(GLAD_FOUND FALSE)
+          message(WARNING "GLAD not found")
         endif()
         
         mark_as_advanced(GLAD_INCLUDE_DIR GLAD_LIBRARY)
@@ -182,16 +185,14 @@ jobs:
         
         echo "GLAD installation completed"
 
-        # 下载stb
-        echo "Installing STB..."
+        # 安装 STB (简化版本)
+        echo "Installing STB headers..."
+        sudo mkdir -p /usr/local/include/stb
         cd /tmp
-        git clone https://github.com/nothings/stb.git
-        cd stb
-        mkdir build
-        cd build
-        cmake ..
-        make
-        sudo make install
+        wget -O stb_image.h https://raw.githubusercontent.com/nothings/stb/master/stb_image.h
+        wget -O stb_image_write.h https://raw.githubusercontent.com/nothings/stb/master/stb_image_write.h
+        wget -O stb_truetype.h https://raw.githubusercontent.com/nothings/stb/master/stb_truetype.h
+        sudo cp stb_*.h /usr/local/include/stb/
 
     - name: Setup build environment
       shell: bash
@@ -263,6 +264,7 @@ jobs:
       uses: actions/cache@v4
       with:
         path: ${{ github.workspace }}/build/vcpkg_installed
+        path: ${{ github.workspace }}/build/vcpkg_installed
         key: vcpkg-${{ runner.os }}-${{matrix.arch}}-${{ hashFiles('**/vcpkg.json') }}
         restore-keys: |
           vcpkg-${{ runner.os }}-${{matrix.arch}}-${{ hashFiles('**/vcpkg.json') }}
@@ -276,6 +278,7 @@ jobs:
         key: vcpkg
         restore-keys: |
           vcpkg
+        enableCrossOsArchive: true
         enableCrossOsArchive: true
 
     - name: Configure CMake
@@ -341,9 +344,12 @@ jobs:
         GITHUB_ACTIONS: true
         SOURCE_DIR: ~/installer_files
         OUTPUT_DIR: ~/installer/Output
+        OUTPUT_DIR: ~/installer/Output
         ARCH: ${{ matrix.arch }}
+        ICON_PATH: ${{ github.workspace }}/OIP-C.ico
       shell: pwsh
       run: |
+        mkdir -p ~/installer/Output
         mkdir -p ~/installer/Output
         iscc installer_action\common.iss
       continue-on-error: true

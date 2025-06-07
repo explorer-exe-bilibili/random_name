@@ -87,7 +87,7 @@ if(USE_SYSTEM_DEPS)
     find_package(OpenGL REQUIRED)
     find_package(glm REQUIRED)
 
-    # 特殊处理 GLAD - 优先使用我们安装的版本
+    # 特殊处理 GLAD - 适应 GLAD2 的变化
     find_package(glad QUIET)
     if(NOT glad_FOUND)
         # 回退到手动查找
@@ -111,6 +111,7 @@ if(USE_SYSTEM_DEPS)
             message(FATAL_ERROR "GLAD not found. Please install GLAD development package.")
         endif()
     endif()
+    
 
     # SDL2
     pkg_check_modules(SDL2 REQUIRED sdl2)
@@ -118,6 +119,32 @@ if(USE_SYSTEM_DEPS)
     
     # WebP
     pkg_check_modules(WEBP REQUIRED libwebp)
+    # stb 通常是 header-only，可能需要手动处理
+    find_path(STB_INCLUDE_DIR 
+        NAMES stb_image.h
+        PATHS /usr/include/stb /usr/local/include/stb /usr/include /usr/local/include ~
+    )
+    if(STB_INCLUDE_DIR)
+        add_library(stb INTERFACE)
+        target_include_directories(stb INTERFACE ${STB_INCLUDE_DIR})
+        add_library(stb::stb ALIAS stb)
+        message(STATUS "Found STB: ${STB_INCLUDE_DIR}")
+    else()
+        message(WARNING "STB not found, you may need to install libstb-dev")
+    endif()
+    
+    # tinyfiledialogs - 可能需要手动安装
+    find_library(TINYFILEDIALOGS_LIBRARY NAMES tinyfiledialogs)
+    if(TINYFILEDIALOGS_LIBRARY)
+        add_library(tinyfiledialogs::tinyfiledialogs UNKNOWN IMPORTED)
+        set_target_properties(tinyfiledialogs::tinyfiledialogs PROPERTIES
+            IMPORTED_LOCATION "${TINYFILEDIALOGS_LIBRARY}"
+        )
+    else()
+        message(WARNING "tinyfiledialogs not found, some features may be disabled")
+        # 创建一个空的目标作为占位符
+        add_library(tinyfiledialogs::tinyfiledialogs INTERFACE)
+    endif()
     # stb 通常是 header-only，可能需要手动处理
     find_path(STB_INCLUDE_DIR 
         NAMES stb_image.h

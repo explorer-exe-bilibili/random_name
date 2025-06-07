@@ -11,6 +11,7 @@
 #define MyAppSourceDir GetEnv('SOURCE_DIR')
 #define MyAppOutputDir GetEnv('OUTPUT_DIR')
 #define ARCH GetEnv('ARCH')
+#define ICON_PATH GetEnv('ICON_PATH')
 
 [Setup]
 ; NOTE: The value of AppId uniquely identifies this application. Do not use the same AppId value in installers for other applications.
@@ -26,7 +27,7 @@ DisableProgramGroupPage=yes
 ;PrivilegesRequired=lowest
 OutputDir={#MyAppOutputDir}
 OutputBaseFilename=random_name_{#ARCH}-setup
-SetupIconFile={#MyAppSourceDir}\OIP-C.ico
+SetupIconFile={#ICON_PATH}
 Compression=lzma
 PrivilegesRequiredOverridesAllowed=dialog
 SolidCompression=yes
@@ -64,9 +65,7 @@ Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
 
 [Files]
-Source: "{#MyAppSourceDir}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "{#MyAppSourceDir}\files\*"; DestDir: "{app}\files"; Flags: ignoreversion recursesubdirs createallsubdirs
-; NOTE: Don't use "Flags: ignoreversion" on any shared system files
+Source: "{#MyAppSourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion
 
 [Registry]
 Root: HKA; Subkey: "Software\Classes\{#MyAppAssocExt}\OpenWithProgids"; ValueType: string; ValueName: "{#MyAppAssocKey}"; ValueData: ""; Flags: uninsdeletevalue
