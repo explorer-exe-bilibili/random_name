@@ -11,6 +11,7 @@ else()
     set(IN_GITHUB_ACTIONS FALSE)
 endif()
 if(NOT USE_SYSTEM_DEPS)
+    message("Use VCPKG")
     # 确保在任何其他操作之前设置 vcpkg 集成
     if(NOT IN_GITHUB_ACTIONS)
         if(WIN32)
@@ -37,6 +38,7 @@ if(NOT USE_SYSTEM_DEPS)
     # 检测是否使用混合链接模式
     set(USE_MIXED_LINKING FALSE)
     if(WIN32 AND VCPKG_TARGET_TRIPLET MATCHES "static-dynamic-ffmpeg")
+        message("USE mixed linking")
         set(USE_MIXED_LINKING TRUE)
         message(STATUS "Using mixed linking: Static libraries + Dynamic FFMPEG")
     endif()
@@ -44,13 +46,15 @@ if(NOT USE_SYSTEM_DEPS)
     # vcpkg 工具链文件设置（在 project() 之前）
     if(NOT DEFINED CMAKE_TOOLCHAIN_FILE)
         if(DEFINED ENV{VCPKG_ROOT})
+            message("Using VCPKG_ROOT")
             set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_ROOT}/scripts/buildsystems/vcpkg.cmake"
                 CACHE STRING "Vcpkg toolchain file")
         elseif(DEFINED ENV{VCPKG_INSTALLATION_ROOT})
             set(CMAKE_TOOLCHAIN_FILE "$ENV{VCPKG_INSTALLATION_ROOT}/scripts/buildsystems/vcpkg.cmake"
                 CACHE STRING "Vcpkg toolchain file")
         else()
-            set(CMAKE_TOOLCHAIN_FILE "")
+            message("using /opt/vcpkg")
+            set(CMAKE_TOOLCHAIN_FILE "/opt/vcpkg/scripts/buildsystems/vcpkg.cmake")
         endif()
     endif()
 endif()
@@ -203,6 +207,7 @@ if(USE_SYSTEM_DEPS)
     )
     
 else()
+    message(STATUS "Using vcpkg")
     # 查找依赖库 - 根据链接模式调整
     if(USE_MIXED_LINKING)
         # 混合链接模式：FFMPEG 动态，其他静态
@@ -352,6 +357,46 @@ elseif(UNIX)
             set_target_properties(glfw3 PROPERTIES IMPORTED_GLOBAL TRUE)
             add_library(glfw ALIAS glfw3)
         endif()
+    endif()
+endif()
+# WSL 特定设置
+if(UNIX AND NOT APPLE)
+    # 检测 WSL
+    execute_process(
+        COMMAND grep -q Microsoft /proc/version
+        RESULT_VARIABLE IS_WSL
+        OUTPUT_QUIET ERROR_QUIET
+    )
+      if(IS_WSL EQUAL 0)
+        message(STATUS "检测到 WSL 环境，应用特定优化")
+        
+        # 添加 WSL 特定编译标志
+        target_compile_definitions(${PROJECT_NAME} PRIVATE WSL_BUILD=1)
+        
+        # 内存安全和错误恢复相关编译选项
+        target_compile_options(${PROJECT_NAME} PRIVATE 
+            -O1                          # 减少优化级别以避免某些 WSL 问题
+            -fno-strict-aliasing        # 避免严格别名优化导致的问题
+            -fstack-protector-strong    # 栈保护
+            -D_FORTIFY_SOURCE=2         # 缓冲区溢出检测
+            -fno-omit-frame-pointer     # 保留帧指针用于调试
+            -fsanitize=address          # 地址检测器（调试模式）
+            -g                          # 调试信息
+        )
+        
+        # 添加链接时的内存安全标志
+        target_link_options(${PROJECT_NAME} PRIVATE
+            -fsanitize=address          # 地址检测器链接
+            -Wl,-z,relro,-z,now        # 增强安全性
+        )
+        
+        # 链接顺序很重要
+        target_link_libraries(${PROJECT_NAME} 
+            ${OPENGL_LIBRARIES}
+            ${GLFW_LIBRARIES}
+            ${CMAKE_DL_LIBS}
+            pthread
+        )
     endif()
 endif()
 

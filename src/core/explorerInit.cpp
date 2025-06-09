@@ -57,26 +57,35 @@ int Explorer::init()
         Log << Level::Info << "Background video loaded successfully" << op::endl;
     }
     if(!config->getBool(NO_VIDEO_PRELOAD,0)){
-        videos[VideoID::Signal3star] = std::make_shared<VideoPlayer>();
-        videos[VideoID::Signal3star]->load(config->getPath(SIGNAL_3_STAR_VIDEO_PATH, "files/video/signal3star.mp4"));
-        videos[VideoID::Signal3star]->setVolume(config->getInt(VOLUME,50));
-        videos[VideoID::Signal3star]->setLoop(false);
-        videos[VideoID::Signal4star] = std::make_shared<VideoPlayer>();
-        videos[VideoID::Signal4star]->load(config->getPath(SIGNAL_4_STAR_VIDEO_PATH, "files/video/signal4star.mp4"));
-        videos[VideoID::Signal4star]->setVolume(config->getInt(VOLUME,50));
-        videos[VideoID::Signal4star]->setLoop(false);
-        videos[VideoID::Signal5star] = std::make_shared<VideoPlayer>();
-        videos[VideoID::Signal5star]->load(config->getPath(SIGNAL_5_STAR_VIDEO_PATH, "files/video/signal5star.mp4"));
-        videos[VideoID::Signal5star]->setVolume(config->getInt(VOLUME,50));
-        videos[VideoID::Signal5star]->setLoop(false);
-        videos[VideoID::Multi4star] = std::make_shared<VideoPlayer>();
-        videos[VideoID::Multi4star]->load(config->getPath(GROUP_4_STAR_VIDEO_PATH, "files/video/multi4star.mp4"));
-        videos[VideoID::Multi4star]->setVolume(config->getInt(VOLUME,50));
-        videos[VideoID::Multi4star]->setLoop(false);
-        videos[VideoID::Multi5star] = std::make_shared<VideoPlayer>();
-        videos[VideoID::Multi5star]->load(config->getPath(GROUP_5_STAR_VIDEO_PATH, "files/video/multi5star.mp4"));
-        videos[VideoID::Multi5star]->setVolume(config->getInt(VOLUME,50));
-        videos[VideoID::Multi5star]->setLoop(false);
+        // 串行加载视频，避免并发问题
+        std::vector<std::pair<VideoID, std::string>> videosToLoad = {
+            {VideoID::Signal3star, config->getPath(SIGNAL_3_STAR_VIDEO_PATH, "files/video/signal3star.mp4")},
+            {VideoID::Signal4star, config->getPath(SIGNAL_4_STAR_VIDEO_PATH, "files/video/signal4star.mp4")},
+            {VideoID::Signal5star, config->getPath(SIGNAL_5_STAR_VIDEO_PATH, "files/video/signal5star.mp4")},
+            {VideoID::Multi4star, config->getPath(GROUP_4_STAR_VIDEO_PATH, "files/video/multi4star.mp4")},
+            {VideoID::Multi5star, config->getPath(GROUP_5_STAR_VIDEO_PATH, "files/video/multi5star.mp4")}
+        };
+        
+        for (const auto& [videoId, path] : videosToLoad) {
+            try {
+                videos[videoId] = std::make_shared<VideoPlayer>();
+                if (videos[videoId]->load(path)) {
+                    videos[videoId]->setVolume(config->getInt(VOLUME, 50));
+                    videos[videoId]->setLoop(false);
+                    Log << Level::Info << "成功加载视频: " << static_cast<int>(videoId) << op::endl;
+                } else {
+                    Log << Level::Error << "加载视频失败: " << static_cast<int>(videoId) << op::endl;
+                    videos[videoId].reset();
+                }
+                
+                // 添加短暂延迟，避免快速连续分配
+                std::this_thread::sleep_for(std::chrono::milliseconds(10));
+            } catch (const std::exception& e) {
+                Log << Level::Error << "视频加载异常: " << e.what() << op::endl;
+                videos[videoId].reset();
+            }
+        }
+        
         Log << Level::Info << "Preloaded videos successfully" << op::endl;
     }
     Log << Level::Info << "Explorer initialization finished" << op::endl;

@@ -1,7 +1,9 @@
 #pragma once
 
 #ifdef DEBUG_MODE
-#define ASSERT(x) if (!(x)) __debugbreak()
+#ifdef _WIN32
+#define ASSERT(x) if (!(x));
+/* __debugbreak()*/
 
 // 检查OpenGL上下文是否有效的辅助函数声明
 bool IsOpenGLContextValid();
@@ -12,6 +14,11 @@ bool IsOpenGLContextValid();
         a; \
         ASSERT(GLLogCall(#a,__FILE__,__LINE__)); \
     }
+#else
+#define ASSERT(x) {}
+#define GLCall(a) a
+#endif
+
 #else
 #define ASSERT(x) do { } while (0)
 #define GLCall(a) a

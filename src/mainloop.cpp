@@ -11,6 +11,9 @@
 #include "core/baseItem/Base.h"
 #include "core/screen/mainScreen.h"
 #include "core/Drawer.h"
+#include "core/ErrorRecovery.h"
+#include "core/OpenGLErrorRecovery.h"
+#include "core/MemoryMonitor.h"
 
 using namespace core;
 
@@ -34,63 +37,90 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
 }
 
 int mainloop() {
-    GLCall(glClearColor(0.2f, 0.2f, 0.2f, 1.0f));
+    static int consecutiveErrors = 0;
+    const int MAX_CONSECUTIVE_ERRORS = 10;
     
-    // 清除颜色和深度缓冲区
-    GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
-
-    // 设置视口和投影矩阵（如果需要）
-    int width, height;
-    glfwGetFramebufferSize(WindowInfo.window, &width, &height);
-    GLCall(glViewport(0, 0, width, height));
-
-    // FPS计算
-    // 获取当前时间
-    double currentTime = glfwGetTime();
-    frameCount++;
-    
-    // 每秒更新一次FPS值
-    if (currentTime - lastFPSUpdateTime >= 1.0) {
-        currentFPS = frameCount / (currentTime - lastFPSUpdateTime);
-        // 重置计数器
-        frameCount = 0;
-        lastFPSUpdateTime = currentTime;
-        
-        // 输出FPS日志
-        std::stringstream ss;
-        ss << std::fixed << std::setprecision(1) << currentFPS;
-        Log << Level::Debug << "FPS: " << ss.str() << op::endl;
-        Log<<Level::Info<<"Current screen :"<<(int)screen::Screen::getCurrentScreen()->getID()<<op::endl;
-    }
-
-    // 绘制场景
-    // 使用屏幕管理系统的当前屏幕
-    if (screen::Screen::getCurrentScreen()) {
-        screen::Screen::getCurrentScreen()->Draw();
-    } else {
-        Log << Level::Error << "当前屏幕为空，无法绘制" << op::endl;
-    }
-    
-    // 如果启用了FPS显示，则绘制FPS文本
-    if (showFPS) {
-        // 创建FPS文本
-        std::stringstream ss;
-        ss << std::fixed << std::setprecision(1) << "FPS: " << currentFPS;
-        std::string fpsText = ss.str();
-        
-        // 使用Explorer获取默认字体并渲染FPS文本
-        Font* font = Explorer::getInstance()->getFont(FontID::Default); // 使用默认字体
-        if (font) {
-            // 在屏幕右上角渲染FPS文本
-            font->RenderText(fpsText, 0, 0, 0.5f, color::black);
+    try {
+        // 检查并恢复 OpenGL 错误
+        if (!OpenGLErrorRecovery::checkAndRecoverOpenGLErrors()) {
+            consecutiveErrors++;
+            if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+                Log << Level::Error << "连续 OpenGL 错误过多，程序退出" << op::endl;
+                glfwSetWindowShouldClose(WindowInfo.window, GLFW_TRUE);
+                return -1;
+            }
+            return 0;
         }
-    }
-    
-    // 交换前后缓冲区
-    glfwSwapBuffers(WindowInfo.window);
+        
+        GLCall(glClearColor(0.2f, 0.2f, 0.2f, 1.0f));
+        
+        // 清除颜色和深度缓冲区
+        GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
 
-    // 处理事件
-    glfwPollEvents();
+        // 设置视口和投影矩阵（如果需要）
+        int width, height;
+        glfwGetFramebufferSize(WindowInfo.window, &width, &height);
+        GLCall(glViewport(0, 0, width, height));
+
+        // FPS计算
+        // 获取当前时间
+        double currentTime = glfwGetTime();
+        frameCount++;
+        
+        // 每秒更新一次FPS值
+        if (currentTime - lastFPSUpdateTime >= 1.0) {
+            currentFPS = frameCount / (currentTime - lastFPSUpdateTime);
+            // 重置计数器
+            frameCount = 0;
+            lastFPSUpdateTime = currentTime;
+            
+            // 输出FPS日志
+            std::stringstream ss;
+            ss << std::fixed << std::setprecision(1) << currentFPS;
+            Log << Level::Debug << "FPS: " << ss.str() << op::endl;
+            Log<<Level::Info<<"Current screen :"<<(int)screen::Screen::getCurrentScreen()->getID()<<op::endl;
+        }
+
+        // 安全地执行渲染
+        executeRenderingWithRecovery();
+        
+        // 如果启用了FPS显示，则绘制FPS文本
+        if (showFPS) {
+            // 创建FPS文本
+            std::stringstream ss;
+            ss << std::fixed << std::setprecision(1) << "FPS: " << currentFPS;
+            std::string fpsText = ss.str();
+            
+            // 使用Explorer获取默认字体并渲染FPS文本
+            Font* font = Explorer::getInstance()->getFont(FontID::Default); // 使用默认字体
+            if (font) {
+                // 在屏幕右上角渲染FPS文本
+                font->RenderText(fpsText, 0, 0, 0.5f, color::black);
+            }
+        }
+        
+        // 安全地交换缓冲区
+        OpenGLErrorRecovery::safeSwapBuffers(WindowInfo.window);
+
+        // 处理事件
+        glfwPollEvents();
+        
+        consecutiveErrors = 0; // 重置错误计数
+        
+    } catch (const std::exception& e) {
+        consecutiveErrors++;
+        Log << Level::Error << "主循环异常: " << e.what() 
+            << " (连续错误: " << consecutiveErrors << ")" << op::endl;
+        
+        if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
+            Log << Level::Error << "连续错误过多，程序退出" << op::endl;
+            glfwSetWindowShouldClose(WindowInfo.window, GLFW_TRUE);
+            return -1;
+        }
+        
+        // 尝试恢复
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
 
     return 0;
 }
@@ -138,5 +168,38 @@ void MouseButtonEvent(GLFWwindow* window, int button, int action, int mods) {
             break;
         default:
             break;
+    }
+}
+
+void executeRenderingWithRecovery() {
+    static int renderFailures = 0;
+    const int MAX_RENDER_FAILURES = 5;
+    
+    try {
+        // 绘制场景
+        // 使用屏幕管理系统的当前屏幕
+        if (screen::Screen::getCurrentScreen()) {
+            screen::Screen::getCurrentScreen()->Draw();
+        } else {
+            Log << Level::Error << "当前屏幕为空，无法绘制" << op::endl;
+        }
+        
+        renderFailures = 0; // 重置失败计数
+        
+    } catch (const std::exception& e) {
+        renderFailures++;
+        Log << Level::Warn << "渲染失败: " << e.what() 
+            << " (失败次数: " << renderFailures << ")" << op::endl;
+        
+        if (renderFailures >= MAX_RENDER_FAILURES) {
+            Log << Level::Error << "渲染失败次数过多，尝试重新初始化图形资源" << op::endl;
+            
+            // 重新初始化图形资源
+            if (OpenGLErrorRecovery::recoverLostContext(WindowInfo.window)) {
+                renderFailures = 0;
+            } else {
+                throw std::runtime_error("无法恢复图形渲染");
+            }
+        }
     }
 }

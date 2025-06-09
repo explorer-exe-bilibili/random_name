@@ -7,6 +7,8 @@
 #include "core/baseItem/Font.h"
 #include "core/baseItem/Audio.h"
 #include "core/baseItem/Video/VideoPlayer.h"
+#include "core/ErrorRecovery.h"
+#include "core/MemoryMonitor.h"
 
 namespace core
 {
@@ -129,5 +131,10 @@ public:
 
     void loadImagesFromDirectory(const std::string& directory);
     void listLoadedBitmaps();
+    
+    // 错误恢复相关方法
+    void cleanupVideoResources();
+    void cleanupBitmapResources();
+    bool validateResources();
 };
 } // namespace core

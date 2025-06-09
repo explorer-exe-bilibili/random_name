@@ -266,6 +266,10 @@ jobs:
           # Windows 通常不需要额外安装，但可以安装 Ninja 作为备选
           choco install ninja -y || true
         fi
+    - name: Download ChineseSimplified.isl
+      if: matrix.os == 'windows-latest' || matrix.os == 'windows-11-arm'
+      run: |
+        Invoke-WebRequest -Uri "https://raw.github.com/jrsoftware/issrc/main/Files/Languages/Unofficial/ChineseSimplified.isl" -OutFile "C:\Program Files (x86)\Inno Setup 6\Languages\ChineseSimplified.isl"
 
     - name: Cache vcpkg
       uses: actions/cache@v4

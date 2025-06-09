@@ -32,7 +32,7 @@ bld/
 [Oo]ut/
 [Ll]og/
 [Ll]ogs/
-build/
+build*/
 old_src/
 
 
@@ -373,3 +373,11 @@ FodyWeavers.xsd
 /vcpkg_installed/
 config.txt
 setting.json
+CMakePresets.json
+CMakeSettings.json
+.gitignore
+CMakeSettings.json
+CMakeUserPresets.json
+CMakeSettings.json
+CMakeSettings.json
+CMakeSettings.json

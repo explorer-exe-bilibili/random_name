@@ -4,6 +4,11 @@
 #include <string>
 #include <glm/glm.hpp>
 
+// Forward declaration to avoid circular dependency
+namespace core {
+    class OpenGLErrorRecovery;
+}
+
 
 namespace core {
 

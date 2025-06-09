@@ -5,7 +5,9 @@
 #include "core/screen/SettingScreen.h"
 #include "core/screen/VideoScreen.h"
 #include "core/screen/nameScreen.h"
-
+#include "core/ErrorRecovery.h"
+#include "core/OpenGLErrorRecovery.h"
+#include "core/MemoryMonitor.h"
 
 #ifdef _WIN32
 #include <windows.h>
@@ -19,6 +21,31 @@ using namespace std;
 // 当使用SDL2时，main函数需要被重新定义为SDL_main
 int main(int argc, char* argv[])
 {
+    // 注册错误处理器
+    ErrorRecovery::registerErrorHandler(
+        ErrorRecovery::ErrorType::MEMORY_ALLOCATION,
+        []() {
+            Log << Level::Warn << "内存分配失败，执行垃圾回收" << op::endl;
+            MemoryMonitor::getInstance().forceGarbageCollection();
+        }
+    );
+    
+    ErrorRecovery::registerErrorHandler(
+        ErrorRecovery::ErrorType::OPENGL_CONTEXT,
+        []() {
+            Log << Level::Warn << "OpenGL 错误，尝试重新初始化上下文" << op::endl;
+            OpenGLErrorRecovery::markContextInvalid();
+        }
+    );
+    
+    ErrorRecovery::registerErrorHandler(
+        ErrorRecovery::ErrorType::FFMPEG_DECODE,
+        []() {
+            Log << Level::Warn << "FFmpeg 解码错误，清理视频资源" << op::endl;
+            MemoryMonitor::getInstance().forceGarbageCollection();
+        }
+    );
+
 #ifdef _WIN32
     // 设置控制台编码为 UTF-8
     SetConsoleOutputCP(CP_UTF8);
@@ -30,21 +57,49 @@ int main(int argc, char* argv[])
 #else
     Log<<Level::Info<<"运行在非Debug模式"<<op::endl;
 #endif
-    if(init()!=0){
-        Log<<Level::Error<<"Failed to initialize"<<op::endl;
+
+    try {
+        // 使用错误恢复执行初始化
+        int result = ErrorRecovery::executeWithRetry<int>(
+            []() { return init(); },
+            {.maxRetries = 3, .baseDelay = std::chrono::milliseconds(1000)}
+        );
+        
+        if(result != 0){
+            Log<<Level::Error<<"Failed to initialize"<<op::endl;
+            return -1;
+        }
+        
+        // 初始化FPS计算
+        lastFPSUpdateTime = glfwGetTime();
+        frameCount = 0;
+        currentFPS = 0.0;
+        
+        // 渲染循环 - 现在包含错误恢复
+        while (!glfwWindowShouldClose(core::WindowInfo.window)) {
+            if (ErrorRecovery::shouldAbort()) {
+                Log << Level::Error << "连续错误过多，程序退出" << op::endl;
+                break;
+            }
+            
+            try {
+                mainloop();
+            } catch (const std::exception& e) {
+                Log << Level::Error << "主循环异常: " << e.what() << op::endl;
+                
+                // 尝试恢复OpenGL上下文
+                if (!OpenGLErrorRecovery::recoverLostContext(core::WindowInfo.window)) {
+                    Log << Level::Error << "无法恢复OpenGL上下文，程序退出" << op::endl;
+                    break;
+                }
+            }
+        }
+        
+    } catch (const std::exception& e) {
+        Log << Level::Error << "程序发生致命错误: " << e.what() << op::endl;
         return -1;
     }
-    
-    // 初始化FPS计算
-    lastFPSUpdateTime = glfwGetTime();
-    frameCount = 0;
-    currentFPS = 0.0;
-    
-    // 渲染循环
-    while (!glfwWindowShouldClose(core::WindowInfo.window)) {
-        mainloop();
-    }
-    
+
     // 执行清理操作并确保不再进行后续的OpenGL调用
     int cleanupResult = cleanup();
     if (cleanupResult != 0) {
@@ -66,6 +121,25 @@ int init(){
     GetConsoleMode(hOut, &dwMode);
     dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
     SetConsoleMode(hOut, dwMode);
+    #endif
+    // WSL 特定的 GLFW 提示
+    #ifdef __linux__
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    
+    // WSL 兼容性设置
+    glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
+    glfwWindowHint(GLFW_REFRESH_RATE, 60);
+    
+    // 减少显存使用
+    glfwWindowHint(GLFW_RED_BITS, 8);
+    glfwWindowHint(GLFW_GREEN_BITS, 8);
+    glfwWindowHint(GLFW_BLUE_BITS, 8);
+    glfwWindowHint(GLFW_ALPHA_BITS, 8);
+    glfwWindowHint(GLFW_DEPTH_BITS, 24);
+    glfwWindowHint(GLFW_STENCIL_BITS, 8);
     #endif
     Log.Init();
     Log<<Level::Info<<"Initializing GLFW"<<op::endl;
@@ -90,14 +164,20 @@ int init(){
     
     // 设置当前上下文
     glfwMakeContextCurrent(WindowInfo.window);
-    glfwSwapInterval(0); // 垂直同步
-
-    Log<<Level::Info<<"Loading GLAD"<<op::endl;
+    glfwSwapInterval(0); // 垂直同步    Log<<Level::Info<<"Loading GLAD"<<op::endl;
     // 初始化glad
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         glfwTerminate();
         return -1;
     }
+    
+    // 验证 OpenGL 上下文
+    Log << Level::Info << "OpenGL Version: " << (const char*)glGetString(GL_VERSION) << op::endl;
+    Log << Level::Info << "OpenGL Renderer: " << (const char*)glGetString(GL_RENDERER) << op::endl;
+
+    // 初始化 OpenGL 错误恢复系统
+    OpenGLErrorRecovery::reset();
+    
     glfwSetMouseButtonCallback(WindowInfo.window, MouseButtonEvent);
     glfwSetKeyCallback(WindowInfo.window, KeyEvent);
     glfwSetFramebufferSizeCallback(WindowInfo.window, framebuffer_size_callback);

@@ -1,6 +1,7 @@
 #include "core/render/VertexBuffer.h"
 #include "core/log.h"
 #include "core/render/GLBase.h"
+#include "core/OpenGLErrorRecovery.h"
 #include <cstdlib>
 
 
@@ -55,7 +56,17 @@ VertexBuffer::VertexBuffer(const VertexBuffer& vb) : size(vb.size) {
 }
 
 VertexBuffer::~VertexBuffer() {
-    GLCall(glDeleteBuffers(1, &rendererID));
+    if (core::OpenGLErrorRecovery::isContextValid() && rendererID != 0) {
+        try {
+            GLCall(glDeleteBuffers(1, &rendererID));
+        } catch (const std::exception& e) {
+            Log << Level::Error << "Exception while deleting vertex buffer " << rendererID << ": " << e.what() << op::endl;
+        } catch (...) {
+            Log << Level::Error << "Unknown exception while deleting vertex buffer " << rendererID << op::endl;
+        }
+    } else if (rendererID != 0) {
+        Log << Level::Warn << "OpenGL context invalid, skipping vertex buffer " << rendererID << " deletion" << op::endl;
+    }
 }
 
 void VertexBuffer::BufferData(const void* data, unsigned int size) {
@@ -83,7 +94,9 @@ VertexBuffer& VertexBuffer::operator=(const VertexBuffer& vb) {
     if (this != &vb) {
         // 先删除当前的缓冲区
         if (rendererID != 0) {
-            GLCall(glDeleteBuffers(1, &rendererID));
+            if (core::OpenGLErrorRecovery::isContextValid()) {
+                GLCall(glDeleteBuffers(1, &rendererID));
+            }
         }
         
         // 生成新的缓冲区ID

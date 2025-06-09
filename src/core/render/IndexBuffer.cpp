@@ -1,6 +1,6 @@
 #include"core/render/IndexBuffer.h"
 #include"core/log.h"
-
+#include"core/OpenGLErrorRecovery.h"
 #include"core/render/GLBase.h"
 #include<glad/glad.h>
 
@@ -37,7 +37,17 @@ IndexBuffer::IndexBuffer(const IndexBuffer& ib)
 IndexBuffer::~IndexBuffer()
 {
     Log<<Level::Info<<"IndexBuffer::~IndexBuffer() "<<rendererID<<op::endl;
-    GLCall(glDeleteBuffers(1, &rendererID));
+    if (core::OpenGLErrorRecovery::isContextValid() && rendererID != 0) {
+        try {
+            GLCall(glDeleteBuffers(1, &rendererID));
+        } catch (const std::exception& e) {
+            Log << Level::Error << "Exception while deleting index buffer " << rendererID << ": " << e.what() << op::endl;
+        } catch (...) {
+            Log << Level::Error << "Unknown exception while deleting index buffer " << rendererID << op::endl;
+        }
+    } else if (rendererID != 0) {
+        Log << Level::Warn << "OpenGL context invalid, skipping index buffer " << rendererID << " deletion" << op::endl;
+    }
     rendererID = 0;
 }
 
@@ -46,7 +56,9 @@ IndexBuffer& IndexBuffer::operator=(const IndexBuffer& ib)
     Log<<Level::Info<<"IndexBuffer& IndexBuffer::operator=(const IndexBuffer& ib) "<<rendererID<<op::endl;
     if (this != &ib)
     {
-        GLCall(glDeleteBuffers(1, &rendererID));
+        if (core::OpenGLErrorRecovery::isContextValid() && rendererID != 0) {
+            GLCall(glDeleteBuffers(1, &rendererID));
+        }
         rendererID = 0;
         count = ib.count;
         GLCall(glGenBuffers(1, &rendererID));

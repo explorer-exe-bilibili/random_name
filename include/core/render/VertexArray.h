@@ -4,6 +4,11 @@
 #include "VertexBuffer.h"
 #include "IndexBuffer.h"
 
+// Forward declarations
+namespace core {
+    class OpenGLErrorRecovery;
+}
+
 
 namespace core {
 

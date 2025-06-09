@@ -6,6 +6,7 @@
 #include <thread>
 #include <atomic>
 #include <queue>
+#include <SDL2/SDL.h>
 
 struct AVFormatContext;
 struct AVCodecContext;
@@ -21,6 +22,8 @@ struct AVRational;
 namespace core
 {
 class Bitmap;
+class VideoPlayerErrorRecovery;
+
 class VideoPlayer
 {   
     void decodeThread();
@@ -29,6 +32,13 @@ class VideoPlayer
     std::shared_ptr<FrameData> convertFrameToFrameData(AVFrame* frame);
     void applyVolume(uint8_t* audioBuffer, int bufferSize, int channels);
     void cleanup();
+    
+    // 错误恢复相关的内部方法
+    bool loadInternal(const std::string& path);
+    void setupAudioDecoder();
+    void setupFrameBuffers();
+    void setupVideoConverter();
+    void setupAudioOutput();
     
     // 音视频同步辅助函数
     double getAudioClock();
@@ -54,6 +64,10 @@ public:
 
     void setLoop(bool loop);
     void setVolume(int volume);
+    
+    // 错误恢复友元类
+    friend class VideoPlayerErrorRecovery;
+    
 private:
     std::atomic<bool> loop{true};
     std::atomic<bool> playing{true};
@@ -69,6 +83,9 @@ private:
     std::shared_ptr<FrameData> currentFrameData = nullptr;
     std::atomic<bool> frameReady{false};    // SDL音频相关
     uint32_t audioDeviceID = 0;
+    SDL_AudioDeviceID audioDevice = 0;
+    uint8_t* rgbBuffer = nullptr;
+    size_t rgbBufferSize = 0;  // Store buffer size for memory tracking
     std::atomic<float> volume{1.0f}; // 音量范围：0.0-1.0
     
     // 音视频同步相关
@@ -100,9 +117,13 @@ private:
     double frameDelay = 0.0;
     int width=0;
     int height=0;
-    double fps=0.0;
-    std::string videoPath;
-
+    double fps=0;
+    std::string videoPath="";
+    
+    // 错误恢复相关
+    std::unique_ptr<VideoPlayerErrorRecovery> errorRecovery;
+    std::mutex renderMutex;
+    std::thread::id mainThreadId;
     // 音视频同步相关
     double syncThreshold{0.01}; // 同步阈值，单位：秒
 };

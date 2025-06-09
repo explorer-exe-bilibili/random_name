@@ -14,6 +14,7 @@
 #include "core/Config.h"
 
 int mainloop();
+void executeRenderingWithRecovery();
 void KeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods);
 void MouseButtonEvent(GLFWwindow* window, int button, int action, int mods);
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);

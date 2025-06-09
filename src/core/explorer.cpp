@@ -34,8 +34,10 @@ bool Explorer::loadBitmap(const std::string &name, const std::string &path)
 {
     Log << Level::Info << "Loading bitmap: " << name << " from path: " << path << op::endl;
 
-    try
-    {
+    return ErrorRecovery::executeWithRetry<bool>([this, &name, &path]() {
+        // 检查内存压力
+        MemoryMonitor::getInstance().isMemoryPressure();
+        
         // 创建新的Bitmap实例
         auto bitmap = std::make_shared<Bitmap>();
 
@@ -52,15 +54,9 @@ bool Explorer::loadBitmap(const std::string &name, const std::string &path)
         else
         {
             Log << Level::Error << "Failed to load bitmap: " << name << " from path: " << path << op::endl;
-        }
-    }
-    catch (const std::exception &e)
-    {
-        Log << Level::Error << "Exception while loading bitmap: " << name
-            << " from path: " << path << " - " << e.what() << op::endl;
-    }
-
-    return false;
+            throw std::runtime_error("Bitmap loading failed: " + name);
+        }    }, {.maxRetries = 2, .baseDelay = std::chrono::milliseconds(500)}, 
+       ErrorRecovery::ErrorType::MEMORY_ALLOCATION);
 }
 
 bool Explorer::loadBitmap(BitmapID id, const std::string &path)
@@ -98,18 +94,18 @@ bool Explorer::loadBitmap(BitmapID id, const std::string &path)
 
 void Explorer::listLoadedBitmaps()
 {
-    Log << Level::Info << "Listing all loaded bitmaps (" << bitmaps.size() << " total):" << op::endl;
-    int index = 0;
-    for (const auto &pair : bitmaps)
+    Log << Level::Info << "=== Loaded Bitmaps ===" << op::endl;
+    for (const auto& [id, bitmap] : bitmaps) 
     {
-        Log << Level::Info << "[" << index++ << "] ID: '" << static_cast<int>(pair.first) << "', "
-            << "size: " << pair.second->getWidth() << "x" << pair.second->getHeight() << op::endl;
+        Log << Level::Info << "Bitmap ID " << static_cast<int>(id) 
+            << " (" << bitmap->getWidth() << "x" << bitmap->getHeight() << ")" << op::endl;
     }
-    for(const auto &pair : Name_bitmaps)
+    for (const auto& [name, bitmap] : Name_bitmaps) 
     {
-        Log << Level::Info << "[" << index++ << "] Name: '" << pair.first << "', "
-            << "size: " << pair.second->getWidth() << "x" << pair.second->getHeight() << op::endl;
+        Log << Level::Info << "Bitmap Name " << name 
+            << " (" << bitmap->getWidth() << "x" << bitmap->getHeight() << ")" << op::endl;
     }
+    Log << Level::Info << "======================" << op::endl;
 }
 
 int Explorer::loadFont(FontID id, const std::string &path, bool needPreLoad)
@@ -212,19 +208,27 @@ int Explorer::loadFont(FontID id, const std::string &path, bool needPreLoad)
 bool Explorer::loadVideo(VideoID id, const std::string &path)
 {
     Log << Level::Info << "Loading video from path: " << path << op::endl;
-    auto video = std::make_shared<VideoPlayer>();
-    if (video->load(path))
-    {
-        video->pause();
-        videos[id] = video;
-        Log << Level::Info << "Video loaded successfully: " << static_cast<int>(id) << op::endl;
-        return true;
-    }
-    else
-    {
-        Log << Level::Error << "Failed to load video: " << static_cast<int>(id) << op::endl;
-        return false;
-    }
+    
+    // 使用错误恢复机制加载视频
+    return ErrorRecovery::executeWithRetry<bool>([this, id, &path]() {
+        // 检查内存压力
+        MemoryMonitor::getInstance().isMemoryPressure();
+
+        auto video = std::make_shared<VideoPlayer>();
+        if (video->load(path))
+        {
+            video->pause();
+            videos[id] = video;
+            Log << Level::Info << "Video loaded successfully: " << static_cast<int>(id) << op::endl;
+            return true;
+        }
+        else
+        {
+            Log << Level::Error << "Failed to load video: " << static_cast<int>(id) << op::endl;
+            throw std::runtime_error("Video loading failed for ID: " + std::to_string(static_cast<int>(id)));
+        }
+    }, {.maxRetries = 2, .baseDelay = std::chrono::milliseconds(1000)}, 
+       ErrorRecovery::ErrorType::FFMPEG_DECODE);
 }
 
 bool Explorer::loadAudio(AudioID id, const std::string &path)
@@ -419,4 +423,103 @@ constexpr const char* core::AudioIDToString(AudioID id) {
         case AudioID::starfull: return "starfull";
         default: return "Unknown";
     }
+}
+
+// ================= 错误恢复相关方法实现 =================
+
+void Explorer::cleanupVideoResources()
+{
+    Log << Level::Info << "Cleaning up video resources..." << op::endl;
+    
+    for (auto& [id, video] : videos) 
+    {
+        if (video) 
+        {
+            video->stop();
+            // 视频资源会在智能指针析构时自动释放
+        }
+    }
+    videos.clear();
+    
+    // 触发垃圾回收
+    MemoryMonitor::getInstance().forceGarbageCollection();
+    
+    Log << Level::Info << "Video resources cleanup completed" << op::endl;
+}
+
+void Explorer::cleanupBitmapResources()
+{
+    Log << Level::Info << "Cleaning up bitmap resources..." << op::endl;
+    
+    size_t bitmapCount = bitmaps.size() + Name_bitmaps.size();
+    
+    bitmaps.clear();
+    Name_bitmaps.clear();
+    
+    // 触发垃圾回收
+    MemoryMonitor::getInstance().forceGarbageCollection();
+    
+    Log << Level::Info << "Cleaned up " << bitmapCount << " bitmap resources" << op::endl;
+}
+
+bool Explorer::validateResources()
+{
+    bool allValid = true;
+    
+    // 验证位图资源
+    for (const auto& [id, bitmap] : bitmaps) 
+    {
+        if (!bitmap || !(*bitmap)) 
+        {
+            Log << Level::Warn << "Invalid bitmap resource for ID: " << static_cast<int>(id) << op::endl;
+            allValid = false;
+        }
+    }
+    
+    for (const auto& [name, bitmap] : Name_bitmaps) 
+    {
+        if (!bitmap || !(*bitmap)) 
+        {
+            Log << Level::Warn << "Invalid bitmap resource for name: " << name << op::endl;
+            allValid = false;
+        }
+    }
+    
+    // 验证视频资源
+    for (const auto& [id, video] : videos) 
+    {
+        if (!video) 
+        {
+            Log << Level::Warn << "Invalid video resource for ID: " << static_cast<int>(id) << op::endl;
+            allValid = false;
+        }
+    }
+    
+    // 验证字体资源
+    for (const auto& [id, font] : fonts) 
+    {
+        if (!font) 
+        {
+            Log << Level::Warn << "Invalid font resource for ID: " << static_cast<int>(id) << op::endl;
+            allValid = false;
+        }
+    }
+    
+    // 验证音频资源
+    if (!audio) 
+    {
+        Log << Level::Warn << "Invalid audio resource" << op::endl;
+        allValid = false;
+    }
+    
+    if (allValid) 
+    {
+        Log << Level::Info << "All resources validated successfully" << op::endl;
+    } 
+    else 
+    {
+        Log << Level::Warn << "Resource validation found issues" << op::endl;
+    }
+    
+    return allValid;
 }

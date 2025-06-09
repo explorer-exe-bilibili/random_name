@@ -10,6 +10,7 @@
 
 #include "core/render/GLBase.h"
 #include "core/baseItem/Base.h"
+#include "core/OpenGLErrorRecovery.h"
 #include "core/log.h"
 
 using namespace core;
@@ -70,8 +71,7 @@ Font::Font(const std::string& fontPath,bool needPreLoad)
 	// 初始化备用字体
 	if (!spare_font&&!spareIniting) {
 		spareIniting = true;
-		spare_font = std::make_shared<Font>
-			(R"(C:\Users\j1387\source\repos\explorer-exe-bilibili\random_name\files\fonts\spare.ttf)", 0);
+		spare_font = std::make_shared<Font>("files/fonts/spare.ttf", 0);
 	}
 	face = nullptr;
 	// 加载字体
@@ -117,13 +117,25 @@ Font::Font(const std::string& fontPath,bool needPreLoad)
 }
 
 Font::~Font() {
-	// 释放纹理
-	for (auto& pair : Characters) {
-		glDeleteTextures(1, &pair.second.TextureID);
+	// 释放纹理 - 使用OpenGL错误恢复
+	if (core::OpenGLErrorRecovery::isContextValid()) {
+		for (auto& pair : Characters) {
+			try {
+				glDeleteTextures(1, &pair.second.TextureID);
+			} catch (const std::exception& e) {
+				Log << Level::Error << "Exception while deleting texture for character: " << e.what() << op::endl;
+			} catch (...) {
+				Log << Level::Error << "Unknown exception while deleting texture" << op::endl;
+			}
+		}
+	} else {
+		Log << Level::Warn << "OpenGL context invalid, skipping texture deletion in Font destructor" << op::endl;
 	}
 
 	// 释放 FreeType 资源
-	FT_Done_Face(face);
+	if (face) {
+		FT_Done_Face(face);
+	}
 }
 
 void Font::RenderText(const std::string& text,float x, float y,float scale, const glm::vec4& color){
