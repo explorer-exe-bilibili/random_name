@@ -35,10 +35,6 @@ class VideoPlayer
     
     // 错误恢复相关的内部方法
     bool loadInternal(const std::string& path);
-    void setupAudioDecoder();
-    void setupFrameBuffers();
-    void setupVideoConverter();
-    void setupAudioOutput();
     
     // 音视频同步辅助函数
     double getAudioClock();
@@ -76,14 +72,14 @@ private:
     std::atomic<bool> reachedEOF{false}; // 是否已读取完所有数据包
     std::atomic<bool> videoDecodeFinished{false}; // 视频解码是否完成
     std::atomic<bool> audioDecodeFinished{false}; // 音频解码是否完成
+    std::atomic<bool> isCleanedUp{false}; // 是否正在清理资源
     std::thread decoderThreadAudio;
     std::thread decoderThreadVideo;
     std::thread decoderThread;
     std::mutex frameMutex;
     std::shared_ptr<FrameData> currentFrameData = nullptr;
     std::atomic<bool> frameReady{false};    // SDL音频相关
-    uint32_t audioDeviceID = 0;
-    SDL_AudioDeviceID audioDevice = 0;
+    SDL_AudioDeviceID audioDeviceID = 0;
     uint8_t* rgbBuffer = nullptr;
     size_t rgbBufferSize = 0;  // Store buffer size for memory tracking
     std::atomic<float> volume{1.0f}; // 音量范围：0.0-1.0

@@ -210,6 +210,7 @@ int cleanup() {
 
     // 标记OpenGL上下文即将失效，防止后续OpenGL调用引起问题
     SetOpenGLContextInvalid();
+    core::OpenGLErrorRecovery::markContextInvalid();
     
     // 确保在终止GLFW前解绑当前上下文
     Log<<Level::Info<<"Unbinding OpenGL context"<<op::endl<<op::flush;
@@ -217,7 +218,6 @@ int cleanup() {
     
     // 然后再终止GLFW
     Log<<Level::Info<<"Terminating GLFW"<<op::endl<<op::flush;
-
     // 终止GLFW
     glfwTerminate();
     

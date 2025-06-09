@@ -57,6 +57,7 @@ bool VideoPlayer::load(const std::string& path) {
 }
 
 bool VideoPlayer::loadInternal(const std::string& path) {
+    isCleanedUp = false;
     static std::mutex ffmpeg_init_mutex;
     std::lock_guard<std::mutex> lock(ffmpeg_init_mutex);
     
@@ -66,18 +67,26 @@ bool VideoPlayer::loadInternal(const std::string& path) {
     Log << Level::Info << "加载视频文件: " << videoPath << op::endl;
     
     try {
+        formatContext = nullptr;
+        codecContext = nullptr;
+        audioCodecContext = nullptr;
         formatContext = avformat_alloc_context();
         if (!formatContext) {
-            throw std::runtime_error("无法分配格式上下文");
+            Log << Level::Error << "无法分配格式上下文" << op::endl;
+            return false;
         }
-        
         if (avformat_open_input(&formatContext, videoPath.c_str(), nullptr, nullptr) < 0) {
-            throw std::runtime_error("无法打开视频文件: " + videoPath);
+            Log << Level::Error << "无法打开视频文件: " << videoPath << op::endl;
+            return false;
         }
 
-        // 获取视频流信息
-        if (avformat_find_stream_info(formatContext, nullptr) < 0) {
-            throw std::runtime_error("无法获取视频流信息");
+        int ret = avformat_find_stream_info(formatContext, nullptr);
+        if (ret < 0) {
+            char errbuf[AV_ERROR_MAX_STRING_SIZE];
+            av_make_error_string(errbuf, sizeof(errbuf), ret);
+            Log << Level::Error << "无法获取视频流信息: " << errbuf << op::endl;
+            cleanup();
+            return false;
         }
 
         // 查找视频流
@@ -86,7 +95,9 @@ bool VideoPlayer::loadInternal(const std::string& path) {
         videoStreamIndex = av_find_best_stream(formatContext, AVMEDIA_TYPE_VIDEO, -1, -1, nullptr, 0);
         audioStreamIndex = av_find_best_stream(formatContext, AVMEDIA_TYPE_AUDIO, -1, -1, nullptr, 0);
         if (videoStreamIndex == -1) {
-            throw std::runtime_error("未找到视频流");
+            Log << Level::Error << "未找到视频流" << op::endl;
+            cleanup();
+            return false;
         }
         if( audioStreamIndex == -1) {
             Log << Level::Warn << "未找到音频流" << op::endl;
@@ -98,44 +109,139 @@ bool VideoPlayer::loadInternal(const std::string& path) {
         // 获取视频编解码器
         const AVCodec* codec = avcodec_find_decoder(formatContext->streams[videoStreamIndex]->codecpar->codec_id);
         if (!codec) {
-            throw std::runtime_error("无法找到视频编解码器");
+            Log << Level::Error << "无法找到视频编解码器" << op::endl;
+            cleanup();
+            return false;
         }
         
         // 获取视频流的解码器上下文
         codecContext = avcodec_alloc_context3(nullptr);
         if (!codecContext) {
-            throw std::runtime_error("无法分配解码器上下文");
+            Log << Level::Error << "无法分配解码器上下文" << op::endl;
+            cleanup();
+            return false;
         }
 
         if(avcodec_parameters_to_context(codecContext, formatContext->streams[videoStreamIndex]->codecpar)){
-            throw std::runtime_error("无法复制编解码器参数");
+            Log << Level::Error << "无法复制编解码器参数" << op::endl;
+            cleanup();
+            return false;
         }
 
         // 打开解码器
         if (avcodec_open2(codecContext, codec, nullptr) < 0) {
-            throw std::runtime_error("无法打开解码器");
+            Log << Level::Error << "无法打开解码器" << op::endl;
+            cleanup();
+            return false;
         }
-        
-        // 处理音频流（如果存在）
         if(audioStreamIndex >= 0) {
-            setupAudioDecoder();
+            // 获取音频编解码器
+            const AVCodec* audioCodec = avcodec_find_decoder(formatContext->streams[audioStreamIndex]->codecpar->codec_id);
+            if (!audioCodec) {
+                Log << Level::Warn << "无法找到音频编解码器" << op::endl;
+                audioStreamIndex = -1;
+            }
+            audioCodecContext = avcodec_alloc_context3(nullptr);
+            if (!audioCodecContext) {
+                Log << Level::Warn << "无法分配音频解码器上下文" << op::endl;
+                audioStreamIndex = -1;
+            }
+            if(avcodec_parameters_to_context(audioCodecContext, formatContext->streams[audioStreamIndex]->codecpar)){
+                Log << Level::Warn << "无法复制音频编解码器参数" << op::endl;
+            }
+            // 打开音频解码器
+            if( avcodec_open2(audioCodecContext, audioCodec, nullptr) < 0) {
+                Log << Level::Warn << "无法打开音频解码器" << op::endl;
+                audioStreamIndex = -1;
+            }
         }
+
 
         width = codecContext->width;
         height = codecContext->height;
 
-        // 分配帧
-        setupFrameBuffers();
-        
-        // 初始化SWS上下文
-        setupVideoConverter();
-        
-        // 设置音频输出（如果有音频流）
-        if (audioStreamIndex >= 0) {
-            setupAudioOutput();
+        // 分配音频帧
+        frame = av_frame_alloc();
+        // 分配图像帧
+        rgbFrame = av_frame_alloc();
+        if (!frame || !rgbFrame) {
+            Log << Level::Error << "无法分配图像帧" << op::endl;
+            cleanup();
+            return false;
         }
 
-        Log << Level::Info << "视频文件加载成功: " << videoPath << op::endl;
+        // 为RGB帧分配缓冲区
+        int numBytes = av_image_get_buffer_size(AV_PIX_FMT_RGB24, width, height, 1);
+        uint8_t* buffer = (uint8_t*)av_malloc(numBytes);
+        if (!buffer) {
+            Log << Level::Error << "无法分配RGB帧缓冲区" << op::endl;
+            cleanup();
+            return false;
+        }
+        av_image_fill_arrays(rgbFrame->data, rgbFrame->linesize, buffer, AV_PIX_FMT_RGB24, width, height, 1);
+
+        //初始化SWS上下文
+        swsContext = sws_getContext(width, height,
+            codecContext->pix_fmt, width, height, 
+            AV_PIX_FMT_RGB24, SWS_BILINEAR, nullptr, 
+            nullptr, nullptr);
+        if (!swsContext) {
+            Log << Level::Error << "无法初始化SWS上下文" << op::endl;
+            cleanup();
+            return false;
+        }
+        if (audioStreamIndex >= 0) {
+            if(audioCodecContext!=nullptr){
+            SDL_AudioSpec audioSpec, obtainedSpec;
+            audioSpec.freq = audioCodecContext->sample_rate;
+            audioSpec.format = AUDIO_S16SYS; // 使用16位有符号整数格式
+            audioSpec.channels = audioCodecContext->ch_layout.nb_channels;
+            audioSpec.samples = 4096; // 减小音频缓冲区大小以降低延迟
+            audioSpec.callback = nullptr; // 使用SDL_QueueAudio()而不是回调
+            audioSpec.userdata = nullptr; // 不需要用户数据
+            
+            audioDeviceID = SDL_OpenAudioDevice(nullptr, 0, &audioSpec, &obtainedSpec, SDL_AUDIO_ALLOW_FREQUENCY_CHANGE | SDL_AUDIO_ALLOW_CHANNELS_CHANGE);
+            if (audioDeviceID == 0) {
+                Log << Level::Warn << "无法打开SDL音频设备: " << SDL_GetError() << op::endl;
+                audioStreamIndex = -1;
+            } else {
+                Log << Level::Info << "音频设备打开成功，设备ID: " << audioDeviceID 
+                    << ", 采样率: " << obtainedSpec.freq << "Hz, 声道: " << (int)obtainedSpec.channels << op::endl;
+            }
+            
+            // 设置音频重采样参数 - 使用兼容的API
+            swrContext = swr_alloc();
+            if (!swrContext) {
+                Log << Level::Warn << "无法分配音频重采样上下文" << op::endl;
+                audioStreamIndex = -1;
+            } else {
+                // 设置输入输出格式
+                av_opt_set_chlayout(swrContext, "in_chlayout", &audioCodecContext->ch_layout, 0);
+                av_opt_set_chlayout(swrContext, "out_chlayout", &audioCodecContext->ch_layout, 0);
+                av_opt_set_int(swrContext, "in_sample_rate", audioCodecContext->sample_rate, 0);
+                av_opt_set_int(swrContext, "out_sample_rate", obtainedSpec.freq, 0); // 使用实际获得的采样率
+                av_opt_set_sample_fmt(swrContext, "in_sample_fmt", audioCodecContext->sample_fmt, 0);
+                av_opt_set_sample_fmt(swrContext, "out_sample_fmt", AV_SAMPLE_FMT_S16, 0);
+                
+                if (swr_init(swrContext) < 0) {
+                    Log << Level::Warn << "无法初始化音频重采样上下文" << op::endl;
+                    swr_free(&swrContext);
+                    swrContext = nullptr;
+                    audioStreamIndex = -1;
+                } else {
+                    Log << Level::Info << "音频重采样初始化成功 - 输入采样率: " << audioCodecContext->sample_rate 
+                        << "Hz, 输出采样率: " << obtainedSpec.freq << "Hz, 声道: " << audioCodecContext->ch_layout.nb_channels << op::endl;
+                }
+            }
+            } // SDL音频设备打开结束
+            else {
+                Log << Level::Warn << "没有音频流或音频设备未正确初始化" << op::endl;
+                audioStreamIndex = -1; // 如果没有音频流，则将索引设置为-1
+            }
+        }
+        Log << Level::Info << "视频文件加载成功: " << videoPath
+            << " (" << width << "x" << height << " @ " << fps << "fps)" << op::endl;
+
         return true;
         
     } catch (const std::exception& e) {
@@ -699,260 +805,144 @@ std::shared_ptr<FrameData> VideoPlayer::convertFrameToFrameData(AVFrame* frame) 
 
 // 清理资源并重置状态
 void VideoPlayer::cleanup() {    
-    // 清理其他资源
-    if (swsContext) {
-        sws_freeContext(swsContext);
-        swsContext = nullptr;
-    }
+    if(isCleanedUp)return; // 如果已经清理过，直接返回
+    isCleanedUp = true; // 设置清理标志，防止重复清理
+    // 添加互斥锁保护，确保 cleanup 只能被一个线程执行
+    static std::mutex cleanup_mutex;
+    std::lock_guard<std::mutex> cleanup_lock(cleanup_mutex);
     
-    if (rgbFrame) {
-        av_freep(&rgbFrame->data[0]);
-        av_frame_free(&rgbFrame);
-        rgbFrame = nullptr;
+    // 添加标志位防止重复清理
+    static bool cleaning_up = false;
+    if (cleaning_up) {
+        return;
     }
+    cleaning_up = true;
     
-    if (frame) {
-        av_frame_free(&frame);
-        frame = nullptr;
-    }
-    
-    if (codecContext) {
-        avcodec_free_context(&codecContext);
-        codecContext = nullptr;
-    }
-    
-    if (formatContext) {
-        avformat_close_input(&formatContext);
-        formatContext = nullptr;
-    }    // 清理音频相关资源
-    if (audioCodecContext) {
-        avcodec_free_context(&audioCodecContext);
-        audioCodecContext = nullptr;
-    }    if (swrContext) {
-        swr_free(&swrContext);
-        swrContext = nullptr;
-    }
-    if (audioDeviceID > 0) {
-        SDL_CloseAudioDevice(audioDevice);
-        audioDevice = 0;
-        Log << Level::Info << "音频设备已关闭" << op::endl;
-    }
-    if (audioDeviceID > 0) {
-        SDL_CloseAudioDevice(audioDeviceID);
-        audioDeviceID = 0;
-        Log << Level::Info << "音频设备已关闭" << op::endl;
-    }
-    if (rgbBuffer) {
-        av_free(rgbBuffer);
-        rgbBuffer = nullptr;
-        if (rgbBufferSize > 0) {
-            MemoryMonitor::getInstance().trackDeallocation(rgbBufferSize);
-            rgbBufferSize = 0;
-        }
-    }
-    // 清理队列
-    while (!packetVideoQueue.empty()) {
-        AVPacket* pkt = packetVideoQueue.front();
-        packetVideoQueue.pop();
-        av_packet_free(&pkt);
-    }
-    while (!packetAudioQueue.empty()) {
-        AVPacket* pkt = packetAudioQueue.front();
-        packetAudioQueue.pop();
-        av_packet_free(&pkt);
-    }
-    // 重置状态
-    playing = false;
-    shouldExit = true;
-    loop = false;
-    frameReady = false;
-    isFinished = false;
-    reachedEOF = false;
-    videoDecodeFinished = false;
-    audioDecodeFinished = false;
-    audioStreamIndex = -1;
-    videoStream = nullptr;
-    videoStreamIndex = -1;
-    width = 0;
-    height = 0;
-    frameDelay = 0.0;
-    
-    // 重置音视频同步状态
-    audioClock = 0.0;
-    videoClock = 0.0;
-    frameTimer = 0.0;
-    videoCurrentPts = 0.0;
-    videoPtsDrift = 0.0;
-    lastFramePts = 0.0;
-    frameLastDelay = 0.0;
-    
-    // 重置帧缓冲区
-    std::lock_guard<std::mutex> lock(frameMutex);
-    currentFrameData = nullptr;
-    frameReady = false;
-}
-
-// ================= Helper Methods Implementation =================
-
-void VideoPlayer::setupAudioDecoder() {
     try {
-        // 获取音频编解码器
-        const AVCodec* audioCodec = avcodec_find_decoder(formatContext->streams[audioStreamIndex]->codecpar->codec_id);
-        if (!audioCodec) {
-            throw std::runtime_error("无法找到音频编解码器");
+        // 清理队列（先清理队列，避免后续访问已释放的上下文）
+        while (!packetVideoQueue.empty()) {
+            AVPacket* pkt = packetVideoQueue.front();
+            packetVideoQueue.pop();
+            if (pkt) {
+                av_packet_free(&pkt);
+            }
+        }
+        while (!packetAudioQueue.empty()) {
+            AVPacket* pkt = packetAudioQueue.front();
+            packetAudioQueue.pop();
+            if (pkt) {
+                av_packet_free(&pkt);
+            }
         }
         
-        // 创建音频解码器上下文
-        audioCodecContext = avcodec_alloc_context3(audioCodec);
-        if (!audioCodecContext) {
-            throw std::runtime_error("无法分配音频解码器上下文");
+        // 清理音频设备（在清理音频上下文之前）
+        if (audioDeviceID > 0) {
+            SDL_PauseAudioDevice(audioDeviceID, 1);
+            SDL_ClearQueuedAudio(audioDeviceID);
+            SDL_CloseAudioDevice(audioDeviceID);
+            audioDeviceID = 0;
+            Log << Level::Info << "音频设备已关闭" << op::endl;
         }
         
-        // 复制编解码器参数
-        if (avcodec_parameters_to_context(audioCodecContext, formatContext->streams[audioStreamIndex]->codecpar) < 0) {
-            throw std::runtime_error("无法复制音频编解码器参数");
-        }
-        
-        // 打开音频解码器
-        if (avcodec_open2(audioCodecContext, audioCodec, nullptr) < 0) {
-            throw std::runtime_error("无法打开音频解码器");
-        }
-        
-        Log << Level::Info << "音频解码器设置成功 - 采样率: " << audioCodecContext->sample_rate 
-            << "Hz, 声道: " << audioCodecContext->ch_layout.nb_channels << op::endl;
-            
-    } catch (const std::exception& e) {
-        Log << Level::Error << "音频解码器设置失败: " << e.what() << op::endl;
-        throw;
-    }
-}
-
-void VideoPlayer::setupFrameBuffers() {
-    try {
-        // 分配视频帧缓冲区
-        frame = av_frame_alloc();
-        if (!frame) {
-            throw std::runtime_error("无法分配视频帧");
-        }
-        
-        rgbFrame = av_frame_alloc();
-        if (!rgbFrame) {
-            throw std::runtime_error("无法分配RGB帧");
-        }
-        
-        // 分配RGB帧的缓冲区
-        int numBytes = av_image_get_buffer_size(AV_PIX_FMT_RGB24, width, height, 32);
-        if (numBytes < 0) {
-            throw std::runtime_error("无法计算RGB帧缓冲区大小");
-        }
-        
-        rgbBuffer = (uint8_t*)av_malloc(numBytes * sizeof(uint8_t));
-        if (!rgbBuffer) {
-            throw std::runtime_error("无法分配RGB缓冲区");
-        }
-          // 设置RGB帧的数据指针
-        if (av_image_fill_arrays(rgbFrame->data, rgbFrame->linesize, rgbBuffer, 
-                                AV_PIX_FMT_RGB24, width, height, 32) < 0) {
-            throw std::runtime_error("无法设置RGB帧数据指针");
-        }
-        
-        // 存储缓冲区大小并注册内存使用
-        rgbBufferSize = numBytes;
-        MemoryMonitor::getInstance().trackAllocation(numBytes);
-        
-        Log << Level::Info << "帧缓冲区设置成功 - 大小: " << width << "x" << height << op::endl;
-        
-    } catch (const std::exception& e) {
-        Log << Level::Error << "帧缓冲区设置失败: " << e.what() << op::endl;
-        throw;
-    }
-}
-
-void VideoPlayer::setupVideoConverter() {
-    try {
-        // 初始化SWS上下文用于像素格式转换
-        swsContext = sws_getContext(
-            width, height, codecContext->pix_fmt,
-            width, height, AV_PIX_FMT_RGB24,
-            SWS_BILINEAR, nullptr, nullptr, nullptr
-        );
-        
-        if (!swsContext) {
-            throw std::runtime_error("无法创建视频转换上下文");
-        }
-        
-        Log << Level::Info << "视频转换器设置成功 - 格式: " << av_get_pix_fmt_name(codecContext->pix_fmt) 
-            << " -> RGB24" << op::endl;
-            
-    } catch (const std::exception& e) {
-        Log << Level::Error << "视频转换器设置失败: " << e.what() << op::endl;
-        throw;
-    }
-}
-
-void VideoPlayer::setupAudioOutput() {
-    try {
-        // 设置音频规格
-        SDL_AudioSpec desiredSpec, obtainedSpec;
-        SDL_zero(desiredSpec);
-        
-        desiredSpec.freq = audioCodecContext->sample_rate;
-        desiredSpec.format = AUDIO_S16SYS;
-        desiredSpec.channels = audioCodecContext->ch_layout.nb_channels;
-        desiredSpec.silence = 0;
-        desiredSpec.samples = 1024;
-        desiredSpec.callback = nullptr; // 使用队列模式
-        
-        // 打开音频设备
-        audioDevice = SDL_OpenAudioDevice(nullptr, 0, &desiredSpec, &obtainedSpec, SDL_AUDIO_ALLOW_ANY_CHANGE);
-        if (audioDevice == 0) {
-            throw std::runtime_error("无法打开音频设备: " + std::string(SDL_GetError()));
-        }
-        
-        // 设置音频重采样上下文
-        swrContext = swr_alloc();
-        if (!swrContext) {
-            throw std::runtime_error("无法分配音频重采样上下文");
-        }
-        
-        // 配置重采样参数
-        av_opt_set_chlayout(swrContext, "in_chlayout", &audioCodecContext->ch_layout, 0);
-        av_opt_set_int(swrContext, "in_sample_rate", audioCodecContext->sample_rate, 0);
-        av_opt_set_sample_fmt(swrContext, "in_sample_fmt", audioCodecContext->sample_fmt, 0);
-        
-        AVChannelLayout out_ch_layout;
-        av_channel_layout_default(&out_ch_layout, obtainedSpec.channels);
-        av_opt_set_chlayout(swrContext, "out_chlayout", &out_ch_layout, 0);
-        av_opt_set_int(swrContext, "out_sample_rate", obtainedSpec.freq, 0);
-        av_opt_set_sample_fmt(swrContext, "out_sample_fmt", AV_SAMPLE_FMT_S16, 0);
-        
-        // 初始化重采样上下文
-        if (swr_init(swrContext) < 0) {
-            throw std::runtime_error("无法初始化音频重采样上下文");
-        }
-        
-        // 启动音频播放
-        SDL_PauseAudioDevice(audioDevice, 0);
-        
-        Log << Level::Info << "音频输出设置成功 - 输入: " << audioCodecContext->sample_rate 
-            << "Hz/" << audioCodecContext->ch_layout.nb_channels << "ch, 输出: " 
-            << obtainedSpec.freq << "Hz/" << obtainedSpec.channels << "ch" << op::endl;
-            
-    } catch (const std::exception& e) {
-        Log << Level::Error << "音频输出设置失败: " << e.what() << op::endl;
-        // 音频失败不应该影响视频播放
-        audioStreamIndex = -1;
-        if (audioDevice) {
-            SDL_CloseAudioDevice(audioDevice);
-            audioDevice = 0;
-        }
+        // 清理音频重采样上下文
         if (swrContext) {
             swr_free(&swrContext);
+            swrContext = nullptr;
         }
-        Log << Level::Warn << "音频播放已禁用，仅播放视频" << op::endl;
+        
+        // 清理音频解码器上下文
+        if (audioCodecContext) {
+            avcodec_free_context(&audioCodecContext);
+            audioCodecContext = nullptr;
+        }
+        
+        // 清理视频相关资源
+        if (rgbFrame) {
+            if (rgbFrame->data[0]) {
+                av_freep(&rgbFrame->data[0]);
+            }
+            av_frame_free(&rgbFrame);
+            rgbFrame = nullptr;
+        }
+        
+        if (frame) {
+            av_frame_free(&frame);
+            frame = nullptr;
+        }
+        
+        // 清理图像转换上下文
+        if (swsContext) {
+            sws_freeContext(swsContext);
+            swsContext = nullptr;
+        }
+        
+        // 清理视频解码器上下文
+        if (codecContext) {
+            avcodec_free_context(&codecContext);
+            codecContext = nullptr;
+        }
+        
+        // 最后清理格式上下文（这是最容易出错的地方）
+        if (formatContext) {
+            // 确保格式上下文是有效的
+            AVFormatContext* temp = formatContext;
+            formatContext = nullptr; // 先置空，防止重复释放
+            
+            // 检查指针有效性
+            if (temp && temp != (AVFormatContext*)0xdeadbeef) {
+                avformat_close_input(&temp);
+            }
+        }
+        
+        // 清理其他缓冲区
+        if (rgbBuffer) {
+            rgbBuffer = nullptr;
+            if (rgbBufferSize > 0) {
+                MemoryMonitor::getInstance().trackDeallocation(rgbBufferSize);
+                rgbBufferSize = 0;
+            }
+        }
+        
+        // 重置状态变量
+        playing = false;
+        shouldExit = true;
+        loop = false;
+        frameReady = false;
+        isFinished = false;
+        reachedEOF = false;
+        videoDecodeFinished = false;
+        audioDecodeFinished = false;
+        audioStreamIndex = -1;
+        videoStream = nullptr;
+        videoStreamIndex = -1;
+        width = 0;
+        height = 0;
+        frameDelay = 0.0;
+        
+        // 重置音视频同步状态
+        audioClock = 0.0;
+        videoClock = 0.0;
+        frameTimer = 0.0;
+        videoCurrentPts = 0.0;
+        videoPtsDrift = 0.0;
+        lastFramePts = 0.0;
+        frameLastDelay = 0.0;
+        
+        // 重置帧缓冲区
+        {
+            std::lock_guard<std::mutex> lock(frameMutex);
+            currentFrameData = nullptr;
+            frameReady = false;
+        }
+        
+    } catch (const std::exception& e) {
+        Log << Level::Error << "清理过程中发生异常: " << e.what() << op::endl;
+    } catch (...) {
+        Log << Level::Error << "清理过程中发生未知异常" << op::endl;
     }
+    
+    cleaning_up = false;
 }
-
 // ================= 音视频同步功能实现 =================
 
 double VideoPlayer::convertPtsToSeconds(int64_t pts, AVRational timeBase) {

@@ -25,6 +25,7 @@ Explorer::Explorer()
 Explorer::~Explorer()
 {
     Log << Level::Info << "Explorer destroying" << op::endl;
+    videos.clear();
     bitmaps.clear();
     fonts.clear();
     audio.reset();
