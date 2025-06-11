@@ -51,7 +51,8 @@ Button::~Button() {
 void Button::Draw(unsigned char alpha) {
     // Draw the button
     if(!enable)return;
-    
+    if(region.getxend() < 0 || region.getyend() < 0 || region.getx() > WindowInfo.width || region.gety() > WindowInfo.height)return;
+
     // 如果淡出动画正在运行，使用淡出动画的alpha值，否则使用传入的alpha值
     unsigned char finalAlpha = alpha;
     if (fadeAnimationRunning) {
@@ -83,7 +84,11 @@ bool core::Button::OnClick(Point point)
     point.gety() >= region.gety() && point.gety() <= region.getyend())
     {
         Log << "Button "<<text<<" clicked" << op::endl;
+        if(audioid!=AudioID::Unknown && core::Explorer::getInstance()->isAudioLoaded(audioid)) {
+            core::Explorer::getInstance()->playSound(audioid, 0);
+        }
         if (ClickFunc) ClickFunc();
+        else return false; // 如果没有设置点击函数，返回false
         return true;
     }
     return false;
@@ -182,6 +187,7 @@ void Button::MoveTo(const Region& region, const bool enableFluent, const float s
             }
             
             button.animationRunning = false;
+            if(callback&&*callback)(*callback)();
         }).detach();
     }
     else

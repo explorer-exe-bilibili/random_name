@@ -67,6 +67,11 @@ namespace core
         void setyend(float yend) { this->yend = yend; }
         void setRatio(bool Ratio) { this->screenRatio = Ratio; }
 
+        float getOriginX() const { return screenRatio ? x * WindowInfo.width : x; }
+        float getOriginY() const { return screenRatio ? y * WindowInfo.height : y; }
+        float getOriginXEnd() const { return screenRatio ? xend * WindowInfo.width : xend; }
+        float getOriginYEnd() const { return screenRatio ? yend * WindowInfo.height : yend; }
+        
         operator glm::vec4() const { return glm::vec4(getx(), gety(), getxend(), getyend()); }
     };
 

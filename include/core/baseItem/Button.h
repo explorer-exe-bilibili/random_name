@@ -35,6 +35,7 @@ public:
     void SetRegion(const Region& region) {this->region = region;}
     void SetFontID(FontID id);
     void SetFont(Font* font) {this->font = font;}
+    void SetAudioID(AudioID id) {this->audioid = id;}
     void SetTextCenterd(bool isCentered){this->isCentered = isCentered;}
     void SetColor(const Color& color) {this->color = color;}
     void SetFillColor(const Color& color) {this->fillColor = color;}
@@ -57,9 +58,10 @@ protected:
     Bitmap* bitmap;
     std::function<void()> ClickFunc;
     FontID fontid=FontID::Default;
+    AudioID audioid=AudioID::click;
     float fontSize=0;
     float fontScale=1.0f;
-    Font* font;    
+    Font* font;
     // 线程安全相关成员
     std::mutex animMutex;                   // 线程同步互斥锁
     std::atomic<bool> animationRunning{false}; // 标记动画是否在运行

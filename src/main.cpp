@@ -5,9 +5,9 @@
 #include "core/screen/SettingScreen.h"
 #include "core/screen/VideoScreen.h"
 #include "core/screen/nameScreen.h"
-#include "core/ErrorRecovery.h"
-#include "core/OpenGLErrorRecovery.h"
-#include "core/MemoryMonitor.h"
+#include "core/decrash/ErrorRecovery.h"
+#include "core/decrash/OpenGLErrorRecovery.h"
+#include "core/decrash/MemoryMonitor.h"
 
 #ifdef _WIN32
 #include <windows.h>

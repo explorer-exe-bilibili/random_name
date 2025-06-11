@@ -10,7 +10,7 @@
 
 #include "core/baseItem/Button.h"
 #include "core/baseItem/Bitmap.h"
-#include "core/baseItem/Video/VideoPlayer.h"
+#include "core/baseItem/VideoPlayer.h"
 #include "core/nameRandomer.h"
 
 

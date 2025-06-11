@@ -1,6 +1,6 @@
-#include "core/VideoPlayerErrorRecovery.h"
-#include "core/baseItem/Video/VideoPlayer.h"
-#include "core/ErrorRecovery.h"
+#include "core/decrash/VideoPlayerErrorRecovery.h"
+#include "core/baseItem/VideoPlayer.h"
+#include "core/decrash/ErrorRecovery.h"
 #include "core/log.h"
 
 extern "C" {

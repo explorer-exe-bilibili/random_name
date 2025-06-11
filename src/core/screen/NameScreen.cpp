@@ -102,7 +102,7 @@ bool NameScreen::Click(int x,int y){
 void NameScreen::PaintStars() const {
     int index=currentIndex;
     unsigned int nowEnterTime=enterTime;
-    std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1800));
     if(currentName.star<=5){
         for(int i = 0; i < currentName.star; ++i) {
             std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -131,9 +131,11 @@ void NameScreen::PaintStars() const {
 }
 
 void NameScreen::changeName() {
+    core::Explorer::getInstance()->getAudio()->stopAll();
     if(currentIndex>=nameItems.size()){
         if(nameCount==1){
             Log << Level::Info << "所有名字已显示完毕" << op::endl;
+            core::Explorer::getInstance()->playAudio(AudioID::bgm, 0);
             SwitchToScreenWithFade(ScreenID::MainMenu);
             return;
         }
@@ -158,10 +160,10 @@ void NameScreen::changeName() {
     nameButton.SetRegion({0,-0.15,1,1.15});
     nameButton.SetName(currentName);
     int nowIndex=currentIndex;
-    nameButton.MoveTo({0.3,0.32,0.5,0.62},true,1,[nowIndex,this]{
+    nameButton.MoveTo({0.2,0.3,0.6,0.7},true,10,[nowIndex,this]{
         if(nowIndex!=currentIndex)return;
         if(Screen::getCurrentScreen()->getID() != ScreenID::Name)return;
-        nameButton.MoveTo({0.4,0.34,0.6,0.64},true,20);
+        nameButton.MoveTo({0.3,0.3,0.7,0.7},true,8);
     });
     std::thread([this]{PaintStars();}).detach();
     if(currentName.star==3)core::Explorer::getInstance()->playAudio(AudioID::star3);
@@ -174,10 +176,15 @@ void NameScreen::changeName() {
 void NameButton::Draw(unsigned char alpha) {
     if(!font)return;
     int i=0;
-    for(auto&r: regions) r.setFatherRegion(region);
+    for(auto&r: regions) 
+        r.setFatherRegion(region);
     if(text.length()<=regions.size()) for(const auto& c: text){
+        if(Debugging){
+            Drawer::getInstance()->DrawSquare({regions[i].getx(), regions[i].gety(), regions[i].getxend(), regions[i].getyend(),false},Color(255,0,0,255),false);
+            Drawer::getInstance()->DrawSquare(region,Color(255,0,255,255),false);
+        }
         font->RenderCharFitRegion(c, regions[i].getx(), regions[i].gety()
-        ,regions[i].getWidth(), regions[i].getHeight(), color);
+        ,regions[i].getxend(), regions[i].getyend(), color);
         i++;
     }
     else {
@@ -227,13 +234,13 @@ float NameRegion::getx() const {
 }
 
 float NameRegion::gety() const {
-    return fatherRegion.gety() + y * fatherRegion.getHeight();
+    return fatherRegion.gety() + y * (fatherRegion.getOriginYEnd()-fatherRegion.getOriginY());
 }
 
 float NameRegion::getxend() const {
-    return fatherRegion.getx() + xend * fatherRegion.getWidth();
+    return fatherRegion.getxend() - (1-xend)* fatherRegion.getWidth();
 }
 
 float NameRegion::getyend() const {
-    return fatherRegion.gety() + yend * fatherRegion.getHeight();
+    return fatherRegion.gety() + yend * (fatherRegion.getOriginYEnd()-fatherRegion.getOriginY());
 }

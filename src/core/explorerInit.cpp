@@ -14,13 +14,13 @@ int Explorer::init()
     {
         Log << Level::Warn << "音频系统初始化失败，但将继续执行" << op::endl;
     }
-    loadAudio(AudioID::bgm, "C:/Users/j1387/source/repos/explorer-exe-bilibili/random_name/files/music/backsound.mp3");
-    loadAudio(AudioID::click, "C:/Users/j1387/source/repos/explorer-exe-bilibili/random_name/files/music/click.mp3");
-    loadAudio(AudioID::enter, "C:/Users/j1387/source/repos/explorer-exe-bilibili/random_name/files/music/enter.mp3");
-    loadAudio(AudioID::star3, "C:/Users/j1387/source/repos/explorer-exe-bilibili/random_name/files/music/star3.mp3");
-    loadAudio(AudioID::star4, "C:/Users/j1387/source/repos/explorer-exe-bilibili/random_name/files/music/star4.mp3");
-    loadAudio(AudioID::star5, "C:/Users/j1387/source/repos/explorer-exe-bilibili/random_name/files/music/star5.mp3");
-    loadAudio(AudioID::starfull, "C:/Users/j1387/source/repos/explorer-exe-bilibili/random_name/files/music/starfull.mp3");
+    loadAudio(AudioID::bgm, "files/music/backsound.mp3");
+    loadSound(AudioID::click, "files/music/click.mp3");
+    loadSound(AudioID::enter, "files/music/enter.mp3");
+    loadAudio(AudioID::star3, "files/music/star3.mp3");
+    loadAudio(AudioID::star4, "files/music/star4.mp3");
+    loadAudio(AudioID::star5, "files/music/star5.mp3");
+    loadAudio(AudioID::starfull, "files/music/starfull.mp3");
     Log << Level::Info << "Audio system initialized" << op::endl;
 
     loadImagesFromDirectory(config->getPath(IMGS_PATH));
@@ -33,7 +33,7 @@ int Explorer::init()
     {
         loadFont(FontID::Default, config->getPath(DEFAULT_FONT_PATH), false);
         loadFont(FontID::Icon, config->getPath(ICON_FONT_PATH), false);
-        loadFont(FontID::Name, config->getPath(NAME_FONT_PATH), false);
+        loadFont(FontID::Name, config->getPath(NAME_FONT_PATH), false, 150);
         loadFont(FontID::Normal, config->getPath(TEXT_FONT_PATH), false);
         Log << Level::Info << "Default fonts loaded successfully" << op::endl;
     }

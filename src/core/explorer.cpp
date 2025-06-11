@@ -109,11 +109,11 @@ void Explorer::listLoadedBitmaps()
     Log << Level::Info << "======================" << op::endl;
 }
 
-int Explorer::loadFont(FontID id, const std::string &path, bool needPreLoad)
+int Explorer::loadFont(FontID id, const std::string &path, bool needPreLoad, unsigned int fontSize)
 {
     Log << Level::Info << "Loading font from path: " << path << op::endl;
     try {
-        auto font = std::make_shared<Font>(path, needPreLoad);
+        auto font = std::make_shared<Font>(path, needPreLoad, fontSize);
         if (!font->isLoaded())
         {
             throw std::runtime_error("Font failed to load properly");
@@ -162,7 +162,7 @@ int Explorer::loadFont(FontID id, const std::string &path, bool needPreLoad)
         for (const auto& systemFont : fallbackFonts) {
             try {
                 Log << Level::Info << "Trying system font: " << systemFont << op::endl;
-                auto font = std::make_shared<Font>(systemFont, needPreLoad);
+                auto font = std::make_shared<Font>(systemFont, needPreLoad, fontSize);
                 if (font->isLoaded())
                 {
                     fonts[id] = font;
@@ -187,7 +187,7 @@ int Explorer::loadFont(FontID id, const std::string &path, bool needPreLoad)
         for (const auto& fontName : genericFontNames) {
             try {
                 Log << Level::Info << "Trying generic font name: " << fontName << op::endl;
-                auto font = std::make_shared<Font>(fontName, needPreLoad);
+                auto font = std::make_shared<Font>(fontName, needPreLoad, fontSize);
                 if (font->isLoaded())
                 {
                     fonts[id] = font;
@@ -235,7 +235,15 @@ bool Explorer::loadVideo(VideoID id, const std::string &path)
 bool Explorer::loadAudio(AudioID id, const std::string &path)
 {
     Log << Level::Info << "Loading audio from path: " << path << op::endl;
+    audioLoaded[id] = true;
     return getAudio()->loadMusic(AudioIDToString(id),path);
+}
+
+bool Explorer::loadSound(AudioID id, const std::string &path)
+{
+    Log << Level::Info << "Loading sound from path: " << path << op::endl;
+    audioLoaded[id] = true;
+    return getAudio()->loadSound(AudioIDToString(id), path);
 }
 
 bool Explorer::playAudio(AudioID id, int loop)
@@ -247,6 +255,10 @@ bool Explorer::playAudio(AudioID id, int loop)
         getAudio()->stopMusic();
     }
     return getAudio()->playMusic(AudioIDToString(id), loop);
+}
+
+bool Explorer::playSound(AudioID id, int loop){
+    return getAudio()->playSound(AudioIDToString(id),loop);
 }
 
 void Explorer::loadImagesFromDirectory(const std::string &directory)

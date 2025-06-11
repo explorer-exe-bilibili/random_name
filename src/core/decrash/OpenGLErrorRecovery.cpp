@@ -1,5 +1,5 @@
-#include "core/OpenGLErrorRecovery.h"
-#include "core/ErrorRecovery.h"
+#include "core/decrash/OpenGLErrorRecovery.h"
+#include "core/decrash/ErrorRecovery.h"
 #include "core/log.h"
 #include <stdexcept>
 

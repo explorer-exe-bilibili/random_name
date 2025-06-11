@@ -2,7 +2,7 @@
 
 #include "core/log.h"
 #include "core/render/GLBase.h"
-#include "core/OpenGLErrorRecovery.h"
+#include "core/decrash/OpenGLErrorRecovery.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <mutex>
 

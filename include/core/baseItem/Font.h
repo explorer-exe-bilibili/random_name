@@ -25,7 +25,7 @@ class Font {
     FT_Face face;
     static std::shared_ptr<Font> spare_font;
 public:
-    Font(const std::string& fontPath, bool needPreLoad = true);
+    Font(const std::string& fontPath, bool needPreLoad = true, unsigned int fontSize = 48.0f);
     ~Font(); 
     // 渲染文本
     void RenderText(const std::wstring& text, float x, float y, float scale, const glm::vec4& color);
@@ -50,7 +50,7 @@ public:
     // 渲染字符，自动计算缩放以铺满指定区域
     void RenderCharFitRegion(wchar_t text, float x, float y, float xend, float yend, const glm::vec4& color);
 
-    float GetFontSize() const;
+    unsigned int GetFontSize() const;
 
     bool operator==(const Font&) const;
     bool isLoaded() const{return isOK;};
@@ -58,9 +58,10 @@ private:
     bool LoadCharacter(wchar_t c);
     Character GetCharacter(wchar_t c);
     float CalculateDynamicScale(float baseScale) const;
+    float DeCalculateDynamicScale(float baseScale) const;
 
     bool isOK=false;
-    float fontSize; // 字体大小
+    unsigned int fontSize; // 字体大小
     std::map<wchar_t, Character> Characters;
     VertexArray VAO;
     VertexBuffer VBO;

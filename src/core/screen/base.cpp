@@ -1,5 +1,5 @@
 #include "core/screen/base.h"
-#include "core/baseItem/Video/VideoPlayer.h"
+#include "core/baseItem/VideoPlayer.h"
 #include "core/Config.h"
 #include "core/log.h"
 #include <algorithm>

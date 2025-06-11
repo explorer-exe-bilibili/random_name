@@ -1,10 +1,10 @@
-#include "core/baseItem/Video/VideoPlayer.h"
+#include "core/baseItem/VideoPlayer.h"
 
 #include "core/log.h"
 #include "core/baseItem/Bitmap.h"
-#include "core/ErrorRecovery.h"
-#include "core/VideoPlayerErrorRecovery.h"
-#include "core/MemoryMonitor.h"
+#include "core/decrash/ErrorRecovery.h"
+#include "core/decrash/VideoPlayerErrorRecovery.h"
+#include "core/decrash/MemoryMonitor.h"
 
 extern "C" {
 #include <libavformat/avformat.h>

@@ -6,9 +6,9 @@
 #include "core/baseItem/Bitmap.h"
 #include "core/baseItem/Font.h"
 #include "core/baseItem/Audio.h"
-#include "core/baseItem/Video/VideoPlayer.h"
-#include "core/ErrorRecovery.h"
-#include "core/MemoryMonitor.h"
+#include "core/baseItem/VideoPlayer.h"
+#include "core/decrash/ErrorRecovery.h"
+#include "core/decrash/MemoryMonitor.h"
 
 namespace core
 {
@@ -44,6 +44,10 @@ enum class BitmapID{
     Weapon_catalystBg,
     SettingBg,
     floatWindow,
+    star3,
+    star4,
+    star5,
+    star6,
     Overlay0,
     Overlay1,
     Overlay2,
@@ -91,6 +95,7 @@ class Explorer {
     std::map<std::string, std::shared_ptr<core::Bitmap>> Name_bitmaps;
     std::map<FontID, std::shared_ptr<core::Font>> fonts;
     std::map<VideoID, std::shared_ptr<core::VideoPlayer>> videos;
+    std::map<AudioID, bool> audioLoaded; // 用于跟踪音频是否已加载
     std::shared_ptr<Audio> audio;
     static std::shared_ptr<core::Explorer> instance;
 
@@ -120,14 +125,17 @@ public:
     bool isBitmapLoaded(BitmapID id) const{return bitmaps.contains(id);}
     bool isFontLoaded(FontID id) const{return fonts.contains(id);}
     bool isVideoLoaded(VideoID id) const{return videos.contains(id);}
+    bool isAudioLoaded(AudioID id) const{return audioLoaded.contains(id);}
 
     bool loadBitmap(const std::string& name, const std::string& path);
     bool loadBitmap(BitmapID id, const std::string& path);
-    int loadFont(FontID id, const std::string& path, bool needPreLoad = true);
+    int loadFont(FontID id, const std::string& path, bool needPreLoad = true, unsigned int fontSize = 48);
     bool loadVideo(VideoID id, const std::string& path);
     bool loadAudio(AudioID id, const std::string& path);
+    bool loadSound(AudioID id, const std::string& path);
 
     bool playAudio(AudioID id, int loop = 0);
+    bool playSound(AudioID id, int loop = 0);
 
     void loadImagesFromDirectory(const std::string& directory);
     void listLoadedBitmaps();

@@ -11,9 +11,9 @@
 #include "core/baseItem/Base.h"
 #include "core/screen/mainScreen.h"
 #include "core/Drawer.h"
-#include "core/ErrorRecovery.h"
-#include "core/OpenGLErrorRecovery.h"
-#include "core/MemoryMonitor.h"
+#include "core/decrash/ErrorRecovery.h"
+#include "core/decrash/OpenGLErrorRecovery.h"
+#include "core/decrash/MemoryMonitor.h"
 
 using namespace core;
 

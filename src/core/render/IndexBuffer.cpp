@@ -1,6 +1,6 @@
 #include"core/render/IndexBuffer.h"
 #include"core/log.h"
-#include"core/OpenGLErrorRecovery.h"
+#include"core/decrash/OpenGLErrorRecovery.h"
 #include"core/render/GLBase.h"
 #include<glad/glad.h>
 

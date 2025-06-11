@@ -10,7 +10,7 @@
 
 #include "core/render/GLBase.h"
 #include "core/baseItem/Base.h"
-#include "core/OpenGLErrorRecovery.h"
+#include "core/decrash/OpenGLErrorRecovery.h"
 #include "core/log.h"
 
 using namespace core;
@@ -50,7 +50,8 @@ void main()
 std::shared_ptr<Font> Font::spare_font = nullptr;
 Shader Font::shader;
 
-Font::Font(const std::string& fontPath,bool needPreLoad)
+Font::Font(const std::string& fontPath,bool needPreLoad, unsigned int fontSize)
+	: fontSize(fontSize), face(nullptr), isOK(false)
 {
 	std::cout << "loading Font file "<<fontPath<<std::endl;
 	if(!std::filesystem::exists(fontPath)){
@@ -81,9 +82,8 @@ Font::Font(const std::string& fontPath,bool needPreLoad)
 		isOK=false;
 		return;
 	}
-	fontSize = 48;
 	// 设置字体大小
-	FT_Set_Pixel_Sizes(face, 0, 48);
+	FT_Set_Pixel_Sizes(face, 0, fontSize);
 
 	// 加载字符
 	glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // 禁用字节对齐限制
@@ -371,76 +371,20 @@ void Font::RenderCharFitRegion(wchar_t text, float x, float y, float xend, float
 	float availableHeight = yend - y;
 	
 	// 计算字符的实际尺寸（不含缩放）
-	float charWidth = static_cast<float>(ch.Size.x);
-	float charHeight = static_cast<float>(ch.Size.y);
+	float charWidth = ch.Advance >> 6; // 字符的原始宽度（单位为像素）
 	
 	// 如果字符尺寸为0，则无法渲染
-	if (charWidth <= 0 || charHeight <= 0) {
+	if (charWidth <= 0) {
 		return;
 	}
 	
 	// 计算缩放因子，确保字符能完全填充区域
 	float scaleX = availableWidth / charWidth;
-	float scaleY = availableHeight / charHeight;
 	
-	// 使用较小的缩放因子以确保字符不会超出区域
-	float scale = std::min(scaleX, scaleY);
-	
-	// 计算居中位置
-	float scaledWidth = charWidth * scale;
-	float scaledHeight = charHeight * scale;
-	float centerX = x + (availableWidth - scaledWidth) / 2.0f;
-	float centerY = y + (availableHeight - scaledHeight) / 2.0f;
-	
-	// 转换坐标系（OpenGL坐标系转换）
-	float render_y = WindowInfo.height - centerY - scaledHeight;
-	
-	// 设置正交投影矩阵
-	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(WindowInfo.width), 0.0f, static_cast<float>(WindowInfo.height));
-	
-	// 设置着色器
-	shader.use();
-	shader.setMat4("projection", projection);
-	shader.setVec3("textColor", color);
-	shader.setFloat("alphaMultiplier", color.a);
-	
-	// 启用混合以处理文本的透明度
-	GLCall(glEnable(GL_BLEND));
-	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-	GLCall(glActiveTexture(GL_TEXTURE0));
-	VAO.Bind();
-
-	// 计算字符渲染位置
-	float xpos = centerX + ch.Bearing.x * scale;
-	float ypos = render_y - (ch.Size.y - ch.Bearing.y) * scale;
-
-	float w = ch.Size.x * scale;
-	float h = ch.Size.y * scale;
-
-	// 更新 VBO
-	float vertices[6][4] = {
-		{ xpos,     ypos + h,   0.0f, 0.0f },
-		{ xpos,     ypos,       0.0f, 1.0f },
-		{ xpos + w, ypos,       1.0f, 1.0f },
-
-		{ xpos,     ypos + h,   0.0f, 0.0f },
-		{ xpos + w, ypos,       1.0f, 1.0f },
-		{ xpos + w, ypos + h,   1.0f, 0.0f }
-	};
-
-	// 绑定纹理
-	GLCall(glBindTexture(GL_TEXTURE_2D, ch.TextureID));
-
-	// 更新顶点缓冲
-	VBO.Bind();
-	VBO.BufferSubData(0, sizeof(vertices), vertices);
-	VertexBuffer::Unbind();
-
-	// 绘制
-	GLCall(glDrawArrays(GL_TRIANGLES, 0, 6));
-
-	VertexArray::Unbind();
-	glBindTexture(GL_TEXTURE_2D, 0);
+	float scale=DeCalculateDynamicScale(scaleX);
+	x-= ch.Bearing.x * scale;
+	y-= ch.Bearing.y * scale/2.0;
+	RenderChar(text, x, y, scale, color);
 }
 
 bool Font::operator==(const Font& b) const
@@ -504,7 +448,7 @@ bool Font::LoadCharacter(wchar_t c)
 	return true;
 }
 
-float Font::GetFontSize() const
+unsigned int Font::GetFontSize() const
 {
 	return fontSize;
 }
@@ -661,4 +605,24 @@ float Font::CalculateDynamicScale(float baseScale) const {
     
     // 应用用户提供的基础缩放并返回
     return baseScale * scaleFactor;
+}
+
+float Font::DeCalculateDynamicScale(float scaledValue) const {
+    // 获取窗口当前尺寸
+    float currentWidth = static_cast<float>(WindowInfo.width);
+    float currentHeight = static_cast<float>(WindowInfo.height);
+
+    // 选择一个参考尺寸（可以根据需要调整）
+    const float referenceWidth = 800.0f;
+    const float referenceHeight = 600.0f;
+
+    // 计算当前窗口与参考尺寸的比例
+    float widthRatio = currentWidth / referenceWidth;
+    float heightRatio = currentHeight / referenceHeight;
+
+    // 使用较小的比例以确保在任何方向上都不会太大
+    float scaleFactor = std::min(widthRatio, heightRatio);
+
+    // 反向应用缩放因子
+    return scaledValue / scaleFactor;
 }

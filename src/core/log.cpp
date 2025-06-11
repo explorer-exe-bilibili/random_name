@@ -96,7 +96,13 @@ void Log_::LogMessage(const std::string& message) {
 
 // 添加Logerr::LogMessage实现
 void Logerr::LogMessage(const std::string& message) {
-    ErrorBuffer += message;
+    try{
+        ErrorBuffer += message;
+    }
+    catch(...){
+        std::cerr << "Error writing to error log: " << message << std::endl;
+    }
+
 }
 
 Log_& Log_::operator<<(operation op) {

@@ -1,7 +1,7 @@
 #include "core/render/VertexArray.h"
 #include "core/log.h"
 #include "core/render/GLBase.h"
-#include "core/OpenGLErrorRecovery.h"
+#include "core/decrash/OpenGLErrorRecovery.h"
 
 
 using namespace core;
