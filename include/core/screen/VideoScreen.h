@@ -23,8 +23,9 @@ class VideoScreen : public Screen
 {
     core::VideoPlayer* videoPlayer=nullptr;
 public:
-    VideoScreen():Screen(ScreenID::Video){};
+    VideoScreen():Screen(ScreenID::Video){init();};
     ~VideoScreen();
+    void init() override;
 
     void enter(int videoID) override;
     void Draw() override;

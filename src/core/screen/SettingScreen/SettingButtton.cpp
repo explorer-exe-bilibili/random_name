@@ -173,11 +173,27 @@ SettingButton::SettingButton(sItem item_, int number, int page)
                     std::string path=selectFile();
                     if (!path.empty()) {
                         Config::getInstance()->set(configName,path);
-                        button->SetText(Config::getInstance()->get(configName));
-                        button->SetText(path);
-                        button->SetEnableFill(false);
-                        button->SetEnableBitmap(true);
-                        button->SetBitmap(BitmapID::SettingButton);
+                        showText=path;
+                        int i=0;
+                        if(item.fileType==FileType::NameFile)
+                            for(const auto& c:item.configName){
+                                try{
+                                    i= std::stoi(std::string(1, c));
+                                }
+                                catch (...) {
+                                }
+                                if(i>0&&i<10){
+                                    break;
+                                }
+                            }
+                        switch (item.fileType)
+                        {
+                        case FileType::Picture:core::Explorer::getInstance()->loadBitmap(item.bitmapID, path);break;
+                        case FileType::Video:core::Explorer::getInstance()->loadVideo(item.videoID, path);break;
+                        case FileType::Audio:core::Explorer::getInstance()->loadAudio(item.audioID, path);break;
+                        case FileType::NameFile: core::NameRandomer::getInstance(i)->setFile(path); break;
+                        default:break;
+                        }
                         checkActions();
                     }
                 }
@@ -396,6 +412,9 @@ void SettingButton::openFile() {
 }
 
 void SettingButton::checkActions(){
+    if(item.type==SettingButtonType::Switch){
+
+    }
     if(item.action&SettingButtonAction::Restart){
     }
 }

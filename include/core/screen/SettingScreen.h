@@ -41,6 +41,7 @@ public:
               action(SettingButtonAction::None), 
               type(SettingButtonType::Switch),
               bitmapID(core::BitmapID::Unknown),
+              audioID(core::AudioID::Unknown),
               fontID(core::FontID::Unknown),
               videoID(core::VideoID::Unknown),
               color(core::Color(0,0,0,255)),
@@ -48,7 +49,6 @@ public:
               configName(""),
               fileChooseWindowName(""),
               bitmapName(""),
-              audioID(""),
               outOfLimitOutPut(""),
               minCount(0),
               maxCount(0) {}
@@ -103,7 +103,7 @@ public:
     std::string configName;
     std::string fileChooseWindowName;
     std::string bitmapName;
-    std::string audioID;
+    core::AudioID audioID;
     std::string outOfLimitOutPut;
     int minCount=0;
     int maxCount=0;
@@ -111,6 +111,7 @@ public:
 class SettingButton
 {
     sItem item;
+    std::string showText;
     core::Region TextRegion;
     core::Region ButtonRegion;
     std::shared_ptr<core::Button> button=nullptr;

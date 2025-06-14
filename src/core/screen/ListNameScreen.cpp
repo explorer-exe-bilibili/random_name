@@ -1,5 +1,7 @@
 #include "core/screen/ListNameScreen.h"
 
+#include <algorithm>
+
 using namespace core;
 using namespace screen;
 
@@ -31,6 +33,7 @@ bool ListNameScreen::Click(int x, int y) {
 }
 
 void ListNameScreen::Draw() {
+    updateTransition(0);
     // 绘制代码
     if(background) {
         background->Draw({0,0,1,1});
@@ -47,32 +50,38 @@ void ListNameScreen::Draw() {
     }
 }
 
-void ListNameScreen::enter() {
+void ListNameScreen::enter(int) {
     // 进入代码
     core::Explorer::getInstance()->playSound(AudioID::enter,0);
+    std::sort(nameItems.begin(), nameItems.end(), [](const NameEntry& a, const NameEntry& b) {
+        return a.star > b.star; // 按星级降序排序
+    });
     int i = 0;
     for(auto& button : m_buttons) {
         if(button) {
             button->SetRegion({0, 0, 1, 1});
             if(nameItems.size() > i) {
-                button->SetName(nameItems[i]);
+                button->SetName(nameItems[i++]);
             } else {
-                button->SetName(NameEntry("Unknown", 0, NameType::Unknow, 0));
+                button->SetName(NameEntry("未知", 0, NameType::Unknow, 0));
             }
             button->SetFontID(FontID::Name);
-            button->SetColor(Color(255, 255, 255, 255));
+            button->SetColor(Color(10, 10, 10, 255));
             button->SetAudioID(AudioID::enter);
-            button->SetClickFunc([this, i]{ 
+            button->SetFontScale(0.7f);
+            // button->SetClickFunc([this, i]{ 
                 // SwitchToScreenWithFade(ScreenID::NameInfo,i,0.5f);
-            });
-            button->SetRegion({0.1f, 0.1f + i * 0.1f + 1, 0.9f, 0.1f + (i + 1) * 0.1f+1});
+            // });
+            button->SetRegion({0.1f + i * 0.1f + 1, 0.1f, 0.183f + i * 0.1f + 1, 0.9f});
         }
     }
     std::thread([this]{
         int index = 0;
         for(auto& button : m_buttons) {
             if(button) {
-                button->MoveTo({0.1f, 0.1f + index * 0.1f, 0.9f, 0.1f + (index + 1) * 0.1f}, true, 50.0f);
+                Region region = {(index+1) * 0.083f, 0.1f, (index+2) * 0.083f, 0.9f};
+                button->MoveTo(region, true, 50.0f);
+                Log<<"Moving button "<<index<<" region: "<<region<<op::endl;
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(100));
             index++;
@@ -110,6 +119,7 @@ void ListNameButton::Draw() {
         bitmap->Draw(region);
     }
     if (enableText && font) {
-        font->RenderTextVerticalBetween(text, region, fontScale,color);
+        Region textRegion={region.getOriginX(), region.getOriginY() + 0.1f, region.getOriginXEnd(), region.getOriginYEnd() - 0.2f, true};
+        font->RenderTextVerticalBetween(text, textRegion, fontScale,color);
     }
 }

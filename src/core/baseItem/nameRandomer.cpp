@@ -13,18 +13,16 @@ std::vector<std::shared_ptr<NameRandomer>> NameRandomer::instances;
 
 NameRandomer* NameRandomer::getInstance(int mode)  {
         if(mode>=instances.size()){
-            if(mode==0){
-                instances.resize(4);
-                instances[0]=createInstance(0);
-                instances[1]=createInstance(1);
-                instances[2]=createInstance(2);
-                instances[3]=createInstance(3);
-                instances[0]->setFile(Config::getInstance()->getPath(NAMES1, "files/name/names.txt"));
-                instances[1]->setFile(Config::getInstance()->getPath(NAMES2, "files/name/names.txt"));
-                instances[2]->setFile(Config::getInstance()->getPath(NAMES3, "files/name/names.txt"));
-                instances[3]->setFile(Config::getInstance()->getPath(NAMES4, "files/name/names.txt"));
-            }
-            return getInstance(0);
+            instances.resize(4);
+            instances[0]=createInstance(0);
+            instances[1]=createInstance(1);
+            instances[2]=createInstance(2);
+            instances[3]=createInstance(3);
+            instances[0]->setFile(Config::getInstance()->getPath(NAMES1, "files/name/names.txt"));
+            instances[1]->setFile(Config::getInstance()->getPath(NAMES2, "files/name/names.txt"));
+            instances[2]->setFile(Config::getInstance()->getPath(NAMES3, "files/name/names.txt"));
+            instances[3]->setFile(Config::getInstance()->getPath(NAMES4, "files/name/names.txt"));
+            return getInstance(mode);
         }
         std::shared_ptr<NameRandomer> instance = instances[mode];
         if(instance==nullptr){

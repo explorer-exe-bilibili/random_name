@@ -4,12 +4,40 @@
 #include "core/Config.h"
 #include "core/log.h"
 
+using namespace core;
 namespace screen
 {
 
 VideoScreen::~VideoScreen()
 {
     VideoScreen::exit();
+}
+
+void VideoScreen::init()
+{
+    buttons.clear();
+    buttons.resize(1);
+    buttons[0] = std::make_shared<Button>();
+    buttons[0]->SetText("跳过>>");
+    buttons[0]->SetEnableBitmap(false);
+    buttons[0]->SetRegion({0.82,0.045,0.88,0.08});
+    buttons[0]->SetAudioID(AudioID::enter);
+    buttons[0]->SetFontID(FontID::Normal);
+    buttons[0]->SetColor(Color(255,255,255, 255));
+    buttons[0]->SetEnableText(true);
+    buttons[0]->SetEnable(true);
+    buttons[0]->SetFontScale(0.3f);
+    buttons[0]->SetClickFunc([]() {
+        if (SwitchToScreen(ScreenID::Name, nameItems.size()))
+        {
+            Log << Level::Info << "跳过视频，切换到Name屏幕" << op::endl;
+        }
+        else
+        {
+            Log << Level::Error << "无法切换到Name屏幕，返回主菜单" << op::endl;
+            SwitchToScreen(ScreenID::MainMenu);
+        }
+    });
 }
 
 void VideoScreen::enter(int mode)
@@ -100,6 +128,11 @@ void VideoScreen::Draw()
                 SwitchToScreen(ScreenID::MainMenu);
             }
         }
+    }
+    for(const auto& button : buttons)
+    {
+        if(button)
+            button->Draw();
     }
 }
 

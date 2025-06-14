@@ -5,6 +5,7 @@
 #include "core/screen/SettingScreen.h"
 #include "core/screen/VideoScreen.h"
 #include "core/screen/nameScreen.h"
+#include "core/screen/ListNameScreen.h"
 #include "core/decrash/ErrorRecovery.h"
 #include "core/decrash/OpenGLErrorRecovery.h"
 #include "core/decrash/MemoryMonitor.h"
@@ -53,7 +54,6 @@ int main(int argc, char* argv[])
 #endif
 #ifdef DEBUG_MODE
     Log<<Level::Info<<"运行在Debug模式"<<op::endl;
-    // _wchdir(L"..");
 #else
     Log<<Level::Info<<"运行在非Debug模式"<<op::endl;
 #endif
@@ -122,25 +122,6 @@ int init(){
     dwMode |= ENABLE_VIRTUAL_TERMINAL_PROCESSING;
     SetConsoleMode(hOut, dwMode);
     #endif
-    // WSL 特定的 GLFW 提示
-    #ifdef __linux__
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
-    
-    // WSL 兼容性设置
-    glfwWindowHint(GLFW_DOUBLEBUFFER, GLFW_TRUE);
-    glfwWindowHint(GLFW_REFRESH_RATE, 60);
-    
-    // 减少显存使用
-    glfwWindowHint(GLFW_RED_BITS, 8);
-    glfwWindowHint(GLFW_GREEN_BITS, 8);
-    glfwWindowHint(GLFW_BLUE_BITS, 8);
-    glfwWindowHint(GLFW_ALPHA_BITS, 8);
-    glfwWindowHint(GLFW_DEPTH_BITS, 24);
-    glfwWindowHint(GLFW_STENCIL_BITS, 8);
-    #endif
     Log.Init();
     Log<<Level::Info<<"Initializing GLFW"<<op::endl;
         // 初始化GLFW
@@ -164,7 +145,8 @@ int init(){
     
     // 设置当前上下文
     glfwMakeContextCurrent(WindowInfo.window);
-    glfwSwapInterval(0); // 垂直同步    Log<<Level::Info<<"Loading GLAD"<<op::endl;
+    glfwSwapInterval(Config::getInstance()->getBool(VERTICAL_SYNC,0)); // 垂直同步
+    Log<<Level::Info<<"Loading GLAD"<<op::endl;
     // 初始化glad
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
         glfwTerminate();
@@ -198,6 +180,7 @@ int init(){
     screen::Screen::RegisterScreen(screen::ScreenID::Settings, std::make_shared<screen::SettingScreen>());
     screen::Screen::RegisterScreen(screen::ScreenID::Video,std::make_shared<screen::VideoScreen>());
     screen::Screen::RegisterScreen(screen::ScreenID::Name,std::make_shared<screen::NameScreen>());
+    screen::Screen::RegisterScreen(screen::ScreenID::ListName,std::make_shared<screen::ListNameScreen>());
     Log<<Level::Info<<"starting render loop"<<op::endl<<op::flush;
     return 0;
 }

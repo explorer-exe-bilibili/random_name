@@ -41,16 +41,18 @@ void NameScreen::init() {
     buttons[SkipButton]->SetText("跳过>>");
     buttons[SkipButton]->SetFontScale(0.3f);
     buttons[SkipButton]->SetFontID(FontID::Normal);
+    buttons[SkipButton]->SetAudioID(AudioID::enter);
     buttons[SkipButton]->SetClickFunc([this] {
         Log << Level::Info << "跳过名字输入，进入列表" << op::endl;
         SwitchToScreenWithFade(ScreenID::ListName);
+        core::Explorer::getInstance()->getAudio()->stopAll();
     });
     buttons[SkipButton]->SetColor({255, 255, 255, 255});
     buttons[SkipButton]->SetEnableText(true);
     buttons[SkipButton]->SetEnableBitmap(false);
     buttons[SkipButton]->SetEnableFill(false);
     buttons[SkipButton]->SetEnable(false);
-    buttons[AddNameButton]->SetRegion({0.4,0.8,0.52,0.836});
+    buttons[AddNameButton]->SetRegion({0.35,0.8,0.65,0.836});
     buttons[AddNameButton]->SetText("增加此名字几率");
     buttons[AddNameButton]->SetFontScale(0.3f);
     buttons[AddNameButton]->SetFontID(FontID::Normal);
@@ -62,8 +64,9 @@ void NameScreen::init() {
     buttons[AddNameButton]->SetEnableBitmap(false);
     buttons[AddNameButton]->SetEnableFill(false);
     buttons[AddNameButton]->SetEnable(false);
-    buttons[TypeButton]->SetRegion({0.52,0.8,0.64,0.836});
+    buttons[TypeButton]->SetRegion({0.2,0.25,0.6,-1});
     nameButton.SetFontID(FontID::Name);
+    nameButton.SetColor({200,200,200,255});
 }
 
 void NameScreen::Draw() {
@@ -93,7 +96,8 @@ void NameScreen::enter(int times) {
 
 bool NameScreen::Click(int x,int y){    
     for(auto& b: buttons){
-        if(b->OnClick(Point(x, y))) return true;
+        if(b->OnClick(Point(x, y,false)))
+        return true;
     }
     changeName();
     return true;
@@ -102,7 +106,7 @@ bool NameScreen::Click(int x,int y){
 void NameScreen::PaintStars() const {
     int index=currentIndex;
     unsigned int nowEnterTime=enterTime;
-    std::this_thread::sleep_for(std::chrono::milliseconds(1800));
+    std::this_thread::sleep_for(std::chrono::milliseconds(1500));
     if(currentName.star<=5){
         for(int i = 0; i < currentName.star; ++i) {
             std::this_thread::sleep_for(std::chrono::milliseconds(200));
@@ -152,11 +156,17 @@ void NameScreen::changeName() {
     else buttons[AddNameButton]->SetEnable(false);
     if(nameCount>1)buttons[SkipButton]->SetEnable(true);
     else buttons[SkipButton]->SetEnable(false);
-    if(currentName.type==NameType::Unknow) {
-        buttons[TypeButton]->SetEnable(false);
-    } else {
-        buttons[TypeButton]->SetEnable(true);
+    switch (currentName.type)
+    {
+    case NameType::bow:buttons[TypeButton]->SetBitmap(BitmapID::Weapon_bowBg);break;
+    case NameType::sword:buttons[TypeButton]->SetBitmap(BitmapID::Weapon_swordBg);break;
+    case NameType::polearm:buttons[TypeButton]->SetBitmap(BitmapID::Weapon_polearmBg);break;
+    case NameType::catalyst:buttons[TypeButton]->SetBitmap(BitmapID::Weapon_catalystBg);break;
+    case NameType::claymore:buttons[TypeButton]->SetBitmap(BitmapID::Weapon_claymoreBg);break;
+    default:break;
     }
+    buttons[TypeButton]->SetEnable(false);
+    buttons[TypeButton]->SetRegion({0.2,0.25,0.6,-1});
     nameButton.SetRegion({0,-0.15,1,1.15});
     nameButton.SetName(currentName);
     int nowIndex=currentIndex;
@@ -164,6 +174,10 @@ void NameScreen::changeName() {
         if(nowIndex!=currentIndex)return;
         if(Screen::getCurrentScreen()->getID() != ScreenID::Name)return;
         nameButton.MoveTo({0.3,0.3,0.7,0.7},true,8);
+        if(currentName.type!=NameType::Unknow){
+            buttons[TypeButton]->SetEnable(true);
+            buttons[TypeButton]->MoveTo({0.3,0.25,0.7,-1},true,8);
+        }
     });
     std::thread([this]{PaintStars();}).detach();
     if(currentName.star==3)core::Explorer::getInstance()->playAudio(AudioID::star3);
@@ -234,7 +248,7 @@ float NameRegion::getx() const {
 }
 
 float NameRegion::gety() const {
-    return fatherRegion.gety() + y * (fatherRegion.getOriginYEnd()-fatherRegion.getOriginY());
+    return fatherRegion.gety() + y * (fatherRegion.getyend_()-fatherRegion.gety_());
 }
 
 float NameRegion::getxend() const {
@@ -242,5 +256,5 @@ float NameRegion::getxend() const {
 }
 
 float NameRegion::getyend() const {
-    return fatherRegion.gety() + yend * (fatherRegion.getOriginYEnd()-fatherRegion.getOriginY());
+    return fatherRegion.gety() + yend * (fatherRegion.getyend_()-fatherRegion.gety_());
 }

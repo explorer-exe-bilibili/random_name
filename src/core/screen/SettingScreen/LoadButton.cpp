@@ -425,7 +425,7 @@ void SettingScreen::loadButtons() {
                     item.fileType = button.value("fileType", FileType::All);
                     item.fileChooseWindowName = button.value("fileChooseWindowName", "选择文件");
                     if(item.fileType==FileType::Audio){
-                        item.audioID = button.value("audioID", "Unknown");
+                        item.audioID = button.value("audioID", core::AudioID::Unknown);
                     }
                     else if(item.fileType==FileType::Video){
                         item.videoID = button.value("videoID", core::VideoID::Unknown);

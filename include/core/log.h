@@ -124,7 +124,6 @@ public:
         LogMessage(std::string(1, value));
         return *this;
     }
-
 };
 
 class Logerr:public Log_ {
