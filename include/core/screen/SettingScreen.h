@@ -7,7 +7,7 @@ namespace screen
 {
 struct FileTypeFilter {
     std::string description;  // 描述，如"图片文件"
-    std::string pattern;      // 模式，如"*.png"
+    std::vector<const char*> pattern;      // 模式，如"*.png"
 };
 enum class SettingButtonType{
     Switch,

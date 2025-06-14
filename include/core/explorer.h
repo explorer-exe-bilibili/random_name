@@ -138,6 +138,7 @@ public:
     bool playSound(AudioID id, int loop = 0);
 
     void loadImagesFromDirectory(const std::string& directory);
+    void loadImagesFromConfig();
     void listLoadedBitmaps();
     
     // 错误恢复相关方法

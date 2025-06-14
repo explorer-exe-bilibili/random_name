@@ -2,6 +2,7 @@
 #include "core/log.h"
 
 #include "core/Config.h"
+#include "core/Drawer.h"
 #include <tinyfiledialogs/tinyfiledialogs.h>
 
 using namespace core;
@@ -12,20 +13,20 @@ static std::vector<FileTypeFilter> getFiltersForType(FileType fileType) {
     // 定义文件类型到过滤器的映射
     static const std::map<FileType, std::vector<FileTypeFilter>> fileTypeFiltersMap = {
         { FileType::All, {
-            {"所有文件", "*.*"}
+            {"所有文件", {"*.*"}}
         }},
         { FileType::Picture, {
-            {"图片文件", "*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.tiff;*.webp;"}
+            {"图片文件", {"*.png","*.jpg","*.jpeg","*.bmp","*.gif","*.tiff","*.webp"}}
         }},
         { FileType::Video, {
-            {"视频文件", "*.mp4;*.avi;*.mkv;*.mov;*.wmv;*.flv;*.webm"}
+            {"视频文件", {"*.mp4","*.avi","*.mkv","*.mov","*.wmv","*.flv","*.webm"} }
         }},
         { FileType::Audio, {
-            {"音频文件", "*.mp3;*.wav;*.flac;*.ogg;*.aac;*.m4a"}
+            {"音频文件", {"*.mp3","*.wav","*.flac","*.ogg","*.aac","*.m4a"}}
         }},
         { FileType::NameFile, {
             // {"文档文件", "*.pdf;*.doc;*.docx;*.ppt;*.pptx;*.xls;*.xlsx"},
-            {"文本文件", "*.txt"}
+            {"文本文件", {"*.txt"}}
         }},
         // FileType::Custom 需要单独处理
     };
@@ -149,6 +150,14 @@ SettingButton::SettingButton(sItem item_, int number, int page)
             });
         }
         else if(item.type==SettingButtonType::FileSelect){
+            showText=Config::getInstance()->get(item.configName,"");
+            if(!showText.empty()){
+                // 只显示文件名，不显示完整路径
+                size_t pos = showText.find_last_of("/\\");
+                if (pos != std::string::npos) {
+                    showText = showText.substr(pos + 1);
+                }
+            }
             button2=std::make_shared<core::Button>(Button());
             button2->SetRegion(Button2Region);
             button2->SetBitmap(BitmapID::SettingButton);
@@ -203,6 +212,14 @@ SettingButton::SettingButton(sItem item_, int number, int page)
             });
         }
         else if(item.type==SettingButtonType::PathSelect){
+            showText=Config::getInstance()->get(item.configName,"");
+            if(!showText.empty()){
+                // 只显示文件名，不显示完整路径
+                size_t pos = showText.find_last_of("/\\");
+                if (pos != std::string::npos) {
+                    showText = showText.substr(pos + 1);
+                }
+            }
             button2=std::make_shared<core::Button>(Button());
             button2->SetRegion(Button2Region);
             button2->SetBitmap(BitmapID::SettingButton);
@@ -245,7 +262,17 @@ SettingButton::SettingButton(sItem item_, int number, int page)
 void SettingButton::Draw(int currentPage, unsigned char alpha)const {
     if(currentPage!=page)return;
     if(!item.name.empty()){
-        font->RenderTextBetween(item.name, TextRegion, 0.7f, Color(255, 255, 255, alpha));
+        if(!showText.empty()){
+            Region TextRegion2={TextRegion.getOriginXEnd()-0.15f, TextRegion.getOriginY(), TextRegion.getOriginXEnd(), TextRegion.getOriginYEnd(),true};
+            if(Debugging){
+                Drawer::getInstance()->DrawSquare(TextRegion2,Color(255,0,0,255),false);
+                Drawer::getInstance()->DrawSquare(TextRegion,Color(0,255,0,255),false);
+            }
+            font->RenderTextBetween(showText, TextRegion2, 0.35f, Color(255, 255, 255, alpha));
+            font->RenderText(item.name,TextRegion.getx(),TextRegion.gety(),0.5f,Color(255,255,255,alpha));
+        }
+        else
+            font->RenderTextBetween(item.name, TextRegion, 0.7f, Color(255, 255, 255, alpha));
     }
     if(button){
         button->Draw(alpha);
@@ -336,38 +363,71 @@ std::string SettingButton::selectFile() {
     }
     catch (const std::exception& e) {
         Log << Level::Error << "SettingButton::selectFile() - Exception in Config::get(): " << e.what() << op::endl;
-        return "";
+        // 即使无法获取配置的路径，也可能希望允许用户选择一个新文件，
+        // 因此这里不立即返回空字符串，defaultPath 将为空。
+        // 或者，根据需求，如果无法获取默认路径则返回 ""。
+        // defaultPath = ""; // 确保 defaultPath 为空字符串
+    }
+
+    // 准备扁平化的过滤器模式列表和描述列表
+    std::vector<const char*> flatPatternList;
+    std::vector<std::string> descriptionList;
+
+    std::vector<FileTypeFilter> filterGroups = getFiltersForType(item.fileType);
+
+    // 从 getFiltersForType 返回的每个组中收集模式和描述
+    // getFiltersForType 保证至少返回 FileType::All 的过滤器
+    for (const auto& group : filterGroups) {
+        if (!group.pattern.empty()) {
+            flatPatternList.insert(flatPatternList.end(), group.pattern.begin(), group.pattern.end());
+            // 仅当从此组添加了模式并且描述不为空时才添加描述
+            if (!group.description.empty()) {
+                 descriptionList.push_back(group.description);
+            }
+        }
+    }
+
+    // 如果在处理完所有组后 flatPatternList 仍然为空（不太可能，因为 FileType::All），
+    // 或者没有收集到描述，则添加默认值。
+    // getFiltersForType 的回退机制应确保此情况不会发生。
+    if (flatPatternList.empty()) {
+        Log << Level::Warn << "Pattern list is empty after processing filter groups. Defaulting to all files." << op::endl;
+        flatPatternList.push_back("*.*");
+    }
+    if (descriptionList.empty()) {
+        // 如果没有描述，则使用通用描述
+        descriptionList.push_back("所有文件");
     }
     
-    // 准备过滤器数组
-    std::vector<const char*> filterPatterns;
-    std::vector<const char*> filterDescriptions;
-    
-    for (const auto& filter : getFiltersForType(item.fileType)) {
-        filterPatterns.push_back(filter.pattern.c_str());
-        filterDescriptions.push_back(filter.description.c_str());
+    // 将描述列表组合成单个字符串
+    std::string combinedDescription;
+    if (!descriptionList.empty()) {
+        combinedDescription = descriptionList[0];
+        for (size_t i = 1; i < descriptionList.size(); ++i) {
+            combinedDescription += "; " + descriptionList[i]; // tinyfd 可能只显示第一个，或以某种方式处理组合字符串
+        }
     }
+    // 如果 combinedDescription 仍然为空（理论上不应发生），tinyfd 会处理 NULL 或空描述。
     
-    // 如果没有过滤器，添加默认的"所有文件"过滤器
-    if (filterPatterns.empty()) {
-        filterPatterns.push_back("*.*");
-        filterDescriptions.push_back("所有文件");
-    }
+    Log << Level::Debug << "Total filter patterns for tinyfd: " << flatPatternList.size() 
+              << ", Combined description for tinyfd: " << combinedDescription << op::endl;
     
     // 调用文件选择对话框
     const char* selectedFile = tinyfd_openFileDialog(
-        "选择文件",          
-        defaultPath.c_str(), 
-        static_cast<int>(filterPatterns.size()),
-        filterPatterns.data(),
-        "文件类型", // 这个参数在某些平台上会被忽略
-        0
+        item.name.c_str(),                                         // 对话框标题
+        defaultPath.c_str(),                            // 默认路径/文件
+        static_cast<int>(flatPatternList.size()),       // 扁平化模式列表中的模式总数
+        flatPatternList.data(),                         // 指向模式数组的指针 (const char* const*)
+        combinedDescription.c_str(),                    // 单个描述字符串
+        0                                               // 0 表示单文件选择，1 表示多文件选择
     );
     
     if (selectedFile != NULL) {
         return std::string(selectedFile);
     }
     
+    // 如果用户取消或未选择文件，则返回原始的 defaultPath
+    // 如果最初未能从 Config 获取 defaultPath，它将是一个空字符串。
     return defaultPath;
 }
 

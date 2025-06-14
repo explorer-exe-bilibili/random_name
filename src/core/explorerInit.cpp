@@ -24,7 +24,7 @@ int Explorer::init()
     Log << Level::Info << "Audio system initialized" << op::endl;
 
     loadImagesFromDirectory(config->getPath(IMGS_PATH));
-
+    loadImagesFromConfig();
     // 列出所有加载成功的图像
     Log << Level::Info << "Listing all loaded images after initialization:" << op::endl;
     listLoadedBitmaps();
@@ -90,4 +90,15 @@ int Explorer::init()
     }
     Log << Level::Info << "Explorer initialization finished" << op::endl;
     return 0;
+}
+
+void Explorer::loadImagesFromConfig()
+{
+    Config* config = Config::getInstance();
+    loadBitmap(BitmapID::Overlay1,config->getPath(OVERLAY1));
+    loadBitmap(BitmapID::Overlay2,config->getPath(OVERLAY2));
+    loadBitmap(BitmapID::Overlay3,config->getPath(OVERLAY3));
+    loadBitmap(BitmapID::Overlay4,config->getPath(OVERLAY4));
+    loadBitmap(BitmapID::floatWindow,config->getPath(FLOAT_WINDOW_IMG));
+    loadBitmap(BitmapID::Background,config->getPath(BACKGROUND_IMG_PATH));
 }

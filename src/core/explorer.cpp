@@ -380,7 +380,7 @@ constexpr bool iequals(std::string_view a, std::string_view b) {
 // 大小写不敏感的字符串转BitmapID函数
 constexpr BitmapID core::StringToBitmapID(std::string_view str) {
     if (iequals(str, "Unknown")) return BitmapID::Unknown;
-    if (iequals(str, "Background")) return BitmapID::Background;
+    if (iequals(str, "Background")) return BitmapID::Unknown;
     if (iequals(str, "Exit")) return BitmapID::Exit;
     if (iequals(str, "NameBg")) return BitmapID::NameBg;
     if (iequals(str, "Pink1Button")) return BitmapID::Pink1Button;
@@ -409,17 +409,17 @@ constexpr BitmapID core::StringToBitmapID(std::string_view str) {
     if (iequals(str, "Weapon_polearmBg")) return BitmapID::Weapon_polearmBg;
     if (iequals(str, "Weapon_catalystBg")) return BitmapID::Weapon_catalystBg;
     if (iequals(str, "SettingBg")) return BitmapID::SettingBg;
-    if (iequals(str,"floatWindow")) return BitmapID::floatWindow;
+    if (iequals(str,"floatWindow")) return BitmapID::Unknown;
     if (iequals(str, "star3")) return BitmapID::star3;
     if (iequals(str, "star4")) return BitmapID::star4;
     if (iequals(str, "star5")) return BitmapID::star5;
     if (iequals(str, "star6")) return BitmapID::star6;
     if (iequals(str, "Overlay")) return BitmapID::Overlay0; // 默认返回Overlay0
     if (iequals(str, "Overlay0")) return BitmapID::Overlay0;
-    if (iequals(str, "Overlay1")) return BitmapID::Overlay1;
-    if (iequals(str, "Overlay2")) return BitmapID::Overlay2;
-    if (iequals(str, "Overlay3")) return BitmapID::Overlay3;
-    if (iequals(str, "Overlay4")) return BitmapID::Overlay4;
+    if (iequals(str, "Overlay1")) return BitmapID::Unknown;
+    if (iequals(str, "Overlay2")) return BitmapID::Unknown;
+    if (iequals(str, "Overlay3")) return BitmapID::Unknown;
+    if (iequals(str, "Overlay4")) return BitmapID::Unknown;
     if (iequals(str, "Overlay5")) return BitmapID::Overlay5;
     if (iequals(str, "Overlay6")) return BitmapID::Overlay6;
     if (iequals(str, "Overlay7")) return BitmapID::Overlay7;

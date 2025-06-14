@@ -8,7 +8,8 @@ namespace core
 {
 class Bitmap
 {
-public:    Bitmap(const std::string& filePath){Load(filePath);}
+public:
+    Bitmap(const std::string& filePath){Load(filePath);}
     Bitmap(int width, int height, bool createTexture = true, bool useRGB = false); // 创建指定大小的空白位图
     Bitmap(){}
     ~Bitmap(){ 
