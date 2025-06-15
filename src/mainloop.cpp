@@ -129,12 +129,63 @@ void KeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods) {
     switch (action) {
         case GLFW_PRESS:
             Log << Level::Info << "Key pressed: " << key << op::endl;
+            
+            // 将键盘输入传递给当前屏幕
+            if (screen::Screen::getCurrentScreen()) {
+                // 转换GLFW键码为字符
+                char keyChar = 0;
+                if (key >= GLFW_KEY_A && key <= GLFW_KEY_Z) {
+                    keyChar = 'a' + (key - GLFW_KEY_A);
+                    if (mods & GLFW_MOD_SHIFT) {
+                        keyChar = 'A' + (key - GLFW_KEY_A);
+                    }
+                }
+                else if (key >= GLFW_KEY_0 && key <= GLFW_KEY_9) {
+                    keyChar = '0' + (key - GLFW_KEY_0);
+                }
+                else if (key == GLFW_KEY_SPACE) {
+                    keyChar = ' ';
+                }
+                else if (key == GLFW_KEY_ENTER) {
+                    keyChar = '\r';
+                }
+                else if (key == GLFW_KEY_BACKSPACE) {
+                    keyChar = '\b';
+                }
+                else if (key == GLFW_KEY_ESCAPE) {
+                    keyChar = 27;
+                }
+                else if (key == GLFW_KEY_PERIOD) {
+                    keyChar = '.';
+                }
+                else if (key == GLFW_KEY_COMMA) {
+                    keyChar = ',';
+                }
+                else if (key == GLFW_KEY_MINUS) {
+                    keyChar = '-';
+                }
+                else if (key == GLFW_KEY_EQUAL) {
+                    keyChar = '=';
+                }
+                // 添加更多字符支持...
+                
+                if (keyChar != 0) {
+                    if (screen::Screen::getCurrentScreen()->HandleKeyInput(keyChar)) {
+                        return; // 如果屏幕处理了输入，就不继续处理全局快捷键
+                    }
+                }
+            }
+            
             break;
         case GLFW_RELEASE:
             Log << Level::Info << "Key released: " << key << op::endl;
             switch (key) {
                 case GLFW_KEY_ESCAPE:
-                    glfwSetWindowShouldClose(window, GLFW_TRUE);
+                    // 只有在没有屏幕处理ESC时才退出程序
+                    if (!screen::Screen::getCurrentScreen() || 
+                        !screen::Screen::getCurrentScreen()->HandleKeyInput(27)) {
+                        glfwSetWindowShouldClose(window, GLFW_TRUE);
+                    }
                     break;
                 case GLFW_KEY_F:
                     // 按F键切换FPS显示

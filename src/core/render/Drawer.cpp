@@ -98,35 +98,51 @@ void Drawer::DrawSquare(Region region, Color color, bool filled) {
     glm::vec2 p1 = ScreenToNDC(region.getx(), region.gety());
     glm::vec2 p2 = ScreenToNDC(region.getxend(), region.getyend());
 
-    float vertices[] = {
-        p1.x, p1.y,  // 左下角
-        p2.x, p1.y,  // 右下角
-        p2.x, p2.y,  // 右上角
-        p1.x, p2.y   // 左上角
-    };
-
-    // 创建VAO和VBO
-    VertexArray va;
-    VertexBuffer vb(vertices, sizeof(vertices));
-    va.AddBuffer(vb, 0, 2, GL_FLOAT, false, 2 * sizeof(float), nullptr);
-
-    // 使用着色器并设置颜色（包括Alpha通道）
-    defaultShader.use();
-    glm::vec4 colorVec(color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f);
-    defaultShader.setVec4("u_Color", colorVec);
-
-    // 绘制
-    va.Bind();
     if (filled) {
-        // 使用索引绘制填充矩形
-        unsigned int indices[] = { 0, 1, 2, 2, 3, 0 };
-        IndexBuffer ib(indices, 6);
-        GLCall(glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0));
+        // 对于填充矩形，使用6个顶点组成两个三角形
+        float vertices[] = {
+            // 第一个三角形
+            p1.x, p1.y,  // 左下角
+            p2.x, p1.y,  // 右下角  
+            p2.x, p2.y,  // 右上角
+            // 第二个三角形
+            p1.x, p1.y,  // 左下角
+            p2.x, p2.y,  // 右上角
+            p1.x, p2.y   // 左上角
+        };
+
+        VertexArray va;
+        VertexBuffer vb(vertices, sizeof(vertices));
+        va.AddBuffer(vb, 0, 2, GL_FLOAT, false, 2 * sizeof(float), nullptr);
+
+        defaultShader.use();
+        glm::vec4 colorVec(color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f);
+        defaultShader.setVec4("u_Color", colorVec);
+
+        va.Bind();
+        GLCall(glDrawArrays(GL_TRIANGLES, 0, 6));
+        VertexArray::Unbind();
     } else {
-        // 绘制未填充矩形
+        // 对于线框矩形，使用4个顶点
+        float vertices[] = {
+            p1.x, p1.y,  // 左下角
+            p2.x, p1.y,  // 右下角  
+            p2.x, p2.y,  // 右上角
+            p1.x, p2.y   // 左上角
+        };
+
+        VertexArray va;
+        VertexBuffer vb(vertices, sizeof(vertices));
+        va.AddBuffer(vb, 0, 2, GL_FLOAT, false, 2 * sizeof(float), nullptr);
+
+        defaultShader.use();
+        glm::vec4 colorVec(color.r / 255.0f, color.g / 255.0f, color.b / 255.0f, color.a / 255.0f);
+        defaultShader.setVec4("u_Color", colorVec);
+
+        va.Bind();
         GLCall(glDrawArrays(GL_LINE_LOOP, 0, 4));
+        VertexArray::Unbind();
     }
-    VertexArray::Unbind();
 }
 
 void Drawer::DrawCircle(Point center, float radius, Color color, bool filled) {

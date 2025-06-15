@@ -77,10 +77,10 @@ void SetConfigItems(){
     config->setifno(NAMES2, "files/names/2.txt");
     config->setifno(NAMES3, "files/names/3.txt");
     config->setifno(NAMES4, "files/names/4.txt");
-    config->setifno(OVERLAY1, "files/imgs/overlay1.webp");
-    config->setifno(OVERLAY2, "files/imgs/overlay2.webp");
-    config->setifno(OVERLAY3, "files/imgs/overlay3.webp");
-    config->setifno(OVERLAY4, "files/imgs/overlay4.webp");
+    config->setifno(OVERLAY1, "files/imgs/overlay0.webp");
+    config->setifno(OVERLAY2, "files/imgs/overlay1.webp");
+    config->setifno(OVERLAY3, "files/imgs/overlay2.webp");
+    config->setifno(OVERLAY4, "files/imgs/overlay3.webp");
     
     config->setifno(NAME_COLOR, 0xFFFFFFFF);
     config->setifno(NAME_COLOR_6_STAR,0xFFFFFFFF);

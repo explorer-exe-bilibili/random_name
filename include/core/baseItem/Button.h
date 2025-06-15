@@ -31,6 +31,7 @@ public:
         }
     }
     void SetBitmap(BitmapID id) {
+        this->bitmapid = id;
         if(core::Explorer::getInstance()->isBitmapLoaded(id)) {
             this->bitmapPtr = core::Explorer::getInstance()->getBitmapPtr(id);
         }
@@ -62,6 +63,7 @@ protected:
     std::function<void()> ClickFunc;
     FontID fontid=FontID::Default;
     AudioID audioid=AudioID::click;
+    BitmapID bitmapid=BitmapID::Unknown;
     float fontSize=0;
     float fontScale=1.0f;
     Font* font;

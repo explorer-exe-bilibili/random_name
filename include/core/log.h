@@ -100,6 +100,10 @@ public:
         LogMessage(std::to_string(value));
         return *this;
     }
+    Log_& operator<<(long long value) {
+        LogMessage(std::to_string(value));
+        return *this;
+    }
     Log_& operator<<(unsigned long value) {
         LogMessage(std::to_string(value));
         return *this;

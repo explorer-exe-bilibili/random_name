@@ -95,10 +95,10 @@ int Explorer::init()
 void Explorer::loadImagesFromConfig()
 {
     Config* config = Config::getInstance();
-    loadBitmap(BitmapID::Overlay1,config->getPath(OVERLAY1));
-    loadBitmap(BitmapID::Overlay2,config->getPath(OVERLAY2));
-    loadBitmap(BitmapID::Overlay3,config->getPath(OVERLAY3));
-    loadBitmap(BitmapID::Overlay4,config->getPath(OVERLAY4));
+    loadBitmap(BitmapID::Overlay0,config->getPath(OVERLAY1));
+    loadBitmap(BitmapID::Overlay1,config->getPath(OVERLAY2));
+    loadBitmap(BitmapID::Overlay2,config->getPath(OVERLAY3));
+    loadBitmap(BitmapID::Overlay3,config->getPath(OVERLAY4));
     loadBitmap(BitmapID::floatWindow,config->getPath(FLOAT_WINDOW_IMG));
     loadBitmap(BitmapID::Background,config->getPath(BACKGROUND_IMG_PATH));
 }

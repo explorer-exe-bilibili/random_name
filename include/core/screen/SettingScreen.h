@@ -2,6 +2,7 @@
 #include "base.h"
 #include "core/baseItem/Base.h"
 #include "core/log.h"
+#include <chrono>
 
 namespace screen
 {
@@ -119,17 +120,34 @@ class SettingButton
     core::Font* font=nullptr;
     int number=0;
     int page=-1;
+    
+    // 内嵌文本框相关
+    bool isTextboxEditing = false;
+    std::string editingText;
+    core::Region editingTextRegion;
+    size_t cursorPosition = 0;
+    std::chrono::steady_clock::time_point lastCursorBlink;
+    bool showCursor = true;
+    
 public:
     SettingButton(sItem item,int number, int page);
     ~SettingButton()=default;
 
     void Draw(int currentPage, unsigned char alpha = 255)const;
     bool Click(core::Point point,int page);
+    bool HandleKeyInput(char key); // 处理键盘输入
+    bool IsEditing() const { return isTextboxEditing; } // 检查是否正在编辑
+    void FinishEditing(); // 完成编辑并保存
+    void CancelEditing(); // 取消编辑
     operator bool() const { return page>=0; }
 private:
     core::Color selectColor();
     std::string selectFile();
     std::string selectPath();
+    std::string selectText();
+#ifdef _WIN32
+    std::string showSimpleInputDialog(const std::string& title, const std::string& prompt, const std::string& defaultValue);
+#endif
     void openFile();
     void checkActions();
     void updateConfig();
@@ -167,6 +185,8 @@ public:
     void enter(int) override;
     void Draw() override;
     bool Click(int x, int y) override;
+    bool HandleKeyInput(char key) override; // 处理键盘输入
+    void FinishAllTextEditing(); // 完成所有文本编辑
       // 页面切换动画配置
     void setTransitionDuration(float duration) { transitionDuration = duration; }
     float getTransitionDuration() const { return transitionDuration; }

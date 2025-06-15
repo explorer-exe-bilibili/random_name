@@ -137,12 +137,68 @@ void SettingScreen::enter(int) {
 }
 
 bool SettingScreen::Click(int x, int y) {
+    // 检查是否有文本框正在编辑
+    bool anyTextboxEditing = false;
+    for(auto& button : s_buttons) {
+        if(button && button->IsEditing()) {
+            anyTextboxEditing = true;
+            break;
+        }
+    }
+    
+    // 如果有文本框正在编辑，检查点击是否在编辑区域外
+    if(anyTextboxEditing) {
+        bool clickedInsideEditingArea = false;
+        
+        // 检查是否点击在任何正在编辑的文本框内
+        for(auto& button : s_buttons) {
+            if(button && button->IsEditing()) {
+                // 这里需要检查点击点是否在编辑区域内
+                // 由于没有直接访问editingTextRegion的方法，我们简化处理
+                // 如果点击了同一个按钮，视为继续编辑
+                if(button->Click(Point(x, y, false), currentPage)) {
+                    clickedInsideEditingArea = true;
+                    break;
+                }
+            }
+        }
+        
+        // 如果点击在编辑区域外，完成所有文本编辑
+        if(!clickedInsideEditingArea) {
+            FinishAllTextEditing();
+        }
+    }
+    
     if(Screen::Click(x, y))return true;
     for(auto& button : s_buttons) if(button)
         if(button->Click(Point(x, y,false),currentPage))return true;
     for(auto& b:buttons)if(b)
         if(b->OnClick(Point(x,y,false)))return true;
     return false;
+}
+
+bool SettingScreen::HandleKeyInput(char key) {
+    Log << Level::Debug << "SettingScreen::HandleKeyInput called with key: " << (int)key << op::endl;
+    
+    // 将键盘输入传递给正在编辑的文本框
+    for(auto& button : s_buttons) {
+        if(button && button->HandleKeyInput(key)) {
+            Log << Level::Debug << "Key handled by button" << op::endl;
+            return true; // 如果有按钮处理了输入，返回true
+        }
+    }
+    
+    Log << Level::Debug << "Key not handled by any button" << op::endl;
+    return false;
+}
+
+void SettingScreen::FinishAllTextEditing() {
+    // 完成所有文本框的编辑
+    for(auto& button : s_buttons) {
+        if(button && button->IsEditing()) {
+            button->FinishEditing();
+        }
+    }
 }
 
 void SettingScreen::changePage(bool forward){

@@ -121,7 +121,6 @@ public:
     Bitmap* getBitmap(const std::string& name){return Name_bitmaps.contains(name) ? Name_bitmaps[name].get() : nullptr;}
     Bitmap* getBitmap(BitmapID id){return bitmaps.contains(id) ? bitmaps[id].get() : nullptr;}
     
-    // 新增：返回Bitmap**的方法，用于Button等需要自动更新的场景
     Bitmap** getBitmapPtr(const std::string& name);
     Bitmap** getBitmapPtr(BitmapID id);
     Font* getFont(FontID id){return fonts.contains(id) ? fonts[id].get() : fonts[FontID::Default].get();}
