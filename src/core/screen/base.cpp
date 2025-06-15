@@ -10,8 +10,6 @@ using namespace core;
 std::shared_ptr<Screen> Screen::currentScreen = nullptr;
 ScreenID Screen::currentScreenID = ScreenID::MainMenu;
 std::map<ScreenID, std::shared_ptr<Screen>> Screen::screens;
-bool Screen::useVideoBackground = false;
-bool Screen::OffVideo = false;
 core::VideoPlayer* Screen::videoBackground = nullptr;
 std::vector<NameEntry> Screen::nameItems;
 
@@ -29,9 +27,8 @@ void Screen::Draw() {
 
     // 获取当前alpha值
     float alpha = getCurrentAlpha();
-    
-    std::shared_ptr<Bitmap> currentFrame;
-    if(useVideoBackground)currentFrame=videoBackground->getCurrentFrame();
+      std::shared_ptr<Bitmap> currentFrame;
+    if(bools[boolconfig::use_video_background])currentFrame=videoBackground->getCurrentFrame();
     if(currentFrame){
         currentFrame->CreateTextureFromBuffer();
         currentFrame->Draw({0,0,1,1}, alpha);
@@ -50,9 +47,9 @@ void Screen::init() {
     static bool inited = false;
     if (inited) return;
     inited = true;
-    OffVideo=Config::getInstance()->getBool(OFF_VIDEO);
-    useVideoBackground = Config::getInstance()->getBool(USE_VIDEO_BACKGROUND);
-    if (useVideoBackground) {
+    // 从config中加载bool值到bools映射中
+    LoadBoolsFromConfig();
+    if (bools[boolconfig::use_video_background]) {
         videoBackground = Explorer::getInstance()->getVideo(VideoID::Background);
     }
 }
@@ -187,7 +184,7 @@ bool Screen::SwitchToScreenWithFade(ScreenID id,int param_, float fadeTime, std:
 }
 
 void Screen::setUseVideoBackground(bool use) {
-        useVideoBackground = use;
+        bools[boolconfig::use_video_background] = use;
         if (use && videoBackground == nullptr) {
             videoBackground = core::Explorer::getInstance()->getVideo(core::VideoID::Background);
         }

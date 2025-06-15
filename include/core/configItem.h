@@ -63,3 +63,26 @@
 #define SHOW_FPS "show_fps"
 #define USE_JSON_SETTINGS "use_json_settings"
 #define VOLUME "volume"
+
+enum class boolconfig {
+    offmusic = 0,
+    inwindow = 1,
+    off_video = 2,
+    use_video_background = 3,
+    nosmoothui = 4,
+    floatwindow = 5,
+    use_font_compatibility = 6,
+    no_video_preload = 7,
+    debug = 8,
+    show_fps = 9,
+    use_json_settings = 10
+};
+
+extern std::map<boolconfig, bool> bools;
+
+// 从配置名字符串映射到boolconfig枚举
+boolconfig GetBoolConfigFromString(const std::string& configName);
+
+// 声明bools相关函数
+void LoadBoolsFromConfig();
+void SyncBoolsToConfig();

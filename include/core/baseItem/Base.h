@@ -128,5 +128,4 @@ namespace core
     std::wstring string2wstring(const std::string& str);
     size_t utf8_length(const std::string& str);
     void quit();
-    extern bool Debugging;
 }

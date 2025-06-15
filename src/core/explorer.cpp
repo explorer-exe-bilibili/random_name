@@ -47,6 +47,14 @@ bool Explorer::loadBitmap(const std::string &name, const std::string &path)
         {
             // 如果成功加载，将其存储在映射表中
             Name_bitmaps[name] = bitmap;
+            
+            // 更新或创建稳定的指针地址
+            if (!name_bitmap_ptrs.contains(name)) {
+                name_bitmap_ptrs[name] = std::make_unique<Bitmap*>(bitmap.get());
+            } else {
+                *name_bitmap_ptrs[name] = bitmap.get();
+            }
+            
             Log << Level::Info << "Bitmap loaded successfully: " << name << " (width: " << bitmap->getWidth()
                 << ", height: " << bitmap->getHeight()
                 << ", texture valid: " << (*bitmap ? "true" : "false") << ")" << op::endl;
@@ -74,6 +82,14 @@ bool Explorer::loadBitmap(BitmapID id, const std::string &path)
         {
             // 如果成功加载，将其存储在映射表中
             bitmaps[id] = bitmap;
+            
+            // 更新或创建稳定的指针地址
+            if (!bitmap_ptrs.contains(id)) {
+                bitmap_ptrs[id] = std::make_unique<Bitmap*>(bitmap.get());
+            } else {
+                *bitmap_ptrs[id] = bitmap.get();
+            }
+            
             Log << Level::Info << "Bitmap loaded successfully: " << static_cast<int>(id) << " (width: " << bitmap->getWidth()
                 << ", height: " << bitmap->getHeight()
                 << ", texture valid: " << (*bitmap ? "true" : "false") << ")" << op::endl;
@@ -366,6 +382,25 @@ VideoPlayer* Explorer::getVideo(VideoID id)
     return nullptr;
 }
 
+// 获取Bitmap**指针，用于自动更新的场景
+Bitmap** Explorer::getBitmapPtr(const std::string& name) {
+    // 如果bitmap存在但指针映射不存在，创建它
+    if (Name_bitmaps.contains(name) && !name_bitmap_ptrs.contains(name)) {
+        name_bitmap_ptrs[name] = std::make_unique<Bitmap*>(Name_bitmaps[name].get());
+    }
+    
+    return name_bitmap_ptrs.contains(name) ? name_bitmap_ptrs[name].get() : nullptr;
+}
+
+Bitmap** Explorer::getBitmapPtr(BitmapID id) {
+    // 如果bitmap存在但指针映射不存在，创建它
+    if (bitmaps.contains(id) && !bitmap_ptrs.contains(id)) {
+        bitmap_ptrs[id] = std::make_unique<Bitmap*>(bitmaps[id].get());
+    }
+    
+    return bitmap_ptrs.contains(id) ? bitmap_ptrs[id].get() : nullptr;
+}
+
 
 
 // 大小写不敏感的字符串比较辅助函数
@@ -415,7 +450,7 @@ constexpr BitmapID core::StringToBitmapID(std::string_view str) {
     if (iequals(str, "star5")) return BitmapID::star5;
     if (iequals(str, "star6")) return BitmapID::star6;
     if (iequals(str, "Overlay")) return BitmapID::Overlay0; // 默认返回Overlay0
-    if (iequals(str, "Overlay0")) return BitmapID::Overlay0;
+    if (iequals(str, "Overlay0")) return BitmapID::Unknown;
     if (iequals(str, "Overlay1")) return BitmapID::Unknown;
     if (iequals(str, "Overlay2")) return BitmapID::Unknown;
     if (iequals(str, "Overlay3")) return BitmapID::Unknown;

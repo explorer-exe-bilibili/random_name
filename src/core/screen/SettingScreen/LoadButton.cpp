@@ -383,9 +383,8 @@ static nlohmann::json RollBack(std::string jsonpath) {
     
     j[PAGES].push_back(p);
     p.clear();
-    
-    // 写入JSON文件
-    if (Config::getInstance()->getBool(USE_JSON_SETTINGS, false)) {
+      // 写入JSON文件
+    if (bools[boolconfig::use_json_settings]) {
         std::ofstream file(jsonpath);
         if (file.is_open()) {
             try {
@@ -411,7 +410,7 @@ void SettingScreen::loadButtons() {
     s_buttons.clear();
     titles.clear();
     nlohmann::json jsonData;
-    if(Config::getInstance()->getBool(USE_JSON_SETTINGS,0)){
+    if(bools[boolconfig::use_json_settings]){
         std::ifstream file("files/settings.json");
         if (!file.is_open()) {
             Log << Level::Error << "无法打开设置文件" << op::endl;

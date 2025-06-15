@@ -42,7 +42,7 @@ void VideoScreen::init()
 
 void VideoScreen::enter(int mode)
 {
-    if(OffVideo){
+    if(bools[boolconfig::off_video]){
         if(int(mode/10)==1){
         nameItems.clear();
         nameItems.resize(0);
@@ -66,7 +66,7 @@ void VideoScreen::enter(int mode)
         nameItems.clear();
         nameItems.resize(0);
         nameItems.push_back(core::NameRandomer::getInstance(mode%10)->GetNameEntry());
-        if(!core::Config::getInstance()->getBool(NO_VIDEO_PRELOAD,false)){
+        if(!bools[boolconfig::no_video_preload]){
             if(nameItems[0].star==3)videoPlayer=core::Explorer::getInstance()->getVideo(core::VideoID::Signal3star);
             else if(nameItems[0].star==4)videoPlayer=core::Explorer::getInstance()->getVideo(core::VideoID::Signal4star);
             else videoPlayer=core::Explorer::getInstance()->getVideo(core::VideoID::Signal5star);
@@ -88,7 +88,7 @@ void VideoScreen::enter(int mode)
         for(auto& i:nameItems){
             starCount=std::max(starCount,i.star);
         }
-        if(!core::Config::getInstance()->getBool(NO_VIDEO_PRELOAD,false)){
+        if(!bools[boolconfig::no_video_preload]){
             if(starCount<=4)videoPlayer=core::Explorer::getInstance()->getVideo(core::VideoID::Multi4star);
             else videoPlayer=core::Explorer::getInstance()->getVideo(core::VideoID::Multi5star);
         }
@@ -137,12 +137,10 @@ void VideoScreen::Draw()
 }
 
 void VideoScreen::exit()
-{
-    auto now = std::chrono::steady_clock::now();
-    if(OffVideo)return;
-    if (videoPlayer)
-    {
-        if(!core::Config::getInstance()->getBool(NO_VIDEO_PRELOAD,false)){
+{    auto now = std::chrono::steady_clock::now();
+    if(bools[boolconfig::off_video])return;
+    if (videoPlayer)    {
+        if(!bools[boolconfig::no_video_preload]){
             videoPlayer->stop();
             videoPlayer=nullptr;
         }

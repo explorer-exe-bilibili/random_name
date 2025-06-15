@@ -84,12 +84,13 @@ void MainScreen::init() {
     buttons[exitButton]->SetText("返回");
     buttons[offVideo]->SetBitmap(BitmapID::MainScreenButton);
     buttons[offVideo]->SetClickFunc([this]{
-        OffVideo = !OffVideo;
-        buttons[offVideo]->SetText(OffVideo ? "视频:关" : "视频:开");
+        bools[boolconfig::off_video] = !bools[boolconfig::off_video];
+        buttons[offVideo]->SetText(bools[boolconfig::off_video] ? "视频:关" : "视频:开");
+        SyncBoolsToConfig(); // 同步到配置文件
     });
     buttons[offVideo]->SetEnable(true);
     buttons[offVideo]->SetFontScale(0.25f);
-    buttons[offVideo]->SetText(OffVideo ? "视频:关" : "视频:开");
+    buttons[offVideo]->SetText(bools[boolconfig::off_video] ? "视频:关" : "视频:开");
     buttons[offVideo]->SetColor({0,0,0,255});
     buttons[offVideo]->SetFontID(FontID::Normal);
     buttons[offVideo]->SetRegion({0.15, 0.82, 0.23, 0.86});
@@ -173,7 +174,7 @@ void MainScreen::Draw(){
 }
 
 void MainScreen::enter(int){
-    if(useVideoBackground && videoBackground) {
+    if(bools[boolconfig::use_video_background] && videoBackground) {
         videoBackground->resume();
     }
     Log << Level::Info << "进入主屏幕" << op::endl;

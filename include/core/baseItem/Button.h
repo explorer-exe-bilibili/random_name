@@ -12,7 +12,7 @@
 namespace core {
 class Button {
 public:
-    Button(const std::string& text="", FontID fontid=FontID::Default, const Region& region=Region(), Bitmap* bitmap=nullptr);
+    Button(const std::string& text="", FontID fontid=FontID::Default, const Region& region=Region(), Bitmap** bitmapPtr=nullptr);
     Button(const Button& button);
     Button& operator=(const Button& button);
     ~Button();
@@ -25,13 +25,16 @@ public:
 
 
     void SetText(const std::string& text) {this->text = text;}
-    void SetBitmap(Bitmap* bitmap) {this->bitmap = bitmap;}
     void SetBitmap(const std::string& bitmapID){
-        if(core::Explorer::getInstance()->isBitmapLoaded(bitmapID))
-            this->bitmap = core::Explorer::getInstance()->getBitmap(bitmapID);}
+        if(core::Explorer::getInstance()->isBitmapLoaded(bitmapID)) {
+            this->bitmapPtr = core::Explorer::getInstance()->getBitmapPtr(bitmapID);
+        }
+    }
     void SetBitmap(BitmapID id) {
-        if(core::Explorer::getInstance()->isBitmapLoaded(id))
-            this->bitmap = core::Explorer::getInstance()->getBitmap(id);}
+        if(core::Explorer::getInstance()->isBitmapLoaded(id)) {
+            this->bitmapPtr = core::Explorer::getInstance()->getBitmapPtr(id);
+        }
+    }
     void SetRegion(const Region& region) {this->region = region;}
     void SetFontID(FontID id);
     void SetFont(Font* font) {this->font = font;}
@@ -55,7 +58,7 @@ protected:
     bool enableFill=false;
     bool isCentered=true; // 是否居中显示文本
     std::string text="";
-    Bitmap* bitmap;
+    Bitmap** bitmapPtr = nullptr; // 用于自动更新的指针
     std::function<void()> ClickFunc;
     FontID fontid=FontID::Default;
     AudioID audioid=AudioID::click;

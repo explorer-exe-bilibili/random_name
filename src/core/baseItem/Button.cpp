@@ -3,13 +3,14 @@
 #include "core/explorer.h"
 #include "core/log.h"
 #include "core/Drawer.h"
+#include "core/Config.h"
 #include <thread>
 #include <chrono>
 
 using namespace core;
 
-Button::Button(const std::string& text, FontID fontid, const Region& region, Bitmap* bitmap) :
- text(text), fontid(fontid), region(region), bitmap(bitmap){}
+Button::Button(const std::string& text, FontID fontid, const Region& region, Bitmap** bitmapPtr) :
+ text(text), fontid(fontid), region(region), bitmapPtr(bitmapPtr) {}
 
 Button::Button(const Button& button) :
     region(button.region),
@@ -17,7 +18,7 @@ Button::Button(const Button& button) :
     enable(button.enable),
     enableBitmap(button.enableBitmap),
     text(button.text),
-    bitmap(button.bitmap),
+    bitmapPtr(button.bitmapPtr),
     ClickFunc(button.ClickFunc),
     fontid(button.fontid) {}
 
@@ -28,7 +29,7 @@ Button& Button::operator=(const Button& button) {
         enable = button.enable;
         enableBitmap = button.enableBitmap;
         text = button.text;
-        bitmap = button.bitmap;
+        bitmapPtr = button.bitmapPtr;
         ClickFunc = button.ClickFunc;
         fontid = button.fontid;
     }
@@ -58,12 +59,11 @@ void Button::Draw(unsigned char alpha) {
     if (fadeAnimationRunning) {
         finalAlpha = currentFadeAlpha.load();
     }
-    
-    if(Debugging){
+    if(bools[boolconfig::debug]){
         Drawer::getInstance()->DrawSquare(region, Color(255, 0, 0, 255));
     }
-    if (enableBitmap && bitmap) {
-        bitmap->Draw(region, finalAlpha/255.0f);
+    if (enableBitmap && bitmapPtr && *bitmapPtr) {
+        (*bitmapPtr)->Draw(region, finalAlpha/255.0f);
     }
     if(enableFill) {
         Drawer::getInstance()->DrawSquare(region, fillColor,true);

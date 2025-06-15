@@ -30,12 +30,9 @@ enum class TransitionState {
 };
 
 class Screen {
-protected:
-    std::vector<std::shared_ptr<core::Button>> buttons;
+protected:    std::vector<std::shared_ptr<core::Button>> buttons;
     core::Bitmap* background;
     ScreenID ID;
-    static bool useVideoBackground;
-    static bool OffVideo;
     static core::VideoPlayer* videoBackground;
     static ScreenID currentScreenID;
     static std::shared_ptr<Screen> currentScreen;
@@ -76,7 +73,6 @@ public:
     static float GetTransitionDuration() { return transitionDuration; }
     static TransitionState GetTransitionState() { return transitionState; }
 
-    static void setOFFVideo(bool off) { OffVideo = off; }
     static void setUseVideoBackground(bool use);
 private:
 };

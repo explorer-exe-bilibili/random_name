@@ -102,11 +102,13 @@ SettingButton::SettingButton(sItem item_, int number, int page)
                     safeConfigName = "unknown_config";
                 }
                 
-                button->SetText(Config::getInstance()->getBool(safeConfigName) ? "开" : "关");
-                button->SetClickFunc([this, safeConfigName]{
+                boolconfig configEnum = GetBoolConfigFromString(safeConfigName);
+                button->SetText(bools[configEnum] ? "开" : "关");
+                button->SetClickFunc([this, safeConfigName, configEnum]{
                     try {
-                        Config::getInstance()->toggleBool(safeConfigName);
-                        button->SetText(Config::getInstance()->getBool(safeConfigName) ? "开" : "关");
+                        bools[configEnum] = !bools[configEnum];
+                        button->SetText(bools[configEnum] ? "开" : "关");
+                        SyncBoolsToConfig(); // 同步到配置文件
                         checkActions();
                     }
                     catch (const std::exception& e) {
@@ -264,7 +266,7 @@ void SettingButton::Draw(int currentPage, unsigned char alpha)const {
     if(!item.name.empty()){
         if(!showText.empty()){
             Region TextRegion2={TextRegion.getOriginXEnd()-0.15f, TextRegion.getOriginY(), TextRegion.getOriginXEnd(), TextRegion.getOriginYEnd(),true};
-            if(Debugging){
+            if(bools[boolconfig::debug]){
                 Drawer::getInstance()->DrawSquare(TextRegion2,Color(255,0,0,255),false);
                 Drawer::getInstance()->DrawSquare(TextRegion,Color(0,255,0,255),false);
             }

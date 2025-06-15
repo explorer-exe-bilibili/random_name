@@ -93,6 +93,9 @@ class Explorer {
     std::shared_ptr<GLFWwindow> window;
     std::map<BitmapID, std::shared_ptr<core::Bitmap>> bitmaps;
     std::map<std::string, std::shared_ptr<core::Bitmap>> Name_bitmaps;
+    // 为了支持Bitmap**，需要维护稳定的指针地址
+    std::map<BitmapID, std::unique_ptr<Bitmap*>> bitmap_ptrs;
+    std::map<std::string, std::unique_ptr<Bitmap*>> name_bitmap_ptrs;
     std::map<FontID, std::shared_ptr<core::Font>> fonts;
     std::map<VideoID, std::shared_ptr<core::VideoPlayer>> videos;
     std::map<AudioID, bool> audioLoaded; // 用于跟踪音频是否已加载
@@ -117,6 +120,10 @@ public:
 
     Bitmap* getBitmap(const std::string& name){return Name_bitmaps.contains(name) ? Name_bitmaps[name].get() : nullptr;}
     Bitmap* getBitmap(BitmapID id){return bitmaps.contains(id) ? bitmaps[id].get() : nullptr;}
+    
+    // 新增：返回Bitmap**的方法，用于Button等需要自动更新的场景
+    Bitmap** getBitmapPtr(const std::string& name);
+    Bitmap** getBitmapPtr(BitmapID id);
     Font* getFont(FontID id){return fonts.contains(id) ? fonts[id].get() : fonts[FontID::Default].get();}
     Audio* getAudio();
     VideoPlayer* getVideo(VideoID id);

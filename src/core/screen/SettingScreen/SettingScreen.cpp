@@ -1,5 +1,6 @@
 #include "core/screen/SettingScreen.h"
 #include "core/log.h"
+#include "core/Config.h"
 #include <chrono>
 #include <algorithm>
 
@@ -53,7 +54,7 @@ void SettingScreen::Draw() {
     float alpha = getCurrentAlpha();
     
     std::shared_ptr<Bitmap> currentFrame;
-    if(useVideoBackground)currentFrame=videoBackground->getCurrentFrame();
+    if(bools[boolconfig::use_video_background])currentFrame=videoBackground->getCurrentFrame();
     if(currentFrame){
         currentFrame->CreateTextureFromBuffer();
         currentFrame->Draw({0,0,1,1}, alpha);

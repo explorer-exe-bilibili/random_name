@@ -1,7 +1,60 @@
 #include "core/Config.h"
-
+#include "core/configItem.h"
 #include "core/log.h"
 #include <GLFW/glfw3.h>
+
+// 实现bools映射
+std::map<boolconfig, bool> bools;
+
+// 从配置名字符串映射到boolconfig枚举
+boolconfig GetBoolConfigFromString(const std::string& configName) {
+    if (configName == OFF_MUSIC) return boolconfig::offmusic;
+    if (configName == INWINDOW) return boolconfig::inwindow;
+    if (configName == OFF_VIDEO) return boolconfig::off_video;
+    if (configName == USE_VIDEO_BACKGROUND) return boolconfig::use_video_background;
+    if (configName == NOSMOOTHUI) return boolconfig::nosmoothui;
+    if (configName == FLOATWINDOW) return boolconfig::floatwindow;
+    if (configName == USE_FONT_COMPATIBILITY) return boolconfig::use_font_compatibility;
+    if (configName == NO_VIDEO_PRELOAD) return boolconfig::no_video_preload;
+    if (configName == DEBUG) return boolconfig::debug;
+    if (configName == SHOW_FPS) return boolconfig::show_fps;
+    if (configName == USE_JSON_SETTINGS) return boolconfig::use_json_settings;
+    // 默认返回debug
+    return boolconfig::debug;
+}
+
+// 从Config加载bool值到bools映射
+void LoadBoolsFromConfig() {
+    core::Config* config = core::Config::getInstance();
+    bools[boolconfig::offmusic] = config->getBool(OFF_MUSIC, false);
+    bools[boolconfig::inwindow] = config->getBool(INWINDOW, true);
+    bools[boolconfig::off_video] = config->getBool(OFF_VIDEO, false);
+    bools[boolconfig::use_video_background] = config->getBool(USE_VIDEO_BACKGROUND, true);
+    bools[boolconfig::nosmoothui] = config->getBool(NOSMOOTHUI, false);
+    bools[boolconfig::floatwindow] = config->getBool(FLOATWINDOW, true);
+    bools[boolconfig::use_font_compatibility] = config->getBool(USE_FONT_COMPATIBILITY, false);
+    bools[boolconfig::no_video_preload] = config->getBool(NO_VIDEO_PRELOAD, false);
+    bools[boolconfig::debug] = config->getBool(DEBUG, false);
+    bools[boolconfig::show_fps] = config->getBool(SHOW_FPS, false);
+    bools[boolconfig::use_json_settings] = config->getBool(USE_JSON_SETTINGS, false);
+}
+
+// 将bools映射的值同步到Config
+void SyncBoolsToConfig() {
+    core::Config* config = core::Config::getInstance();
+    config->set(OFF_MUSIC, bools[boolconfig::offmusic]);
+    config->set(INWINDOW, bools[boolconfig::inwindow]);
+    config->set(OFF_VIDEO, bools[boolconfig::off_video]);
+    config->set(USE_VIDEO_BACKGROUND, bools[boolconfig::use_video_background]);
+    config->set(NOSMOOTHUI, bools[boolconfig::nosmoothui]);
+    config->set(FLOATWINDOW, bools[boolconfig::floatwindow]);
+    config->set(USE_FONT_COMPATIBILITY, bools[boolconfig::use_font_compatibility]);
+    config->set(NO_VIDEO_PRELOAD, bools[boolconfig::no_video_preload]);
+    config->set(DEBUG, bools[boolconfig::debug]);
+    config->set(SHOW_FPS, bools[boolconfig::show_fps]);
+    config->set(USE_JSON_SETTINGS, bools[boolconfig::use_json_settings]);
+    config->saveToFile();
+}
 
 void SetConfigItems(){
     core::Config* config = core::Config::getInstance();
@@ -80,7 +133,8 @@ void SetConfigItems(){
     config->setifno(USE_JSON_SETTINGS, 0);
     config->setifno(VOLUME, 50);
     
-    core::Debugging=config->getBool(DEBUG);
-
+    // 在设置完配置后，加载bools映射
+    LoadBoolsFromConfig();
+    
     config->saveToFile();
 }

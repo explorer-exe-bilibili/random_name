@@ -192,8 +192,8 @@ void NameButton::Draw(unsigned char alpha) {
     int i=0;
     for(auto&r: regions) 
         r.setFatherRegion(region);
-    if(text.length()<=regions.size()) for(const auto& c: text){
-        if(Debugging){
+        if(text.length()<=regions.size()) for(const auto& c: text){
+        if(bools[boolconfig::debug]){
             Drawer::getInstance()->DrawSquare({regions[i].getx(), regions[i].gety(), regions[i].getxend(), regions[i].getyend(),false},Color(255,0,0,255),false);
             Drawer::getInstance()->DrawSquare(region,Color(255,0,255,255),false);
         }

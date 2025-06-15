@@ -115,8 +115,8 @@ void ListNameButton::SetName(const NameEntry& nameEntry) {
 
 void ListNameButton::Draw() {
     // 绘制按钮
-    if (bitmap) {
-        bitmap->Draw(region);
+    if (bitmapPtr && *bitmapPtr) {
+        (*bitmapPtr)->Draw(region);
     }
     if (enableText && font) {
         Region textRegion={region.getOriginX(), region.getOriginY() + 0.1f, region.getOriginXEnd(), region.getOriginYEnd() - 0.2f, true};
