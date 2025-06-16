@@ -137,7 +137,7 @@ int init(){
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     Log<<Level::Info<<"Creating window"<<op::endl;
     // 创建窗口
-    WindowInfo.window = glfwCreateWindow(800, 600, "OpenGL Demo", nullptr, nullptr);
+    WindowInfo.window = glfwCreateWindow(800, 600, Config::getInstance()->get(WINDOW_TITLE, "祈愿").c_str(), nullptr, nullptr);
     if (!WindowInfo.window) {
         glfwTerminate();
         return -1;
@@ -181,7 +181,7 @@ int init(){
     screen::Screen::RegisterScreen(screen::ScreenID::Video,std::make_shared<screen::VideoScreen>());
     screen::Screen::RegisterScreen(screen::ScreenID::Name,std::make_shared<screen::NameScreen>());
     screen::Screen::RegisterScreen(screen::ScreenID::ListName,std::make_shared<screen::ListNameScreen>());
-    SyncBoolsToConfig();
+    SyncConfig();
     Log<<Level::Info<<"starting render loop"<<op::endl<<op::flush;
     return 0;
 }

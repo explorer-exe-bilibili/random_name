@@ -58,6 +58,10 @@
 #define ENTER_MUSIC_PATH "enter_music_path"
 #define BACKGROUND_MUSIC_PATH "background_music_path"
 #define BGM_PATH BACKGROUND_MUSIC_PATH
+#define STAR_3_MUSIC_PATH "star_3_music_path"
+#define STAR_4_MUSIC_PATH "star_4_music_path"
+#define STAR_5_MUSIC_PATH "star_5_music_path"
+#define STAR_FULL_MUSIC_PATH "star_full_music_path"
 
 #define DEBUG "debug"
 #define SHOW_FPS "show_fps"
@@ -90,4 +94,4 @@ void defullscreen(GLFWwindow* window);
 
 // 声明bools相关函数
 void LoadBoolsFromConfig();
-void SyncBoolsToConfig();
+void SyncConfig();

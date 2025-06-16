@@ -19,6 +19,8 @@ extern "C" {
 
 using namespace core;
 
+std::atomic<float> VideoPlayer::volume{1.0f};
+
 VideoPlayer::VideoPlayer() : playing(false), loop(false), shouldExit(false) {
     // 初始化错误恢复系统
     errorRecovery = std::make_unique<VideoPlayerErrorRecovery>();
@@ -402,17 +404,17 @@ void VideoPlayer::setVolume(int volume) {
     volume = std::max(0, std::min(100, volume));
     
     // 将音量从0-100范围转换为0.0-1.0范围
-    this->volume = volume / 100.0f;
-    
-    Log << Level::Info << "设置音量: " << volume << "% (内部值: " << this->volume.load() << ")" << op::endl;
+    VideoPlayer::volume = volume / 100.0f;
+
+    Log << Level::Info << "设置音量: " << volume << "% (内部值: " << VideoPlayer::volume.load() << ")" << op::endl;
 }
 
 void VideoPlayer::applyVolume(uint8_t* audioBuffer, int bufferSize, int channels) {
     if (!audioBuffer || bufferSize <= 0) {
         return;
     }
-    
-    float currentVolume = volume.load();
+
+    float currentVolume = VideoPlayer::volume.load();
     if (currentVolume >= 1.0f) {
         // 音量为最大时，无需处理
         return;

@@ -552,7 +552,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
                     try {
                         bools[configEnum] = !bools[configEnum];
                         button->SetText(bools[configEnum] ? "开" : "关");
-                        SyncBoolsToConfig(); // 同步到配置文件
+                        SyncConfig(); // 同步到配置文件
                         checkActions();
                     }
                     catch (const std::exception& e) {

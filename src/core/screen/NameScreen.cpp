@@ -11,6 +11,10 @@ using namespace core;
 
 #define STAR L"E"
 
+core::Color NameButton::color = core::Color(255, 255, 255, 255);
+core::Color NameButton::star6Color = core::Color(255, 255, 0, 255);
+core::Color NameScreen::SmallNameColor = core::Color(250, 250, 250, 255);
+
 static int nameCount=0;
 static unsigned int enterTime=0;
 
@@ -65,8 +69,8 @@ void NameScreen::init() {
     buttons[AddNameButton]->SetEnableFill(false);
     buttons[AddNameButton]->SetEnable(false);
     buttons[TypeButton]->SetRegion({0.2,0.25,0.6,-1});
-    nameButton.SetFontID(FontID::Name);
-    nameButton.SetColor({200,200,200,255});
+    if(bools[boolconfig::use_font_compatibility]) nameButton.SetFontID(FontID::Default);
+    else nameButton.SetFontID(FontID::Name);
 }
 
 void NameScreen::Draw() {
@@ -79,7 +83,7 @@ void NameScreen::Draw() {
         for(auto s: starPositions)
             StarFont->RenderChar('E', s.getx(), s.gety(), 0.2f, Color(220,184,14,255));}
     Point pos(0.177, (8.0/13.0));
-    Explorer::getInstance()->getFont(FontID::Normal)->RenderText(currentName.name, pos.getx(), pos.gety(), 0.3f, Color(250,250,250,255));
+    Explorer::getInstance()->getFont(FontID::Normal)->RenderText(currentName.name, pos.getx(), pos.gety(), 0.3f, SmallNameColor);
     nameButton.Draw();
 }
 
@@ -197,8 +201,11 @@ void NameButton::Draw(unsigned char alpha) {
             Drawer::getInstance()->DrawSquare({regions[i].getx(), regions[i].gety(), regions[i].getxend(), regions[i].getyend(),false},Color(255,0,0,255),false);
             Drawer::getInstance()->DrawSquare(region,Color(255,0,255,255),false);
         }
-        font->RenderCharFitRegion(c, regions[i].getx(), regions[i].gety()
-        ,regions[i].getxend(), regions[i].getyend(), color);
+        if(starCount<6)
+            font->RenderChar(c, regions[i].getx(), regions[i].gety(), fontScale, color);
+        else
+            font->RenderCharFitRegion(c, regions[i].getx(), regions[i].gety()
+            ,regions[i].getxend(), regions[i].getyend(), star6Color);
         i++;
     }
     else {
@@ -208,6 +215,7 @@ void NameButton::Draw(unsigned char alpha) {
 
 void NameButton::SetName(const core::NameEntry& name) {
     text = core::string2wstring(name.name);
+    starCount=name.star;
     regions.clear();
     switch (text.length())
     {

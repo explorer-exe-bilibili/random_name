@@ -27,13 +27,19 @@ public:
 class NameButton:public core::Button {
     std::vector<NameRegion> regions;
     std::wstring text;
+    int starCount=0;
+    static core::Color color;
+    static core::Color star6Color;
 public:
     void Draw(unsigned char alpha=255);
     void SetName(const core::NameEntry& name);
+    static void setColor(const core::Color& newColor){color=newColor;}
+    static void set6Color(const core::Color& newColor){star6Color=newColor;}
 };
 class NameScreen : public Screen {
     core::Font* StarFont;
     core::Font* NameFont;
+    static core::Color SmallNameColor;
     unsigned char alpha=0;
     mutable std::mt19937 rng;
     mutable std::uniform_real_distribution<float> dist;
@@ -48,6 +54,7 @@ public:
     void init() override;
     void enter(int mode) override;
     bool Click(int x, int y)override;
+    static void setSmallNameColor(const core::Color& color) { SmallNameColor = color; }
 private:
     void PaintStars() const;
     void changeName();

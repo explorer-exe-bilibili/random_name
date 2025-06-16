@@ -14,13 +14,13 @@ int Explorer::init()
     {
         Log << Level::Warn << "音频系统初始化失败，但将继续执行" << op::endl;
     }
-    loadAudio(AudioID::bgm, "files/music/backsound.mp3");
-    loadSound(AudioID::click, "files/music/click.mp3");
-    loadSound(AudioID::enter, "files/music/enter.mp3");
-    loadAudio(AudioID::star3, "files/music/star3.mp3");
-    loadAudio(AudioID::star4, "files/music/star4.mp3");
-    loadAudio(AudioID::star5, "files/music/star5.mp3");
-    loadAudio(AudioID::starfull, "files/music/starfull.mp3");
+    loadAudio(AudioID::bgm, config->getPath(BACKGROUND_MUSIC_PATH, "files/music/backsound.mp3"));
+    loadSound(AudioID::click, config->getPath(CLICK_MUSIC_PATH,"files/music/click.mp3"));
+    loadSound(AudioID::enter, config->getPath(ENTER_MUSIC_PATH,"files/music/enter.mp3"));
+    loadAudio(AudioID::star3, config->getPath(STAR_3_MUSIC_PATH,"files/music/star3.mp3"));
+    loadAudio(AudioID::star4, config->getPath(STAR_4_MUSIC_PATH,"files/music/star4.mp3"));
+    loadAudio(AudioID::star5, config->getPath(STAR_5_MUSIC_PATH,"files/music/star5.mp3"));
+    loadAudio(AudioID::starfull, config->getPath(STAR_FULL_MUSIC_PATH,"files/music/starfull.mp3"));
     Log << Level::Info << "Audio system initialized" << op::endl;
 
     loadImagesFromDirectory(config->getPath(IMGS_PATH));

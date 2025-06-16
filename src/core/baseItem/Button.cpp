@@ -119,7 +119,7 @@ void Button::MoveTo(const Region& region, const bool enableFluent, const float s
         }
     }
 
-    if (enableFluent)
+    if (enableFluent&&!bools[boolconfig::nosmoothui])
     {        // 创建一个shared_ptr来捕获this指针，确保对象在线程运行期间不会被销毁        
         std::shared_ptr<Button> self = std::shared_ptr<Button>(this, [](Button*){});  // 自定义删除器，不实际删除对象
 

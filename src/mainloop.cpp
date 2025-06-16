@@ -21,7 +21,6 @@ using namespace core;
 double lastFPSUpdateTime = 0.0;
 int frameCount = 0;
 double currentFPS = 0.0;
-bool showFPS = true; // 默认显示FPS
 
 // 窗口大小改变时的回调函数
 void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
@@ -85,7 +84,7 @@ int mainloop() {
         executeRenderingWithRecovery();
         
         // 如果启用了FPS显示，则绘制FPS文本
-        if (showFPS) {
+        if (bools[boolconfig::show_fps]) {
             // 创建FPS文本
             std::stringstream ss;
             ss << std::fixed << std::setprecision(1) << "FPS: " << currentFPS;
@@ -168,8 +167,8 @@ void KeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods) {
                 case GLFW_KEY_F:
                     // 按F键切换FPS显示
                     if (mods & GLFW_MOD_CONTROL) {
-                        showFPS = !showFPS;
-                        Log << Level::Info << "FPS display " << (showFPS ? "enabled" : "disabled") << op::endl;
+                        bools[boolconfig::show_fps] = !bools[boolconfig::show_fps];
+                        Log << Level::Info << "FPS display " << (bools[boolconfig::show_fps] ? "enabled" : "disabled") << op::endl;
                     }
                     break;
                 default:

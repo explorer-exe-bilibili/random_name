@@ -29,4 +29,3 @@ void SetConfigItems();
 extern double lastFPSUpdateTime; // 上次更新FPS的时间
 extern int frameCount;           // 帧计数器
 extern double currentFPS;        // 当前FPS值
-extern bool showFPS;             // 是否显示FPS

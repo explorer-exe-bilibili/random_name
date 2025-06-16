@@ -4,6 +4,7 @@
 #include "core/baseItem/Base.h"
 #include "core/explorer.h"
 #include "core/screen/base.h"
+#include "core/screen/nameScreen.h"
 #include <GLFW/glfw3.h>
 #ifdef _WIN32
 #include <windows.h>
@@ -81,7 +82,7 @@ void defullscreen(GLFWwindow* window){
 }
 
 // 将bools映射的值同步到Config
-void SyncBoolsToConfig() {
+void SyncConfig() {
     core::Config* config = core::Config::getInstance();
     config->set(OFF_MUSIC, bools[boolconfig::offmusic]);
     config->set(INWINDOW, bools[boolconfig::inwindow]);
@@ -99,9 +100,17 @@ void SyncBoolsToConfig() {
     if(!bools[boolconfig::inwindow])fullscreen(core::WindowInfo.window);
     else defullscreen(core::WindowInfo.window);
     if(bools[boolconfig::offmusic])core::Explorer::getInstance()->getAudio()->stopAll();
-    else core::Explorer::getInstance()->playAudio(core::AudioID::bgm);
+    else {
+        if(!core::Explorer::getInstance()->getAudio()->isMusicPlaying())
+            core::Explorer::getInstance()->playAudio(core::AudioID::bgm, -1);
+    }
     screen::Screen::setUseVideoBackground(bools[boolconfig::use_video_background]);
-
+    screen::NameButton::setColor(core::Config::getInstance()->getInt(NAME_COLOR, core::Color(200,200,200,255)));
+    screen::NameButton::set6Color(core::Config::getInstance()->getInt(NAME_COLOR_6_STAR, core::Color(200,200,200,255)));
+    screen::NameScreen::setSmallNameColor(core::Config::getInstance()->getInt(TEXT_COLOR, core::Color(250,250,250,255)));
+    core::Explorer::getInstance()->getAudio()->setMusicVolume(core::Config::getInstance()->getInt(VOLUME, 100));
+    core::Explorer::getInstance()->getAudio()->setSoundVolume(core::AudioIDToString(core::AudioID::click),core::Config::getInstance()->getInt(VOLUME, 100));
+    core::Explorer::getInstance()->getAudio()->setSoundVolume(core::AudioIDToString(core::AudioID::enter),core::Config::getInstance()->getInt(VOLUME, 100));
 }
 
 void SetConfigItems(){
@@ -132,14 +141,14 @@ void SetConfigItems(){
     config->setifno(OVERLAY3, "files/imgs/overlay2.webp");
     config->setifno(OVERLAY4, "files/imgs/overlay3.webp");
     
-    config->setifno(NAME_COLOR, 0xFFFFFFFF);
-    config->setifno(NAME_COLOR_6_STAR,0xFFFFFFFF);
-    config->setifno(TEXT_COLOR, 0xFFFFFFFF);
+    config->setifno(NAME_COLOR, core::Color(200,200,200,255));
+    config->setifno(NAME_COLOR_6_STAR,core::Color(200,200,200,255));
+    config->setifno(TEXT_COLOR, core::Color(250,250,250,255));
 
     config->setifno(OFF_MUSIC,0);
     config->setifno(INWINDOW,1);
     config->setifno(OFF_VIDEO,0);
-    config->setifno(USE_VIDEO_BACKGROUND, true);
+    config->setifno(USE_VIDEO_BACKGROUND, true); //TODO
     config->setifno(NOSMOOTHUI,0);
 
     config->setifno(FLOATWINDOW,true);
@@ -156,9 +165,9 @@ void SetConfigItems(){
     config->setifno(WINDOW_X,0);
     config->setifno(WINDOW_Y,0);
     config->setifno(VERTICAL_SYNC, 1);
-    config->setifno(WINDOW_TITLE, "随机点名器");
+    config->setifno(WINDOW_TITLE, "祈愿");
     config->setifno(USE_FONT_COMPATIBILITY, 0);
-    config->setifno(NO_VIDEO_PRELOAD, 0);
+    config->setifno(NO_VIDEO_PRELOAD, 0);//TODO
 
     config->setifno(BACKGROUND_IMG_PATH, "files/imgs/background.webp");
     config->setifno(IMGS_PATH,"files/imgs/");
@@ -177,11 +186,15 @@ void SetConfigItems(){
     config->setifno(CLICK_MUSIC_PATH, "files/music/click.mp3");
     config->setifno(ENTER_MUSIC_PATH,"files/music/enter.mp3");
     config->setifno(BACKGROUND_MUSIC_PATH,"files/music/bgm.mp3");
+    config->setifno(STAR_3_MUSIC_PATH,"files/music/star3.mp3");
+    config->setifno(STAR_4_MUSIC_PATH,"files/music/star4.mp3");
+    config->setifno(STAR_5_MUSIC_PATH,"files/music/star5.mp3");
+    config->setifno(STAR_FULL_MUSIC_PATH,"files/music/starfull.mp3");
 
     config->setifno(DEBUG, 0);
     config->setifno(SHOW_FPS,0);
     config->setifno(USE_JSON_SETTINGS, 0);
-    config->setifno(VOLUME, 50);
+    config->setifno(VOLUME, 100);
     
     // 在设置完配置后，加载bools映射
     LoadBoolsFromConfig();

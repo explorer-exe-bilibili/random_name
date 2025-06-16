@@ -86,7 +86,7 @@ void MainScreen::init() {
     buttons[offVideo]->SetClickFunc([this]{
         bools[boolconfig::off_video] = !bools[boolconfig::off_video];
         buttons[offVideo]->SetText(bools[boolconfig::off_video] ? "视频:关" : "视频:开");
-        SyncBoolsToConfig(); // 同步到配置文件
+        SyncConfig(); // 同步到配置文件
     });
     buttons[offVideo]->SetEnable(true);
     buttons[offVideo]->SetFontScale(0.25f);
@@ -157,7 +157,8 @@ void MainScreen::changeMode() {
     int tmp=0;
     for(auto& b:overlays){
         int t=tmp-mode;
-        b->MoveTo({0.16+t,0.25,0.84+t,0.75},true,20,[&b,t]{
+        b->MoveTo({0.16+t,0.25,0.84+t,0.75},true,Config::getInstance()->getInt(EXCHANGE_SPEED)
+        ,[&b,t]{
             Log<< "Overlay "<< t << op::endl;
             b->SetEnable(true);
         });

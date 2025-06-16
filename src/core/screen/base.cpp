@@ -152,7 +152,12 @@ bool Screen::SwitchToScreenWithFade(ScreenID id,int param_, float fadeTime, std:
         Log << Level::Error << "Screen with ID " << static_cast<int>(id) << " not found." << op::endl;
         return false;
     }
-    
+    if(bools[boolconfig::nosmoothui]){
+        SwitchToScreen(id,param_);
+        transitionState = TransitionState::Stable;
+        onComplete();
+        return true;
+    }
     // 如果已经在过渡中，忽略新的切换请求
     if (transitionState != TransitionState::Stable) {
         Log << Level::Warn << "Screen transition already in progress, ignoring new request." << op::endl;

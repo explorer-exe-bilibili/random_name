@@ -82,7 +82,7 @@ private:
     SDL_AudioDeviceID audioDeviceID = 0;
     uint8_t* rgbBuffer = nullptr;
     size_t rgbBufferSize = 0;  // Store buffer size for memory tracking
-    std::atomic<float> volume{1.0f}; // 音量范围：0.0-1.0
+    static std::atomic<float> volume; // 音量范围：0.0-1.0
     
     // 音视频同步相关
     std::atomic<double> audioClock{0.0};     // 音频时钟

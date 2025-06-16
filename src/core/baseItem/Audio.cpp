@@ -1,5 +1,6 @@
 #include "core/baseItem/Audio.h"
 #include "core/log.h"
+#include "core/Config.h"
 #include <algorithm>
 
 namespace core {
@@ -64,6 +65,7 @@ bool Audio::loadMusic(const std::string& id, const std::string& path) {
 
 bool Audio::playMusic(const std::string& id, int loop) {
     if (!initialized && !init()) return false;
+    if(bools[boolconfig::offmusic])return true;
     
     if (musics.find(id) == musics.end()) {
         Log << Level::Error << "尝试播放未加载的音乐: " << id << op::endl;
@@ -97,6 +99,7 @@ void Audio::pauseMusic() {
 
 void Audio::resumeMusic() {
     if (!initialized) return;
+    if(bools[boolconfig::offmusic])return;
     if (Mix_PausedMusic()) {
         Mix_ResumeMusic();
         Log << Level::Info << "恢复音乐播放" << op::endl;
@@ -110,6 +113,7 @@ void Audio::setMusicVolume(int volume) {
 }
 
 bool Audio::isMusicPlaying() const {
+    if(bools[boolconfig::offmusic])return false;
     return initialized && Mix_PlayingMusic() && !Mix_PausedMusic();
 }
 
@@ -140,6 +144,7 @@ bool Audio::loadSound(const std::string& id, const std::string& path) {
 
 int Audio::playSound(const std::string& id, int loop) {
     if (!initialized && !init()) return -1;
+    if(bools[boolconfig::offmusic])return -1;
     
     if (sounds.find(id) == sounds.end()) {
         Log << Level::Error << "尝试播放未加载的音效: " << id << op::endl;
@@ -188,6 +193,7 @@ void Audio::pauseSound(int channel) {
 
 void Audio::resumeSound(int channel) {
     if (!initialized || channel < 0) return;
+    if(bools[boolconfig::offmusic])return;
     if (Mix_Paused(channel)) {
         Mix_Resume(channel);
         Log << Level::Info << "恢复音效在通道 " << channel << op::endl;
@@ -202,6 +208,7 @@ void Audio::pauseAllSounds() {
 
 void Audio::resumeAllSounds() {
     if (!initialized) return;
+    if(bools[boolconfig::offmusic])return;
     Mix_Resume(-1); // -1表示所有通道
     Log << Level::Info << "恢复所有音效" << op::endl;
 }
