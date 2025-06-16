@@ -1,7 +1,15 @@
 #include "core/Config.h"
 #include "core/configItem.h"
 #include "core/log.h"
+#include "core/baseItem/Base.h"
+#include "core/explorer.h"
+#include "core/screen/base.h"
 #include <GLFW/glfw3.h>
+#ifdef _WIN32
+#include <windows.h>
+#define GLFW_EXPOSE_NATIVE_WIN32
+#include <GLFW/glfw3native.h>
+#endif
 
 // 实现bools映射
 std::map<boolconfig, bool> bools;
@@ -39,6 +47,39 @@ void LoadBoolsFromConfig() {
     bools[boolconfig::use_json_settings] = config->getBool(USE_JSON_SETTINGS, false);
 }
 
+void fullscreen(GLFWwindow* window){
+    if(!window) return;
+    GLFWmonitor* primary = glfwGetPrimaryMonitor();
+    if(!primary) {
+        Log << Level::Error << "Failed to get primary monitor for fullscreen" << op::endl;
+        return;
+    }
+    // 更新窗口信息
+    core::WindowInfo.width = core::screenInfo.width;
+    core::WindowInfo.height = core::screenInfo.height;
+    core::WindowInfo.aspectRatio = static_cast<float>(core::screenInfo.width) / core::screenInfo.height;
+#ifdef _WIN32
+    //用winapi取消全屏独占
+    HWND hwnd = glfwGetWin32Window(window);
+    SetWindowLong(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) | WS_POPUP);
+    ShowWindow(hwnd, SW_MAXIMIZE);
+#endif
+    glfwSetWindowMonitor(window, primary, 0, 0, core::screenInfo.width, core::screenInfo.height, GLFW_DONT_CARE);
+    // 刷新窗口
+    glfwSwapBuffers(window);
+    Log << Level::Info << "Switched to fullscreen mode: " << core::screenInfo.width << "x" << core::screenInfo.height << "@" << GLFW_DONT_CARE << "Hz" << op::endl;
+}
+
+void defullscreen(GLFWwindow* window){
+    if(!window) return;
+    core::WindowInfo.width = core::Config::getInstance()->getInt(WINDOW_WIDTH, core::screenInfo.width / 2);
+    core::WindowInfo.height = core::Config::getInstance()->getInt(WINDOW_HEIGHT, core::screenInfo.height / 2);
+    int x = core::Config::getInstance()->getInt(WINDOW_X, 0);
+    int y = core::Config::getInstance()->getInt(WINDOW_Y, 0);
+    // 恢复窗口到原来的大小和位置
+    glfwSetWindowMonitor(window, nullptr, x, y, core::WindowInfo.width, core::WindowInfo.height, GLFW_DONT_CARE);
+}
+
 // 将bools映射的值同步到Config
 void SyncBoolsToConfig() {
     core::Config* config = core::Config::getInstance();
@@ -54,6 +95,13 @@ void SyncBoolsToConfig() {
     config->set(SHOW_FPS, bools[boolconfig::show_fps]);
     config->set(USE_JSON_SETTINGS, bools[boolconfig::use_json_settings]);
     config->saveToFile();
+    // 设置全屏
+    if(!bools[boolconfig::inwindow])fullscreen(core::WindowInfo.window);
+    else defullscreen(core::WindowInfo.window);
+    if(bools[boolconfig::offmusic])core::Explorer::getInstance()->getAudio()->stopAll();
+    else core::Explorer::getInstance()->playAudio(core::AudioID::bgm);
+    screen::Screen::setUseVideoBackground(bools[boolconfig::use_video_background]);
+
 }
 
 void SetConfigItems(){
@@ -63,6 +111,8 @@ void SetConfigItems(){
     if(primary){
         const GLFWvidmode* mode =glfwGetVideoMode(primary);
         if(mode){
+            core::screenInfo.width=mode->width;
+            core::screenInfo.height=mode->height;
             screenHeight=mode->height;
             screenWidth=mode->width;
         }

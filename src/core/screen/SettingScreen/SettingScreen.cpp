@@ -192,6 +192,21 @@ bool SettingScreen::HandleKeyInput(char key) {
     return false;
 }
 
+bool SettingScreen::HandleUnicodeInput(const std::string& utf8_char) {
+    Log << Level::Debug << "SettingScreen::HandleUnicodeInput called with UTF-8 char: '" << utf8_char << "'" << op::endl;
+    
+    // 将Unicode字符输入传递给正在编辑的文本框
+    for(auto& button : s_buttons) {
+        if(button && button->HandleUnicodeInput(utf8_char)) {
+            Log << Level::Debug << "Unicode character handled by button" << op::endl;
+            return true; // 如果有按钮处理了输入，返回true
+        }
+    }
+    
+    Log << Level::Debug << "Unicode character not handled by any button" << op::endl;
+    return false;
+}
+
 void SettingScreen::FinishAllTextEditing() {
     // 完成所有文本框的编辑
     for(auto& button : s_buttons) {

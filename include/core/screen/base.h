@@ -62,6 +62,7 @@ public:
     virtual void enter(int param)=0;
     virtual void exit(){};
     virtual bool HandleKeyInput(char key) { return false; } // 处理键盘输入，默认不处理
+    virtual bool HandleUnicodeInput(const std::string& utf8_char) { return false; } // 处理Unicode字符输入，默认不处理
 
     ScreenID getID() const { return ID; }
     static std::shared_ptr<Screen> getCurrentScreen() { return currentScreen; }    // 屏幕管理系统功能

@@ -140,6 +140,15 @@ public:
     bool loadAudio(AudioID id, const std::string& path);
     bool loadSound(AudioID id, const std::string& path);
 
+    void unloadVideo(VideoID id);
+    void unloadBitmap(const std::string& name);
+    void unloadBitmap(BitmapID id);
+    void unloadFont(FontID id);
+    void unloadAudio(AudioID id);
+    void unloadSound(AudioID id);
+
+    void unloadAllVideo();
+
     bool playAudio(AudioID id, int loop = 0);
     bool playSound(AudioID id, int loop = 0);
 

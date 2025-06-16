@@ -274,4 +274,18 @@ void Audio::removeChannelFromTracking(int channel) {
     }
 }
 
+void Audio::unloadMusic(const std::string& id) {
+    if (!initialized || musics.find(id) == musics.end()) return;
+    Mix_FreeMusic(musics[id]);
+    musics.erase(id);
+    Log << Level::Info << "卸载音乐: " << id << op::endl;
+}
+
+void Audio::unloadSound(const std::string& id) {
+    if (!initialized || sounds.find(id) == sounds.end()) return;
+    Mix_FreeChunk(sounds[id]);
+    sounds.erase(id);
+    Log << Level::Info << "卸载音效: " << id << op::endl;
+}
+
 } // namespace core

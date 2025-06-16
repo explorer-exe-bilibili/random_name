@@ -184,8 +184,7 @@ bool Screen::SwitchToScreenWithFade(ScreenID id,int param_, float fadeTime, std:
 }
 
 void Screen::setUseVideoBackground(bool use) {
-        bools[boolconfig::use_video_background] = use;
-        if (use && videoBackground == nullptr) {
-            videoBackground = core::Explorer::getInstance()->getVideo(core::VideoID::Background);
-        }
+    if (use && videoBackground == nullptr) {
+        videoBackground = core::Explorer::getInstance()->getVideo(core::VideoID::Background);
+    }
 }

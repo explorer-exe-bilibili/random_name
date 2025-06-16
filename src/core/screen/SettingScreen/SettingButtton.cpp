@@ -6,11 +6,20 @@
 #include <tinyfiledialogs/tinyfiledialogs.h>
 #include <fstream>
 #include <iterator>
+#include <locale>
+#include <codecvt>
 
 #ifdef _WIN32
 #include <windows.h>
 #include <shellapi.h>
 #include <tlhelp32.h>
+#elif defined(__APPLE__)
+#include <ApplicationServices/ApplicationServices.h>
+#include <unistd.h>
+#elif defined(__linux__)
+#include <unistd.h>
+#include <sys/wait.h>
+#include <cstdlib>
 #endif
 
 using namespace core;
@@ -44,9 +53,123 @@ static std::vector<FileTypeFilter> getFiltersForType(FileType fileType) {
     if (it != fileTypeFiltersMap.end()) {
         return it->second;
     }
-    
-    // 默认返回所有文件类型
+      // 默认返回所有文件类型
     return fileTypeFiltersMap.at(FileType::All);
+}
+
+// UTF-8字符处理辅助函数
+namespace {
+    // 计算UTF-8字符串中的字符数量（而非字节数量）
+    size_t utf8_length(const std::string& str) {
+        size_t length = 0;
+        for (size_t i = 0; i < str.length(); ) {
+            unsigned char c = str[i];
+            if (c < 0x80) {
+                // ASCII字符 (0xxxxxxx)
+                i += 1;
+            } else if ((c >> 5) == 0x06) {
+                // 2字节字符 (110xxxxx 10xxxxxx)
+                i += 2;
+            } else if ((c >> 4) == 0x0E) {
+                // 3字节字符 (1110xxxx 10xxxxxx 10xxxxxx) - 大部分中文字符
+                i += 3;
+            } else if ((c >> 3) == 0x1E) {
+                // 4字节字符 (11110xxx 10xxxxxx 10xxxxxx 10xxxxxx)
+                i += 4;
+            } else {
+                // 无效的UTF-8序列，跳过
+                i += 1;
+            }
+            length++;
+        }
+        return length;
+    }
+    
+    // 获取UTF-8字符串中指定位置的字符的字节长度
+    size_t utf8_char_length(const std::string& str, size_t pos) {
+        if (pos >= str.length()) return 0;
+        
+        unsigned char c = str[pos];
+        if (c < 0x80) {
+            return 1; // ASCII字符
+        } else if ((c >> 5) == 0x06) {
+            return 2; // 2字节字符
+        } else if ((c >> 4) == 0x0E) {
+            return 3; // 3字节字符 (大部分中文)
+        } else if ((c >> 3) == 0x1E) {
+            return 4; // 4字节字符
+        } else {
+            return 1; // 无效序列，按1字节处理
+        }
+    }
+    
+    // 安全地删除UTF-8字符串中的最后一个字符
+    std::string utf8_remove_last_char(const std::string& str) {
+        if (str.empty()) return str;
+        
+        size_t pos = str.length();
+        
+        // 从后往前找到一个完整字符的开始位置
+        while (pos > 0) {
+            pos--;
+            unsigned char c = str[pos];
+            
+            // 如果是ASCII字符或UTF-8序列的开始字节
+            if (c < 0x80 || (c >> 6) != 0x02) {
+                break;
+            }
+        }
+        
+        return str.substr(0, pos);
+    }
+    
+    // 将字符位置转换为字节位置
+    size_t utf8_char_pos_to_byte_pos(const std::string& str, size_t char_pos) {
+        size_t byte_pos = 0;
+        size_t current_char = 0;
+        
+        while (byte_pos < str.length() && current_char < char_pos) {
+            unsigned char c = str[byte_pos];
+            if (c < 0x80) {
+                byte_pos += 1;
+            } else if ((c >> 5) == 0x06) {
+                byte_pos += 2;
+            } else if ((c >> 4) == 0x0E) {
+                byte_pos += 3;
+            } else if ((c >> 3) == 0x1E) {
+                byte_pos += 4;
+            } else {
+                byte_pos += 1; // 无效序列
+            }
+            current_char++;
+        }
+        
+        return byte_pos;
+    }
+    
+    // 将字节位置转换为字符位置
+    size_t utf8_byte_pos_to_char_pos(const std::string& str, size_t byte_pos) {
+        size_t char_pos = 0;
+        size_t current_byte = 0;
+        
+        while (current_byte < byte_pos && current_byte < str.length()) {
+            unsigned char c = str[current_byte];
+            if (c < 0x80) {
+                current_byte += 1;
+            } else if ((c >> 5) == 0x06) {
+                current_byte += 2;
+            } else if ((c >> 4) == 0x0E) {
+                current_byte += 3;
+            } else if ((c >> 3) == 0x1E) {
+                current_byte += 4;
+            } else {
+                current_byte += 1; // 无效序列
+            }
+            char_pos++;
+        }
+        
+        return char_pos;
+    }
 }
 
 #ifdef _WIN32
@@ -78,8 +201,13 @@ namespace {
     
     // 显示Windows软键盘
     void ShowVirtualKeyboard() {
+        #ifdef _WIN32
+        if(!bools[boolconfig::inwindow]){
+            defullscreen(core::WindowInfo.window);
+        }
+        #endif
         try {
-            // 方法1：启动TabTip.exe（Windows触屏键盘）
+            // 方法1：启动osk.exe（Windows触屏键盘）
             HINSTANCE result = ShellExecuteW(
                 NULL,
                 L"open",
@@ -105,9 +233,14 @@ namespace {
     
     // 隐藏Windows软键盘
     void HideVirtualKeyboard() {
+        #ifdef _WIN32
+        if(!bools[boolconfig::inwindow]){
+            fullscreen(core::WindowInfo.window);
+        }
+        #endif
         try {
-            // 查找TabTip窗口并关闭
-            HWND hWnd = FindWindowW(L"IPTip_Main_Window", NULL);
+            // 查找osk窗口并关闭
+            HWND hWnd = FindWindowW(L"OSKMainClass", NULL);
             if (hWnd) {
                 SendMessage(hWnd, WM_SYSCOMMAND, SC_CLOSE, 0);
                 Log << Level::Info << "Virtual keyboard hidden" << op::endl;
@@ -121,7 +254,236 @@ namespace {
         }
     }
 }
+
+#elif defined(__APPLE__)
+// macOS软键盘相关函数
+namespace {
+    static pid_t keyboardPid = -1;
+    
+    void ShowVirtualKeyboard() {
+        try {
+            // macOS方法1：通过AppleScript显示虚拟键盘
+            const char* appleScript = R"(
+                tell application "System Events"
+                    tell process "SystemUIServer"
+                        click (menu bar item 1 of menu bar 1 whose description contains "Accessibility")
+                        click menu item "Show Accessibility Keyboard" of menu 1 of menu bar item 1 of menu bar 1
+                    end tell
+                end tell
+            )";
+            
+            std::string command = "osascript -e '";
+            command += appleScript;
+            command += "'";
+            
+            int result = system(command.c_str());
+            if (result == 0) {
+                Log << Level::Info << "macOS virtual keyboard shown via AppleScript" << op::endl;
+            } else {
+                Log << Level::Warn << "Failed to show virtual keyboard via AppleScript, trying alternative method" << op::endl;
+                
+                // 方法2：使用系统偏好设置命令
+                system("open -b com.apple.preference.universalaccess");
+            }
+        }
+        catch (const std::exception& e) {
+            Log << Level::Error << "Exception showing virtual keyboard on macOS: " << e.what() << op::endl;
+        }
+    }
+    
+    void HideVirtualKeyboard() {
+        try {
+            // 通过AppleScript隐藏虚拟键盘
+            const char* appleScript = R"(
+                tell application "System Events"
+                    tell process "SystemUIServer"
+                        click (menu bar item 1 of menu bar 1 whose description contains "Accessibility")
+                        click menu item "Hide Accessibility Keyboard" of menu 1 of menu bar item 1 of menu bar 1
+                    end tell
+                end tell
+            )";
+            
+            std::string command = "osascript -e '";
+            command += appleScript;
+            command += "'";
+            
+            system(command.c_str());
+            Log << Level::Info << "macOS virtual keyboard hidden" << op::endl;
+        }
+        catch (const std::exception& e) {
+            Log << Level::Error << "Exception hiding virtual keyboard on macOS: " << e.what() << op::endl;
+        }
+    }
+}
+
+#elif defined(__linux__)
+// Linux软键盘相关函数
+namespace {
+    static pid_t keyboardPid = -1;
+    
+    // 检测可用的虚拟键盘
+    std::string DetectAvailableKeyboard() {
+        // 按优先级检测可用的虚拟键盘
+        const char* keyboards[] = {
+            "onboard",          // Ubuntu/GNOME默认
+            "florence",         // 轻量级键盘
+            "matchbox-keyboard", // 嵌入式系统常用
+            "kvkbd",            // KDE虚拟键盘
+            "cellwriter",       // 手写识别键盘
+            nullptr
+        };
+        
+        for (int i = 0; keyboards[i] != nullptr; i++) {
+            std::string checkCmd = "which ";
+            checkCmd += keyboards[i];
+            checkCmd += " >/dev/null 2>&1";
+            
+            if (system(checkCmd.c_str()) == 0) {
+                Log << Level::Info << "Found virtual keyboard: " << keyboards[i] << op::endl;
+                return std::string(keyboards[i]);
+            }
+        }
+        
+        Log << Level::Warn << "No virtual keyboard found on Linux system" << op::endl;
+        return "";
+    }
+    
+    void ShowVirtualKeyboard() {
+        try {
+            if (keyboardPid > 0) {
+                Log << Level::Debug << "Virtual keyboard already running" << op::endl;
+                return;
+            }
+            
+            std::string keyboard = DetectAvailableKeyboard();
+            if (keyboard.empty()) {
+                Log << Level::Error << "No virtual keyboard available on this Linux system" << op::endl;
+                return;
+            }
+            
+            // 启动虚拟键盘进程
+            keyboardPid = fork();
+            if (keyboardPid == 0) {
+                // 子进程：启动虚拟键盘
+                if (keyboard == "onboard") {
+                    execl("/usr/bin/onboard", "onboard", "--size", "1000x300", nullptr);
+                } else if (keyboard == "florence") {
+                    execl("/usr/bin/florence", "florence", nullptr);
+                } else if (keyboard == "matchbox-keyboard") {
+                    execl("/usr/bin/matchbox-keyboard", "matchbox-keyboard", nullptr);
+                } else {
+                    execlp(keyboard.c_str(), keyboard.c_str(), nullptr);
+                }
+                
+                // 如果execl失败
+                exit(1);
+            } else if (keyboardPid > 0) {
+                Log << Level::Info << "Linux virtual keyboard (" << keyboard << ") launched with PID: " << keyboardPid << op::endl;
+            } else {
+                Log << Level::Error << "Failed to fork process for virtual keyboard" << op::endl;
+                keyboardPid = -1;
+            }
+        }
+        catch (const std::exception& e) {
+            Log << Level::Error << "Exception showing virtual keyboard on Linux: " << e.what() << op::endl;
+        }
+    }
+    
+    void HideVirtualKeyboard() {
+        try {
+            if (keyboardPid > 0) {
+                // 终止虚拟键盘进程
+                kill(keyboardPid, SIGTERM);
+                
+                // 等待进程结束
+                int status;
+                waitpid(keyboardPid, &status, 0);
+                
+                Log << Level::Info << "Linux virtual keyboard process terminated" << op::endl;
+                keyboardPid = -1;
+            } else {
+                // 如果没有记录PID，尝试通过进程名终止
+                system("pkill -f onboard");
+                system("pkill -f florence");
+                system("pkill -f matchbox-keyboard");
+                system("pkill -f kvkbd");
+                
+                Log << Level::Info << "Attempted to kill virtual keyboard processes" << op::endl;
+            }
+        }
+        catch (const std::exception& e) {
+            Log << Level::Error << "Exception hiding virtual keyboard on Linux: " << e.what() << op::endl;
+        }
+    }
+}
+
+#else
+// 其他平台的占位符实现
+namespace {
+    void ShowVirtualKeyboard() {
+        Log << Level::Info << "Virtual keyboard not implemented for this platform" << op::endl;
+    }
+    
+    void HideVirtualKeyboard() {
+        Log << Level::Info << "Virtual keyboard not implemented for this platform" << op::endl;
+    }
+}
 #endif
+
+// 跨平台软键盘支持检测
+namespace {
+    bool IsVirtualKeyboardSupported() {
+#ifdef _WIN32
+        return true; // Windows始终支持OSK
+#elif defined(__APPLE__)
+        return true; // macOS支持辅助功能键盘
+#elif defined(__linux__)
+        // 检测Linux是否有可用的虚拟键盘
+        const char* keyboards[] = {
+            "onboard", "florence", "matchbox-keyboard", "kvkbd", "cellwriter", nullptr
+        };
+        
+        for (int i = 0; keyboards[i] != nullptr; i++) {
+            std::string checkCmd = "which ";
+            checkCmd += keyboards[i];
+            checkCmd += " >/dev/null 2>&1";
+            
+            if (system(checkCmd.c_str()) == 0) {
+                return true;
+            }
+        }
+        return false;
+#else
+        return false; // 其他平台暂不支持
+#endif
+    }
+    
+    std::string GetPlatformKeyboardInfo() {
+#ifdef _WIN32
+        return "Windows屏幕键盘 (OSK)";
+#elif defined(__APPLE__)
+        return "macOS辅助功能键盘";
+#elif defined(__linux__)
+        // 返回第一个找到的键盘
+        const char* keyboards[] = {
+            "onboard", "florence", "matchbox-keyboard", "kvkbd", "cellwriter", nullptr
+        };
+        
+        for (int i = 0; keyboards[i] != nullptr; i++) {
+            std::string checkCmd = "which ";
+            checkCmd += keyboards[i];
+            checkCmd += " >/dev/null 2>&1";
+            
+            if (system(checkCmd.c_str()) == 0) {
+                return std::string("Linux虚拟键盘 (") + keyboards[i] + ")";
+            }
+        }
+        return "Linux虚拟键盘 (未安装)";
+#else
+        return "不支持的平台";
+#endif
+    }
+}
 
 SettingButton::SettingButton(sItem item_, int number, int page)
     : item(item_), number(number), page(page) {
@@ -202,12 +564,17 @@ SettingButton::SettingButton(sItem item_, int number, int page)
                 Log << Level::Error << "Error setting up switch button: " << e.what() << op::endl;
                 button->SetText("错误");
             }
-        }        else if(item.type==SettingButtonType::Textbox){
+        }
+        else if(item.type==SettingButtonType::Textbox){
             // 获取当前配置值作为默认文本
             std::string currentValue = Config::getInstance()->get(item.configName, "");
             button->SetText(currentValue.empty() ? "点击输入" : currentValue);
             // 设置编辑区域（使用按钮区域的完全相同尺寸）
             editingTextRegion = ButtonRegion;
+            
+            // 记录软键盘支持状态
+            Log << Level::Info << "Virtual keyboard support: " << GetPlatformKeyboardInfo() 
+                << " (Supported: " << (IsVirtualKeyboardSupported() ? "Yes" : "No") << ")" << op::endl;
             button->SetClickFunc([this, configName = item.configName]{
                 try {
                     if (configName.empty()) {
@@ -216,18 +583,19 @@ SettingButton::SettingButton(sItem item_, int number, int page)
                     }
                     
                     Log << Level::Debug << "Textbox button clicked, configName: " << configName << op::endl;
-                      // 启动内嵌编辑模式
+                    // 启动内嵌编辑模式
                     if (!isTextboxEditing) {
                         isTextboxEditing = true;
                         editingText = Config::getInstance()->get(configName, "");
-                        cursorPosition = editingText.length();
+                        cursorPosition = core::utf8_length(editingText); // 使用UTF-8字符长度
                         lastCursorBlink = std::chrono::steady_clock::now();
                         showCursor = true;
-                        
-#ifdef _WIN32
-                        // 显示软键盘
-                        ShowVirtualKeyboard();
-#endif
+                          // 跨平台显示软键盘（仅在支持的平台上）
+                        if (IsVirtualKeyboardSupported()) {
+                            ShowVirtualKeyboard();
+                        } else {
+                            Log << Level::Info << "Virtual keyboard not supported on this platform" << op::endl;
+                        }
                         
                         Log << Level::Debug << "Started inline text editing for: " << configName 
                             << ", current text: '" << editingText << "'" << op::endl;
@@ -257,6 +625,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
                     // 处理颜色选择的点击事件
                     Color color = selectColor();
                     Config::getInstance()->set(configName,color);
+                    Config::getInstance()->saveToFile();
                     button->SetFillColor((unsigned int)Config::getInstance()->getInt(configName));
                     checkActions();
                 }
@@ -304,6 +673,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
                     if (!path.empty()) {
                         if(!std::filesystem::exists(path))return;
                         Config::getInstance()->set(configName,path);
+                        Config::getInstance()->saveToFile();
                         // 只显示文件名，不显示完整路径
                         size_t pos = path.find_last_of("/\\");
                         if (pos != std::string::npos) {
@@ -387,6 +757,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
                             }
                         }
                         Config::getInstance()->set(configName,path);
+                        Config::getInstance()->saveToFile();
                         button->SetText(Config::getInstance()->get(configName));
                         button->SetText(path);
                         button->SetEnableFill(false);
@@ -435,10 +806,11 @@ void SettingButton::Draw(int currentPage, unsigned char alpha)const {
             const_cast<SettingButton*>(this)->showCursor = !showCursor;
             const_cast<SettingButton*>(this)->lastCursorBlink = now;
         }
-        
-        // 添加光标
-        if (showCursor && cursorPosition <= displayText.length()) {
-            displayText.insert(cursorPosition, "|");
+          // 添加光标
+        if (showCursor && cursorPosition <= core::utf8_length(displayText)) {
+            // 将字符位置转换为字节位置来插入光标
+            size_t byte_pos = utf8_char_pos_to_byte_pos(displayText, cursorPosition);
+            displayText.insert(byte_pos, "|");
         }
         
         // 如果文本为空，显示提示
@@ -456,7 +828,7 @@ void SettingButton::Draw(int currentPage, unsigned char alpha)const {
         textDrawRegion.setRatio(false);
         
         // 绘制编辑中的文本（黑色文字，较大字体）
-        font->RenderTextBetween(displayText, textDrawRegion, 0.5f, Color(0, 0, 0, 255));
+        font->RenderTextBetween(displayText, textDrawRegion, 0.3f, Color(0, 0, 0, 255));
         
         // 绘制编辑提示（在编辑框下方）
         std::string hint = "回车确认 | ESC取消";
@@ -685,10 +1057,22 @@ void SettingButton::openFile() {
 }
 
 void SettingButton::checkActions(){
-    if(item.type==SettingButtonType::Switch){
-
-    }
     if(item.action&SettingButtonAction::Restart){
+        int result = tinyfd_messageBox("重启提示", "修改设置后需要重启程序才能生效，是否现在重启？", "yesno", "question", 1);
+        if (result == 1) {
+            Log << Level::Info << "User chose to restart the application" << op::endl;
+            core::restart();
+        } else {
+            Log << Level::Info << "User chose not to restart the application" << op::endl;
+        }
+    }
+    if(item.action&SettingButtonAction::ResetWindowTitle){
+        glfwSetWindowTitle(WindowInfo.window, Config::getInstance()->get(WINDOW_TITLE, "祈愿").c_str());
+    }
+    if(item.action&SettingButtonAction::ReloadVideo){
+        if(Config::getInstance()->getBool(NO_VIDEO_PRELOAD,false)){
+            core::Explorer::getInstance()->unloadAllVideo();
+        }
     }
 }
 
@@ -701,9 +1085,40 @@ bool SettingButton::HandleKeyInput(char key) {
     
     if (key == '\b' || key == 127) { // 退格键
         if (cursorPosition > 0) {
-            editingText.erase(cursorPosition - 1, 1);
-            cursorPosition--;
-            Log << Level::Debug << "Backspace: new text = '" << editingText << "', cursor = " << cursorPosition << op::endl;
+            try {
+                // 安全地删除光标前的一个UTF-8字符
+                size_t byte_pos = utf8_char_pos_to_byte_pos(editingText, cursorPosition);
+                
+                if (byte_pos > 0) {
+                    // 找到前一个字符的开始位置
+                    size_t prev_char_start = byte_pos;
+                    do {
+                        prev_char_start--;
+                        if (prev_char_start == 0) break;
+                        unsigned char c = editingText[prev_char_start];
+                        // 找到UTF-8字符的开始字节 (不是continuation byte)
+                        if (c < 0x80 || (c >> 6) != 0x02) {
+                            break;
+                        }
+                    } while (prev_char_start > 0);
+                    
+                    // 删除从prev_char_start到byte_pos的字符
+                    editingText.erase(prev_char_start, byte_pos - prev_char_start);
+                    cursorPosition--;
+                    
+                    Log << Level::Debug << "Backspace (UTF-8): new text = '" << editingText 
+                        << "', cursor = " << cursorPosition << " chars, " 
+                        << core::utf8_length(editingText) << " total chars" << op::endl;
+                }
+            }
+            catch (const std::exception& e) {
+                Log << Level::Error << "Error in UTF-8 backspace handling: " << e.what() << op::endl;
+                // fallback: 使用简单的字符串删除
+                if (!editingText.empty()) {
+                    editingText = utf8_remove_last_char(editingText);
+                    cursorPosition = core::utf8_length(editingText);
+                }
+            }
         }
     }
     else if (key == '\r' || key == '\n') { // 回车键 - 完成输入
@@ -714,10 +1129,40 @@ bool SettingButton::HandleKeyInput(char key) {
         Log << Level::Debug << "ESC pressed, cancelling editing" << op::endl;
         CancelEditing();
     }
-    else if (key >= 32 && key <= 126) { // 可打印字符
-        editingText.insert(cursorPosition, 1, key);
+    // 注意：ASCII可打印字符现在通过HandleUnicodeInput处理，避免重复输入
+    else {
+        // 对于其他控制字符，记录但不处理
+        Log << Level::Debug << "Control key ignored: " << (int)key << op::endl;
+    }
+    
+    return true;
+}
+
+bool SettingButton::HandleUnicodeInput(const std::string& utf8_char) {
+    if (!isTextboxEditing || item.type != SettingButtonType::Textbox) {
+        return false;
+    }
+    
+    // 跳过控制字符 (如退格、回车、ESC等，这些在HandleKeyInput中处理)
+    if (utf8_char.length() == 1 && utf8_char[0] < 32) {
+        return false;
+    }
+    
+    Log << Level::Debug << "HandleUnicodeInput called with UTF-8 char: '" << utf8_char << "'" << op::endl;
+    
+    try {
+        // 将UTF-8字符插入到当前光标位置
+        size_t byte_pos = utf8_char_pos_to_byte_pos(editingText, cursorPosition);
+        editingText.insert(byte_pos, utf8_char);
         cursorPosition++;
-        Log << Level::Debug << "Character added: new text = '" << editingText << "', cursor = " << cursorPosition << op::endl;
+        
+        Log << Level::Debug << "UTF-8 character inserted: new text = '" << editingText 
+            << "', cursor = " << cursorPosition << " chars, " 
+            << (long)core::utf8_length(editingText) << " total chars" << op::endl;
+    }
+    catch (const std::exception& e) {
+        Log << Level::Error << "Error inserting UTF-8 character: " << e.what() << op::endl;
+        return false;
     }
     
     return true;
@@ -790,16 +1235,17 @@ void SettingButton::FinishEditing() {
     try {
         // 保存到配置
         Config::getInstance()->set(item.configName, editingText);
+        Config::getInstance()->saveToFile();
         
         // 更新按钮显示
         button->SetText(editingText.empty() ? "点击输入" : editingText);
           // 关闭编辑模式
         isTextboxEditing = false;
         
-#ifdef _WIN32
-        // 隐藏软键盘
-        HideVirtualKeyboard();
-#endif
+        // 跨平台隐藏软键盘（仅在支持的平台上）
+        if (IsVirtualKeyboardSupported()) {
+            HideVirtualKeyboard();
+        }
         
         // 执行相关动作
         checkActions();
@@ -814,215 +1260,12 @@ void SettingButton::FinishEditing() {
 
 void SettingButton::CancelEditing() {
     if (!isTextboxEditing) return;
+      isTextboxEditing = false;
     
-    isTextboxEditing = false;
-    
-#ifdef _WIN32
-    // 隐藏软键盘
-    HideVirtualKeyboard();
-#endif
+    // 跨平台隐藏软键盘（仅在支持的平台上）
+    if (IsVirtualKeyboardSupported()) {
+        HideVirtualKeyboard();
+    }
     
     Log << Level::Debug << "Cancelled text editing" << op::endl;
-}
-
-std::string SettingButton::selectText() {
-    // 获取当前配置的文本作为默认值
-    std::string defaultText = Config::getInstance()->get(item.configName, "");
-    
-    Log << Level::Debug << "selectText() called, defaultText: " << defaultText << op::endl;
-    
-#ifdef _WIN32
-    // Windows 平台：使用美观的自定义对话框
-    return showSimpleInputDialog(item.name, "请输入内容:", defaultText);
-#else
-    // 非Windows平台使用tinyfiledialogs
-    const char* result = tinyfd_inputBox(
-        item.name.c_str(),           // 对话框标题
-        "请输入内容:",               // 提示文本
-        defaultText.c_str()          // 默认值
-    );
-    
-    if (result != NULL) {
-        return std::string(result);
-    }
-    
-    return defaultText;
-#endif
-}
-
-#ifdef _WIN32
-std::string SettingButton::showSimpleInputDialog(const std::string& title, const std::string& prompt, const std::string& defaultValue) {
-    // 获取父窗口
-    HWND parentHwnd = GetForegroundWindow();
-    if (!parentHwnd) {
-        parentHwnd = GetActiveWindow();
-    }
-    
-    // 创建模态对话框窗口
-    const char* className = "ModernInputDialog";
-    
-    // 注册窗口类
-    WNDCLASSA wc = {};
-    wc.lpfnWndProc = [](HWND hwnd, UINT msg, WPARAM wParam, LPARAM lParam) -> LRESULT {
-        static HWND hEdit = nullptr;
-        static HWND hStatic = nullptr;
-        static std::string* pResult = nullptr;
-        
-        switch (msg) {
-        case WM_CREATE:
-            {
-                CREATESTRUCT* cs = (CREATESTRUCT*)lParam;
-                pResult = (std::string*)cs->lpCreateParams;
-                
-                // 创建提示标签
-                hStatic = CreateWindowA("STATIC", "请输入内容:", 
-                    WS_VISIBLE | WS_CHILD | SS_LEFT,
-                    20, 20, 300, 20, hwnd, NULL, GetModuleHandle(NULL), NULL);
-                
-                // 创建输入框
-                hEdit = CreateWindowA("EDIT", pResult ? pResult->c_str() : "",
-                    WS_VISIBLE | WS_CHILD | WS_BORDER | ES_AUTOHSCROLL,
-                    20, 50, 300, 25, hwnd, (HMENU)100, GetModuleHandle(NULL), NULL);
-                
-                // 创建确定按钮
-                CreateWindowA("BUTTON", "确定",
-                    WS_VISIBLE | WS_CHILD | BS_DEFPUSHBUTTON,
-                    170, 90, 70, 30, hwnd, (HMENU)IDOK, GetModuleHandle(NULL), NULL);
-                
-                // 创建取消按钮
-                CreateWindowA("BUTTON", "取消",
-                    WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON,
-                    250, 90, 70, 30, hwnd, (HMENU)IDCANCEL, GetModuleHandle(NULL), NULL);
-                
-                // 设置现代化字体
-                HFONT hFont = CreateFontA(-14, 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE,
-                    DEFAULT_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS,
-                    DEFAULT_QUALITY, DEFAULT_PITCH | FF_DONTCARE, "Microsoft YaHei");
-                
-                if (hFont) {
-                    SendMessage(hStatic, WM_SETFONT, (WPARAM)hFont, TRUE);
-                    SendMessage(hEdit, WM_SETFONT, (WPARAM)hFont, TRUE);
-                    EnumChildWindows(hwnd, [](HWND child, LPARAM font) -> BOOL {
-                        char className[256];
-                        GetClassNameA(child, className, sizeof(className));
-                        if (strcmp(className, "Button") == 0) {
-                            SendMessage(child, WM_SETFONT, font, TRUE);
-                        }
-                        return TRUE;
-                    }, (LPARAM)hFont);
-                }
-                
-                // 聚焦到输入框并选中所有文本
-                SetFocus(hEdit);
-                SendMessage(hEdit, EM_SETSEL, 0, -1);
-                
-                return 0;
-            }
-            
-        case WM_COMMAND:
-            switch (LOWORD(wParam)) {
-            case IDOK:
-                {
-                    char buffer[1024];
-                    GetWindowTextA(hEdit, buffer, sizeof(buffer));
-                    if (pResult) {
-                        *pResult = buffer;
-                    }
-                    PostMessage(hwnd, WM_CLOSE, 0, 0);
-                    return 0;
-                }
-                
-            case IDCANCEL:
-                PostMessage(hwnd, WM_CLOSE, 0, 0);
-                return 0;
-                
-            case 100: // Edit control
-                if (HIWORD(wParam) == EN_CHANGE) {
-                    // 可以在这里添加实时验证
-                }
-                break;
-            }
-            break;
-            
-        case WM_CLOSE:
-            DestroyWindow(hwnd);
-            return 0;
-            
-        case WM_DESTROY:
-            PostQuitMessage(0);
-            return 0;
-            
-        case WM_CTLCOLORSTATIC:
-            // 现代化颜色方案 - 深色文字，浅色背景
-            SetTextColor((HDC)wParam, RGB(33, 37, 41));
-            SetBkColor((HDC)wParam, RGB(248, 249, 250));
-            return (LRESULT)GetStockObject(WHITE_BRUSH);
-            
-        case WM_CTLCOLOREDIT:
-            // 输入框颜色
-            SetTextColor((HDC)wParam, RGB(33, 37, 41));
-            SetBkColor((HDC)wParam, RGB(255, 255, 255));
-            return (LRESULT)GetStockObject(WHITE_BRUSH);
-        }
-        
-        return DefWindowProcA(hwnd, msg, wParam, lParam);
-    };
-    
-    wc.hInstance = GetModuleHandle(NULL);
-    wc.lpszClassName = className;
-    wc.hCursor = LoadCursor(NULL, IDC_ARROW);
-    wc.hbrBackground = (HBRUSH)(COLOR_WINDOW + 1);
-    wc.style = CS_HREDRAW | CS_VREDRAW;
-    
-    RegisterClassA(&wc);
-    
-    // 创建对话框
-    std::string result = defaultValue;
-    HWND hDlg = CreateWindowA(className, title.c_str(),
-        WS_OVERLAPPED | WS_CAPTION | WS_SYSMENU | WS_VISIBLE,
-        CW_USEDEFAULT, CW_USEDEFAULT, 360, 160,
-        parentHwnd, NULL, GetModuleHandle(NULL), &result);
-    
-    if (hDlg) {
-        // 居中显示
-        RECT rect;
-        GetWindowRect(hDlg, &rect);
-        int width = rect.right - rect.left;
-        int height = rect.bottom - rect.top;
-        int x = (GetSystemMetrics(SM_CXSCREEN) - width) / 2;
-        int y = (GetSystemMetrics(SM_CYSCREEN) - height) / 2;
-        SetWindowPos(hDlg, HWND_TOPMOST, x, y, width, height, SWP_SHOWWINDOW);
-        
-        // 确保窗口在前台
-        SetForegroundWindow(hDlg);
-        SetActiveWindow(hDlg);
-        
-        // 消息循环
-        MSG msg;
-        while (GetMessage(&msg, NULL, 0, 0)) {
-            if (msg.message == WM_QUIT) {
-                break;
-            }
-            
-            if (!IsDialogMessage(hDlg, &msg)) {
-                TranslateMessage(&msg);
-                DispatchMessage(&msg);
-            }
-            
-            // 检查窗口是否还存在
-            if (!IsWindow(hDlg)) {
-                break;
-            }
-        }
-    }
-    
-    UnregisterClassA(className, GetModuleHandle(NULL));
-    
-    Log << Level::Debug << "Input dialog result: " << result << op::endl;
-    return result;
-}
-#endif
-
-void SettingButton::updateConfig() {
-    
 }

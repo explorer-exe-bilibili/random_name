@@ -44,6 +44,9 @@ public:
     void resumeAll(); // 恢复所有音乐和音效
     void stopAll(); // 停止所有音乐和音效
     void cleanup();
+
+    void unloadMusic(const std::string& id);
+    void unloadSound(const std::string& id);
     
     // 检查是否已初始化
     bool isInitialized() const { return initialized; }

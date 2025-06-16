@@ -262,6 +262,104 @@ bool Explorer::loadSound(AudioID id, const std::string &path)
     return getAudio()->loadSound(AudioIDToString(id), path);
 }
 
+void Explorer::unloadVideo(VideoID id)
+{
+    Log << Level::Info << "Unloading video: " << static_cast<int>(id) << op::endl;
+    if (videos.contains(id))
+    {
+        videos[id]->stop();
+        videos.erase(id);
+        Log << Level::Info << "Video unloaded successfully: " << static_cast<int>(id) << op::endl;
+    }
+    else
+    {
+        Log << Level::Warn << "Video ID not found: " << static_cast<int>(id) << op::endl;
+    }
+}
+
+void Explorer::unloadAllVideo()
+{
+    Log << Level::Info << "Unloading all videos..." << op::endl;
+    for (const auto& [id, video] : videos)
+    {
+        video->stop();
+    }
+    videos.clear();
+    Log << Level::Info << "All videos unloaded successfully." << op::endl;
+}
+
+void Explorer::unloadBitmap(const std::string& name)
+{
+    Log << Level::Info << "Unloading bitmap: " << name << op::endl;
+    if (Name_bitmaps.contains(name))
+    {
+        Name_bitmaps.erase(name);
+        Log << Level::Info << "Bitmap unloaded successfully: " << name << op::endl;
+    }
+    else
+    {
+        Log << Level::Warn << "Bitmap name not found: " << name << op::endl;
+    }
+}
+
+void Explorer::unloadBitmap(BitmapID id)
+{
+    Log << Level::Info << "Unloading bitmap ID: " << static_cast<int>(id) << op::endl;
+    if (bitmaps.contains(id))
+    {
+        bitmaps.erase(id);
+        Log << Level::Info << "Bitmap unloaded successfully: " << static_cast<int>(id) << op::endl;
+    }
+    else
+    {
+        Log << Level::Warn << "Bitmap ID not found: " << static_cast<int>(id) << op::endl;
+    }
+}
+
+void Explorer::unloadFont(FontID id)
+{
+    Log << Level::Info << "Unloading font ID: " << static_cast<int>(id) << op::endl;
+    if (fonts.contains(id))
+    {
+        fonts.erase(id);
+        Log << Level::Info << "Font unloaded successfully: " << static_cast<int>(id) << op::endl;
+    }
+    else
+    {
+        Log << Level::Warn << "Font ID not found: " << static_cast<int>(id) << op::endl;
+    }
+}
+
+void Explorer::unloadAudio(AudioID id)
+{
+    Log << Level::Info << "Unloading audio ID: " << static_cast<int>(id) << op::endl;
+    if (audioLoaded.contains(id))
+    {
+        audioLoaded.erase(id);
+        getAudio()->unloadMusic(AudioIDToString(id));
+        Log << Level::Info << "Audio unloaded successfully: " << static_cast<int>(id) << op::endl;
+    }
+    else
+    {
+        Log << Level::Warn << "Audio ID not found: " << static_cast<int>(id) << op::endl;
+    }
+}
+
+void Explorer::unloadSound(AudioID id)
+{
+    Log << Level::Info << "Unloading sound ID: " << static_cast<int>(id) << op::endl;
+    if (audioLoaded.contains(id))
+    {
+        audioLoaded.erase(id);
+        getAudio()->unloadSound(AudioIDToString(id));
+        Log << Level::Info << "Sound unloaded successfully: " << static_cast<int>(id) << op::endl;
+    }
+    else
+    {
+        Log << Level::Warn << "Sound ID not found: " << static_cast<int>(id) << op::endl;
+    }
+}
+
 bool Explorer::playAudio(AudioID id, int loop)
 {
     Log << Level::Info << "Playing audio: " << AudioIDToString(id) << " with loop count: " << loop << op::endl;

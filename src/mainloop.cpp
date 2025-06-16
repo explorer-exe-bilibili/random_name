@@ -128,25 +128,15 @@ int mainloop() {
 void KeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods) {
     switch (action) {
         case GLFW_PRESS:
-            Log << Level::Info << "Key pressed: " << key << op::endl;
+        case GLFW_REPEAT:
+            Log << Level::Info << "Key " << (action == GLFW_PRESS ? "pressed" : "repeated") << ": " << key << op::endl;
             
             // 将键盘输入传递给当前屏幕
             if (screen::Screen::getCurrentScreen()) {
-                // 转换GLFW键码为字符
+                // 只处理控制键，ASCII可打印字符交给CharEvent处理
                 char keyChar = 0;
-                if (key >= GLFW_KEY_A && key <= GLFW_KEY_Z) {
-                    keyChar = 'a' + (key - GLFW_KEY_A);
-                    if (mods & GLFW_MOD_SHIFT) {
-                        keyChar = 'A' + (key - GLFW_KEY_A);
-                    }
-                }
-                else if (key >= GLFW_KEY_0 && key <= GLFW_KEY_9) {
-                    keyChar = '0' + (key - GLFW_KEY_0);
-                }
-                else if (key == GLFW_KEY_SPACE) {
-                    keyChar = ' ';
-                }
-                else if (key == GLFW_KEY_ENTER) {
+                
+                if (key == GLFW_KEY_ENTER || key == GLFW_KEY_KP_ENTER) {
                     keyChar = '\r';
                 }
                 else if (key == GLFW_KEY_BACKSPACE) {
@@ -155,19 +145,7 @@ void KeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods) {
                 else if (key == GLFW_KEY_ESCAPE) {
                     keyChar = 27;
                 }
-                else if (key == GLFW_KEY_PERIOD) {
-                    keyChar = '.';
-                }
-                else if (key == GLFW_KEY_COMMA) {
-                    keyChar = ',';
-                }
-                else if (key == GLFW_KEY_MINUS) {
-                    keyChar = '-';
-                }
-                else if (key == GLFW_KEY_EQUAL) {
-                    keyChar = '=';
-                }
-                // 添加更多字符支持...
+                // 注意：ASCII可打印字符（字母、数字、标点等）现在由CharEvent处理，避免重复输入
                 
                 if (keyChar != 0) {
                     if (screen::Screen::getCurrentScreen()->HandleKeyInput(keyChar)) {
@@ -198,9 +176,6 @@ void KeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods) {
                     break;
             }
             break;
-        case GLFW_REPEAT:
-            Log << Level::Info << "Key repeated: " << key << op::endl;
-            break;
         default:
             break;
     }
@@ -219,6 +194,41 @@ void MouseButtonEvent(GLFWwindow* window, int button, int action, int mods) {
             break;
         default:
             break;
+    }
+}
+
+// 处理Unicode字符输入的回调函数（支持中文等多字节字符）
+void CharEvent(GLFWwindow* window, unsigned int codepoint) {
+    // 将Unicode码点转换为UTF-8字符串
+    std::string utf8_char;
+    
+    if (codepoint < 0x80) {
+        // ASCII字符
+        utf8_char += static_cast<char>(codepoint);
+    } else if (codepoint < 0x800) {
+        // 2字节UTF-8
+        utf8_char += static_cast<char>(0xC0 | (codepoint >> 6));
+        utf8_char += static_cast<char>(0x80 | (codepoint & 0x3F));
+    } else if (codepoint < 0x10000) {
+        // 3字节UTF-8 (大部分中文字符)
+        utf8_char += static_cast<char>(0xE0 | (codepoint >> 12));
+        utf8_char += static_cast<char>(0x80 | ((codepoint >> 6) & 0x3F));
+        utf8_char += static_cast<char>(0x80 | (codepoint & 0x3F));
+    } else {
+        // 4字节UTF-8
+        utf8_char += static_cast<char>(0xF0 | (codepoint >> 18));
+        utf8_char += static_cast<char>(0x80 | ((codepoint >> 12) & 0x3F));
+        utf8_char += static_cast<char>(0x80 | ((codepoint >> 6) & 0x3F));
+        utf8_char += static_cast<char>(0x80 | (codepoint & 0x3F));
+    }
+    
+    Log << Level::Debug << "Unicode character input: U+"  << codepoint  << " -> UTF-8: " << utf8_char << op::endl;
+    
+    // 将UTF-8字符传递给当前屏幕
+    if (screen::Screen::getCurrentScreen()) {
+        if (screen::Screen::getCurrentScreen()->HandleUnicodeInput(utf8_char)) {
+            return; // 如果屏幕处理了输入，就不继续处理
+        }
     }
 }
 

@@ -3,6 +3,25 @@
 #include <cstring>
 #include "core/log.h"
 #include <utf8cpp/utf8.h>
+#include <vector>
+#include <string>
+#include <cstdlib>
+
+#ifdef _WIN32
+    #include <windows.h>
+    #include <shellapi.h>
+    #include <psapi.h>
+#else
+    #include <unistd.h>
+    #include <sys/types.h>
+    #include <sys/wait.h>
+    #include <limits.h>
+    #ifdef __APPLE__
+        #include <mach-o/dyld.h>
+    #else
+        #include <linux/limits.h>
+    #endif
+#endif
 
 
 using namespace core;
@@ -60,4 +79,133 @@ size_t core::utf8_length(const std::string& str) {
 
 void core::quit() {
     glfwSetWindowShouldClose(WindowInfo.window, true);
+}
+
+std::string getExecutablePath() {
+#ifdef _WIN32
+    wchar_t path[MAX_PATH];
+    DWORD length = GetModuleFileNameW(NULL, path, MAX_PATH);
+    if (length == 0) {
+        return "";
+    }
+    
+    // 转换为UTF-8字符串
+    int utf8Length = WideCharToMultiByte(CP_UTF8, 0, path, -1, NULL, 0, NULL, NULL);
+    if (utf8Length == 0) {
+        return "";
+    }
+    
+    std::string utf8Path(utf8Length - 1, '\0');
+    WideCharToMultiByte(CP_UTF8, 0, path, -1, &utf8Path[0], utf8Length, NULL, NULL);
+    return utf8Path;
+    
+#elif defined(__APPLE__)
+    char path[PATH_MAX];
+    uint32_t size = sizeof(path);
+    if (_NSGetExecutablePath(path, &size) == 0) {
+        return std::string(path);
+    }
+    
+    // 如果缓冲区太小，重新分配
+    std::vector<char> buffer(size);
+    if (_NSGetExecutablePath(buffer.data(), &size) == 0) {
+        return std::string(buffer.data());
+    }
+    return "";
+    
+#else // Linux
+    char path[PATH_MAX];
+    ssize_t count = readlink("/proc/self/exe", path, PATH_MAX - 1);
+    if (count == -1) {
+        return "";
+    }
+    path[count] = '\0';
+    return std::string(path);
+#endif
+}
+
+void core::restart() {
+    Log << Level::Info << "正在重启程序..." << op::endl;
+    
+    std::string executablePath = getExecutablePath();
+    if (executablePath.empty()) {
+        Log << Level::Error << "无法获取可执行文件路径，重启失败" << op::endl;
+        return;
+    }
+    
+#ifdef _WIN32
+    // Windows 实现
+    STARTUPINFOW si = {0};
+    PROCESS_INFORMATION pi = {0};
+    si.cb = sizeof(si);
+    
+    // 获取命令行参数
+    LPWSTR cmdLine = GetCommandLineW();
+    
+    // 创建新进程
+    BOOL success = CreateProcessW(
+        NULL,           // 应用程序名称
+        cmdLine,        // 命令行
+        NULL,           // 进程安全属性
+        NULL,           // 线程安全属性
+        FALSE,          // 继承句柄
+        0,              // 创建标志
+        NULL,           // 环境
+        NULL,           // 当前目录
+        &si,            // 启动信息
+        &pi             // 进程信息
+    );
+    
+    if (success) {
+        Log << Level::Info << "新进程已启动，正在退出当前进程" << op::endl;
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
+        
+        // 关闭当前窗口
+        glfwSetWindowShouldClose(WindowInfo.window, true);
+        
+        // 强制退出当前进程
+        std::exit(0);
+    } else {
+        DWORD error = GetLastError();
+        Log << Level::Error << "创建新进程失败，错误代码: " << error << op::endl;
+    }
+    
+#else
+    // Unix/Linux/macOS 实现
+    pid_t pid = fork();
+    
+    if (pid == 0) {
+        // 子进程：启动新的程序实例
+        std::vector<char*> args;
+        args.push_back(const_cast<char*>(executablePath.c_str()));
+        
+        // 这里可以添加原始的命令行参数
+        // 目前简化处理，只传递程序名
+        args.push_back(nullptr);
+        
+        // 等待一小段时间让父进程有机会清理
+        usleep(100000); // 100ms
+        
+        execv(executablePath.c_str(), args.data());
+        
+        // 如果execv失败，记录错误并退出
+        Log << Level::Error << "execv 失败" << op::endl;
+        std::exit(1);
+        
+    } else if (pid > 0) {
+        // 父进程：准备退出
+        Log << Level::Info << "子进程已启动 (PID: " << pid << ")，正在退出当前进程" << op::endl;
+        
+        // 关闭当前窗口
+        glfwSetWindowShouldClose(WindowInfo.window, true);
+        
+        // 强制退出当前进程
+        std::exit(0);
+        
+    } else {
+        // fork 失败
+        Log << Level::Error << "fork 失败，无法重启程序" << op::endl;
+    }
+#endif
 }

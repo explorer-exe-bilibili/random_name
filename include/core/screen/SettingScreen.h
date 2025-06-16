@@ -136,6 +136,7 @@ public:
     void Draw(int currentPage, unsigned char alpha = 255)const;
     bool Click(core::Point point,int page);
     bool HandleKeyInput(char key); // 处理键盘输入
+    bool HandleUnicodeInput(const std::string& utf8_char); // 处理Unicode字符输入
     bool IsEditing() const { return isTextboxEditing; } // 检查是否正在编辑
     void FinishEditing(); // 完成编辑并保存
     void CancelEditing(); // 取消编辑
@@ -144,13 +145,8 @@ private:
     core::Color selectColor();
     std::string selectFile();
     std::string selectPath();
-    std::string selectText();
-#ifdef _WIN32
-    std::string showSimpleInputDialog(const std::string& title, const std::string& prompt, const std::string& defaultValue);
-#endif
     void openFile();
     void checkActions();
-    void updateConfig();
 };
 class SettingScreen : public Screen
 {
@@ -186,6 +182,7 @@ public:
     void Draw() override;
     bool Click(int x, int y) override;
     bool HandleKeyInput(char key) override; // 处理键盘输入
+    bool HandleUnicodeInput(const std::string& utf8_char) override; // 处理Unicode字符输入
     void FinishAllTextEditing(); // 完成所有文本编辑
       // 页面切换动画配置
     void setTransitionDuration(float duration) { transitionDuration = duration; }

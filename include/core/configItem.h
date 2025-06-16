@@ -83,6 +83,11 @@ extern std::map<boolconfig, bool> bools;
 // 从配置名字符串映射到boolconfig枚举
 boolconfig GetBoolConfigFromString(const std::string& configName);
 
+struct GLFWwindow;
+
+void fullscreen(GLFWwindow* window);
+void defullscreen(GLFWwindow* window);
+
 // 声明bools相关函数
 void LoadBoolsFromConfig();
 void SyncBoolsToConfig();

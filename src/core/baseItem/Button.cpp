@@ -108,7 +108,7 @@ bool core::Button::OnClick(Point point)
 
 void Button::MoveTo(const Region& region, const bool enableFluent, const float speed_, std::function<void()> onComplete)
 {
-    float speed=speed_*WindowInfo.width/1920.0f*100;
+    float speed=speed_*WindowInfo.width/800.0f*100;
     // 先停止可能正在进行的动画
     {
         std::lock_guard<std::mutex> lock(animMutex);

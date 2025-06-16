@@ -159,8 +159,18 @@ std::string Config::getPath(const std::string& name, const std::string& defaultV
         std::filesystem::path exePath = std::filesystem::current_path();
         fsPath = exePath / fsPath;
     }
-    
-    return fsPath.string();
+    if (std::filesystem::exists(fsPath)) {
+        return fsPath.string();
+    }
+    else{
+        std::filesystem::path defaultFsPath(defaultValue);
+        if (defaultFsPath.is_relative()) {
+            // 获取可执行文件所在目录
+            std::filesystem::path exePath = std::filesystem::current_path();
+            defaultFsPath = exePath / defaultFsPath;
+        }
+        return defaultFsPath.string();
+    }
 }
 
 long Config::getInt(const std::string& name, long defaultValue) {
@@ -243,30 +253,25 @@ void Config::setJson(const std::string& name, const nlohmann::json& value) {
 // 设置配置值 - 修复递归问题
 void Config::set(const std::string& name, const std::string& value) {
     configItems[name] = value;
-    saveToFile(); // 自动保存
 }
 
 void Config::set(const std::string& name, int value) {
     // 修复：直接设置值，避免调用其他重载
     configItems[name] = std::to_string(value);
-    saveToFile(); // 自动保存
 }
 
 void Config::set(const std::string& name, unsigned int value) {
     configItems[name] = std::to_string(value);
-    saveToFile(); // 自动保存
 }
 
 void Config::set(const std::string& name, double value) {
     // 修复：直接设置值，避免调用其他重载
     configItems[name] = std::to_string(value);
-    saveToFile(); // 自动保存
 }
 
 void Config::set(const std::string& name, bool value) {
     // 修复：直接设置值，避免调用其他重载
     configItems[name] = value ? "1" : "0";
-    saveToFile(); // 自动保存
 }
 
 void Config::setifno(const std::string &name, const std::string &value)
@@ -755,6 +760,7 @@ bool Config::toggleBool(const std::string& name) {
     if (configItems.contains(name)) {
         bool currentValue = getBool(name);
         set(name, !currentValue);
+        saveToFile();
         return !currentValue;
     }
     return false; // 如果没有找到配置项，返回false

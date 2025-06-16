@@ -162,6 +162,7 @@ int init(){
     
     glfwSetMouseButtonCallback(WindowInfo.window, MouseButtonEvent);
     glfwSetKeyCallback(WindowInfo.window, KeyEvent);
+    glfwSetCharCallback(WindowInfo.window, CharEvent); // 设置Unicode字符输入回调
     glfwSetFramebufferSizeCallback(WindowInfo.window, framebuffer_size_callback);
     // 打印OpenGL版本
     {
@@ -174,13 +175,13 @@ int init(){
     core::Explorer::getInstance();
 
     core::Explorer::getInstance()->playAudio(AudioID::bgm, -1);
-    core::Explorer::getInstance()->getAudio()->setMusicVolume(50);
     screen::Screen::RegisterScreen(screen::ScreenID::MainMenu, std::make_shared<screen::MainScreen>());
     screen::Screen::SwitchToScreen(screen::ScreenID::MainMenu);
     screen::Screen::RegisterScreen(screen::ScreenID::Settings, std::make_shared<screen::SettingScreen>());
     screen::Screen::RegisterScreen(screen::ScreenID::Video,std::make_shared<screen::VideoScreen>());
     screen::Screen::RegisterScreen(screen::ScreenID::Name,std::make_shared<screen::NameScreen>());
     screen::Screen::RegisterScreen(screen::ScreenID::ListName,std::make_shared<screen::ListNameScreen>());
+    SyncBoolsToConfig();
     Log<<Level::Info<<"starting render loop"<<op::endl<<op::flush;
     return 0;
 }
