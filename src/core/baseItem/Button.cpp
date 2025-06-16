@@ -109,18 +109,52 @@ bool core::Button::OnClick(Point point)
 void Button::MoveTo(const Region& region, const bool enableFluent, const float speed_, std::function<void()> onComplete)
 {
     float speed=speed_*WindowInfo.width/800.0f*100;
+      // 尝试在有限时间内获取锁，避免死锁
+    std::unique_lock<std::timed_mutex> lock(animMutex, std::defer_lock);
+    
+    // 尝试获取锁，超时时间为1000ms
+    if (!lock.try_lock_for(std::chrono::milliseconds(1000))) {
+        Log << Level::Error << "Button::MoveTo - 无法获取动画互斥锁，可能存在死锁" << op::endl;
+        // 执行回调函数（如果有）
+        if (onComplete) {
+            onComplete();
+        }
+        return;
+    }
+    
     // 先停止可能正在进行的动画
-    {
-        std::lock_guard<std::mutex> lock(animMutex);
+    if (animationRunning) {
+        stopRequested = true;
+        // 等待先前的动画线程意识到停止请求，但有超时限制
+        lock.unlock();
+        auto timeout = std::chrono::steady_clock::now() + std::chrono::milliseconds(500);
+        while (animationRunning && std::chrono::steady_clock::now() < timeout) {
+            std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        }
+        
         if (animationRunning) {
-            stopRequested = true;
-            // 等待先前的动画线程意识到停止请求
-            std::this_thread::sleep_for(std::chrono::milliseconds(20));
+            Log << Level::Warn << "Button::MoveTo - 强制停止动画" << op::endl;
+            animationRunning = false;
+        }
+        
+        // 重新获取锁
+        if (!lock.try_lock_for(std::chrono::milliseconds(1000))) {
+            Log << Level::Error << "Button::MoveTo - 无法重新获取动画互斥锁" << op::endl;
+            if (onComplete) {
+                onComplete();
+            }
+            return;
         }
     }
-
-    if (enableFluent&&!bools[boolconfig::nosmoothui])
-    {        // 创建一个shared_ptr来捕获this指针，确保对象在线程运行期间不会被销毁        
+    if (enableFluent&&!bools[boolconfig::nosmoothui]){
+        // 重置标志
+        animationRunning = true;
+        stopRequested = false;
+        
+        // 释放锁，让动画线程可以使用
+        lock.unlock();
+        
+        // 创建一个shared_ptr来捕获this指针，确保对象在线程运行期间不会被销毁        
         std::shared_ptr<Button> self = std::shared_ptr<Button>(this, [](Button*){});  // 自定义删除器，不实际删除对象
 
         // 创建回调函数的副本，以便在线程中使用
@@ -128,9 +162,6 @@ void Button::MoveTo(const Region& region, const bool enableFluent, const float s
         if (onComplete) {
             callback = std::make_shared<std::function<void()>>(onComplete);
         }
-
-        animationRunning = true;
-        stopRequested = false;
 
         // 基于速度的平滑移动逻辑
         std::thread([self=std::move(self), targetRegion=region, speed, callback]{
@@ -146,17 +177,24 @@ void Button::MoveTo(const Region& region, const bool enableFluent, const float s
             // 使用最大的距离变化作为移动距离
             float distance1 = std::sqrt(dx1*dx1 + dy1*dy1);  // 左上角的距离
             float distance2 = std::sqrt(dx2*dx2 + dy2*dy2);  // 右下角的距离
-            float distance = std::max(distance1, distance2);
-            
-            // 如果距离太小，直接设置位置并返回
+            float distance = std::max(distance1, distance2);            // 如果距离太小，直接设置位置并返回
             if (distance < 1.0f) {
-                std::lock_guard<std::mutex> lock(button.animMutex);
-                button.region = targetRegion;
-                button.animationRunning = false;
+                std::unique_lock<std::timed_mutex> animLock(button.animMutex, std::defer_lock);
+                if (animLock.try_lock_for(std::chrono::milliseconds(100))) {
+                    button.region = targetRegion;
+                    button.animationRunning = false;
+                } else {
+                    Log << Level::Warn << "Button::MoveTo - 无法获取锁设置最终位置" << op::endl;
+                    button.animationRunning = false;
+                }
                 
                 // 如果有回调函数，则执行它
                 if (callback && *callback) {
-                    (*callback)();
+                    try {
+                        (*callback)();
+                    } catch (const std::exception& e) {
+                        Log << Level::Error << "Button::MoveTo - 回调函数执行异常: " << e.what() << op::endl;
+                    }
                 }
                 
                 return;
@@ -177,38 +215,64 @@ void Button::MoveTo(const Region& region, const bool enableFluent, const float s
                 float newY = startRegion.gety() + (targetRegion.gety() - startRegion.gety()) * progress;
                 float newYend = startRegion.getyend() + (targetRegion.getyend() - startRegion.getyend()) * progress;
                 newX/=WindowInfo.width;
-                newXend/=WindowInfo.width;
-                newY/=WindowInfo.height;
+                newXend/=WindowInfo.width;                newY/=WindowInfo.height;
                 newYend/=WindowInfo.height;
                 {
-                    std::lock_guard<std::mutex> lock(button.animMutex);
-                    if (!button.stopRequested) {
-                        button.region.setx(newX);
-                        button.region.setxend(newXend);
-                        button.region.sety(newY);
-                        button.region.setyend(newYend);
+                    std::unique_lock<std::timed_mutex> animLock(button.animMutex, std::defer_lock);
+                    if (animLock.try_lock_for(std::chrono::milliseconds(50))) {
+                        if (!button.stopRequested) {
+                            button.region.setx(newX);
+                            button.region.setxend(newXend);
+                            button.region.sety(newY);
+                            button.region.setyend(newYend);
+                        }
+                    } else {
+                        // 如果无法获取锁，记录警告但继续动画
+                        Log << Level::Warn << "Button::MoveTo - 动画步骤锁获取超时" << op::endl;
                     }
                 }
                 
                 std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(delay)));
-            }
-              // 如果没有被请求停止，确保最终位置精确
+            }              // 如果没有被请求停止，确保最终位置精确
             if (!button.stopRequested) {
-                std::lock_guard<std::mutex> lock(button.animMutex);
-                button.region = targetRegion;
+                std::unique_lock<std::timed_mutex> animLock(button.animMutex, std::defer_lock);
+                if (animLock.try_lock_for(std::chrono::milliseconds(100))) {
+                    button.region = targetRegion;
+                } else {
+                    Log << Level::Warn << "Button::MoveTo - 无法获取锁设置最终位置" << op::endl;
+                }
             }
             
             button.animationRunning = false;
-            if(callback&&*callback)(*callback)();
+            if(callback&&*callback) {
+                try {
+                    (*callback)();
+                } catch (const std::exception& e) {
+                    Log << Level::Error << "Button::MoveTo - 回调函数执行异常: " << e.what() << op::endl;
+                }
+            }
         }).detach();
-    }
-    else
-    {
+    } 
+    else {
         // 如果不使用流畅移动，直接设置位置
-        std::lock_guard<std::mutex> lock(animMutex);
+        // 如果之前已经获取了锁，直接使用
+        if (!lock.owns_lock()) {
+            if (!lock.try_lock_for(std::chrono::milliseconds(100))) {
+                Log << Level::Error << "Button::MoveTo - 无法获取锁进行直接移动" << op::endl;
+                if (onComplete) {
+                    onComplete();
+                }
+                return;
+            }
+        }
+        
         this->region = region;
         if (onComplete) {
-            onComplete();
+            try {
+                onComplete();
+            } catch (const std::exception& e) {
+                Log << Level::Error << "Button::MoveTo - 直接移动回调函数执行异常: " << e.what() << op::endl;
+            }
         }
     }
 }
@@ -220,10 +284,9 @@ void Button::SetFontID(FontID id)
 }
 
 void Button::FadeOut(float duration, unsigned char startAlpha, unsigned char endAlpha, std::function<void()> onComplete)
-{
-    // 先停止可能正在进行的淡出动画
+{    // 先停止可能正在进行的淡出动画
     {
-        std::lock_guard<std::mutex> lock(fadeMutex);
+        std::lock_guard<std::timed_mutex> lock(fadeMutex);
         if (fadeAnimationRunning) {
             fadeStopRequested = true;
             // 等待先前的淡出动画线程意识到停止请求
@@ -247,10 +310,9 @@ void Button::FadeOut(float duration, unsigned char startAlpha, unsigned char end
     // 基于时间的淡出动画逻辑
     std::thread([self=std::move(self), duration, startAlpha, endAlpha, callback]{
         auto& button = *self;  // 通过引用访问按钮，简化语法
-        
-        // 如果持续时间太小，直接设置最终alpha值并返回
+          // 如果持续时间太小，直接设置最终alpha值并返回
         if (duration <= 0.0f) {
-            std::lock_guard<std::mutex> lock(button.fadeMutex);
+            std::lock_guard<std::timed_mutex> lock(button.fadeMutex);
             button.currentFadeAlpha = endAlpha;
             button.fadeAnimationRunning = false;
             
@@ -280,9 +342,8 @@ void Button::FadeOut(float duration, unsigned char startAlpha, unsigned char end
             unsigned char newAlpha = static_cast<unsigned char>(
                 startAlpha + alphaDiff * easedProgress
             );
-            
-            {
-                std::lock_guard<std::mutex> lock(button.fadeMutex);
+              {
+                std::lock_guard<std::timed_mutex> lock(button.fadeMutex);
                 if (!button.fadeStopRequested) {
                     button.currentFadeAlpha = newAlpha;
                 }
@@ -293,10 +354,9 @@ void Button::FadeOut(float duration, unsigned char startAlpha, unsigned char end
                 std::this_thread::sleep_for(std::chrono::milliseconds(static_cast<int>(delay)));
             }
         }
-        
-        // 如果没有被请求停止，确保最终alpha值精确
+          // 如果没有被请求停止，确保最终alpha值精确
         if (!button.fadeStopRequested) {
-            std::lock_guard<std::mutex> lock(button.fadeMutex);
+            std::lock_guard<std::timed_mutex> lock(button.fadeMutex);
             button.currentFadeAlpha = endAlpha;
         }
         

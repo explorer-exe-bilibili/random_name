@@ -5,6 +5,7 @@
 #include "core/baseItem/Font.h"
 #include "core/Config.h"
 #include "core/Drawer.h"
+#include <exception>
 
 using namespace screen;
 using namespace core;
@@ -170,20 +171,50 @@ void NameScreen::changeName() {
     default:break;
     }
     buttons[TypeButton]->SetEnable(false);
-    buttons[TypeButton]->SetRegion({0.2,0.25,0.6,-1});
-    nameButton.SetRegion({0,-0.15,1,1.15});
+    buttons[TypeButton]->SetRegion({0.2,0.25,0.6,-1});    nameButton.SetRegion({0,-0.15,1,1.15});
     nameButton.SetName(currentName);
     int nowIndex=currentIndex;
-    nameButton.MoveTo({0.2,0.3,0.6,0.7},true,10,[nowIndex,this]{
-        if(nowIndex!=currentIndex)return;
-        if(Screen::getCurrentScreen()->getID() != ScreenID::Name)return;
-        nameButton.MoveTo({0.3,0.3,0.7,0.7},true,8);
+    if(bools[boolconfig::nosmoothui]){
+        nameButton.SetRegion({0.3,0.3,0.7,0.7});
         if(currentName.type!=NameType::Unknow){
-            buttons[TypeButton]->SetEnable(true);
-            buttons[TypeButton]->MoveTo({0.3,0.25,0.7,-1},true,8);
+            if(buttons[TypeButton]) {
+                buttons[TypeButton]->SetEnable(true);
+                buttons[TypeButton]->MoveTo({0.3,0.25,0.7,-1},true,8);
+            }
         }
-    });
-    std::thread([this]{PaintStars();}).detach();
+    }
+    else{
+        // 使用try-catch保护MoveTo调用
+        try {
+            nameButton.MoveTo({0.2,0.3,0.6,0.7},true,10,[nowIndex,this]{
+                // 检查对象是否仍然有效
+                if(nowIndex!=currentIndex)return;
+                if(Screen::getCurrentScreen()->getID() != ScreenID::Name)return;
+                
+                try {
+                    nameButton.MoveTo({0.3,0.3,0.7,0.7},true,8);
+                    if(currentName.type!=NameType::Unknow){
+                        if(buttons[TypeButton]) {
+                            buttons[TypeButton]->SetEnable(true);
+                            buttons[TypeButton]->MoveTo({0.3,0.25,0.7,-1},true,8);
+                        }
+                    }
+                } catch (const std::exception& e) {
+                    Log << Level::Error << "NameScreen::changeName - 内部动画执行异常: " << e.what() << op::endl;
+                }
+            });
+        } catch (const std::exception& e) {
+            Log << Level::Error << "NameScreen::changeName - 外部动画执行异常: " << e.what() << op::endl;
+        }
+    }
+    // 使用异步方式启动星星绘制，避免阻塞
+    std::thread([this]{
+        try {
+            PaintStars();
+        } catch (const std::exception& e) {
+            Log << Level::Error << "NameScreen::PaintStars - 异常: " << e.what() << op::endl;
+        }
+    }).detach();
     if(currentName.star==3)core::Explorer::getInstance()->playAudio(AudioID::star3);
     else if(currentName.star==4)core::Explorer::getInstance()->playAudio(AudioID::star4);
     else if(currentName.star==5)core::Explorer::getInstance()->playAudio(AudioID::star5);

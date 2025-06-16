@@ -230,7 +230,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     
     j[PAGES].push_back(p);
     p.clear();
-    
+    /*
     // 悬浮窗页
     p[TITLE] = "悬浮窗";
     
@@ -318,7 +318,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
 
     j[PAGES].push_back(p);
     p.clear();
-    
+    */
     // 杂项页
     p[TITLE] = "杂项";
     
@@ -344,7 +344,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p[ITEM].push_back(i);
     i.clear();
     
-    i[NAME] = "字体兼容模式(出现字体错误再开)";
+    i[NAME] = "字体兼容模式";
     i[CONFIG_NAME] = USE_FONT_COMPATIBILITY;
     i[TYPE] = screen::SettingButtonType::Switch;
     i[NUMBER] = 4;
@@ -359,7 +359,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p[ITEM].push_back(i);
     i.clear();
     
-    i[NAME] = "省内存模式(不预加载视频)";
+    i[NAME] = "省内存模式";
     i[TYPE] = screen::SettingButtonType::Switch;
     i[NUMBER] = 6;
     i[CONFIG_NAME] = NO_VIDEO_PRELOAD;

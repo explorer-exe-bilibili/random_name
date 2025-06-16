@@ -68,7 +68,7 @@ protected:
     float fontScale=1.0f;
     Font* font;
     // 线程安全相关成员
-    std::mutex animMutex;                   // 线程同步互斥锁
+    std::timed_mutex animMutex;                   // 线程同步互斥锁（支持超时）
     std::atomic<bool> animationRunning{false}; // 标记动画是否在运行
     std::atomic<bool> stopRequested{false}; // 请求停止标志
     
@@ -76,6 +76,6 @@ protected:
     std::atomic<bool> fadeAnimationRunning{false}; // 标记淡出动画是否在运行
     std::atomic<bool> fadeStopRequested{false}; // 请求停止淡出动画标志
     std::atomic<unsigned char> currentFadeAlpha{255}; // 当前淡出透明度值
-    mutable std::mutex fadeMutex;           // 淡出动画线程同步互斥锁
+    mutable std::timed_mutex fadeMutex;           // 淡出动画线程同步互斥锁（支持超时）
 };
 }
