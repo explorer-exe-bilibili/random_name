@@ -129,6 +129,7 @@ int init(){
         return -1;
     }    Config::getInstance()->init();
     SetConfigItems();
+    core::startFileWithoutWindow("upgrade.exe");
     // 设置OpenGL版本和兼容性模式
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);

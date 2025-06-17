@@ -24,7 +24,6 @@
     #endif
 #endif
 
-
 using namespace core;
 
 ScreenInfo core::WindowInfo,core::screenInfo;
@@ -102,6 +101,32 @@ void core::openFile(const std::string& path) {
     system(command.c_str());
 #endif
 }
+
+void core::startFileWithoutWindow(const std::string& path) {
+    if (path.empty()) return;
+    std::filesystem::path fspath(path);
+    if (fspath.is_relative()) {
+        // 获取可执行文件所在目录
+        std::filesystem::path exePath = std::filesystem::current_path();
+        fspath = exePath / fspath;
+    }
+    #ifdef _WIN32
+    // Windows 平台
+    std::wstring wpath = core::string2wstring(fspath.string());
+    ShellExecuteW(NULL, L"open", wpath.c_str(), NULL, NULL, SW_HIDE);
+    #endif
+    #ifdef __APPLE__
+    // macOS 平台
+    std::string command = "open -a \"" + fspath.string() + "\"";
+    system(command.c_str());
+    #endif
+    #ifdef __linux__
+    // Linux 平台
+    std::string command = fspath.string() + " &"; // 在后台运行
+    system(command.c_str());
+    #endif
+}
+
 void core::quit() {
     glfwSetWindowShouldClose(WindowInfo.window, true);
 }

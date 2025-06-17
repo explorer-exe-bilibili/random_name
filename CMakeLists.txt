@@ -59,7 +59,158 @@ if(NOT USE_SYSTEM_DEPS)
     endif()
 endif()
 # 设置项目名称和版本
-project(random_name VERSION 1.0.0 LANGUAGES CXX)
+project(random_name VERSION 2.0.0 LANGUAGES CXX)
+
+# 定义版本相关变量
+set(PROJECT_VERSION_MAJOR 2)
+set(PROJECT_VERSION_MINOR 0)
+set(PROJECT_VERSION_PATCH 0)
+set(PROJECT_VERSION_BUILD 0)
+set(PROJECT_VERSION_STRING "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}")
+
+# 获取构建信息
+string(TIMESTAMP BUILD_DATE "%Y-%m-%d")
+string(TIMESTAMP BUILD_TIME "%H:%M:%S")
+
+# 获取 Git 信息
+find_package(Git QUIET)
+if(GIT_FOUND)
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} rev-parse --short HEAD
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_COMMIT_HASH
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+    execute_process(
+        COMMAND ${GIT_EXECUTABLE} rev-parse --abbrev-ref HEAD
+        WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}
+        OUTPUT_VARIABLE GIT_BRANCH
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+else()
+    set(GIT_COMMIT_HASH "unknown")
+    set(GIT_BRANCH "unknown")
+endif()
+
+# 平台检测和信息设置
+if(WIN32)
+    set(PLATFORM_NAME "Windows")
+    set(PLATFORM_WINDOWS TRUE)
+    
+    # 获取 Windows 版本
+    execute_process(
+        COMMAND cmd /c "ver"
+        OUTPUT_VARIABLE WINDOWS_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+    if(WINDOWS_VERSION MATCHES "Version ([0-9]+\\.[0-9]+\\.[0-9]+)")
+        set(PLATFORM_VERSION "${CMAKE_MATCH_1}")
+    else()
+        set(PLATFORM_VERSION "Unknown")
+    endif()
+    
+elseif(APPLE)
+    set(PLATFORM_NAME "macOS")
+    set(PLATFORM_MACOS TRUE)
+    
+    # 获取 macOS 版本
+    execute_process(
+        COMMAND sw_vers -productVersion
+        OUTPUT_VARIABLE PLATFORM_VERSION
+        OUTPUT_STRIP_TRAILING_WHITESPACE
+        ERROR_QUIET
+    )
+    if(NOT PLATFORM_VERSION)
+        set(PLATFORM_VERSION "Unknown")
+    endif()
+    
+elseif(UNIX)
+    set(PLATFORM_NAME "Linux")
+    set(PLATFORM_LINUX TRUE)
+    
+    # 获取 Linux 发行版信息
+    if(EXISTS "/etc/os-release")
+        execute_process(
+            COMMAND grep "^PRETTY_NAME=" /etc/os-release
+            COMMAND sed "s/PRETTY_NAME=\"\\(.*\\)\"/\\1/"
+            OUTPUT_VARIABLE PLATFORM_VERSION
+            OUTPUT_STRIP_TRAILING_WHITESPACE
+            ERROR_QUIET
+        )
+    endif()
+    if(NOT PLATFORM_VERSION)
+        set(PLATFORM_VERSION "Unknown Linux")
+    endif()
+else()
+    set(PLATFORM_NAME "Unknown")
+    set(PLATFORM_VERSION "Unknown")
+endif()
+
+# 编译器检测
+if(MSVC)
+    set(COMPILER_NAME "MSVC")
+    set(COMPILER_MSVC TRUE)
+    set(COMPILER_VERSION "${MSVC_VERSION}")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+    set(COMPILER_NAME "GCC")
+    set(COMPILER_GCC TRUE)
+    set(COMPILER_VERSION "${CMAKE_CXX_COMPILER_VERSION}")
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+    set(COMPILER_NAME "Clang")
+    set(COMPILER_CLANG TRUE)
+    set(COMPILER_VERSION "${CMAKE_CXX_COMPILER_VERSION}")
+else()
+    set(COMPILER_NAME "Unknown")
+    set(COMPILER_VERSION "Unknown")
+endif()
+
+# 架构检测
+if(CMAKE_SIZEOF_VOID_P EQUAL 8)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^(aarch64|arm64)")
+        set(ARCHITECTURE "ARM64")
+        set(ARCH_ARM64 TRUE)
+    else()
+        set(ARCHITECTURE "x64")
+        set(ARCH_X64 TRUE)
+    endif()
+else()
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "^arm")
+        set(ARCHITECTURE "ARM")
+        set(ARCH_ARM TRUE)
+    else()
+        set(ARCHITECTURE "x86")
+        set(ARCH_X86 TRUE)
+    endif()
+endif()
+
+# 构建类型检测
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+    set(BUILD_TYPE "Debug")
+    set(BUILD_DEBUG TRUE)
+else()
+    set(BUILD_TYPE "Release")
+    set(BUILD_RELEASE TRUE)
+endif()
+
+# 依赖管理方式检测
+if(USE_SYSTEM_DEPS)
+    set(USE_SYSTEM_DEPS_MACRO TRUE)
+else()
+    set(USE_VCPKG_MACRO TRUE)
+    if(USE_MIXED_LINKING)
+        set(USE_MIXED_LINKING_MACRO TRUE)
+    endif()
+endif()
+
+# 配置版本头文件
+configure_file(
+    "${CMAKE_SOURCE_DIR}/include/version.h.in"
+    "${CMAKE_BINARY_DIR}/generated/version.h"
+    @ONLY
+)
 
 # 指定 C++ 标准
 set(CMAKE_CXX_STANDARD 20)
@@ -73,9 +224,13 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin)
 file(GLOB_RECURSE SOURCES "src/*.cpp" "src/*.c")
 file(GLOB_RECURSE HEADERS "include/*.hpp" "include/*.h")
 
+file(GLOB_RECURSE UPGRADE "upgrade/*.cpp" "upgrade/*.c")
 
-# 创建可执行文件
+# 创建主程序可执行文件
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+
+# 创建自动更新程序
+add_executable(upgrade ${UPGRADE} ${HEADERS})
 
 if(USE_SYSTEM_DEPS)
     message(STATUS "Using system dependencies")
@@ -90,6 +245,44 @@ if(USE_SYSTEM_DEPS)
     find_package(Freetype REQUIRED)
     find_package(OpenGL REQUIRED)
     find_package(glm REQUIRED)
+    find_package(CURL REQUIRED)
+    
+    # 修复 minizip 查找
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(MINIZIP QUIET minizip)
+    
+    if(NOT MINIZIP_FOUND)
+        # 回退到传统查找方式
+        find_library(MINIZIP_LIBRARY 
+            NAMES minizip libminizip
+            PATHS /usr/lib /usr/local/lib /usr/lib/x86_64-linux-gnu /usr/lib/aarch64-linux-gnu
+        )
+        find_path(MINIZIP_INCLUDE_DIR 
+            NAMES minizip/zip.h zip.h
+            PATHS /usr/include /usr/local/include /usr/include/minizip
+        )
+        
+        if(MINIZIP_LIBRARY AND MINIZIP_INCLUDE_DIR)
+            add_library(minizip::minizip UNKNOWN IMPORTED)
+            set_target_properties(minizip::minizip PROPERTIES
+                IMPORTED_LOCATION "${MINIZIP_LIBRARY}"
+                INTERFACE_INCLUDE_DIRECTORIES "${MINIZIP_INCLUDE_DIR}"
+            )
+            message(STATUS "Found minizip: ${MINIZIP_LIBRARY}")
+        else()
+            message(FATAL_ERROR "minizip not found. Please install libminizip-dev or zlib1g-dev")
+        endif()
+    else()
+        # 使用 pkg-config 找到的版本
+        add_library(minizip::minizip INTERFACE IMPORTED)
+        set_target_properties(minizip::minizip PROPERTIES
+            INTERFACE_LINK_LIBRARIES "${MINIZIP_LIBRARIES}"
+            INTERFACE_INCLUDE_DIRECTORIES "${MINIZIP_INCLUDE_DIRS}"
+            INTERFACE_LINK_DIRECTORIES "${MINIZIP_LIBRARY_DIRS}"
+        )
+        message(STATUS "Found minizip via pkg-config: ${MINIZIP_LIBRARIES}")
+    endif()
+
 
     # 特殊处理 GLAD - 适应 GLAD2 的变化
     find_package(glad QUIET)
@@ -191,17 +384,31 @@ if(USE_SYSTEM_DEPS)
         tinyfiledialogs::tinyfiledialogs
     )
     
-    target_include_directories(${PROJECT_NAME} PRIVATE
+    # 设置系统依赖的链接 - upgrade 程序（只需要基本库）
+    target_link_libraries(upgrade PRIVATE
+        nlohmann_json::nlohmann_json
+        CURL::libcurl
+        minizip::minizip  # 修改为统一的目标名称
+    )
+      target_include_directories(${PROJECT_NAME} PRIVATE
         ${FFMPEG_INCLUDE_DIRS}
         ${SDL2_INCLUDE_DIRS}
         ${SDL2_MIXER_INCLUDE_DIRS}
         ${WEBP_INCLUDE_DIRS}
         include
+        ${CMAKE_BINARY_DIR}/generated
         ${FREETYPE_INCLUDE_DIRS}
         ${GLM_INCLUDE_DIRS}
         ${Stb_INCLUDE_DIR}
         ${PORTABLE_FILE_DIALOGS_INCLUDE_DIRS}
     )
+    
+    # upgrade 程序的包含目录
+    target_include_directories(upgrade PRIVATE
+        ${CURL_INCLUDE_DIRS}
+        ${CMAKE_BINARY_DIR}/generated
+    )
+    
     target_link_directories(${PROJECT_NAME} PRIVATE
         ${FFMPEG_LIBRARY_DIRS}
     )
@@ -248,6 +455,8 @@ else()
         find_package(SDL2_mixer CONFIG REQUIRED)
         find_package(Stb REQUIRED)
         find_package(tinyfiledialogs CONFIG REQUIRED)
+        find_package(CURL REQUIRED)
+        find_package(minizip CONFIG REQUIRED)
         
     else()
         # 标准模式：按 triplet 设置链接
@@ -264,6 +473,8 @@ else()
         find_package(SDL2_mixer CONFIG REQUIRED)
         find_package(Stb REQUIRED)
         find_package(tinyfiledialogs CONFIG REQUIRED)
+        find_package(CURL REQUIRED)
+        find_package(minizip CONFIG REQUIRED)
     endif()
 
     # 编译定义
@@ -279,14 +490,16 @@ else()
         ${GLM_INCLUDE_DIRS}
         ${Stb_INCLUDE_DIR}
         ${PORTABLE_FILE_DIALOGS_INCLUDE_DIRS}
+        ${CMAKE_BINARY_DIR}/generated
     )
-
+    target_include_directories(upgrade PRIVATE 
+        ${CMAKE_BINARY_DIR}/generated
+    )
     # 链接目录
     if(FFMPEG_LIBRARY_DIRS)
         target_link_directories(${PROJECT_NAME} PRIVATE ${FFMPEG_LIBRARY_DIRS})
     endif()
-
-    # 链接所有库
+    # 链接所有库 - 主程序
     target_link_libraries(${PROJECT_NAME} PRIVATE 
         glfw
         nlohmann_json::nlohmann_json
@@ -302,18 +515,48 @@ else()
         WebP::webp WebP::webpdecoder WebP::webpdemux
         tinyfiledialogs::tinyfiledialogs
     )
+    
+    # 链接库 - upgrade 程序（只需要基本库）
+    target_link_libraries(upgrade PRIVATE 
+        nlohmann_json::nlohmann_json
+        CURL::libcurl
+        unofficial::minizip::minizip
+    )
 endif()
+
+# 自动递增构建号（可选）
+if(EXISTS "${CMAKE_SOURCE_DIR}/build_number.txt")
+    file(READ "${CMAKE_SOURCE_DIR}/build_number.txt" BUILD_NUMBER)
+    string(STRIP "${BUILD_NUMBER}" BUILD_NUMBER)
+    math(EXPR BUILD_NUMBER "${BUILD_NUMBER} + 1")
+else()
+    set(BUILD_NUMBER 1)
+endif()
+
+file(WRITE "${CMAKE_SOURCE_DIR}/build_number.txt" "${BUILD_NUMBER}")
+set(PROJECT_VERSION_BUILD ${BUILD_NUMBER})
 
 # 平台特定设置
 if(WIN32)
-    # Windows平台特定链接
+    # Windows平台特定链接 - 主程序
     target_link_libraries(${PROJECT_NAME} PRIVATE opengl32)
+    
+    # Windows平台特定链接 - upgrade 程序
+    target_link_libraries(upgrade PRIVATE 
+        kernel32 user32 wininet urlmon shell32
+    )
     
     # 如果是静态链接或混合链接，添加必要的系统库
     if(VCPKG_TARGET_TRIPLET MATCHES "static" OR USE_MIXED_LINKING)
         target_link_libraries(${PROJECT_NAME} PRIVATE
             kernel32 user32 gdi32 winspool shell32 ole32 oleaut32 
             uuid comdlg32 advapi32 secur32 ws2_32 winmm
+        )
+        
+        # upgrade 程序的静态链接库
+        target_link_libraries(upgrade PRIVATE
+            kernel32 user32 gdi32 winspool shell32 ole32 oleaut32 
+            uuid comdlg32 advapi32 secur32 ws2_32 winmm wininet urlmon
         )
     endif()
     
@@ -325,10 +568,13 @@ if(WIN32)
     
     # 设置编译选项
     target_compile_options(${PROJECT_NAME} PRIVATE /utf-8)
+    target_compile_options(upgrade PRIVATE /utf-8)
     
     # 如果是静态链接，设置运行时库
     if(VCPKG_TARGET_TRIPLET MATCHES "static")
         set_property(TARGET ${PROJECT_NAME} PROPERTY 
+            MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
+        set_property(TARGET upgrade PROPERTY 
             MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>")
     endif()
     
@@ -343,7 +589,7 @@ elseif(APPLE)
         ${COREVIDEO_LIBRARY}
     )
 elseif(UNIX)
-    # Linux平台特定链接
+    # Linux平台特定链接 - 主程序
     find_package(X11 REQUIRED)
     if(X11_FOUND)
         target_include_directories(${PROJECT_NAME} PRIVATE ${X11_INCLUDE_DIR})
@@ -401,7 +647,7 @@ if(UNIX AND NOT APPLE)
 endif()
 
 # 设置安装规则
-install(TARGETS ${PROJECT_NAME} DESTINATION bin)
+install(TARGETS ${PROJECT_NAME} upgrade DESTINATION bin)
 
 # 复制必要的资源文件到输出目录
 file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/files DESTINATION ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})

@@ -250,7 +250,7 @@ jobs:
             python3-setuptools \
             libibus-1.0-dev \
             libwayland-dev libxkbcommon-dev libegl1-mesa-dev \
-            libx11-dev libxft-dev libxext-dev
+            libx11-dev libxft-dev libxext-dev libminizip-dev
             
         elif [[ "${{ runner.os }}" == "macOS" ]]; then
           brew install \

@@ -1,0 +1,58 @@
+#ifndef VERSION_H
+#define VERSION_H
+
+// 版本信息
+#define VERSION_MAJOR @PROJECT_VERSION_MAJOR@
+#define VERSION_MINOR @PROJECT_VERSION_MINOR@
+#define VERSION_PATCH @PROJECT_VERSION_PATCH@
+#define VERSION_BUILD @PROJECT_VERSION_BUILD@
+#define VERSION_STRING "@PROJECT_VERSION_STRING@"
+
+// 构建信息
+#define BUILD_DATE "@BUILD_DATE@"
+#define BUILD_TIME "@BUILD_TIME@"
+#define GIT_COMMIT_HASH "@GIT_COMMIT_HASH@"
+#define GIT_BRANCH "@GIT_BRANCH@"
+
+// 平台信息
+#define PLATFORM_NAME "@PLATFORM_NAME@"
+#define PLATFORM_VERSION "@PLATFORM_VERSION@"
+#define COMPILER_NAME "@COMPILER_NAME@"
+#define COMPILER_VERSION "@COMPILER_VERSION@"
+#define ARCHITECTURE "@ARCHITECTURE@"
+#define BUILD_TYPE "@BUILD_TYPE@"
+
+// 平台特定宏
+#cmakedefine PLATFORM_WINDOWS
+#cmakedefine PLATFORM_LINUX
+#cmakedefine PLATFORM_MACOS
+#cmakedefine PLATFORM_WSL
+
+// 编译器特定宏
+#cmakedefine COMPILER_MSVC
+#cmakedefine COMPILER_GCC
+#cmakedefine COMPILER_CLANG
+
+// 架构特定宏
+#cmakedefine ARCH_X64
+#cmakedefine ARCH_X86
+#cmakedefine ARCH_ARM64
+#cmakedefine ARCH_ARM
+
+// 构建类型宏
+#cmakedefine BUILD_DEBUG
+#cmakedefine BUILD_RELEASE
+
+// 依赖管理宏
+#cmakedefine USE_VCPKG
+#cmakedefine USE_SYSTEM_DEPS
+#cmakedefine USE_MIXED_LINKING
+
+// 版本比较宏
+#define VERSION_NUMBER (VERSION_MAJOR * 10000 + VERSION_MINOR * 100 + VERSION_PATCH)
+
+// 版本信息字符串
+#define VERSION_FULL_STRING VERSION_STRING " (Built on " BUILD_DATE " " BUILD_TIME ")"
+#define VERSION_GIT_STRING VERSION_STRING " (" GIT_BRANCH "@" GIT_COMMIT_HASH ")"
+
+#endif // VERSION_H

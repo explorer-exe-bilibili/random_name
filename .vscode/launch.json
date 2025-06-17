@@ -7,6 +7,40 @@
             "cmakeDebugType": "external",
             "pipeName": "\\\\.\\pipe\\vcpkg_ext_portfile_dbg",
             "preLaunchTask": "Debug vcpkg commands"
+        },        {
+            "name": "Debug upgrade.exe",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/bin/Debug/upgrade.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "integratedTerminal",
+            "preLaunchTask": "build-upgrade"
+        },        {
+            "name": "Debug upgrade.exe (Release)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/bin/Release/upgrade.exe",
+            "args": [],
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "integratedTerminal",
+            "preLaunchTask": "build-upgrade-release"
+        },
+        {
+            "name": "Debug upgrade.exe (with breakpoint)",
+            "type": "cppvsdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/bin/Debug/upgrade.exe",
+            "args": [],
+            "stopAtEntry": true,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "console": "integratedTerminal",
+            "preLaunchTask": "build-upgrade"
         }
     ]
 }

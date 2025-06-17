@@ -17,6 +17,8 @@
     "sdl2",
     "stb",
     "utfcpp",
+    "curl",
+    "minizip",
     {
       "name": "ffmpeg",
       "features": [
