@@ -332,17 +332,17 @@ jobs:
     - name: Create Archive (Debug Version)
       shell: bash
       run: |
-        mkdir -p ${{ github.workspace }}/installer_files
+        mkdir -p "${{ github.workspace }}/installer_files"
 
-        if( [[ "${{ runner.os }}" == "Windows" ]] ); then
-          cp -r build/bin/*.exe ${{ github.workspace }}/installer_files/
-          cp -r build/bin/*.dll ${{ github.workspace }}/installer_files/ || true
-          cp -r build/bin/files ${{ github.workspace }}/installer_files/
+        if [[ "${{ runner.os }}" == "Windows" ]]; then
+          cp build/bin/*.exe "${{ github.workspace }}/installer_files/"
+          cp build/bin/*.dll "${{ github.workspace }}/installer_files/" || true
+          cp -r build/bin/files "${{ github.workspace }}/installer_files/" || true
         else
-          cp -r build/bin/* ${{ github.workspace }}/installer_files/
+          cp -r build/bin/* "${{ github.workspace }}/installer_files/"
         fi
 
-        cd ${{ github.workspace }}/installer_files
+        cd "${{ github.workspace }}/installer_files"
         ls -la
         
         tar -czf ~/random_name_${{ matrix.arch }}_${{ runner.os }}.tar.gz *
@@ -351,14 +351,17 @@ jobs:
       if: matrix.os == 'windows-latest' || matrix.os == 'windows-11-arm'
       env: 
         GITHUB_ACTIONS: true
-        SOURCE_DIR: ${{ github.workspace }}\installer_files
-        OUTPUT_DIR: ${{ github.workspace }}\installer\Output
+        SOURCE_DIR: ${{ github.workspace }}/installer_files
+        OUTPUT_DIR: ${{ github.workspace }}/installer/Output
         ARCH: ${{ matrix.arch }}
-        ICON_PATH: ${{ github.workspace }}\OIP-C.ico
+        ICON_PATH: ${{ github.workspace }}/OIP-C.ico
       shell: pwsh
       run: |
-        mkdir -p ${{ github.workspace }}\installer\Output || true
-        iscc installer_action\common.iss
+        mkdir -p "${{ github.workspace }}/installer/Output" -ErrorAction SilentlyContinue
+        Write-Host "SOURCE_DIR: $env:SOURCE_DIR"
+        Write-Host "Checking if installer_files exists:"
+        Get-ChildItem "${{ github.workspace }}/installer_files" | Format-Table -AutoSize
+        iscc installer_action/common.iss
       continue-on-error: true
 
     - name: Upload Artifacts
@@ -378,9 +381,9 @@ jobs:
 
     - name: prepare_release
       run: |
-       cp ~/random_name_${{ matrix.arch }}_${{ runner.os }}.tar.gz ${{github.workspace}}/random_name_${{ matrix.arch }}_${{ runner.os }}.tar.gz || true
-       mkdir -p ${{github.workspace}}/installer_program 
-       cp ${{ github.workspace }}/installer/Output/*.exe ${{github.workspace}}/installer_program || true
+       cp ~/random_name_${{ matrix.arch }}_${{ runner.os }}.tar.gz "${{ github.workspace }}/random_name_${{ matrix.arch }}_${{ runner.os }}.tar.gz" || true
+       mkdir -p "${{ github.workspace }}/installer_program" 
+       cp "${{ github.workspace }}/installer/Output/"*.exe "${{ github.workspace }}/installer_program/" || true
 
     - name: Create Release
       id: create_release

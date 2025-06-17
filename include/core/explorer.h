@@ -87,7 +87,18 @@ enum class AudioID{
     starfull,
     Unknown
 };
-inline constexpr const char* AudioIDToString(AudioID id);
+
+inline constexpr const char* AudioIDToString(AudioID id) {
+    switch (id) {
+        case AudioID::bgm: return "bgm";
+        case AudioID::click: return "click";
+        case AudioID::star3: return "star3";
+        case AudioID::star4: return "star4";
+        case AudioID::star5: return "star5";
+        case AudioID::starfull: return "starfull";
+        default: return "Unknown";
+    }
+}
 
 class Explorer {
     std::shared_ptr<GLFWwindow> window;

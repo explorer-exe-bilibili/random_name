@@ -564,18 +564,6 @@ constexpr BitmapID core::StringToBitmapID(std::string_view str) {
     return BitmapID::Unknown;
 }
 
-inline constexpr const char* core::AudioIDToString(AudioID id) {
-    switch (id) {
-        case AudioID::bgm: return "bgm";
-        case AudioID::click: return "click";
-        case AudioID::star3: return "star3";
-        case AudioID::star4: return "star4";
-        case AudioID::star5: return "star5";
-        case AudioID::starfull: return "starfull";
-        default: return "Unknown";
-    }
-}
-
 // ================= 错误恢复相关方法实现 =================
 
 void Explorer::cleanupVideoResources()
