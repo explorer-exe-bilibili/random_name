@@ -64,7 +64,9 @@ public:
     // 获取配置值
     std::string get(const std::string& name, const std::string& defaultValue = "");
     std::string getPath(const std::string& name, const std::string& defaultValue = "");
-    long getInt(const std::string& name, long defaultValue = 0);
+    int getInt(const std::string& name, int defaultValue = 0);
+    unsigned int getUInt(const std::string& name, unsigned int defaultValue = 0);
+    long long getLong(const std::string& name, long long defaultValue = 0);
     double getDouble(const std::string& name, double defaultValue = 0.0);
     bool getBool(const std::string& name, bool defaultValue = false);
     

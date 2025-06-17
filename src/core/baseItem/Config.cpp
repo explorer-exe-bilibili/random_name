@@ -173,16 +173,30 @@ std::string Config::getPath(const std::string& name, const std::string& defaultV
     }
 }
 
-long Config::getInt(const std::string& name, long defaultValue) {
+int Config::getInt(const std::string& name, int defaultValue) {
     std::string value = get(name, "");
     if (value.empty()) {
         return defaultValue;
     }
     
     try {
-        return std::stol(value);
+        return std::stoi(value);
     } catch (const std::exception& e) {
         std::cerr << "Error converting value to int: " << e.what() << std::endl;
+        return defaultValue;
+    }
+}
+
+unsigned int Config::getUInt(const std::string& name, unsigned int defaultValue) {
+    std::string value = get(name, "");
+    if (value.empty()) {
+        return defaultValue;
+    }
+    
+    try {
+        return static_cast<unsigned int>(std::stoul(value));
+    } catch (const std::exception& e) {
+        std::cerr << "Error converting value to unsigned int: " << e.what() << std::endl;
         return defaultValue;
     }
 }

@@ -144,12 +144,12 @@ void SyncConfig() {
             core::Explorer::getInstance()->playAudio(core::AudioID::bgm, -1);
     }
     screen::Screen::setUseVideoBackground(bools[boolconfig::use_video_background]);
-    screen::NameButton::setColor(core::Config::getInstance()->getInt(NAME_COLOR, core::Color(200,200,200,255)));
-    screen::NameButton::set6Color(core::Config::getInstance()->getInt(NAME_COLOR_6_STAR, core::Color(200,200,200,255)));
-    screen::NameScreen::setSmallNameColor(core::Config::getInstance()->getInt(TEXT_COLOR, core::Color(250,250,250,255)));
-    core::Explorer::getInstance()->getAudio()->setMusicVolume(core::Config::getInstance()->getInt(VOLUME, 100));
-    core::Explorer::getInstance()->getAudio()->setSoundVolume(core::AudioIDToString(core::AudioID::click),core::Config::getInstance()->getInt(VOLUME, 100));
-    core::Explorer::getInstance()->getAudio()->setSoundVolume(core::AudioIDToString(core::AudioID::enter),core::Config::getInstance()->getInt(VOLUME, 100));
+    screen::NameButton::setColor(core::Config::getInstance()->getUInt(NAME_COLOR, core::Color(200,200,200,255)));
+    screen::NameButton::set6Color(core::Config::getInstance()->getUInt(NAME_COLOR_6_STAR, core::Color(200,200,200,255)));
+    screen::NameScreen::setSmallNameColor(core::Config::getInstance()->getUInt(TEXT_COLOR, core::Color(250,250,250,255)));
+    core::Explorer::getInstance()->getAudio()->setMusicVolume(core::Config::getInstance()->getUInt(VOLUME, 100));
+    core::Explorer::getInstance()->getAudio()->setSoundVolume(core::AudioIDToString(core::AudioID::click),core::Config::getInstance()->getUInt(VOLUME, 100));
+    core::Explorer::getInstance()->getAudio()->setSoundVolume(core::AudioIDToString(core::AudioID::enter),core::Config::getInstance()->getUInt(VOLUME, 100));
 }
 
 void SetConfigItems(){

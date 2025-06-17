@@ -610,7 +610,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
         else if(item.type==SettingButtonType::ColorSelect){
             button->SetEnableBitmap(false);
             button->SetEnableFill(true);
-            button->SetFillColor((unsigned int)Config::getInstance()->getInt(item.configName, Color(0, 0, 0, 255)));
+            button->SetFillColor(Config::getInstance()->getUInt(item.configName, Color(0, 0, 0, 255)));
             button->SetText("选择颜色");
             button->SetClickFunc([this, configName = item.configName]{
                 // 安全地访问configName
@@ -624,7 +624,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
                     Color color = selectColor();
                     Config::getInstance()->set(configName,color);
                     Config::getInstance()->saveToFile();
-                    button->SetFillColor((unsigned int)Config::getInstance()->getInt(configName));
+                    button->SetFillColor(Config::getInstance()->getUInt(configName));
                     checkActions();
                 }
                 catch (const std::exception& e) {
@@ -872,7 +872,7 @@ bool SettingButton::Click(core::Point point,int page) {
 }
 
 core::Color SettingButton::selectColor(){
-    Color currentColor = Config::getInstance()->getInt(item.configName);
+    Color currentColor = Config::getInstance()->getUInt(item.configName);
 
     // 将当前颜色转换为十六进制字符串表示
     char hexColor[8];
