@@ -65,6 +65,7 @@ Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
 
 [Files]
+Source: "{#MyAppSourceDir}\files"; DestDir: "{app}\files"; Flags: ignoreversion
 Source: "{#MyAppSourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion
 
 [Registry]
