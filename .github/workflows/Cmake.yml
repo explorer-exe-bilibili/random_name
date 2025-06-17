@@ -376,7 +376,7 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: random_name_${{ matrix.arch }}_${{ runner.os }}_installer
-        path: ~/installer/Output/*.exe
+        path: ${{ github.workspace }}/installer/Output/*.exe
         retention-days: 30
 
     - name: prepare_release
