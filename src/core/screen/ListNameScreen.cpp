@@ -80,7 +80,7 @@ void ListNameScreen::enter(int) {
         for(auto& button : m_buttons) {
             if(button) {
                 Region region = {(index+1) * 0.083f, 0.1f, (index+2) * 0.083f, 0.9f};
-                button->MoveTo(region, true, 50.0f);
+                button->MoveTo(region, true, 30.0f);
                 Log<<"Moving button "<<index<<" region: "<<region<<op::endl;
             }
             std::this_thread::sleep_for(std::chrono::milliseconds(100));

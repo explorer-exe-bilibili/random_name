@@ -179,7 +179,7 @@ void NameScreen::changeName() {
         if(currentName.type!=NameType::Unknow){
             if(buttons[TypeButton]) {
                 buttons[TypeButton]->SetEnable(true);
-                buttons[TypeButton]->MoveTo({0.3,0.25,0.7,-1},true,8);
+                buttons[TypeButton]->MoveTo({0.3,0.25,0.7,-1},true,5);
             }
         }
     }
@@ -192,11 +192,11 @@ void NameScreen::changeName() {
                 if(Screen::getCurrentScreen()->getID() != ScreenID::Name)return;
                 
                 try {
-                    nameButton.MoveTo({0.3,0.3,0.7,0.7},true,8);
+                    nameButton.MoveTo({0.3,0.3,0.7,0.7},true,5);
                     if(currentName.type!=NameType::Unknow){
                         if(buttons[TypeButton]) {
                             buttons[TypeButton]->SetEnable(true);
-                            buttons[TypeButton]->MoveTo({0.3,0.25,0.7,-1},true,8);
+                            buttons[TypeButton]->MoveTo({0.3,0.25,0.7,-1},true,5);
                         }
                     }
                 } catch (const std::exception& e) {
@@ -233,7 +233,7 @@ void NameButton::Draw(unsigned char alpha) {
             Drawer::getInstance()->DrawSquare(region,Color(255,0,255,255),false);
         }
         if(starCount<6)
-            font->RenderCharFitRegion(c, regions[i].getx(), regions[i].gety(), regions[i].getxend(), regions[i].getyend(), fontScale, color);
+            font->RenderCharFitRegion(c, regions[i].getx(), regions[i].gety(), regions[i].getxend(), regions[i].getyend(), color);
         else
             font->RenderCharFitRegion(c, regions[i].getx(), regions[i].gety()
             ,regions[i].getxend(), regions[i].getyend(), star6Color);
