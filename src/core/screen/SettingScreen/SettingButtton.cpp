@@ -14,6 +14,7 @@
 #include <shellapi.h>
 #include <tlhelp32.h>
 #elif defined(__APPLE__)
+#undef DEBUG
 #include <ApplicationServices/ApplicationServices.h>
 #include <unistd.h>
 #elif defined(__linux__)
@@ -572,9 +573,6 @@ SettingButton::SettingButton(sItem item_, int number, int page)
             // 设置编辑区域（使用按钮区域的完全相同尺寸）
             editingTextRegion = ButtonRegion;
             
-            // 记录软键盘支持状态
-            Log << Level::Info << "Virtual keyboard support: " << GetPlatformKeyboardInfo() 
-                << " (Supported: " << (IsVirtualKeyboardSupported() ? "Yes" : "No") << ")" << op::endl;
             button->SetClickFunc([this, configName = item.configName]{
                 try {
                     if (configName.empty()) {
@@ -847,7 +845,7 @@ void SettingButton::Draw(int currentPage, unsigned char alpha)const {
     }
 }
 
-bool SettingButton::Click(Point point,int page) {
+bool SettingButton::Click(core::Point point,int page) {
     if(page!=this->page)return false;
     
     // 如果正在编辑文本框
@@ -878,8 +876,8 @@ core::Color SettingButton::selectColor(){
 
     // 将当前颜色转换为十六进制字符串表示
     char hexColor[8];
-    sprintf(hexColor, "#%02x%02x%02x", currentColor.r, currentColor.g, currentColor.b);
-    
+    snprintf(hexColor, sizeof(hexColor), "#%02x%02x%02x", currentColor.r, currentColor.g, currentColor.b);
+
     // 创建用于接收结果的RGB数组
     unsigned char resultRGB[3] = {0, 0, 0};
     std::string title="选择"+item.name;

@@ -233,7 +233,7 @@ void NameButton::Draw(unsigned char alpha) {
             Drawer::getInstance()->DrawSquare(region,Color(255,0,255,255),false);
         }
         if(starCount<6)
-            font->RenderChar(c, regions[i].getx(), regions[i].gety(), fontScale, color);
+            font->RenderCharFitRegion(c, regions[i].getx(), regions[i].gety(), regions[i].getxend(), regions[i].getyend(), fontScale, color);
         else
             font->RenderCharFitRegion(c, regions[i].getx(), regions[i].gety()
             ,regions[i].getxend(), regions[i].getyend(), star6Color);

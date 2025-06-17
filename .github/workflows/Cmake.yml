@@ -351,13 +351,13 @@ jobs:
       if: matrix.os == 'windows-latest' || matrix.os == 'windows-11-arm'
       env: 
         GITHUB_ACTIONS: true
-        SOURCE_DIR: ${{ github.workspace }}/installer_files
-        OUTPUT_DIR: ${{ github.workspace }}/installer/Output
+        SOURCE_DIR: ${{ github.workspace }}\installer_files
+        OUTPUT_DIR: ${{ github.workspace }}\installer\Output
         ARCH: ${{ matrix.arch }}
-        ICON_PATH: ${{ github.workspace }}/OIP-C.ico
+        ICON_PATH: ${{ github.workspace }}\OIP-C.ico
       shell: pwsh
       run: |
-        mkdir -p ${{ github.workspace }}/installer/Output || true
+        mkdir -p ${{ github.workspace }}\installer\Output || true
         iscc installer_action\common.iss
       continue-on-error: true
 

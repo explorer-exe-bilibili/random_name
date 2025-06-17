@@ -564,7 +564,7 @@ constexpr BitmapID core::StringToBitmapID(std::string_view str) {
     return BitmapID::Unknown;
 }
 
-constexpr const char* core::AudioIDToString(AudioID id) {
+inline constexpr const char* core::AudioIDToString(AudioID id) {
     switch (id) {
         case AudioID::bgm: return "bgm";
         case AudioID::click: return "click";

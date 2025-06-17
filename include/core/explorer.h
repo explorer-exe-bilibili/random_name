@@ -87,7 +87,7 @@ enum class AudioID{
     starfull,
     Unknown
 };
-constexpr const char* AudioIDToString(AudioID id);
+inline constexpr const char* AudioIDToString(AudioID id);
 
 class Explorer {
     std::shared_ptr<GLFWwindow> window;
