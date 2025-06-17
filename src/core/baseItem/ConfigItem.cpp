@@ -65,20 +65,59 @@ void fullscreen(GLFWwindow* window){
     SetWindowLong(hwnd, GWL_STYLE, GetWindowLong(hwnd, GWL_STYLE) | WS_POPUP);
     ShowWindow(hwnd, SW_MAXIMIZE);
 #endif
-    glfwSetWindowMonitor(window, primary, 0, 0, core::screenInfo.width, core::screenInfo.height, GLFW_DONT_CARE);
-    // 刷新窗口
+    // 设置窗口为无边框
+    glfwSetWindowAttrib(window, GLFW_DECORATED, GLFW_FALSE);
+    
+    // 设置窗口位置和大小为整个屏幕
+    glfwSetWindowPos(window, 0, 0);
+    glfwSetWindowSize(window, core::screenInfo.width, core::screenInfo.height);
+    
+    glViewport(0, 0, core::screenInfo.width, core::screenInfo.height);
     glfwSwapBuffers(window);
     Log << Level::Info << "Switched to fullscreen mode: " << core::screenInfo.width << "x" << core::screenInfo.height << "@" << GLFW_DONT_CARE << "Hz" << op::endl;
 }
 
+// 退出无边框全屏模式，切换到普通窗口模式
 void defullscreen(GLFWwindow* window){
-    if(!window) return;
-    core::WindowInfo.width = core::Config::getInstance()->getInt(WINDOW_WIDTH, core::screenInfo.width / 2);
-    core::WindowInfo.height = core::Config::getInstance()->getInt(WINDOW_HEIGHT, core::screenInfo.height / 2);
-    int x = core::Config::getInstance()->getInt(WINDOW_X, 0);
-    int y = core::Config::getInstance()->getInt(WINDOW_Y, 0);
-    // 恢复窗口到原来的大小和位置
-    glfwSetWindowMonitor(window, nullptr, x, y, core::WindowInfo.width, core::WindowInfo.height, GLFW_DONT_CARE);
+    if (!window) {
+        Log << Level::Error << "窗口指针为空，无法退出全屏" << op::endl;
+        return;
+    }
+    
+    // 检查是否处于无边框状态
+    if (glfwGetWindowAttrib(window, GLFW_DECORATED)) {
+        Log << Level::Warn << "窗口已经是普通窗口模式" << op::endl;
+        return;
+    }
+    
+    // 恢复窗口边框
+    glfwSetWindowAttrib(window, GLFW_DECORATED, GLFW_TRUE);
+    
+    // 取消置顶
+    glfwSetWindowAttrib(window, GLFW_FLOATING, GLFW_FALSE);
+    
+    // 从配置中获取窗口参数
+    core::Config* config = core::Config::getInstance();
+    int windowWidth = config->getInt(WINDOW_WIDTH, 800);
+    int windowHeight = config->getInt(WINDOW_HEIGHT, 600);
+    int windowX = config->getInt(WINDOW_X, 100);
+    int windowY = config->getInt(WINDOW_Y, 100);
+    
+    // 恢复窗口位置和大小
+    glfwSetWindowPos(window, windowX, windowY);
+    glfwSetWindowSize(window, windowWidth, windowHeight);
+    
+    // 更新窗口信息
+    int width, height;
+    glfwGetFramebufferSize(window, &width, &height);
+    core::WindowInfo.width = width;
+    core::WindowInfo.height = height;
+    core::WindowInfo.aspectRatio = (float)width / (float)height;
+    
+    // 更新视口
+    glViewport(0, 0, width, height);
+    
+    Log << Level::Info << "切换到普通窗口模式 (" << windowWidth << "x" << windowHeight << ")" << op::endl;
 }
 
 // 将bools映射的值同步到Config
@@ -131,7 +170,7 @@ void SetConfigItems(){
     config->setifno(POOL_COUNT, 4);
     config->setifno(MODE, 1);
     config->setifno(SPECIAL, 0);
-    config->setifno(EXCHANGE_SPEED, 100);
+    config->setifno(EXCHANGE_SPEED, 50);
     config->setifno(NAMES1, "files/names/1.txt");
     config->setifno(NAMES2, "files/names/2.txt");
     config->setifno(NAMES3, "files/names/3.txt");
@@ -152,8 +191,8 @@ void SetConfigItems(){
     config->setifno(NOSMOOTHUI,0);
 
     config->setifno(FLOATWINDOW,true);
-    config->setifno(FLOAT_WINDOW_WIDTH, screenHeight/10);
-    config->setifno(FLOAT_WINDOW_HEIGHT, screenHeight/10);
+    config->setifno(FLOAT_WINDOW_WIDTH, screenWidth*0.42);
+    config->setifno(FLOAT_WINDOW_HEIGHT, screenHeight*0.56);
     config->setifno(FLOAT_WINDOW_X, screenHeight*0.9);
     config->setifno(FLOAT_WINDOW_Y, screenWidth*0.9);
     config->setifno(FLOAT_WINDOW_IMG, "files/imgs/floatWindow.webp");
@@ -162,8 +201,8 @@ void SetConfigItems(){
 
     config->setifno(WINDOW_WIDTH, screenWidth/2);
     config->setifno(WINDOW_HEIGHT, screenHeight/2);
-    config->setifno(WINDOW_X,0);
-    config->setifno(WINDOW_Y,0);
+    config->setifno(WINDOW_X,100);
+    config->setifno(WINDOW_Y,100);
     config->setifno(VERTICAL_SYNC, 1);
     config->setifno(WINDOW_TITLE, "祈愿");
     config->setifno(USE_FONT_COMPATIBILITY, 0);

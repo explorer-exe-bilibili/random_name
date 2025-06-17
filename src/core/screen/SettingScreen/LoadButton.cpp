@@ -355,7 +355,6 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i[TYPE] = screen::SettingButtonType::Switch;
     i[NUMBER] = 5;
     i[CONFIG_NAME] = DEBUG;
-    i[ACTIONS] = screen::SettingButtonAction::Restart;
     p[ITEM].push_back(i);
     i.clear();
     
@@ -369,7 +368,6 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i[NAME] = "图片资源目录";
     i[CONFIG_NAME] = IMGS_PATH;
     i[TYPE] = screen::SettingButtonType::PathSelect;
-    i[ACTIONS] = screen::SettingButtonAction::Restart;
     i[NUMBER] = 7;
     p[ITEM].push_back(i);
     i.clear();

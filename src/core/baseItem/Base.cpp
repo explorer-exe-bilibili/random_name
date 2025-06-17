@@ -6,6 +6,7 @@
 #include <vector>
 #include <string>
 #include <cstdlib>
+#include <filesystem>
 
 #ifdef _WIN32
     #include <windows.h>
@@ -77,6 +78,30 @@ size_t core::utf8_length(const std::string& str) {
     return length;
 }
 
+void core::openFile(const std::string& path) {
+    if (path.empty()) return;
+    std::filesystem::path fspath(path);
+    if (fspath.is_relative()) {
+        // 获取可执行文件所在目录
+        std::filesystem::path exePath = std::filesystem::current_path();
+        fspath = exePath / fspath;
+    }
+    // 在 tinyfiledialogs 中没有直接的打开文件功能
+    // 使用平台特定的命令来打开文件
+#ifdef _WIN32
+    // Windows 平台
+    std::string command = "start \"\" \"" + fspath.string() + "\"";
+    system(command.c_str());
+#elif defined(__APPLE__)
+    // macOS 平台
+    std::string command = "open \"" + fspath.string() + "\"";
+    system(command.c_str());
+#else
+    // Linux 平台
+    std::string command = "xdg-open \"" + fspath.string() + "\"";
+    system(command.c_str());
+#endif
+}
 void core::quit() {
     glfwSetWindowShouldClose(WindowInfo.window, true);
 }

@@ -16,6 +16,7 @@ void SettingScreen::init() {
     std::shared_ptr<Button> next=std::make_shared<Button>(Button());
     std::shared_ptr<Button> last=std::make_shared<Button>(Button());
     std::shared_ptr<Button> back=std::make_shared<Button>(Button());
+    std::shared_ptr<Button> openRAWFile=std::make_shared<Button>(Button());
     next->SetFontID(FontID::Icon);
     next->SetRegion({0.94,0.905,0.97,0.935});
     next->SetColor(Color(0xFFB266));
@@ -41,9 +42,20 @@ void SettingScreen::init() {
     back->SetEnableBitmap(true);
     back->SetEnableFill(false);
     back->SetText("返回");
+    openRAWFile->SetFontID(FontID::Default);
+    openRAWFile->SetBitmap(BitmapID::MainScreenButton);
+    openRAWFile->SetClickFunc([]{ openFile("files/config.json"); });
+    openRAWFile->SetColor(Color(0,0,0,255));
+    openRAWFile->SetRegion({0.80, 0.905, 0.885, 0.943});
+    openRAWFile->SetText("打开配置文件");
+    openRAWFile->SetEnableText(true);
+    openRAWFile->SetEnableBitmap(true);
+    openRAWFile->SetEnableFill(false);
+    openRAWFile->SetFontScale(0.25);
     buttons.push_back(next);
     buttons.push_back(last);
     buttons.push_back(back);
+    buttons.push_back(openRAWFile);
 }
 
 void SettingScreen::Draw() {

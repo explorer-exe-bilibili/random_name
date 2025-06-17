@@ -127,6 +127,7 @@ namespace core
     std::string wstring2string(const std::wstring& wstr);
     std::wstring string2wstring(const std::string& str);
     size_t utf8_length(const std::string& str);
+    void openFile(const std::string& path);
     void quit();
     void restart();
 }
