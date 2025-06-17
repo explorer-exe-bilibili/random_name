@@ -65,8 +65,8 @@ Name: "ukrainian"; MessagesFile: "compiler:Languages\Ukrainian.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}";
 
 [Files]
-Source: "{#MyAppSourceDir}\files*"; DestDir: "{app}\files"; Flags: ignoreversion
 Source: "{#MyAppSourceDir}\*"; DestDir: "{app}"; Flags: ignoreversion
+Source: "{#MyAppSourceDir}\files\*"; DestDir: "{app}\files"; Flags: ignoreversion
 
 [Registry]
 Root: HKA; Subkey: "Software\Classes\{#MyAppAssocExt}\OpenWithProgids"; ValueType: string; ValueName: "{#MyAppAssocKey}"; ValueData: ""; Flags: uninsdeletevalue
