@@ -212,6 +212,35 @@ configure_file(
     @ONLY
 )
 
+# Windows资源文件
+if(WIN32)
+    # 生成动态资源文件
+    configure_file(
+        "${CMAKE_SOURCE_DIR}/app.rc.in"
+        "${CMAKE_BINARY_DIR}/generated/app.rc"
+        @ONLY
+    )
+    configure_file(
+        "${CMAKE_SOURCE_DIR}/upgrade.rc.in"
+        "${CMAKE_BINARY_DIR}/generated/upgrade.rc"
+        @ONLY
+    )
+    
+    # 确保图标文件存在
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/random.ico")
+        message(WARNING "Icon file random.ico not found in project root")
+    endif()
+    if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/upgrade.ico")
+        message(WARNING "Icon file upgrade.ico not found in project root")
+    endif()
+
+    set(RESOURCE_FILES "${CMAKE_BINARY_DIR}/generated/app.rc")
+    set(UPGRADE_RESOURCE_FILES "${CMAKE_BINARY_DIR}/generated/upgrade.rc")
+else()
+    set(RESOURCE_FILES "")
+    set(UPGRADE_RESOURCE_FILES "")
+endif()
+
 # 指定 C++ 标准
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -230,7 +259,7 @@ file(GLOB_RECURSE UPGRADE "upgrade/*.cpp" "upgrade/*.c")
 add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
 
 # 创建自动更新程序
-add_executable(upgrade ${UPGRADE} ${HEADERS})
+add_executable(upgrade ${UPGRADE})
 
 if(USE_SYSTEM_DEPS)
     message(STATUS "Using system dependencies")
@@ -545,7 +574,35 @@ if(WIN32)
     target_link_libraries(upgrade PRIVATE 
         kernel32 user32 wininet urlmon shell32
     )
+    # 根据构建类型设置子系统
+    target_link_options(${PROJECT_NAME} PRIVATE
+        $<$<CONFIG:Release>:/SUBSYSTEM:WINDOWS>
+        $<$<CONFIG:Release>:/ENTRY:mainCRTStartup>
+        $<$<CONFIG:Debug>:/SUBSYSTEM:CONSOLE>
+    )
+    # upgrade程序也应用相同的规则
+    target_link_options(upgrade PRIVATE
+        $<$<CONFIG:Release>:/SUBSYSTEM:WINDOWS>
+        $<$<CONFIG:Release>:/ENTRY:mainCRTStartup>
+        $<$<CONFIG:Debug>:/SUBSYSTEM:CONSOLE>
+    )
     
+    # 复制random图标文件到输出目录
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_CURRENT_SOURCE_DIR}/random.ico"
+            "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/random.ico"
+        COMMENT "Copying icon file"
+    )
+
+    # 复制upgrade图标文件到输出目录
+    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different
+            "${CMAKE_CURRENT_SOURCE_DIR}/upgrade.ico"
+            "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/$<CONFIG>/upgrade.ico"
+        COMMENT "Copying icon file"
+    )
+
     # 如果是静态链接或混合链接，添加必要的系统库
     if(VCPKG_TARGET_TRIPLET MATCHES "static" OR USE_MIXED_LINKING)
         target_link_libraries(${PROJECT_NAME} PRIVATE
@@ -559,13 +616,7 @@ if(WIN32)
             uuid comdlg32 advapi32 secur32 ws2_32 winmm wininet urlmon
         )
     endif()
-    
-    # 添加Windows资源文件（如图标）
-    if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/OIP-C.ico")
-        configure_file("${CMAKE_CURRENT_SOURCE_DIR}/OIP-C.ico" 
-                       "${CMAKE_BINARY_DIR}/bin/OIP-C.ico" COPYONLY)
-    endif()
-    
+
     # 设置编译选项
     target_compile_options(${PROJECT_NAME} PRIVATE /utf-8)
     target_compile_options(upgrade PRIVATE /utf-8)

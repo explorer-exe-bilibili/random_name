@@ -264,6 +264,10 @@ jobs:
         elif [[ "${{ runner.os }}" == "Windows" ]]; then
           # Windows 通常不需要额外安装，但可以安装 Ninja 作为备选
           choco install ninja -y || true
+          # 确保 7zip 可用
+          choco install 7zip -y
+          # 添加到 PATH
+          echo "C:\Program Files\7-Zip" >> $GITHUB_PATH
         fi
     - name: Download ChineseSimplified.isl
       if: matrix.os == 'windows-latest' || matrix.os == 'windows-11-arm'
@@ -345,7 +349,13 @@ jobs:
         ls -la
         
         tar -czf ~/random_name_${{ matrix.arch }}_${{ runner.os }}.tar.gz *
-        zip -r ~/random_name_${{ matrix.arch }}_${{ runner.os }}.zip *
+        if command -v zip &> /dev/null; then
+          zip -r ~/random_name_${{ matrix.arch }}_${{ runner.os }}.zip *
+        else if command -v 7z &> /dev/null; then
+          7z a ~/random_name_${{ matrix.arch }}_${{ runner.os }}.zip *
+        else
+          powershell -Command "Compress-Archive -Path './*' -DestinationPath '~/random_name_${{ matrix.arch }}_${{ runner.os }}.zip' -Force"
+        fi
 
     - name: Create Installer
       if: matrix.os == 'windows-latest' || matrix.os == 'windows-11-arm'
