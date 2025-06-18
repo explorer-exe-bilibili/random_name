@@ -351,7 +351,7 @@ jobs:
         tar -czf ~/random_name_${{ matrix.arch }}_${{ runner.os }}.tar.gz *
         if command -v zip &> /dev/null; then
           zip -r ~/random_name_${{ matrix.arch }}_${{ runner.os }}.zip *
-        else if command -v 7z &> /dev/null; then
+        elif command -v 7z &> /dev/null; then
           7z a ~/random_name_${{ matrix.arch }}_${{ runner.os }}.zip *
         else
           powershell -Command "Compress-Archive -Path './*' -DestinationPath '~/random_name_${{ matrix.arch }}_${{ runner.os }}.zip' -Force"
