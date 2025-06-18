@@ -126,7 +126,7 @@ int progress_callback(void* clientp, double dltotal, double dlnow, double ultota
 			else totalSize = dltotal / 1024 / 1024;
 		}
 		else totalSize = dltotal / 1024 / 1024 / 1024;
-		totalsize = format("{:.1f}", totalSize);
+		totalsize = std::format("{:.1f}", totalSize);
 		if (dltotal / 1024 / 1024 / 1024 <= 1) {
 			if ((dltotal / 1024 / 1024) <= 1) {
 				if (dltotal / 1024 <= 1) {
@@ -154,7 +154,7 @@ int progress_callback(void* clientp, double dltotal, double dlnow, double ultota
 			else nowSize = dlnow / 1024 / 1024;
 		}
 		else nowSize = dlnow / 1024 / 1024 / 1024;
-		nowsize = format("{:.1f}", nowSize);
+		nowsize = std::format("{:.1f}", nowSize);
 		if (dlnow / 1024 / 1024 / 1024 <= 1) {
 			if ((dlnow / 1024 / 1024) <= 1) {
 				if (dlnow / 1024 <= 1) {
@@ -178,7 +178,7 @@ int progress_callback(void* clientp, double dltotal, double dlnow, double ultota
 				else changedSize = changedSize_ / 1024 / 1024 / ms * 1000;
 			}
 			else changedSize = changedSize_ / 1024 / 1024 / 1024 / ms * 1000;
-			changedsize = format("{:.1f}", changedSize);
+			changedsize = std::format("{:.1f}", changedSize);
 			if (changedSize_ / 1024 / 1024 / 1024 / ms * 1000 <= 1) {
 				if ((changedSize_ / 1024 / 1024 / ms * 1000) <= 1) {
 					if (changedSize_ / 1024 / ms * 1000 <= 1) {
