@@ -172,7 +172,7 @@ bool alist_api::downloadFile(const std::string& url, const std::string& destPath
 		fp = fopen(destPath.c_str(), "wb");
 		if (fp) {
 			// 设置下载URL
-			curl_easy_setopt(curl, CURLOPT_URL, url);
+			curl_easy_setopt(curl, CURLOPT_URL, url.c_str());
 			// 不显示头信息
 			curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
 			// 设置写入回调函数
@@ -216,8 +216,10 @@ std::string alist_api::getFileUrl() {
     std::vector<std::string> fileList;
     std::map<int, std::string> versionList;
     listFiles("/", fileList);
+    listFiles("/", fileList);
     for (const auto& f : fileList) {
         int version = getFileVersion(f);
+        Log << Level::Info << "File found: " << f << " File version: " << version << op::endl;
         Log << Level::Info << "File found: " << f << " File version: " << version << op::endl;
         if (version >= 0) {
             versionList[version] = f;
@@ -230,11 +232,14 @@ std::string alist_api::getFileUrl() {
     if(versionList.rbegin()->first<=VERSION_NUMBER) {
         Log << Level::Info << "No new version available. current version: " << VERSION_NUMBER << op::endl;
         return "new_version_not_found";
+        Log << Level::Info << "No new version available. current version: " << VERSION_NUMBER << op::endl;
+        return "new_version_not_found";
     }
     CURLcode res;
     std::string geturl = m_baseUrl + "api/fs/get";
     std::string getdata;
     json post,get;
+    post["path"]=versionList.rbegin()->second+"/"+"random_name_"+ARCHITECTURE+"_"+PLATFORM_NAME+".zip";
     post["path"]=versionList.rbegin()->second+"/"+"random_name_"+ARCHITECTURE+"_"+PLATFORM_NAME+".zip";
     string data=post.dump();
     if(m_curl){
