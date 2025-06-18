@@ -28,13 +28,23 @@ void Screen::Draw() {
     // 获取当前alpha值
     float alpha = getCurrentAlpha();
       std::shared_ptr<Bitmap> currentFrame;
-    if(bools[boolconfig::use_video_background])currentFrame=videoBackground->getCurrentFrame();
+    if(bools[boolconfig::use_video_background]){
+        if(!videoBackground){
+            if(!Explorer::getInstance()->isVideoLoaded(VideoID::Background)) {
+                Explorer::getInstance()->loadVideo(VideoID::Background, Config::getInstance()->getPath(BACKGROUND_VIDEO_PATH, "files/video/bg.webm"));
+            }
+            videoBackground = Explorer::getInstance()->getVideo(VideoID::Background);
+            videoBackground->setLoop(true);
+            videoBackground->play();
+        }
+        currentFrame=videoBackground->getCurrentFrame();
+    }
     if(currentFrame){
         currentFrame->CreateTextureFromBuffer();
         currentFrame->Draw({0,0,1,1}, alpha);
     }
-    else if (background) {
-        background->Draw({0, 0, 1, 1}, 0.75f * alpha);
+    else if (background && *background) {
+        (*background)->Draw({0, 0, 1, 1}, 0.75f * alpha);
     }
     
     for (const auto& button : buttons) {

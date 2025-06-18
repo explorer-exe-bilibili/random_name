@@ -43,12 +43,11 @@
 
 #define BACKGROUND_IMG_PATH "background_img_path"
 #define IMGS_PATH "imgs_path"
-#define VIDEO_BACKGROUND_PATH "video_background_path"
 #define DEFAULT_FONT_PATH "default_font_path"
 #define ICON_FONT_PATH "icon_font_path"
 #define NAME_FONT_PATH "name_font_path"
 #define TEXT_FONT_PATH "text_font_path"
-#define VIDEO_BACKGROUND_PATH "video_background_path"
+#define BACKGROUND_VIDEO_PATH "video_background_path"
 #define SIGNAL_3_STAR_VIDEO_PATH "signal_3_star_video_path"
 #define SIGNAL_4_STAR_VIDEO_PATH "signal_4_star_video_path"
 #define SIGNAL_5_STAR_VIDEO_PATH "signal_5_star_video_path"
@@ -79,7 +78,8 @@ enum class boolconfig {
     no_video_preload = 7,
     debug = 8,
     show_fps = 9,
-    use_json_settings = 10
+    use_json_settings = 10,
+    vertical_sync = 11
 };
 
 extern std::map<boolconfig, bool> bools;

@@ -37,8 +37,8 @@ public:
     static void set6Color(const core::Color& newColor){star6Color=newColor;}
 };
 class NameScreen : public Screen {
-    core::Font* StarFont;
-    core::Font* NameFont;
+    core::Font** StarFont;
+    core::Font** NameFont;
     static core::Color SmallNameColor;
     unsigned char alpha=0;
     mutable std::mt19937 rng;

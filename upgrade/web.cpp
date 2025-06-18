@@ -100,64 +100,103 @@ size_t write_data(void* ptr, size_t size, size_t nmemb, FILE* stream) {
 }
 
 int progress_callback(void* clientp, double dltotal, double dlnow, double ultotal, double ulnow) {
-    // 用于显示进度条，速度，已下载大小，总大小等信息
-    static double lastSize = 0;
-    double change = dlnow - lastSize;
-    lastSize = dlnow;
-    if (dltotal <= 0) {
-        Log << Level::Warn << "下载总大小未知，无法计算进度。" << op::endl;
-        return 0; // 返回0表示继续下载
-    }
-    if (dlnow < 0 || dltotal < 0) {
-        Log << Level::Error << "下载进度异常: 已下载大小或总大小为负数。" << op::endl;
-        return 0; // 返回0表示继续下载
-    }
-    // 计算下载进度百分比
-    double progress = (dlnow / dltotal) * 100.0;
-    // 自适应转换单位
-    std::string unitn = "bytes";
-    std::string unitt = "bytes";
-    std::string units = "bytes/s";
-    if (dlnow > 1024) {
-        dlnow /= 1024;
-        unitn = "KB";
-    }
-    if (dltotal > 1024) {
-        dltotal /= 1024;
-        unitt = "KB";
-    }
-    if (dlnow > 1024) {
-        dlnow /= 1024;
-        unitn = "MB";
-    }
-    if (dltotal > 1024) {
-        dltotal /= 1024;
-        unitt = "MB";
-    }
-    if (dlnow > 1024) {
-        dlnow /= 1024;
-        unitn = "GB";
-    }
-    if (dltotal > 1024) {
-        dltotal /= 1024;
-        unitt = "GB";
-    }
-    if(change > 1024) {
-        change /= 1024;
-        units = "KB/s";
-    }
-    if(change > 1024) {
-        change /= 1024;
-        units = "MB/s";
-    }
-    if(change > 1024) {
-        change /= 1024;
-        units = "GB/s";
-    }
-    // 输出下载进度信息
-    Log << Level::Info << "下载速度: " << change << units
-     << progress << "%, 已下载: " << dlnow << " " << unitn << ", 总大小: " << dltotal << " " << unitt << op::endl;
-    return 0; // 返回0表示继续下载
+	static const char* spinner = "|/-\\";
+	static int spin_pos = 0,ms;
+	static bool first_call = true, gotsized=false;
+	static std::chrono::steady_clock::time_point last_update_time = std::chrono::steady_clock::now();
+	double nowSize, totalSize,changedSize, changedSize_;
+    static double last_file_size = 0;
+	string nowsize;
+	static string totalsize, changedsize;
+	ms = 2000;
+	const std::chrono::milliseconds update_interval(ms);
+	if (first_call) {
+		spin_pos = 0;
+		first_call = false;
+	}
+	if (!gotsized) {
+		if (dltotal / 1024 / 1024 / 1024 <= 1) {
+			if ((dltotal / 1024 / 1024) <= 1) {
+				if (dltotal / 1024 <= 1) {
+					totalSize = dltotal;
+				}
+				else totalSize = dltotal / 1024;
+			}
+			else totalSize = dltotal / 1024 / 1024;
+		}
+		else totalSize = dltotal / 1024 / 1024 / 1024;
+		totalsize = format("{:.1f}", totalSize);
+		if (dltotal / 1024 / 1024 / 1024 <= 1) {
+			if ((dltotal / 1024 / 1024) <= 1) {
+				if (dltotal / 1024 <= 1) {
+					totalsize += "Byte";
+				}
+				else
+					totalsize += "KB";
+			}
+			else
+				totalsize += "MB";
+		}
+		else
+			totalsize += "GB";
+		if (dltotal != 0)gotsized = 1;
+	}
+	auto now = std::chrono::steady_clock::now();
+	if (now - last_update_time >= update_interval) {
+		if (dlnow / 1024 / 1024 / 1024 <= 1) {
+			if ((dlnow / 1024 / 1024) <= 1) {
+				if (dlnow / 1024 <= 1) {
+					nowSize = dlnow;
+				}
+				else nowSize = dlnow / 1024;
+			}
+			else nowSize = dlnow / 1024 / 1024;
+		}
+		else nowSize = dlnow / 1024 / 1024 / 1024;
+		nowsize = format("{:.1f}", nowSize);
+		if (dlnow / 1024 / 1024 / 1024 <= 1) {
+			if ((dlnow / 1024 / 1024) <= 1) {
+				if (dlnow / 1024 <= 1) {
+					nowsize += "Byte";
+				}
+				else
+					nowsize += "KB";
+			}
+			else nowsize += "MB";
+		}
+		else nowsize += "GB";
+		changedSize_ = dlnow - last_file_size;
+		if (changedSize_ != 0) {
+			if (changedSize_ / 1024 / 1024 / 1024 / ms * 1000 <= 1) {
+				if ((changedSize_ / 1024 / 1024 / ms * 1000) <= 1) {
+					if (changedSize_ / 1024 / ms * 1000 <= 1) {
+						changedSize = changedSize_;
+					}
+					else changedSize = changedSize_ / 1024 / ms * 1000;
+				}
+				else changedSize = changedSize_ / 1024 / 1024 / ms * 1000;
+			}
+			else changedSize = changedSize_ / 1024 / 1024 / 1024 / ms * 1000;
+			changedsize = format("{:.1f}", changedSize);
+			if (changedSize_ / 1024 / 1024 / 1024 / ms * 1000 <= 1) {
+				if ((changedSize_ / 1024 / 1024 / ms * 1000) <= 1) {
+					if (changedSize_ / 1024 / ms * 1000 <= 1) {
+						changedsize += "Byte/s";
+					}
+					else
+						changedsize += "KB/s";
+				}
+				else changedsize += "MB/s";
+			}
+			else changedsize += "GB/s";
+		}
+		int progress = static_cast<int>(dlnow * 100.0 / dltotal);
+		Log << op::time << progress << "%" << nowsize << "/" << totalsize<<" " << changedsize << op::endl;
+		last_update_time = now;
+		last_file_size = dlnow;
+	}
+
+	return 0;
 }
 
 bool alist_api::downloadFile(const std::string& url, const std::string& destPath) {
@@ -185,27 +224,27 @@ bool alist_api::downloadFile(const std::string& url, const std::string& destPath
 			// 执行下载
 			res = curl_easy_perform(curl);
 			// 关闭文件
-			Log << Level::Info << "下载完成" << op::endl;
+			Log << Level::Info << "download completed" << op::endl;
 
 			fclose(fp);
 		}
 		else {
-		Log << Level::Error << "无法打开文件: " << destPath << op::endl;
-			return 1;
+		Log << Level::Error << "failed to open file: " << destPath << op::endl;
+			return false;
 		}
 		// 清理libcurl
 		curl_easy_cleanup(curl);
 	}
 	else {
-		Log << Level::Error << "无法初始化libcurl" << op::endl;
-		return 1;
+		Log << Level::Error << "failed to initialize libcurl" << op::endl;
+		return false;
 	}
 
 	if (res != CURLE_OK) {
-		Log << Level::Error << "下载失败: " << curl_easy_strerror(res) << op::endl;
-		return 1;
+		Log << Level::Error << "failed to download: " << curl_easy_strerror(res) << op::endl;
+		return false;
 	}
-	return 0;
+	return true;
 }
 
 std::string alist_api::getFileUrl() {

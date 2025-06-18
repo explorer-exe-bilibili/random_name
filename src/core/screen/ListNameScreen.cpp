@@ -6,7 +6,7 @@ using namespace core;
 using namespace screen;
 
 void ListNameScreen::init() {
-    background=Explorer::getInstance()->getBitmap(BitmapID::NameBg);
+    background=Explorer::getInstance()->getBitmapPtr(BitmapID::NameBg);
     m_buttons.resize(10);
     for(int i = 0; i < m_buttons.size(); ++i) {
         m_buttons[i] = std::make_shared<ListNameButton>();
@@ -35,8 +35,8 @@ bool ListNameScreen::Click(int x, int y) {
 void ListNameScreen::Draw() {
     updateTransition(0);
     // 绘制代码
-    if(background) {
-        background->Draw({0,0,1,1});
+    if(background && *background) {
+        (*background)->Draw({0,0,1,1});
     }
     for(auto& button : buttons) {
         if(button) {
@@ -92,7 +92,7 @@ void ListNameScreen::enter(int) {
 
 ListNameButton::ListNameButton() {
     // 构造函数
-    font= Explorer::getInstance()->getFont(FontID::Name);
+    fontPtr = Explorer::getInstance()->getFontPtr(FontID::Name);
 }
 
 ListNameButton::~ListNameButton() {
@@ -118,8 +118,8 @@ void ListNameButton::Draw() {
     if (bitmapPtr && *bitmapPtr) {
         (*bitmapPtr)->Draw(region);
     }
-    if (enableText && font) {
+    if (enableText && fontPtr && *fontPtr) {
         Region textRegion={region.getOriginX(), region.getOriginY() + 0.1f, region.getOriginXEnd(), region.getOriginYEnd() - 0.2f, true};
-        font->RenderTextVerticalBetween(text, textRegion, fontScale,color);
+        (*fontPtr)->RenderTextVerticalBetween(text, textRegion, fontScale,color);
     }
 }

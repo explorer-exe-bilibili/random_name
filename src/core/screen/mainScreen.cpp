@@ -123,7 +123,7 @@ void MainScreen::init() {
             SwitchToScreen(ScreenID::Video,20+mode);
         });
     });
-    background = core::Explorer::getInstance()->getBitmap(BitmapID::Background);
+    background = core::Explorer::getInstance()->getBitmapPtr(BitmapID::Background);
 
     tmp=0;
     for(auto& b:overlays){

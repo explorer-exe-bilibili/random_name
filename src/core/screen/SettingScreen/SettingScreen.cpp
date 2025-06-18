@@ -12,7 +12,7 @@ using namespace core;
 
 void SettingScreen::init() {
     Screen::init();
-    background=core::Explorer::getInstance()->getBitmap(BitmapID::SettingBg);
+    background=core::Explorer::getInstance()->getBitmapPtr(BitmapID::SettingBg);
     std::shared_ptr<Button> next=std::make_shared<Button>(Button());
     std::shared_ptr<Button> last=std::make_shared<Button>(Button());
     std::shared_ptr<Button> back=std::make_shared<Button>(Button());
@@ -66,20 +66,30 @@ void SettingScreen::Draw() {
     float alpha = getCurrentAlpha();
     
     std::shared_ptr<Bitmap> currentFrame;
-    if(bools[boolconfig::use_video_background])currentFrame=videoBackground->getCurrentFrame();
+    if(bools[boolconfig::use_video_background]){
+        if(!videoBackground){
+            if(!core::Explorer::getInstance()->isVideoLoaded(VideoID::Background)) {
+                core::Explorer::getInstance()->loadVideo(VideoID::Background, Config::getInstance()->getPath(BACKGROUND_VIDEO_PATH, "files/video/bg.webm"));
+            }
+            videoBackground = core::Explorer::getInstance()->getVideo(VideoID::Background);
+            videoBackground->setLoop(true);
+            videoBackground->play();
+        }
+        currentFrame=videoBackground->getCurrentFrame();
+    }
     if(currentFrame){
         currentFrame->CreateTextureFromBuffer();
         currentFrame->Draw({0,0,1,1}, alpha);
     }
-    else if (background) {
-        background->Draw({0, 0, 1, 1}, 0.75f * alpha);
+    else if (background && *background) {
+        (*background)->Draw({0, 0, 1, 1}, 0.75f * alpha);
     }
     
     // 更新页面切换动画
     updatePageTransition();
-    
-    if(background){
-        background->Draw({0, 0, 1, 1}, 0.75f * alpha);
+
+    if(background && *background){
+        (*background)->Draw({0, 0, 1, 1}, 0.75f * alpha);
     }
 
     for (const auto& button : buttons) {
@@ -117,30 +127,38 @@ void SettingScreen::Draw() {
     }
 
     // 绘制标题（带动画效果）
-    core::Font* font = core::Explorer::getInstance()->getFont(FontID::Normal);
-    
+    core::Font** font = core::Explorer::getInstance()->getFontPtr(FontID::Normal);
+
     if (isTransitioning) {
         // 当前页面标题（渐隐）
         if(currentPage < titles.size()) {
             float alpha = calculateTransitionAlpha(true);
-            font->RenderTextBetween(titles[currentPage], {0,0.05,1,0.1}, 0.7f, 
-                Color(255, 255, 255, static_cast<unsigned char>(alpha * 255.0f)));
+            if (font && *font) {
+                (*font)->RenderTextBetween(titles[currentPage], {0,0.05,1,0.1}, 0.7f, 
+                    Color(255, 255, 255, static_cast<unsigned char>(alpha * 255.0f)));
+            }
         }
         
         // 目标页面标题（渐现）
         if (targetPage < titles.size()) {
             float alpha = calculateTransitionAlpha(false);
-            font->RenderTextBetween(titles[targetPage], {0,0.05,1,0.1}, 0.7f, 
-                Color(255, 255, 255, static_cast<unsigned char>(alpha * 255.0f)));
+            if (font && *font) {
+                (*font)->RenderTextBetween(titles[targetPage], {0,0.05,1,0.1}, 0.7f, 
+                    Color(255, 255, 255, static_cast<unsigned char>(alpha * 255.0f)));
+            }
         }
     } else {
         // 没有动画时，正常绘制标题
         if(currentPage < titles.size()) {
-            font->RenderTextBetween(titles[currentPage], {0,0.05,1,0.1}, 0.7f, Color(255, 255, 255, 255));
+            if (font && *font) {
+                (*font)->RenderTextBetween(titles[currentPage], {0,0.05,1,0.1}, 0.7f, Color(255, 255, 255, 255));
+            }
         }
     }
-    font->RenderTextBetween(std::to_string(currentPage + 1) + "/" + std::to_string(pages + 1), 
-        {0.9, 0.9, 0.96, 0.93}, 0.3f, Color(255, 150, 20, 255));
+    if (font && *font) {
+        (*font)->RenderTextBetween(std::to_string(currentPage + 1) + "/" + std::to_string(pages + 1), 
+            {0.9, 0.9, 0.96, 0.93}, 0.3f, Color(255, 150, 20, 255));
+    }
 }
 
 void SettingScreen::enter(int) {

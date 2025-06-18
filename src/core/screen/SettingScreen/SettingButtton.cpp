@@ -509,7 +509,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
             item.configName = "unknown_config"; // 设置安全的默认值
         }
         
-        font=core::Explorer::getInstance()->getFont(FontID::Normal);
+        font=core::Explorer::getInstance()->getFontPtr(FontID::Normal);
         Region Button2Region;
         if(number<=10){
             TextRegion={0,number*0.08+0.1,0.4,number*0.08+0.15};
@@ -551,6 +551,10 @@ SettingButton::SettingButton(sItem item_, int number, int page)
                 button->SetText(bools[configEnum] ? "开" : "关");
                 button->SetClickFunc([this, safeConfigName, configEnum]{
                     try {
+                        if (configEnum == (boolconfig)-1) {
+                            Log << Level::Error << "Invalid configName: " << safeConfigName << op::endl;
+                            return;
+                        }
                         bools[configEnum] = !bools[configEnum];
                         button->SetText(bools[configEnum] ? "开" : "关");
                         SyncConfig(); // 同步到配置文件
@@ -698,6 +702,10 @@ SettingButton::SettingButton(sItem item_, int number, int page)
                         case FileType::Picture:core::Explorer::getInstance()->loadBitmap(item.bitmapID, path);break;
                         case FileType::Video:core::Explorer::getInstance()->loadVideo(item.videoID, path);break;
                         case FileType::Audio:core::Explorer::getInstance()->loadAudio(item.audioID, path);break;
+                        case FileType::Sound:core::Explorer::getInstance()->loadSound(item.audioID, path);break;
+                        case FileType::Font:
+                            if(item.fontID!=FontID::Name){core::Explorer::getInstance()->loadFont(item.fontID, path,false,48);}
+                            else core::Explorer::getInstance()->loadFont(item.fontID, path,false,150);break;
                         case FileType::NameFile: core::NameRandomer::getInstance(i)->setFile(path); break;
                         default:break;
                         }
@@ -781,11 +789,14 @@ void SettingButton::Draw(int currentPage, unsigned char alpha)const {
                 Drawer::getInstance()->DrawSquare(TextRegion2,Color(255,0,0,255),false);
                 Drawer::getInstance()->DrawSquare(TextRegion,Color(0,255,0,255),false);
             }
-            font->RenderTextBetween(showText, TextRegion2, 0.35f, Color(255, 255, 255, alpha));
-            font->RenderText(item.name,TextRegion.getx(),TextRegion.gety(),0.5f,Color(255,255,255,alpha));
+            if(font&&*font){
+                (*font)->RenderTextBetween(showText, TextRegion2, 0.35f, Color(255, 255, 255, alpha));
+                (*font)->RenderText(item.name,TextRegion.getx(),TextRegion.gety(),0.5f,Color(255,255,255,alpha));
+            }
         }
         else
-            font->RenderTextBetween(item.name, TextRegion, 0.6f, Color(255, 255, 255, alpha));
+            if(font&&*font)
+                (*font)->RenderTextBetween(item.name, TextRegion, 0.6f, Color(255, 255, 255, alpha));
     }      // 如果正在编辑文本框，绘制内嵌编辑框
     if(isTextboxEditing && item.type == SettingButtonType::Textbox) {
         
@@ -826,15 +837,8 @@ void SettingButton::Draw(int currentPage, unsigned char alpha)const {
         textDrawRegion.setRatio(false);
         
         // 绘制编辑中的文本（黑色文字，较大字体）
-        font->RenderTextBetween(displayText, textDrawRegion, 0.3f, Color(0, 0, 0, 255));
-        
-        // 绘制编辑提示（在编辑框下方）
-        std::string hint = "回车确认 | ESC取消";
-        Region hintRegion = editingTextRegion;
-        hintRegion.sety(hintRegion.getyend() + 0.002f);
-        hintRegion.setyend(hintRegion.gety() + 0.025f);
-        hintRegion.setRatio(false);
-        font->RenderTextBetween(hint, hintRegion, 0.25f, Color(120, 120, 120, 200));
+        if (font && *font)
+            (*font)->RenderTextBetween(displayText, textDrawRegion, 0.3f, Color(0, 0, 0, 255));
     }
     else if(button){
         button->Draw(alpha);
@@ -1072,6 +1076,7 @@ void SettingButton::checkActions(){
             core::Explorer::getInstance()->unloadAllVideo();
         }
     }
+    SyncConfig();
 }
 
 bool SettingButton::HandleKeyInput(char key) {
@@ -1234,7 +1239,7 @@ void SettingButton::FinishEditing() {
         // 保存到配置
         Config::getInstance()->set(item.configName, editingText);
         Config::getInstance()->saveToFile();
-        
+
         // 更新按钮显示
         button->SetText(editingText.empty() ? "点击输入" : editingText);
           // 关闭编辑模式

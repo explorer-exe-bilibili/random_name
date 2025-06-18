@@ -31,7 +31,7 @@ enum class TransitionState {
 
 class Screen {
 protected:    std::vector<std::shared_ptr<core::Button>> buttons;
-    core::Bitmap* background;
+    core::Bitmap** background;
     ScreenID ID;
     static core::VideoPlayer* videoBackground;
     static ScreenID currentScreenID;

@@ -31,6 +31,7 @@ enum class FileType{
     Video,
     Picture,
     NameFile,
+    Sound,
     Audio,
     Font,
     Unknown
@@ -117,7 +118,7 @@ class SettingButton
     core::Region ButtonRegion;
     std::shared_ptr<core::Button> button=nullptr;
     std::shared_ptr<core::Button> button2=nullptr;
-    core::Font* font=nullptr;
+    core::Font** font=nullptr;
     int number=0;
     int page=-1;
     

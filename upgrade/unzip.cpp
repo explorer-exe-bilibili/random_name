@@ -61,62 +61,121 @@ bool unzip::extract(const std::string& destDir){
     char szZipFName[512]={0};
     char szExtraName[512]={0};
     char szCommName[512]={0};
+    std::string destFilePath;
+    std::string tempFilePath;
+	for (unsigned int i = 0; i < globalInfo->number_entry; i++)
+	{
+		// 解析得到zip中的文件信息
+		int nReturnValue = unzGetCurrentFileInfo(zipFileHandle, pFileInfo, szZipFName, 512, szExtraName, 512, szCommName, 512);
+		if (nReturnValue != UNZ_OK)
+			return false;
+		Log << Level::Info << "解压文件名: " << szZipFName;
 
-    // 存放文件名
-    for(unsigned int i=0;i<globalInfo->number_entry;i++){
-        //解析得到zip中的文件信息
-        int result = unzGetCurrentFileInfo(zipFileHandle,pFileInfo,szZipFName,512,szExtraName,512,szCommName,512);
-        if(result!=UNZ_OK)return false;
-        Log<<"正在解压："<< szZipFName<<op::endl;
+		string strZipFName = szZipFName;
+		{
+			if (strZipFName == "upgrade.bat" || strZipFName == "upgrade_.exe") {
+				upgraderFile = strZipFName;
+			}
+			if (strZipFName == "upgrade.exe") {
+				strZipFName = "upgrade_temp.exe";
+			}
+		}
+		// 如果是目录则执行创建递归目录名
+		if (pFileInfo->external_fa == 0x10 || (strZipFName.rfind('/') == strZipFName.length() - 1))
+		{
+			destFilePath = destDir + "//" + szZipFName;
+			fs::create_directory(destFilePath);
+		}
 
-        string strZipFName(szZipFName);
-        if(strZipFName=="upgrade.bat"||strZipFName=="upgrade_.exe"||strZipFName=="upgrade.sh")upgraderFile=strZipFName;
-        if(strZipFName=="upgrade.exe")strZipFName="upgrade_temp.exe";
-        if(pFileInfo->external_fa==0x10||
-            (strZipFName.rfind('/')==strZipFName.length()-1)||
-            (strZipFName.rfind('\\')==strZipFName.length()-1)){
-            string t=destDir+"/"+szZipFName;
-            fs::create_directory(t);
-        }
-        else{
-            //如果是文件则解压并创建
-            // 创建文件 保存路径
-            string fullPath;
-            string t=destDir+"/"+szZipFName;
-            fullPath=t;
-            size_t lastSlashPos = fullPath.find_last_of("/\\");
-            if (lastSlashPos == std::string::npos) continue;
-            size_t nSplitPos = lastSlashPos;
-            fullPath = fullPath.substr(nSplitPos + 1);
+		// 如果是文件则解压缩并创建
+		else
+		{
+			// 创建文件 保存完整路径
+			string strFullFilePath;
+			tempFilePath = destDir + "/" + strZipFName.c_str();
+			strFullFilePath = tempFilePath;
+			bool fileusing = 0;
+			if (tempFilePath == "./jsoncpp.dll" || tempFilePath == "./libcurl.dll" || tempFilePath == "./zlib1.dll" || tempFilePath == "./zlibwapi.dll")fileusing = 1;
+			int nPos = tempFilePath.rfind("/");
+			int nPosRev = tempFilePath.rfind("\\");
+			if (nPosRev == string::npos && nPos == string::npos)
+				continue;
 
-            fs::path filePath(fullPath);
-            fs::create_directories(filePath.parent_path());
+			size_t nSplitPos = nPos > nPosRev ? nPos : nPosRev;
+			destFilePath = tempFilePath.substr(0, nSplitPos + 1);
 
-            ofstream outFile(filePath, std::ios::binary);
-            if (!outFile) {
-                Log<<Level::Error<<"Failed to create file: "<<filePath.string()<<op::endl;
-                continue;
+			if (!fs::is_directory(destFilePath)){
+				// 创建多级目录
+				int bRet = CreatedMultipleDirectory(destFilePath);
+			}
+            // 创建文件
+            FILE* hFile = fopen(strFullFilePath.c_str(), "wb");
+            if (hFile == NULL){
+                Log << Level::Error << "Failed to create file: " << strFullFilePath << op::endl;
+                unzCloseCurrentFile(zipFileHandle);
+                return false;
             }
 
-            // 解压文件
-            if (unzOpenCurrentFile(zipFileHandle) != UNZ_OK) {
-                Log<<Level::Error<<"Failed to open file in zip: "<<szZipFName<<op::endl;
-                continue;
-            }
+			// 打开文件
+			int nReturnValue = unzOpenCurrentFile(zipFileHandle);
+			if (nReturnValue != UNZ_OK)
+			{
+				fclose(hFile);
+				return false;
+			}
 
-            char buffer[8192];
-            int bytesRead;
-            while ((bytesRead = unzReadCurrentFile(zipFileHandle, buffer, sizeof(buffer))) > 0) {
-                outFile.write(buffer, bytesRead);
-                for(auto& c:buffer)c=0;
-            }
+			// 读取文件
+			uLong BUFFER_SIZE = pFileInfo->uncompressed_size;;
+			void* szReadBuffer = NULL;
+			szReadBuffer = (char*)malloc(BUFFER_SIZE);
+			if (NULL == szReadBuffer)
+			{
+				break;
+			}
+			if (!fileusing) {
+				fileusing = 0;
+				while (1)
+				{
+					memset(szReadBuffer, 0, BUFFER_SIZE);
+					int nReadFileSize = 0;
 
-            unzCloseCurrentFile(zipFileHandle);
-            Log<<Level::Info<<"Extracted file: "<<filePath.string()<<op::endl;
-        }
-    }
-    delete globalInfo;
-    delete pFileInfo;
+					nReadFileSize = unzReadCurrentFile(zipFileHandle, szReadBuffer, BUFFER_SIZE);
+
+					// 读取文件失败
+					if (nReadFileSize < 0)
+					{
+						unzCloseCurrentFile(zipFileHandle);
+						fclose(hFile);
+						return false;
+					}
+					// 读取文件完毕
+					else if (nReadFileSize == 0)
+					{
+						unzCloseCurrentFile(zipFileHandle);
+						fclose(hFile);
+						break;
+					}
+					// 写入读取的内容
+					else
+					{
+                        size_t bWriteSuccessed = fwrite(szReadBuffer, 1, nReadFileSize, hFile);
+                        if (bWriteSuccessed != nReadFileSize)
+						{
+							unzCloseCurrentFile(zipFileHandle);
+							fclose(hFile);
+							break;
+						}
+					}
+				}
+				free(szReadBuffer);
+			}
+		}
+		unzGoToNextFile(zipFileHandle);
+	}
+
+	delete pFileInfo;
+	delete globalInfo;
+
     return true;
 }
 

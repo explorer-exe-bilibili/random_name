@@ -91,10 +91,10 @@ int mainloop() {
             std::string fpsText = ss.str();
             
             // 使用Explorer获取默认字体并渲染FPS文本
-            Font* font = Explorer::getInstance()->getFont(FontID::Default); // 使用默认字体
-            if (font) {
+            Font** font = Explorer::getInstance()->getFontPtr(FontID::Default); // 使用默认字体
+            if (font && *font) {
                 // 在屏幕右上角渲染FPS文本
-                font->RenderText(fpsText, 0, 0, 0.5f, color::black);
+                (*font)->RenderText(fpsText, 0, 0, 0.5f, color::black);
             }
         }
         

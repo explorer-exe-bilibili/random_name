@@ -108,6 +108,8 @@ class Explorer {
     std::map<BitmapID, std::unique_ptr<Bitmap*>> bitmap_ptrs;
     std::map<std::string, std::unique_ptr<Bitmap*>> name_bitmap_ptrs;
     std::map<FontID, std::shared_ptr<core::Font>> fonts;
+    // 为了支持Font**，需要维护稳定的指针地址
+    std::map<FontID, std::unique_ptr<Font*>> font_ptrs;
     std::map<VideoID, std::shared_ptr<core::VideoPlayer>> videos;
     std::map<AudioID, bool> audioLoaded; // 用于跟踪音频是否已加载
     std::shared_ptr<Audio> audio;
@@ -129,12 +131,9 @@ public:
 
     int init();
 
-    Bitmap* getBitmap(const std::string& name){return Name_bitmaps.contains(name) ? Name_bitmaps[name].get() : nullptr;}
-    Bitmap* getBitmap(BitmapID id){return bitmaps.contains(id) ? bitmaps[id].get() : nullptr;}
-    
     Bitmap** getBitmapPtr(const std::string& name);
     Bitmap** getBitmapPtr(BitmapID id);
-    Font* getFont(FontID id){return fonts.contains(id) ? fonts[id].get() : fonts[FontID::Default].get();}
+    Font** getFontPtr(FontID id);
     Audio* getAudio();
     VideoPlayer* getVideo(VideoID id);
 
@@ -166,6 +165,8 @@ public:
     void loadImagesFromDirectory(const std::string& directory);
     void loadImagesFromConfig();
     void listLoadedBitmaps();
+
+    void setVolume(char volume);
     
     // 错误恢复相关方法
     void cleanupVideoResources();

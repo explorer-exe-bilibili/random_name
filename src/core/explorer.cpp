@@ -135,6 +135,14 @@ int Explorer::loadFont(FontID id, const std::string &path, bool needPreLoad, uns
             throw std::runtime_error("Font failed to load properly");
         }
         fonts[id] = font;
+        
+        // 更新或创建稳定的指针地址
+        if (!font_ptrs.contains(id)) {
+            font_ptrs[id] = std::make_unique<Font*>(font.get());
+        } else {
+            *font_ptrs[id] = font.get();
+        }
+        
         Log << Level::Info << "Font loaded successfully: " << static_cast<int>(id) << op::endl;
         return static_cast<int>(id);
     } catch (const std::exception &e) {
@@ -182,6 +190,14 @@ int Explorer::loadFont(FontID id, const std::string &path, bool needPreLoad, uns
                 if (font->isLoaded())
                 {
                     fonts[id] = font;
+                    
+                    // 更新或创建稳定的指针地址
+                    if (!font_ptrs.contains(id)) {
+                        font_ptrs[id] = std::make_unique<Font*>(font.get());
+                    } else {
+                        *font_ptrs[id] = font.get();
+                    }
+                    
                     Log << Level::Info << "Fallback system font loaded successfully: " << systemFont << op::endl;
                     return static_cast<int>(id);
                 }
@@ -207,6 +223,14 @@ int Explorer::loadFont(FontID id, const std::string &path, bool needPreLoad, uns
                 if (font->isLoaded())
                 {
                     fonts[id] = font;
+                    
+                    // 更新或创建稳定的指针地址
+                    if (!font_ptrs.contains(id)) {
+                        font_ptrs[id] = std::make_unique<Font*>(font.get());
+                    } else {
+                        *font_ptrs[id] = font.get();
+                    }
+                    
                     Log << Level::Info << "Generic font loaded successfully: " << fontName << op::endl;
                     return static_cast<int>(id);
                 }
@@ -499,6 +523,16 @@ Bitmap** Explorer::getBitmapPtr(BitmapID id) {
     return bitmap_ptrs.contains(id) ? bitmap_ptrs[id].get() : nullptr;
 }
 
+// 获取Font**指针，用于自动更新的场景
+Font** Explorer::getFontPtr(FontID id) {
+    // 如果font存在但指针映射不存在，创建它
+    if (fonts.contains(id) && !font_ptrs.contains(id)) {
+        font_ptrs[id] = std::make_unique<Font*>(fonts[id].get());
+    }
+    
+    return font_ptrs.contains(id) ? font_ptrs[id].get() : nullptr;
+}
+
 
 
 // 大小写不敏感的字符串比较辅助函数
@@ -661,4 +695,21 @@ bool Explorer::validateResources()
     }
     
     return allValid;
+}
+
+void Explorer::setVolume(char volume)
+{
+    if (audio)
+    {
+        audio->setMusicVolume(volume/100.0f*128.0f); // 将音量转换为0-128范围
+        audio->setSoundVolume(AudioIDToString(AudioID::enter),volume/100.0f*128.0f); // 将音量转换为0-128范围
+        audio->setSoundVolume(AudioIDToString(AudioID::click),volume/100.0f*128.0f); // 将音量转换为0-128范围
+    }
+    for(auto& [id, video] : videos)
+    {
+        if (video)
+        {
+            video->setVolume(volume);
+        }
+    }
 }

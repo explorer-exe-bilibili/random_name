@@ -10,7 +10,7 @@
 using namespace core;
 
 Button::Button(const std::string& text, FontID fontid, const Region& region, Bitmap** bitmapPtr) :
- text(text), fontid(fontid), region(region), bitmapPtr(bitmapPtr) {}
+ text(text), fontid(fontid), region(region), bitmapPtr(bitmapPtr), fontPtr(nullptr) {}
 
 Button::Button(const Button& button) :
     region(button.region),
@@ -19,6 +19,7 @@ Button::Button(const Button& button) :
     enableBitmap(button.enableBitmap),
     text(button.text),
     bitmapPtr(button.bitmapPtr),
+    fontPtr(button.fontPtr),
     ClickFunc(button.ClickFunc),
     fontid(button.fontid) {}
 
@@ -30,6 +31,7 @@ Button& Button::operator=(const Button& button) {
         enableBitmap = button.enableBitmap;
         text = button.text;
         bitmapPtr = button.bitmapPtr;
+        fontPtr = button.fontPtr;
         ClickFunc = button.ClickFunc;
         fontid = button.fontid;
     }
@@ -80,13 +82,11 @@ void Button::Draw(unsigned char alpha) {
     if(enableFill) {
         Drawer::getInstance()->DrawSquare(region, fillColor,true);
     }
-    if (enableText) {
-        if (font) {
-            Color tmp=color;
-            tmp.a=finalAlpha;
-            if(isCentered)font->RenderTextBetween(text, region, fontScale, tmp);
-            else font->RenderText(text, region.getx(), region.gety(), fontScale, tmp);
-        }
+    if (enableText && fontPtr && *fontPtr) {
+        Color tmp=color;
+        tmp.a=finalAlpha;
+        if(isCentered)(*fontPtr)->RenderTextBetween(text, region, fontScale, tmp);
+        else (*fontPtr)->RenderText(text, region.getx(), region.gety(), fontScale, tmp);
     }
     
 }
@@ -280,7 +280,7 @@ void Button::MoveTo(const Region& region, const bool enableFluent, const float s
 void Button::SetFontID(FontID id)
 {
     this->fontid = id;
-    font = core::Explorer::getInstance()->getFont(fontid);
+    this->fontPtr = core::Explorer::getInstance()->getFontPtr(id);
 }
 
 void Button::FadeOut(float duration, unsigned char startAlpha, unsigned char endAlpha, std::function<void()> onComplete)

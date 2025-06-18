@@ -6,7 +6,8 @@
 
 int main(){
     Log.setFile("files/upgrade.log");
-    Log << Level::Info << "开始升级程序" << op::endl;
+    Log.setAutoFlush(true);
+    Log << Level::Info << "starting upgrade process" << op::endl;
     // 服务器列表
     std::vector<std::string> servers = {
         "https://alist.1class.top/",
@@ -24,11 +25,11 @@ int main(){
         if(api.isConnectAble()) {
             std::string downloadurl = api.getFileUrl();
             if(downloadurl.empty()) {
-                Log << Level::Error << "获取下载链接失败" << op::endl;
+                Log << Level::Error << "Failed to get download link" << op::endl;
                 continue;
             }
             else if(downloadurl=="new_version_not_found") {
-                Log << Level::Info << "没有找到新版本" << op::endl;
+                Log << Level::Info << "no newer version" << op::endl;
                 return 0;
             }
             if(api.downloadFile(downloadurl, "package.zip")) {

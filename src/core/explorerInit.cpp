@@ -46,7 +46,7 @@ int Explorer::init()
     if (bools[boolconfig::use_video_background])
     {
         videos[VideoID::Background] = std::make_shared<VideoPlayer>();
-        if (!videos[VideoID::Background]->load(config->getPath(VIDEO_BACKGROUND_PATH, "files/video/bg.webm")))
+        if (!videos[VideoID::Background]->load(config->getPath(BACKGROUND_VIDEO_PATH, "files/video/bg.webm")))
         {
             Log << Level::Error << "Failed to load background video" << op::endl;
             screen::Screen::setUseVideoBackground(false); // 如果加载失败，禁用视频背景

@@ -38,7 +38,6 @@ public:
     }
     void SetRegion(const Region& region) {this->region = region;}
     void SetFontID(FontID id);
-    void SetFont(Font* font) {this->font = font;}
     void SetAudioID(AudioID id) {this->audioid = id;}
     void SetTextCenterd(bool isCentered){this->isCentered = isCentered;}
     void SetColor(const Color& color) {this->color = color;}
@@ -61,12 +60,12 @@ protected:
     std::string text="";
     Bitmap** bitmapPtr = nullptr; // 用于自动更新的指针
     std::function<void()> ClickFunc;
+    BitmapID bitmapid=BitmapID::Unknown;
     FontID fontid=FontID::Default;
     AudioID audioid=AudioID::click;
-    BitmapID bitmapid=BitmapID::Unknown;
     float fontSize=0;
     float fontScale=1.0f;
-    Font* font;
+    Font** fontPtr = nullptr; // 用于自动更新的字体指针
     // 线程安全相关成员
     std::timed_mutex animMutex;                   // 线程同步互斥锁（支持超时）
     std::atomic<bool> animationRunning{false}; // 标记动画是否在运行

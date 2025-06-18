@@ -28,8 +28,9 @@ boolconfig GetBoolConfigFromString(const std::string& configName) {
     if (configName == DEBUG) return boolconfig::debug;
     if (configName == SHOW_FPS) return boolconfig::show_fps;
     if (configName == USE_JSON_SETTINGS) return boolconfig::use_json_settings;
+    if (configName == VERTICAL_SYNC) return boolconfig::vertical_sync;
     // 默认返回debug
-    return boolconfig::debug;
+    return (boolconfig)-1;
 }
 
 // 从Config加载bool值到bools映射
@@ -211,7 +212,7 @@ void SetConfigItems(){
     config->setifno(BACKGROUND_IMG_PATH, "files/imgs/background.webp");
     config->setifno(IMGS_PATH,"files/imgs/");
 
-    config->setifno(VIDEO_BACKGROUND_PATH,"files/video/bg.webm");
+    config->setifno(BACKGROUND_VIDEO_PATH,"files/video/bg.webm");
     config->setifno(SIGNAL_3_STAR_VIDEO_PATH,"files/video/signal-3star.webm");
     config->setifno(SIGNAL_4_STAR_VIDEO_PATH,"files/video/signal-4star.webm");
     config->setifno(SIGNAL_5_STAR_VIDEO_PATH,"files/video/signal-5star.webm");

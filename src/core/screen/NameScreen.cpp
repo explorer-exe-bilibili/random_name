@@ -26,15 +26,15 @@ enum ButtonID{
 };
 
 void NameScreen::init() {
-    background=Explorer::getInstance()->getBitmap(BitmapID::NameBg);
-    if(!background) {
+    background=Explorer::getInstance()->getBitmapPtr(BitmapID::NameBg);
+    if(!background || !*background) {
         Log << Level::Warn << "NameScreen: Failed to load background bitmap." << op::endl;
     }
     rng = std::mt19937(std::random_device{}());
     dist = std::uniform_real_distribution<float>(0.0f, 1.0f);
-    StarFont = Explorer::getInstance()->getFont(FontID::Icon);
-    NameFont = Explorer::getInstance()->getFont(FontID::Name);
-    if (!StarFont || !NameFont) {
+    StarFont = Explorer::getInstance()->getFontPtr(FontID::Icon);
+    NameFont = Explorer::getInstance()->getFontPtr(FontID::Name);
+    if (!StarFont || !NameFont || !*StarFont || !*NameFont) {
         Log << Level::Error << "NameScreen: Failed to load fonts." << op::endl;
     }
     buttons.resize(3);
@@ -77,14 +77,19 @@ void NameScreen::init() {
 void NameScreen::Draw() {
     updateTransition();
     float alpha = getCurrentAlpha();
-    if(background)
-    background->Draw({0, 0, 1, 1}, alpha);
+    if(background && *background)
+        (*background)->Draw({0, 0, 1, 1}, alpha);
     for(auto& b: buttons)b->Draw(alpha*255);
-    {std::lock_guard<std::mutex> lock(starPositionsMutex);
+    {
+        std::lock_guard<std::mutex> lock(starPositionsMutex);
         for(auto s: starPositions)
-            StarFont->RenderChar('E', s.getx(), s.gety(), 0.2f, Color(220,184,14,255));}
+            (*StarFont)->RenderChar('E', s.getx(), s.gety(), 0.2f, Color(220,184,14,255));
+    }
     Point pos(0.177, (8.0/13.0));
-    Explorer::getInstance()->getFont(FontID::Normal)->RenderText(currentName.name, pos.getx(), pos.gety(), 0.3f, SmallNameColor);
+    Font** fontPtr = Explorer::getInstance()->getFontPtr(FontID::Normal);
+    if (fontPtr && *fontPtr) {
+        (*fontPtr)->RenderText(currentName.name, pos.getx(), pos.gety(), 0.3f, SmallNameColor);
+    }
     nameButton.Draw();
 }
 
@@ -223,7 +228,7 @@ void NameScreen::changeName() {
 }
 
 void NameButton::Draw(unsigned char alpha) {
-    if(!font)return;
+    if(!fontPtr || !*fontPtr)return;
     int i=0;
     for(auto&r: regions) 
         r.setFatherRegion(region);
@@ -233,14 +238,14 @@ void NameButton::Draw(unsigned char alpha) {
             Drawer::getInstance()->DrawSquare(region,Color(255,0,255,255),false);
         }
         if(starCount<6)
-            font->RenderCharFitRegion(c, regions[i].getx(), regions[i].gety(), regions[i].getxend(), regions[i].getyend(), color);
+            (*fontPtr)->RenderCharFitRegion(c, regions[i].getx(), regions[i].gety(), regions[i].getxend(), regions[i].getyend(), color);
         else
-            font->RenderCharFitRegion(c, regions[i].getx(), regions[i].gety()
+            (*fontPtr)->RenderCharFitRegion(c, regions[i].getx(), regions[i].gety()
             ,regions[i].getxend(), regions[i].getyend(), star6Color);
         i++;
     }
     else {
-        font->RenderTextCentered(text, region, fontScale, color);
+        (*fontPtr)->RenderTextCentered(text, region, fontScale, color);
     }
 }
 
