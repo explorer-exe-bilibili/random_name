@@ -46,7 +46,7 @@ jobs:
 
           # Linux x64
           - os: ubuntu-latest
-            arch: x64-clang
+            arch: x64
             c_compiler: clang
             cpp_compiler: clang++
             vcpkg_triplet: x64-linux-release
@@ -87,7 +87,6 @@ jobs:
       uses: ilammy/msvc-dev-cmd@v1
       with:
         arch: ${{ matrix.arch }}
-        vs-version: latest
 
     - name: Setup Windows Build Tools
       if: runner.os == 'Windows'
@@ -346,6 +345,7 @@ jobs:
         ls -la
         
         tar -czf ~/random_name_${{ matrix.arch }}_${{ runner.os }}.tar.gz *
+        zip -r ~/random_name_${{ matrix.arch }}_${{ runner.os }}.zip *
 
     - name: Create Installer
       if: matrix.os == 'windows-latest' || matrix.os == 'windows-11-arm'
@@ -368,7 +368,9 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: random_name_${{ matrix.arch }}_${{ runner.os }}
-        path: ~/random_name_${{ matrix.arch }}_${{ runner.os }}.tar.gz
+        path: |
+          ~/random_name_${{ matrix.arch }}_${{ runner.os }}.tar.gz
+          ~/random_name_${{ matrix.arch }}_${{ runner.os }}.zip
         retention-days: 30
 
     - name: Upload Installer
@@ -382,7 +384,8 @@ jobs:
     - name: prepare_release
       run: |
        cp ~/random_name_${{ matrix.arch }}_${{ runner.os }}.tar.gz "${{ github.workspace }}/random_name_${{ matrix.arch }}_${{ runner.os }}.tar.gz" || true
-       mkdir -p "${{ github.workspace }}/installer_program" 
+       cp ~/random_name_${{ matrix.arch }}_${{ runner.os }}.zip "${{ github.workspace }}/random_name_${{ matrix.arch }}_${{ runner.os }}.zip" || true
+       mkdir -p "${{ github.workspace }}/installer_program"
        cp ${{ github.workspace }}/installer/Output/*.exe "${{ github.workspace }}/installer_program/" || true
 
     - name: Create Release
@@ -391,6 +394,7 @@ jobs:
       with:
         files: |
           ${{ github.workspace }}/random_name_${{ matrix.arch }}_${{ runner.os }}.tar.gz
+          ${{ github.workspace }}/random_name_${{ matrix.arch }}_${{ runner.os }}.zip
           ${{ github.workspace }}/installer_program/*.exe
         prerelease: true
         make_latest: false

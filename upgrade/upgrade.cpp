@@ -3,12 +3,12 @@
 #include <string>
 #include <vector>
 
+
 int main(){
     Log.setFile("files/upgrade.log");
     Log << Level::Info << "开始升级程序" << op::endl;
     // 服务器列表
     std::vector<std::string> servers = {
-        "http://localhost:5244/",
         "https://alist.1class.top/",
         "https://alist.class1.dpdns.org/",
         "http://hn.lxhtt.cn:55246/",
@@ -22,7 +22,16 @@ int main(){
     for(const auto& serverUrl : servers) {
         alist_api api(serverUrl, "apiuser", "password");
         if(api.isConnectAble()) {
-            if(api.downloadFile(api.getFileUrl(), "package.zip")) {
+            std::string downloadurl = api.getFileUrl();
+            if(downloadurl.empty()) {
+                Log << Level::Error << "获取下载链接失败" << op::endl;
+                continue;
+            }
+            else if(downloadurl=="new_version_not_found") {
+                Log << Level::Info << "没有找到新版本" << op::endl;
+                return 0;
+            }
+            if(api.downloadFile(downloadurl, "package.zip")) {
                 downloadSuccess = true;
                 break;
             }

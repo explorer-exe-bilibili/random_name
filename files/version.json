@@ -1,8 +1,0 @@
-{
-    "version": "1.1.0",
-    "download_url": "https://github.com/your-username/your-repo/releases/download/v1.1.0/random_name.exe",
-    "release_notes": "修复了一些bug，增加了新功能",
-    "file_size": 5242880,
-    "checksum": "sha256:abcdef1234567890",
-    "required": false
-}

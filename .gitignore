@@ -34,6 +34,9 @@ bld/
 [Ll]ogs/
 build*/
 old_src/
+setting.json
+temp_img/
+*副本*/
 
 
 # Visual Studio 2015/2017 cache/options directory
