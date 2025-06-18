@@ -4,7 +4,8 @@
 #include "version.h"
 #include <regex>
 #include <nlohmann/json.hpp>
-#include <format>
+#include <sstream>
+#include <iomanip>
 
 using namespace nlohmann;
 using namespace std;
@@ -100,13 +101,13 @@ size_t write_data(void* ptr, size_t size, size_t nmemb, FILE* stream) {
 	return written;
 }
 
-int progress_callback(void* clientp, double dltotal, double dlnow, double ultotal, double ulnow) {
+int progress_callback(void* clientp, curl_off_t dltotal, curl_off_t dlnow, curl_off_t ultotal, curl_off_t ulnow) {
 	static const char* spinner = "|/-\\";
 	static int spin_pos = 0,ms;
 	static bool first_call = true, gotsized=false;
 	static std::chrono::steady_clock::time_point last_update_time = std::chrono::steady_clock::now();
 	double nowSize, totalSize,changedSize, changedSize_;
-    static double last_file_size = 0;
+    static curl_off_t last_file_size = 0;
 	string nowsize;
 	static string totalsize, changedsize;
 	ms = 2000;
@@ -126,7 +127,9 @@ int progress_callback(void* clientp, double dltotal, double dlnow, double ultota
 			else totalSize = dltotal / 1024 / 1024;
 		}
 		else totalSize = dltotal / 1024 / 1024 / 1024;
-		totalsize = std::format("{:.1f}", totalSize);
+		std::ostringstream oss;
+		oss << std::fixed << std::setprecision(1) << totalSize;
+		totalsize = oss.str();
 		if (dltotal / 1024 / 1024 / 1024 <= 1) {
 			if ((dltotal / 1024 / 1024) <= 1) {
 				if (dltotal / 1024 <= 1) {
@@ -154,7 +157,9 @@ int progress_callback(void* clientp, double dltotal, double dlnow, double ultota
 			else nowSize = dlnow / 1024 / 1024;
 		}
 		else nowSize = dlnow / 1024 / 1024 / 1024;
-		nowsize = std::format("{:.1f}", nowSize);
+		std::ostringstream oss2;
+		oss2 << std::fixed << std::setprecision(1) << nowSize;
+		nowsize = oss2.str();
 		if (dlnow / 1024 / 1024 / 1024 <= 1) {
 			if ((dlnow / 1024 / 1024) <= 1) {
 				if (dlnow / 1024 <= 1) {
@@ -178,7 +183,9 @@ int progress_callback(void* clientp, double dltotal, double dlnow, double ultota
 				else changedSize = changedSize_ / 1024 / 1024 / ms * 1000;
 			}
 			else changedSize = changedSize_ / 1024 / 1024 / 1024 / ms * 1000;
-			changedsize = std::format("{:.1f}", changedSize);
+			std::ostringstream oss3;
+			oss3 << std::fixed << std::setprecision(1) << changedSize;
+			changedsize = oss3.str();
 			if (changedSize_ / 1024 / 1024 / 1024 / ms * 1000 <= 1) {
 				if ((changedSize_ / 1024 / 1024 / ms * 1000) <= 1) {
 					if (changedSize_ / 1024 / ms * 1000 <= 1) {
@@ -221,7 +228,7 @@ bool alist_api::downloadFile(const std::string& url, const std::string& destPath
 			curl_easy_setopt(curl, CURLOPT_WRITEDATA, fp);
 			// 设置进度回调函数
 			curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 0L);
-			curl_easy_setopt(curl, CURLOPT_PROGRESSFUNCTION, progress_callback);
+			curl_easy_setopt(curl, CURLOPT_XFERINFOFUNCTION, progress_callback);
 			// 执行下载
 			res = curl_easy_perform(curl);
 			// 关闭文件
