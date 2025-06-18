@@ -364,7 +364,7 @@ jobs:
         SOURCE_DIR: ${{ github.workspace }}\installer_files
         OUTPUT_DIR: ${{ github.workspace }}\installer\Output
         ARCH: ${{ matrix.arch }}
-        ICON_PATH: ${{ github.workspace }}\OIP-C.ico
+        ICON_PATH: ${{ github.workspace }}\random.ico
       shell: pwsh
       run: |
         mkdir -p "${{ github.workspace }}/installer/Output" -ErrorAction SilentlyContinue
