@@ -1,6 +1,7 @@
 #include "unzip.h"
 
 #include <string>
+#include <cstring>
 #include <vector>
 #include <filesystem>
 #include <fstream>

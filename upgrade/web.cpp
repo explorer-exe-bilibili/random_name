@@ -4,6 +4,7 @@
 #include "version.h"
 #include <regex>
 #include <nlohmann/json.hpp>
+#include <format>
 
 using namespace nlohmann;
 using namespace std;

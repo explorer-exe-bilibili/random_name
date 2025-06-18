@@ -226,6 +226,18 @@ if(WIN32)
         @ONLY
     )
     
+    # 复制图标文件到生成目录，以便资源编译器能找到它们
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/random.ico"
+        "${CMAKE_BINARY_DIR}/generated/random.ico"
+        COPYONLY
+    )
+    configure_file(
+        "${CMAKE_CURRENT_SOURCE_DIR}/upgrade.ico"
+        "${CMAKE_BINARY_DIR}/generated/upgrade.ico"
+        COPYONLY
+    )
+    
     # 确保图标文件存在
     if(NOT EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/random.ico")
         message(WARNING "Icon file random.ico not found in project root")
@@ -255,11 +267,20 @@ file(GLOB_RECURSE HEADERS "include/*.hpp" "include/*.h")
 
 file(GLOB_RECURSE UPGRADE "upgrade/*.cpp" "upgrade/*.c")
 
+
 # 创建主程序可执行文件
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+if(WIN32)
+    add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${RESOURCE_FILES})
+else()
+    add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS})
+endif()
 
 # 创建自动更新程序
-add_executable(upgrade ${UPGRADE})
+if(WIN32)
+    add_executable(upgrade ${UPGRADE} ${UPGRADE_RESOURCE_FILES})
+else()
+    add_executable(upgrade ${UPGRADE})
+endif()
 
 if(USE_SYSTEM_DEPS)
     message(STATUS "Using system dependencies")
