@@ -1,6 +1,7 @@
 #include "mainloop.h"
 #include <SDL.h>
 #include <stdio.h>
+#include <filesystem>
 #include "core/screen/mainScreen.h"
 #include "core/screen/SettingScreen.h"
 #include "core/screen/VideoScreen.h"
@@ -129,6 +130,11 @@ int init(){
         return -1;
     }    Config::getInstance()->init();
     SetConfigItems();
+    if(std::filesystem::exists("upgrade_temp.exe")){
+        std::filesystem::remove("upgrade.exe");
+        Log<<Level::Info<<"Found upgrade_temp.exe, starting upgrade process"<<op::endl;
+        std::filesystem::rename("upgrade_temp.exe", "upgrade.exe");
+    }
     core::startFileWithoutWindow("upgrade.exe");
     // 设置OpenGL版本和兼容性模式
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
