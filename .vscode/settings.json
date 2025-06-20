@@ -8,6 +8,8 @@
         "PYTHONIOENCODING": "utf-8"
     },
     // CMake 和 vcpkg 设置
+    "cmake.generator": "Ninja",
+    "cmake.buildDirectory": "${workspaceFolder}/out/build",
     "cmake.configureArgs": [
         "-DVCPKG_APPLOCAL_DEPS=ON",
         "-DX_VCPKG_APPLOCAL_DEPS_INSTALL=ON"

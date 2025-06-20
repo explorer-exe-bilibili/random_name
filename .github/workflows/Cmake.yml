@@ -371,7 +371,7 @@ jobs:
         Write-Host "SOURCE_DIR: $env:SOURCE_DIR"
         Write-Host "Checking if installer_files exists:"
         Get-ChildItem "${{ github.workspace }}\installer_files" | Format-Table -AutoSize
-        iscc installer_action/common.iss
+        iscc installer/common.iss
       continue-on-error: true
 
     - name: Upload Artifacts

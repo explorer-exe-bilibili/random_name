@@ -377,10 +377,7 @@ FodyWeavers.xsd
 config.txt
 setting.json
 CMakePresets.json
-CMakeSettings.json
 .gitignore
 CMakeSettings.json
 CMakeUserPresets.json
-CMakeSettings.json
-CMakeSettings.json
-CMakeSettings.json
+build_number.txt
