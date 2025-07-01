@@ -59,7 +59,7 @@ if(NOT USE_SYSTEM_DEPS)
     endif()
 endif()
 # 设置项目名称和版本
-project(random_name VERSION 2.0.1· LANGUAGES CXX)
+project(random_name VERSION 2.0.1 LANGUAGES CXX)
 
 # 定义版本相关变量
 set(PROJECT_VERSION_MAJOR 2)
