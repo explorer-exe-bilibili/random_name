@@ -159,7 +159,7 @@ std::string Config::getPath(const std::string& name, const std::string& defaultV
         std::filesystem::path exePath = std::filesystem::current_path();
         fsPath = exePath / fsPath;
     }
-    if (std::filesystem::exists(fsPath)) {
+    if (core::isFileExists(fsPath.string())) {
         return fsPath.string();
     }
     else{

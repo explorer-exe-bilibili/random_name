@@ -16,6 +16,7 @@
     #include <unistd.h>
     #include <sys/types.h>
     #include <sys/wait.h>
+    #include <sys/stat.h>
     #include <limits.h>
     #ifdef __APPLE__
         #include <mach-o/dyld.h>
@@ -99,6 +100,61 @@ void core::openFile(const std::string& path) {
     // Linux 平台
     std::string command = "xdg-open \"" + fspath.string() + "\"";
     system(command.c_str());
+#endif
+}
+
+
+bool core::isFileExists(const std::string& path) {
+        if (path.empty()) {
+            return false;
+        }
+        
+#ifdef _WIN32
+        try {
+            // Windows平台：将UTF-8路径转换为宽字符
+            int wlen = MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, nullptr, 0);
+            if (wlen <= 0) {
+                Log << Level::Error << "Failed to calculate wide string length for path: " << path << op::endl;
+                return false;
+            }
+            
+            std::vector<wchar_t> wpath(wlen);
+            int result = MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, wpath.data(), wlen);
+            if (result <= 0) {
+                Log << Level::Error << "Failed to convert UTF-8 path to wide string: " << path << op::endl;
+                return false;
+            }
+            
+            // 使用Windows API检查文件是否存在
+            DWORD attributes = GetFileAttributesW(wpath.data());
+            bool exists = (attributes != INVALID_FILE_ATTRIBUTES);
+            
+            Log << Level::Debug << "FileExistsUTF8 (Windows): " << path << " -> " << (exists ? "exists" : "not found") << op::endl;
+            return exists;
+        }
+        catch (const std::exception& e) {
+            Log << Level::Error << "Exception in FileExistsUTF8 (Windows): " << e.what() << " for path: " << path << op::endl;
+            // 回退到标准库方法
+            try {
+                return std::filesystem::exists(std::filesystem::u8path(path));
+            }
+            catch (...) {
+                return std::filesystem::exists(path);
+            }
+        }
+#else
+        // Unix系统（Linux/macOS）：直接使用UTF-8路径
+        try {
+            bool exists = std::filesystem::exists(path);
+            Log << Level::Debug << "FileExistsUTF8 (Unix): " << path << " -> " << (exists ? "exists" : "not found") << op::endl;
+            return exists;
+        }
+        catch (const std::exception& e) {
+            Log << Level::Error << "Exception in FileExistsUTF8 (Unix): " << e.what() << " for path: " << path << op::endl;
+            // 回退到C风格检查
+            struct stat buffer;
+            return (stat(path.c_str(), &buffer) == 0);
+        }
 #endif
 }
 

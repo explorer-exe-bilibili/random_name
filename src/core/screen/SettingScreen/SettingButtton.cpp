@@ -8,6 +8,7 @@
 #include <iterator>
 #include <locale>
 #include <codecvt>
+#include <vector>
 
 #ifdef _WIN32
 #include <windows.h>
@@ -21,6 +22,7 @@
 #include <unistd.h>
 #include <sys/wait.h>
 #include <cstdlib>
+#include <sys/stat.h>
 #endif
 
 using namespace core;
@@ -637,9 +639,10 @@ SettingButton::SettingButton(sItem item_, int number, int page)
             });
         }
         else if(item.type==SettingButtonType::FileSelect){
-            showText=Config::getInstance()->get(item.configName,"");
+            showText=Config::getInstance()->getPath(item.configName,"");
             if(!showText.empty()){
-                if(!std::filesystem::exists(showText)){
+                if(!core::isFileExists(showText)){
+                    Log<<Level::Warn<<"FileSelect button - file does not exist: "<<showText<<op::endl;
                     showText="等待选择";
                 }
                 else{
@@ -673,7 +676,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
                     
                     std::string path=selectFile();
                     if (!path.empty()) {
-                        if(!std::filesystem::exists(path))return;
+                        if(!core::isFileExists(path))return;
                         Config::getInstance()->set(configName,path);
                         Config::getInstance()->saveToFile();
                         // 只显示文件名，不显示完整路径
@@ -720,7 +723,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
         else if(item.type==SettingButtonType::PathSelect){
             showText=Config::getInstance()->get(item.configName,"");
             if(!showText.empty()){
-                if(!std::filesystem::exists(showText)){
+                if(!core::isFileExists(showText)){
                     showText="等待选择";
                 }
                 else{
@@ -754,7 +757,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
                     
                     std::string path=selectPath();
                     if (!path.empty()) {
-                        if(!std::filesystem::exists(path))return;
+                        if(!core::isFileExists(path))return;
                         if(!showText.empty()){
                             // 只显示文件名，不显示完整路径
                             size_t pos = path.find_last_of("/\\");
@@ -803,7 +806,7 @@ void SettingButton::Draw(int currentPage, unsigned char alpha)const {
         // 绘制编辑框背景（亮白色，完全不透明）
         Drawer::getInstance()->DrawSquare(editingTextRegion, Color(255, 255, 255, 255), true);
         // 绘制边框（蓝色）
-        Drawer::getInstance()->DrawSquare(editingTextRegion, Color(0, 120, 255, 255), false);
+        Drawer::getInstance()->DrawSquare(editingTextRegion, Color(0,120,255,255), false);
         
         // 准备显示文本（包含光标）
         std::string displayText = editingText;
@@ -1035,6 +1038,13 @@ std::string SettingButton::selectPath(){
 void SettingButton::openFile() {
     std::string filePath = Config::getInstance()->get(item.configName);
     if (filePath.empty()) return;
+    
+    // 检查文件是否存在
+    if (!core::isFileExists(filePath)) {
+        Log << Level::Warn << "openFile: File does not exist: " << filePath << op::endl;
+        return;
+    }
+    
     std::filesystem::path fspath(filePath);
     if (fspath.is_relative()) {
         // 获取可执行文件所在目录
