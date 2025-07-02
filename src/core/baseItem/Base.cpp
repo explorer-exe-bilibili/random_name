@@ -80,23 +80,29 @@ size_t core::utf8_length(const std::string& str) {
 
 void core::openFile(const std::string& path) {
     if (path.empty()) return;
+#ifdef _WIN32
+    // Windows 平台
+    std::filesystem::path fspath(core::string2wstring(path));
+
+    std::wstring command = L"start \"\" \"" + fspath.wstring() + L"\"";
+    _wsystem(command.c_str());
+    return;
+
+#else
     std::filesystem::path fspath(path);
     if (fspath.is_relative()) {
         // 获取可执行文件所在目录
         std::filesystem::path exePath = std::filesystem::current_path();
         fspath = exePath / fspath;
     }
-    // 在 tinyfiledialogs 中没有直接的打开文件功能
-    // 使用平台特定的命令来打开文件
-#ifdef _WIN32
-    // Windows 平台
-    std::string command = "start \"\" \"" + fspath.string() + "\"";
-    system(command.c_str());
-#elif defined(__APPLE__)
+#endif
+
+#ifdef __APPLE__
     // macOS 平台
     std::string command = "open \"" + fspath.string() + "\"";
     system(command.c_str());
-#else
+#endif
+#ifdef __linux__
     // Linux 平台
     std::string command = "xdg-open \"" + fspath.string() + "\"";
     system(command.c_str());
@@ -111,26 +117,9 @@ bool core::isFileExists(const std::string& path) {
         
 #ifdef _WIN32
         try {
-            // Windows平台：将UTF-8路径转换为宽字符
-            int wlen = MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, nullptr, 0);
-            if (wlen <= 0) {
-                Log << Level::Error << "Failed to calculate wide string length for path: " << path << op::endl;
-                return false;
-            }
-            
-            std::vector<wchar_t> wpath(wlen);
-            int result = MultiByteToWideChar(CP_UTF8, 0, path.c_str(), -1, wpath.data(), wlen);
-            if (result <= 0) {
-                Log << Level::Error << "Failed to convert UTF-8 path to wide string: " << path << op::endl;
-                return false;
-            }
-            
-            // 使用Windows API检查文件是否存在
-            DWORD attributes = GetFileAttributesW(wpath.data());
-            bool exists = (attributes != INVALID_FILE_ATTRIBUTES);
-            
-            Log << Level::Debug << "FileExistsUTF8 (Windows): " << path << " -> " << (exists ? "exists" : "not found") << op::endl;
-            return exists;
+            std::wstring wPath = core::string2wstring(path);
+            std::filesystem::path fsPath(wPath);
+            return std::filesystem::exists(fsPath);
         }
         catch (const std::exception& e) {
             Log << Level::Error << "Exception in FileExistsUTF8 (Windows): " << e.what() << " for path: " << path << op::endl;
@@ -156,6 +145,16 @@ bool core::isFileExists(const std::string& path) {
             return (stat(path.c_str(), &buffer) == 0);
         }
 #endif
+}
+
+bool core::stringContains(const std::string& str, const std::string& substr) {
+    if (substr.empty()) {
+        return true;  // 空字符串被认为包含在任何字符串中
+    }
+    if (str.empty()) {
+        return false; // 空字符串不能包含非空字符串
+    }
+    return str.find(substr) != std::string::npos;
 }
 
 void core::startFileWithoutWindow(const std::string& path) {

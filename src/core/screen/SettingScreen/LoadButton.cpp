@@ -3,6 +3,9 @@
 #include "core/Config.h"
 
 #include "nlohmann/json.hpp"
+#include <fstream>
+#include <iostream>
+#include <iterator>
 
 using namespace screen;
 using namespace core;
@@ -559,21 +562,22 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p.clear();
       // 写入JSON文件
     if (bools[boolconfig::use_json_settings]) {
-        std::ofstream file(jsonpath);
+        std::ofstream file("files/settings.json", std::ios::out | std::ios::trunc);
         if (file.is_open()) {
             try {
                 Log << Level::Info << "开始写入JSON设置项" << op::endl;
                 file << j.dump(4); // 将JSON数据写入文件，4表示缩进4个空格
                 file.close();
-                Log << Level::Info << "JSON数据已写入到: " << jsonpath << op::endl;
+                Log << Level::Info << "JSON数据已写入到: " << "files/settings.json" << op::endl;
             }
             catch (const std::exception& e) {
                 Log << Level::Error << "写入JSON设置项时出错: " << e.what() << op::endl;
+                file.close();
                 return j;
             }
         }
         else {
-            Log << Level::Error << "无法打开文件进行写入" << op::endl;
+            Log << Level::Error << "无法打开文件进行写入: files/settings.json" << op::endl;
         }
     }
     
@@ -585,20 +589,36 @@ void SettingScreen::loadButtons() {
     titles.clear();
     nlohmann::json jsonData;
     if(bools[boolconfig::use_json_settings]){
-        std::ifstream file("files/settings.json");
+        std::ifstream file("files/settings.json", std::ios::in);
         if (!file.is_open()) {
-            Log << Level::Error << "无法打开设置文件" << op::endl;
+            Log << Level::Info << "设置文件不存在，创建默认设置" << op::endl;
             jsonData = RollBack("files/settings.json");
         }
-        try {
-            file >> jsonData;
-        } catch (const nlohmann::json::parse_error& e) {
-            Log << Level::Error << "JSON解析错误: " << e.what() << op::endl;
-            jsonData = RollBack("files/settings.json");
+        else {
+            try {
+                // 读取文件内容为字符串，避免编码问题
+                std::string content((std::istreambuf_iterator<char>(file)),
+                                   std::istreambuf_iterator<char>());
+                file.close();
+                
+                if (content.empty()) {
+                    Log << Level::Info << "设置文件为空，创建默认设置" << op::endl;
+                    jsonData = RollBack("files/settings.json");
+                }
+                else {
+                    jsonData = nlohmann::json::parse(content);
+                }
+            } catch (const nlohmann::json::parse_error& e) {
+                Log << Level::Error << "JSON解析错误: " << e.what() << op::endl;
+                jsonData = RollBack("files/settings.json");
+            } catch (const std::exception& e) {
+                Log << Level::Error << "读取设置文件时出错: " << e.what() << op::endl;
+                jsonData = RollBack("files/settings.json");
+            }
         }
-        file.close();
+        
         if (jsonData.is_null()) {
-            Log << Level::Error << "JSON数据为空" << op::endl;
+            Log << Level::Info << "JSON数据为空，创建默认设置" << op::endl;
             jsonData = RollBack("files/settings.json");
         }        if (!jsonData.contains("pages") || !jsonData["pages"].is_array()) {
             Log << Level::Error << "JSON数据格式错误，应该包含pages数组" << op::endl;
@@ -631,6 +651,7 @@ void SettingScreen::loadButtons() {
                     else if(item.fileType==FileType::Font){
                         item.fontID = button.value(FONT_ID, core::FontID::Unknown);
                     }
+                    else if(item.fileType==FileType::NameFile){}
                 }
                 else if(item.action&SettingButtonAction::CountBetween){
                     item.minCount = button.value(MIN_COUNT, 0);
@@ -638,7 +659,7 @@ void SettingScreen::loadButtons() {
                     item.outOfLimitOutPut = button.value(OUT_OF_LIMIT_OUTPUT, "");
                 }
                 int number=button.value(NUMBER, 0);
-                s_buttons.push_back(std::make_shared<SettingButton>(item, number, page));
+                s_buttons.emplace_back(std::make_shared<SettingButton>(item, number, page));
             }
             page++;
         }

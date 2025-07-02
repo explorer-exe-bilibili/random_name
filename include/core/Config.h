@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <nlohmann/json.hpp>
 #include "configItem.h"
+#include "baseItem/Base.h"
 
 namespace core {
 
@@ -64,18 +65,23 @@ public:
     // 获取配置值
     std::string get(const std::string& name, const std::string& defaultValue = "");
     std::string getPath(const std::string& name, const std::string& defaultValue = "");
+    Region getRegion(const std::string& name, const Region& defaultValue = {});
     int getInt(const std::string& name, int defaultValue = 0);
     unsigned int getUInt(const std::string& name, unsigned int defaultValue = 0);
     long long getLong(const std::string& name, long long defaultValue = 0);
     double getDouble(const std::string& name, double defaultValue = 0.0);
     bool getBool(const std::string& name, bool defaultValue = false);
+    float getRatioedInt(const std::string& name, float defaultValue = 0.0f);
     
     // 替换配置值
     void set(const std::string& name, const std::string& value);
     void set(const std::string& name, int value);
+    void set(const std::string& name, float value, float isRatioed= false);
     void set(const std::string& name, unsigned int value);
     void set(const std::string& name, double value);
     void set(const std::string& name, bool value);
+    void set(const std::string& name, const Region& region);
+    void set(const RegionName category, const std::string& name, const Region& region);
     
     // 设置默认值（如果不存在则添加）
     void setifno(const std::string& name, const std::string& value);
@@ -84,6 +90,8 @@ public:
     void setifno(const std::string& name, unsigned int value);
     void setifno(const std::string& name, double value);
     void setifno(const std::string& name, bool value);
+    void setifno(const std::string& name, const Region& region);
+    void setifno(const RegionName category, const std::string& name, const Region& region);
     // 删除配置项
     void remove(const std::string& name);
     
@@ -106,6 +114,12 @@ public:
     
     // 清理资源
     void cleanup();
+    
+    void setCurrentRegionName(const RegionName& regionName);
+
+    // 区域验证和修正
+    bool validateRegion(const Region& region);
+    Region normalizeRegion(const Region& region);
 };
 
 } // namespace core

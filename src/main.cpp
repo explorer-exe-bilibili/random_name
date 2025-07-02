@@ -142,9 +142,10 @@ int init(){
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
     // 启用向前兼容性
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
+    Config& config=*Config::getInstance();
     Log<<Level::Info<<"Creating window"<<op::endl;
     // 创建窗口
-    WindowInfo.window = glfwCreateWindow(800, 600, Config::getInstance()->get(WINDOW_TITLE, "祈愿").c_str(), nullptr, nullptr);
+    WindowInfo.window = glfwCreateWindow(config.getInt(WINDOW_WIDTH, 800), config.getInt(WINDOW_HEIGHT, 600), config.get(WINDOW_TITLE, "祈愿").c_str(), nullptr, nullptr);
     if (!WindowInfo.window) {
         glfwTerminate();
         return -1;
@@ -176,8 +177,9 @@ int init(){
         const GLubyte* version = glGetString(GL_VERSION);
         std::cout << "OpenGL Version: " << version << std::endl;
     }
-    core::WindowInfo.width = 800;
-    core::WindowInfo.height = 600;
+    core::WindowInfo.width = config.getInt(WINDOW_WIDTH, 800);
+    core::WindowInfo.height = config.getInt(WINDOW_HEIGHT, 600);
+    
     Log<<Level::Info<<"Init explorer"<<op::endl;
     core::Explorer::getInstance();
 

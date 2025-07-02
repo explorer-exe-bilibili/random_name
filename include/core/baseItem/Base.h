@@ -78,8 +78,24 @@ namespace core
         float getyend_() const { return screenRatio ? yend * WindowInfo.height : yend; }
 
         operator glm::vec4() const { return glm::vec4(getx(), gety(), getxend(), getyend()); }
+    };    
+    // Region预设名称
+    enum class RegionName
+    {
+        DEFAULT,
+        FULLSCREEN,
+        SMALL_WINDOW,
+        SIMULATE_MOBILE
     };
-
+    inline std::string to_string(RegionName name) {
+        switch (name) {
+            case RegionName::DEFAULT: return "default";
+            case RegionName::FULLSCREEN: return "fullscreen";
+            case RegionName::SMALL_WINDOW: return "small_window";
+            case RegionName::SIMULATE_MOBILE: return "simulate_mobile";
+            default: return "unknown";
+        }
+    }
     class Point {
         float x,y;
         bool screenRatio=true;
@@ -130,6 +146,7 @@ namespace core
     void openFile(const std::string& path);
     bool isFileExists(const std::string& path);
     void startFileWithoutWindow(const std::string& path);
+    bool stringContains(const std::string& str, const std::string& substr);
     void quit();
     void restart();
 }

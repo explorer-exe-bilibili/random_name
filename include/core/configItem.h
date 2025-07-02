@@ -1,5 +1,8 @@
 #pragma once 
 
+// 配置项名称定义
+
+// 卡池相关
 #define POOL_COUNT "pool_count"
 #define MODE "mode"
 #define SPECIAL "special"
@@ -13,16 +16,19 @@
 #define OVERLAY3 "overlay3"
 #define OVERLAY4 "overlay4"
 
+// 界面颜色相关
 #define NAME_COLOR "name_color"
 #define NAME_COLOR_6_STAR "name_color_6_star"
 #define TEXT_COLOR "text_color"
 
+// 界面开关相关
 #define OFF_MUSIC "off_music"
 #define INWINDOW "in_window"
 #define OFF_VIDEO "off_video"
 #define USE_VIDEO_BACKGROUND "use_video_background"
 #define NOSMOOTHUI "no_smooth_ui"
 
+// 界面浮窗相关
 #define FLOATWINDOW "float_window_switch"
 #define FLOAT_WINDOW_WIDTH "float_window_width"
 #define FLOAT_WINDOW_HEIGHT "float_window_height"
@@ -32,15 +38,15 @@
 #define FLOAT_WINDOW_IMG "float_window_img"
 #define FLOAT_WINDOW_ALPHA "float_window_alpha"
 
+// 窗口相关
 #define WINDOW_WIDTH "window_width"
 #define WINDOW_HEIGHT "window_height"
 #define WINDOW_X "window_x"
 #define WINDOW_Y "window_y"
 #define VERTICAL_SYNC "vertical_sync"
 #define WINDOW_TITLE "window_title"
-#define USE_FONT_COMPATIBILITY "font_compatibility"
-#define NO_VIDEO_PRELOAD "no_video_preload"
 
+// 界面资源相关
 #define BACKGROUND_IMG_PATH "background_img_path"
 #define IMGS_PATH "imgs_path"
 #define DEFAULT_FONT_PATH "default_font_path"
@@ -62,10 +68,25 @@
 #define STAR_5_MUSIC_PATH "star_5_music_path"
 #define STAR_FULL_MUSIC_PATH "star_full_music_path"
 
+// 杂项
 #define DEBUG "debug"
 #define SHOW_FPS "show_fps"
 #define USE_JSON_SETTINGS "use_json_settings"
 #define VOLUME "volume"
+#define USE_FONT_COMPATIBILITY "font_compatibility"
+#define NO_VIDEO_PRELOAD "no_video_preload"
+
+// Region相关配置键定义
+#define UI_REGION_MAIN_MENU "ui_region_main_menu"
+#define UI_REGION_SETTING_PANEL "ui_region_setting_panel"
+#define UI_REGION_NAME_DISPLAY "ui_region_name_display"
+#define UI_REGION_BUTTON_AREA "ui_region_button_area"
+#define UI_REGION_VIDEO_PLAYER "ui_region_video_player"
+#define UI_REGION_OVERLAY "ui_region_overlay"
+#define UI_REGION_FLOAT_WINDOW "ui_region_float_window"
+#define UI_REGION_SETTING_BUTTON "ui_region_setting_button"
+#define UI_REGION_NAME_LIST "ui_region_name_list"
+#define UI_REGION_CONTROL_PANEL "ui_region_control_panel"
 
 enum class boolconfig {
     offmusic = 0,

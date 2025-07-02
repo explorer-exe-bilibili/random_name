@@ -151,17 +151,23 @@ std::string Config::get(const std::string& name, const std::string& defaultValue
 
 std::string Config::getPath(const std::string& name, const std::string& defaultValue) {
     std::string path = get(name, defaultValue);
-    
+#ifdef _WIN32
+    std::wstring wPath=core::string2wstring(path);
+    std::filesystem::path fsPath(wPath);
+#else
     // 处理绝对路径和相对路径
     std::filesystem::path fsPath(path);
+#endif
     if (fsPath.is_relative()) {
         // 获取可执行文件所在目录
         std::filesystem::path exePath = std::filesystem::current_path();
         fsPath = exePath / fsPath;
     }
-    if (core::isFileExists(fsPath.string())) {
-        return fsPath.string();
-    }
+#ifdef _WIN32
+    if (core::isFileExists(core::wstring2string(fsPath.wstring()))) return core::wstring2string(fsPath.wstring());
+#else
+    if (core::isFileExists(fsPath.string())) return fsPath.string();
+#endif
     else{
         std::filesystem::path defaultFsPath(defaultValue);
         if (defaultFsPath.is_relative()) {
@@ -170,6 +176,35 @@ std::string Config::getPath(const std::string& name, const std::string& defaultV
             defaultFsPath = exePath / defaultFsPath;
         }
         return defaultFsPath.string();
+    }
+}
+
+Region Config::getRegion(const std::string& name, const Region& defaultValue) {
+    try {
+        nlohmann::json regionJson = getAsJson(name);
+        if (regionJson.is_null() || !regionJson.is_object()) {
+            return defaultValue;
+        }
+        
+        // 解析Region JSON格式：{"x": 0.0, "y": 0.0, "xend": 1.0, "yend": 1.0, "screenRatio": true}
+        float x = regionJson.value("x", defaultValue.getOriginX());
+        float y = regionJson.value("y", defaultValue.getOriginY());
+        float xend = regionJson.value("xend", defaultValue.getOriginXEnd());
+        float yend = regionJson.value("yend", defaultValue.getOriginYEnd());
+        bool screenRatio = regionJson.value("screenRatio", defaultValue.getRatio());
+        
+        Region region(x, y, xend, yend, screenRatio);
+        
+        // 验证区域有效性
+        if (!validateRegion(region)) {
+            Log << Level::Warn << "Invalid region loaded for " << name << ", using default" << op::endl;
+            return defaultValue;
+        }
+        
+        return region;
+    } catch (const std::exception& e) {
+        Log << Level::Error << "Error parsing region " << name << ": " << e.what() << op::endl;
+        return defaultValue;
     }
 }
 
@@ -185,6 +220,22 @@ int Config::getInt(const std::string& name, int defaultValue) {
         std::cerr << "Error converting value to int: " << e.what() << std::endl;
         return defaultValue;
     }
+}
+
+float Config::getRatioedInt(const std::string& name, float defaultValue) {
+    int value = std::stoi(get(name, ""));
+    if(value<0||value>screenInfo.height||value>screenInfo.width)return defaultValue;
+    if(name.find("width")!=std::string::npos){
+        if(name.find("screen")!=std::string::npos)
+            return value/screenInfo.width;
+        return value/WindowInfo.width;
+    }
+    if(name.find("height")!=std::string::npos){
+        if(name.find("screen")!=std::string::npos)
+            return value/screenInfo.height;
+        return value/WindowInfo.height;
+    }
+    return defaultValue;
 }
 
 unsigned int Config::getUInt(const std::string& name, unsigned int defaultValue) {
@@ -288,6 +339,36 @@ void Config::set(const std::string& name, bool value) {
     configItems[name] = value ? "1" : "0";
 }
 
+void Config::set(const std::string& name, const Region& region) {
+    try {
+        // 验证区域
+        if (!validateRegion(region)) {
+            Log << Level::Error << "Attempted to set invalid region for " << name << op::endl;
+            return;
+        }
+        
+        // 创建JSON对象
+        nlohmann::json regionJson = {
+            {"x", region.getOriginX()},
+            {"y", region.getOriginY()},
+            {"xend", region.getOriginXEnd()},
+            {"yend", region.getOriginYEnd()},
+            {"screenRatio", region.getRatio()}
+        };
+        
+        setJson(name, regionJson);
+        Log << Level::Info << "Set region " << name << ": (" << region.getOriginX() << "," << region.getOriginY() 
+              << ") to (" << region.getOriginXEnd() << "," << region.getOriginYEnd() << ")" << op::endl;
+    } catch (const std::exception& e) {
+        Log << Level::Error << "Error setting region " << name << ": " << e.what() << op::endl;
+    }
+}
+
+void Config::set(const RegionName category, const std::string& name, const Region& region) {
+    std::string key = to_string(category) + "." + name;
+    set(key, region);
+}
+
 void Config::setifno(const std::string &name, const std::string &value)
 {
     if (configItems.find(name) == configItems.end()) {
@@ -336,6 +417,18 @@ void Config::setifno(const std::string &name, bool value)
         configItems[name] = value ? "1" : "0";
         saveToFile(); // 自动保存
     }
+}
+
+void Config::setifno(const std::string& name, const Region& region) {
+    if (configItems.find(name) == configItems.end()) {
+        Log << Level::Info << "Setting default region for: " << name << op::endl;
+        set(name, region);
+    }
+}
+
+void Config::setifno(const RegionName category, const std::string& name, const Region& region) {
+    std::string key = to_string(category) + "." + name;
+    setifno(key, region);
 }
 
 // 设置屏幕尺寸
@@ -515,13 +608,57 @@ bool Config::readFromFile() {
                 value = std::to_string(it.value().get<double>());
             } else if (it.value().is_boolean()) {
                 value = it.value().get<bool>() ? "1" : "0";
+            } else if (it.value().is_object()) {
+                // 检查是否是Region类型的对象
+                if (it.value().contains("x") && it.value().contains("y") && 
+                    it.value().contains("xend") && it.value().contains("yend")) {
+                    // 这是一个Region对象，验证其有效性
+                    try {
+                        float x = it.value().value("x", 0.0f);
+                        float y = it.value().value("y", 0.0f);
+                        float xend = it.value().value("xend", 1.0f);
+                        float yend = it.value().value("yend", 1.0f);
+                        bool screenRatio = it.value().value("screenRatio", true);
+                        
+                        Region region(x, y, xend, yend, screenRatio);
+                        
+                        // 验证并修正Region
+                        if (!validateRegion(region)) {
+                            Log << Level::Warn << "Invalid region loaded for " << key << ", attempting to normalize" << op::endl;
+                            region = normalizeRegion(region);
+                        }
+                        
+                        // 将修正后的Region存储为JSON字符串
+                        nlohmann::json regionJson = {
+                            {"x", region.getOriginX()},
+                            {"y", region.getOriginY()},
+                            {"xend", region.getOriginXEnd()},
+                            {"yend", region.getOriginYEnd()},
+                            {"screenRatio", region.getRatio()}
+                        };
+                        value = regionJson.dump();
+                        
+                        Log << Level::Info << "Config::readFromFile() loaded region: " << key 
+                              << " = (" << region.getOriginX() << "," << region.getOriginY() 
+                              << ") to (" << region.getOriginXEnd() << "," << region.getOriginYEnd() << ")" << op::endl;
+                    } catch (const std::exception& e) {
+                        Log << Level::Error << "Error processing region " << key << ": " << e.what() << op::endl;
+                        // 如果处理失败，使用原始JSON字符串
+                        value = it.value().dump();
+                    }
+                } else {
+                    // 其他类型的对象，直接转换为字符串
+                    value = it.value().dump();
+                }
             } else {
-                // 对于复杂类型，转换为字符串表示
+                // 对于其他复杂类型，转换为字符串表示
                 value = it.value().dump();
             }
             
             configItems[key] = value;
-            Log << Level::Info << "Config::readFromFile() loaded: " << key << " = " << value << op::endl;
+            if (key.find("region") == std::string::npos) {
+                Log << Level::Info << "Config::readFromFile() loaded: " << key << " = " << value << op::endl;
+            }
         }
         
         Log << Level::Info << "Config::readFromFile() finished loading config file" << op::endl;
@@ -780,4 +917,53 @@ bool Config::toggleBool(const std::string& name) {
     return false; // 如果没有找到配置项，返回false
 
 }
+
+bool Config::validateRegion(const Region& region) {
+    // 基本边界检查
+    float x = region.getOriginX();
+    float y = region.getOriginY();
+    float xend = region.getOriginXEnd();
+    float yend = region.getOriginYEnd();
+    
+    // 检查坐标是否有效
+    if (x < 0 || y < 0 || xend < 0 || yend < 0) {
+        return false;
+    }
+    
+    // 检查区域是否有有效大小
+    if (xend <= x || yend <= y) {
+        return false;
+    }
+    
+    // 如果使用屏幕比例，检查是否在合理范围内
+    if (region.getRatio()) {
+        if (x > 1.0f || y > 1.0f || xend > 1.0f || yend > 1.0f) {
+            return false;
+        }
+    }
+    
+    return true;
+}
+
+Region Config::normalizeRegion(const Region& region) {
+    float x = std::max(0.0f, region.getOriginX());
+    float y = std::max(0.0f, region.getOriginY());
+    float xend = region.getOriginXEnd();
+    float yend = region.getOriginYEnd();
+    
+    // 确保end坐标大于起始坐标
+    if (xend <= x) xend = x + 0.1f;
+    if (yend <= y) yend = y + 0.1f;
+    
+    // 如果使用屏幕比例，限制在0-1范围内
+    if (region.getRatio()) {
+        x = std::min(1.0f, x);
+        y = std::min(1.0f, y);
+        xend = std::min(1.0f, xend);
+        yend = std::min(1.0f, yend);
+    }
+    
+    return Region(x, y, xend, yend, region.getRatio());
+}
+
 }

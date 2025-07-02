@@ -491,24 +491,50 @@ namespace {
 SettingButton::SettingButton(sItem item_, int number, int page)
     : item(item_), number(number), page(page) {
         
-        // 验证传入的item参数
-        if (item.configName.empty()) {
-            Log << Level::Warn << "SettingButton constructor - configName is empty for item: " << item.name << op::endl;
-            item.configName = "unknown_config"; // 设置默认值
-        }
-        
-        // 验证configName字符串的完整性
+        // 验证传入的item参数 - 使用更安全的字符串访问方式
         try {
-            size_t len = item.configName.length();
-            const char* data = item.configName.c_str();
-            if (data == nullptr || len == 0 || len > 1000) {
-                Log << Level::Error << "SettingButton constructor - invalid configName for item: " << item.name << op::endl;
-                item.configName = "unknown_config"; // 设置安全的默认值
+            // 安全地验证 name 字符串
+            if (item.name.empty()) {
+                Log << Level::Warn << "SettingButton constructor - name is empty" << op::endl;
+                item.name = "unknown_button";
+            } else {
+                // 验证字符串的有效性，但不输出中文内容到日志
+                size_t nameLen = item.name.length();
+                if (nameLen > 1000) {
+                    Log << Level::Warn << "SettingButton constructor - name too long, truncating" << op::endl;
+                    item.name = "long_name_truncated";
+                }
+            }
+            
+            // 安全地验证 configName 字符串
+            if (item.configName.empty()) {
+                Log << Level::Warn << "SettingButton constructor - configName is empty" << op::endl;
+                item.configName = "unknown_config";
+            } else {
+                size_t len = item.configName.length();
+                if (len > 1000) {
+                    Log << Level::Error << "SettingButton constructor - configName too long" << op::endl;
+                    item.configName = "unknown_config";
+                }
+            }
+            
+            // 安全地验证 outOfLimitOutPut 字符串
+            if (!item.outOfLimitOutPut.empty() && item.outOfLimitOutPut.length() > 1000) {
+                Log << Level::Warn << "SettingButton constructor - outOfLimitOutPut too long, truncating" << op::endl;
+                item.outOfLimitOutPut = "error_message_truncated";
             }
         }
+        catch (const std::exception& e) {
+            Log << Level::Error << "SettingButton constructor - exception during string validation: " << e.what() << op::endl;
+            item.name = "error_button";
+            item.configName = "unknown_config";
+            item.outOfLimitOutPut = "error";
+        }
         catch (...) {
-            Log << Level::Error << "SettingButton constructor - exception accessing configName for item: " << item.name << op::endl;
-            item.configName = "unknown_config"; // 设置安全的默认值
+            Log << Level::Error << "SettingButton constructor - unknown exception during string validation" << op::endl;
+            item.name = "error_button";
+            item.configName = "unknown_config";  
+            item.outOfLimitOutPut = "error";
         }
         
         font=core::Explorer::getInstance()->getFontPtr(FontID::Normal);
@@ -1036,36 +1062,7 @@ std::string SettingButton::selectPath(){
 }
 
 void SettingButton::openFile() {
-    std::string filePath = Config::getInstance()->get(item.configName);
-    if (filePath.empty()) return;
-    
-    // 检查文件是否存在
-    if (!core::isFileExists(filePath)) {
-        Log << Level::Warn << "openFile: File does not exist: " << filePath << op::endl;
-        return;
-    }
-    
-    std::filesystem::path fspath(filePath);
-    if (fspath.is_relative()) {
-        // 获取可执行文件所在目录
-        std::filesystem::path exePath = std::filesystem::current_path();
-        fspath = exePath / fspath;
-    }
-    // 在 tinyfiledialogs 中没有直接的打开文件功能
-    // 使用平台特定的命令来打开文件
-#ifdef _WIN32
-    // Windows 平台
-    std::string command = "start \"\" \"" + fspath.string() + "\"";
-    system(command.c_str());
-#elif defined(__APPLE__)
-    // macOS 平台
-    std::string command = "open \"" + fspath.string() + "\"";
-    system(command.c_str());
-#else
-    // Linux 平台
-    std::string command = "xdg-open \"" + fspath.string() + "\"";
-    system(command.c_str());
-#endif
+    core::openFile(Config::getInstance()->get(item.configName));
 }
 
 void SettingButton::checkActions(){
