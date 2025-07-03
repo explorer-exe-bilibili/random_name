@@ -186,10 +186,10 @@ void MouseButtonEvent(GLFWwindow* window, int button, int action, int mods) {
     switch (action) {
         case GLFW_PRESS:
             Log << Level::Info << "Mouse button pressed at (" << x << ", " << y << "): " << button << op::endl;
-            screen::Screen::getCurrentScreen()->Click(static_cast<int>(x), static_cast<int>(y));
             break;
         case GLFW_RELEASE:
             Log << Level::Info << "Mouse button released at (" << x << ", " << y << "): " << button << op::endl;
+            screen::Screen::getCurrentScreen()->Click(static_cast<int>(x), static_cast<int>(y));
             break;
         default:
             break;

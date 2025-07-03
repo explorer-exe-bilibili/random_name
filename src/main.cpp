@@ -145,7 +145,7 @@ int init(){
     Config& config=*Config::getInstance();
     Log<<Level::Info<<"Creating window"<<op::endl;
     // 创建窗口
-    WindowInfo.window = glfwCreateWindow(config.getInt(WINDOW_WIDTH, 800), config.getInt(WINDOW_HEIGHT, 600), config.get(WINDOW_TITLE, "祈愿").c_str(), nullptr, nullptr);
+    WindowInfo.window = glfwCreateWindow(config.getInt(WINDOW_WIDTH), config.getInt(WINDOW_HEIGHT), config.get(WINDOW_TITLE).c_str(), nullptr, nullptr);
     if (!WindowInfo.window) {
         glfwTerminate();
         return -1;
@@ -153,7 +153,7 @@ int init(){
     
     // 设置当前上下文
     glfwMakeContextCurrent(WindowInfo.window);
-    glfwSwapInterval(Config::getInstance()->getBool(VERTICAL_SYNC,0)); // 垂直同步
+    glfwSwapInterval(Config::getInstance()->getBool(VERTICAL_SYNC)); // 垂直同步
     Log<<Level::Info<<"Loading GLAD"<<op::endl;
     // 初始化glad
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
@@ -177,8 +177,8 @@ int init(){
         const GLubyte* version = glGetString(GL_VERSION);
         std::cout << "OpenGL Version: " << version << std::endl;
     }
-    core::WindowInfo.width = config.getInt(WINDOW_WIDTH, 800);
-    core::WindowInfo.height = config.getInt(WINDOW_HEIGHT, 600);
+    core::WindowInfo.width = config.getInt(WINDOW_WIDTH);
+    core::WindowInfo.height = config.getInt(WINDOW_HEIGHT);
     
     Log<<Level::Info<<"Init explorer"<<op::endl;
     core::Explorer::getInstance();

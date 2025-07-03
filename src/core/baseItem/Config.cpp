@@ -113,10 +113,19 @@ void Config::add(const std::string& name, bool value) {
 
 // 获取配置值
 std::string Config::get(const std::string& name, const std::string& defaultValue) {
+    // 如果传入的是空字符串默认值，尝试使用setifno设置的默认值
+    std::string actualDefaultValue = defaultValue;
+    if (defaultValue.empty()) {
+        auto defaultIt = defaultValues.find(name);
+        if (defaultIt != defaultValues.end()) {
+            actualDefaultValue = defaultIt->second;
+        }
+    }
+    
     // 添加输入参数验证
     if (name.empty()) {
         Log << Level::Warn << "Config::get() called with empty name" << op::endl;
-        return defaultValue;
+        return actualDefaultValue;
     }
     
     try {
@@ -124,7 +133,7 @@ std::string Config::get(const std::string& name, const std::string& defaultValue
         const char* nameData = name.c_str();
         if (nameData == nullptr) {
             Log << Level::Error << "Config::get() - name string data is null" << op::endl;
-            return defaultValue;
+            return actualDefaultValue;
         }
         
         auto it = configItems.find(name);
@@ -132,25 +141,34 @@ std::string Config::get(const std::string& name, const std::string& defaultValue
             // 验证返回值的有效性
             if (it->second.length() > 10000) { // 合理的长度检查
                 Log << Level::Warn << "Config::get() - value too long for key: " << name << op::endl;
-                return defaultValue;
+                return actualDefaultValue;
             }
             return it->second;
         }
     }
     catch (const std::exception& e) {
         Log << Level::Error << "Config::get() - Exception: " << e.what() << " for key: " << name << op::endl;
-        return defaultValue;
+        return actualDefaultValue;
     }
     catch (...) {
         Log << Level::Error << "Config::get() - Unknown exception for key: " << name << op::endl;
-        return defaultValue;
+        return actualDefaultValue;
     }
     
-    return defaultValue;
+    return actualDefaultValue;
 }
 
 std::string Config::getPath(const std::string& name, const std::string& defaultValue) {
-    std::string path = get(name, defaultValue);
+    // 如果传入的是空字符串默认值，尝试使用setifno设置的默认值
+    std::string actualDefaultValue = defaultValue;
+    if (defaultValue.empty()) {
+        auto defaultIt = defaultValues.find(name);
+        if (defaultIt != defaultValues.end()) {
+            actualDefaultValue = defaultIt->second;
+        }
+    }
+    
+    std::string path = get(name, actualDefaultValue);
 #ifdef _WIN32
     std::wstring wPath=core::string2wstring(path);
     std::filesystem::path fsPath(wPath);
@@ -169,7 +187,7 @@ std::string Config::getPath(const std::string& name, const std::string& defaultV
     if (core::isFileExists(fsPath.string())) return fsPath.string();
 #endif
     else{
-        std::filesystem::path defaultFsPath(defaultValue);
+        std::filesystem::path defaultFsPath(actualDefaultValue);
         if (defaultFsPath.is_relative()) {
             // 获取可执行文件所在目录
             std::filesystem::path exePath = std::filesystem::current_path();
@@ -180,65 +198,137 @@ std::string Config::getPath(const std::string& name, const std::string& defaultV
 }
 
 Region Config::getRegion(const std::string& name, const Region& defaultValue) {
+    // 如果传入的是空Region默认值，尝试使用setifno设置的默认值
+    Region actualDefaultValue = defaultValue;
+    if (defaultValue.getOriginX() == 0.0f && defaultValue.getOriginY() == 0.0f && 
+        defaultValue.getOriginXEnd() == 0.0f && defaultValue.getOriginYEnd() == 0.0f) {
+        auto defaultIt = defaultValues.find(name);
+        if (defaultIt != defaultValues.end()) {
+            try {
+                nlohmann::json regionJson = nlohmann::json::parse(defaultIt->second);
+                float x = regionJson.value("x", 0.0f);
+                float y = regionJson.value("y", 0.0f);
+                float xend = regionJson.value("xend", 1.0f);
+                float yend = regionJson.value("yend", 1.0f);
+                bool screenRatio = regionJson.value("screenRatio", true);
+                actualDefaultValue = Region(x, y, xend, yend, screenRatio);
+            } catch (const std::exception& e) {
+                Log << Level::Error << "Error parsing default region " << name << ": " << e.what() << op::endl;
+            }
+        }
+    }
+    
     try {
         nlohmann::json regionJson = getAsJson(name);
         if (regionJson.is_null() || !regionJson.is_object()) {
-            return defaultValue;
+            return actualDefaultValue;
         }
         
         // 解析Region JSON格式：{"x": 0.0, "y": 0.0, "xend": 1.0, "yend": 1.0, "screenRatio": true}
-        float x = regionJson.value("x", defaultValue.getOriginX());
-        float y = regionJson.value("y", defaultValue.getOriginY());
-        float xend = regionJson.value("xend", defaultValue.getOriginXEnd());
-        float yend = regionJson.value("yend", defaultValue.getOriginYEnd());
-        bool screenRatio = regionJson.value("screenRatio", defaultValue.getRatio());
+        float x = regionJson.value("x", actualDefaultValue.getOriginX());
+        float y = regionJson.value("y", actualDefaultValue.getOriginY());
+        float xend = regionJson.value("xend", actualDefaultValue.getOriginXEnd());
+        float yend = regionJson.value("yend", actualDefaultValue.getOriginYEnd());
+        bool screenRatio = regionJson.value("screenRatio", actualDefaultValue.getRatio());
         
         Region region(x, y, xend, yend, screenRatio);
         
         // 验证区域有效性
         if (!validateRegion(region)) {
             Log << Level::Warn << "Invalid region loaded for " << name << ", using default" << op::endl;
-            return defaultValue;
+            return actualDefaultValue;
         }
         
         return region;
     } catch (const std::exception& e) {
         Log << Level::Error << "Error parsing region " << name << ": " << e.what() << op::endl;
-        return defaultValue;
+        return actualDefaultValue;
     }
 }
 
 int Config::getInt(const std::string& name, int defaultValue) {
+    // 如果传入的是默认值0，尝试使用setifno设置的默认值
+    int actualDefaultValue = defaultValue;
+    if (defaultValue == 0) {
+        auto defaultIt = defaultValues.find(name);
+        if (defaultIt != defaultValues.end()) {
+            try {
+                actualDefaultValue = std::stoi(defaultIt->second);
+            } catch (const std::exception& e) {
+                std::cerr << "Error converting default value to int: " << e.what() << std::endl;
+                actualDefaultValue = defaultValue;
+            }
+        }
+    }
+    
     std::string value = get(name, "");
     if (value.empty()) {
-        return defaultValue;
+        return actualDefaultValue;
     }
     
     try {
         return std::stoi(value);
     } catch (const std::exception& e) {
         std::cerr << "Error converting value to int: " << e.what() << std::endl;
-        return defaultValue;
+        return actualDefaultValue;
     }
 }
 
 float Config::getRatioedInt(const std::string& name, float defaultValue) {
-    int value = std::stoi(get(name, ""));
-    if(value<0||value>screenInfo.height||value>screenInfo.width)return defaultValue;
-    if(name.find("width")!=std::string::npos){
-        if(name.find("screen")!=std::string::npos)
-            return value/screenInfo.width;
-        return value/WindowInfo.width;
+    // 如果传入的是默认值0.0f，尝试使用setifno设置的默认值
+    float actualDefaultValue = defaultValue;
+    if (defaultValue == 0.0f) {
+        auto defaultIt = defaultValues.find(name);
+        if (defaultIt != defaultValues.end()) {
+            try {
+                actualDefaultValue = std::stof(defaultIt->second);
+            } catch (const std::exception& e) {
+                std::cerr << "Error converting default value to float: " << e.what() << std::endl;
+                actualDefaultValue = defaultValue;
+            }
+        }
     }
-    if(name.find("height")!=std::string::npos){
-        if(name.find("screen")!=std::string::npos)
-            return value/screenInfo.height;
-        return value/WindowInfo.height;
+    
+    std::string valueStr = get(name, "");
+    if (valueStr.empty()) {
+        return actualDefaultValue;
     }
-    return defaultValue;
+    
+    try {
+        int value = std::stoi(valueStr);
+        if(value<0||value>screenInfo.height||value>screenInfo.width) return actualDefaultValue;
+        if(name.find("width")!=std::string::npos){
+            if(name.find("screen")!=std::string::npos)
+                return value/screenInfo.width;
+            return value/WindowInfo.width;
+        }
+        if(name.find("height")!=std::string::npos){
+            if(name.find("screen")!=std::string::npos)
+                return value/screenInfo.height;
+            return value/WindowInfo.height;
+        }
+        return actualDefaultValue;
+    } catch (const std::exception& e) {
+        std::cerr << "Error converting value to int for ratio: " << e.what() << std::endl;
+        return actualDefaultValue;
+    }
 }
 
 unsigned int Config::getUInt(const std::string& name, unsigned int defaultValue) {
+    // 如果传入的是默认值0，尝试使用setifno设置的默认值
+    unsigned int actualDefaultValue = defaultValue;
+    if (defaultValue == 0) {
+        auto defaultIt = defaultValues.find(name);
+        if (defaultIt != defaultValues.end()) {
+            try {
+                actualDefaultValue = static_cast<unsigned int>(std::stoul(defaultIt->second));
+            } catch (const std::exception& e) {
+                std::cerr << "Error converting default value to unsigned int: " << e.what() << std::endl;
+                actualDefaultValue = defaultValue;
+            }
+        }
+    }
+    
     std::string value = get(name, "");
     if (value.empty()) {
         return defaultValue;
@@ -248,28 +338,58 @@ unsigned int Config::getUInt(const std::string& name, unsigned int defaultValue)
         return static_cast<unsigned int>(std::stoul(value));
     } catch (const std::exception& e) {
         std::cerr << "Error converting value to unsigned int: " << e.what() << std::endl;
-        return defaultValue;
+        return actualDefaultValue;
     }
 }
 
 double Config::getDouble(const std::string& name, double defaultValue) {
+    // 如果传入的是默认值0.0，尝试使用setifno设置的默认值
+    double actualDefaultValue = defaultValue;
+    if (defaultValue == 0.0) {
+        auto defaultIt = defaultValues.find(name);
+        if (defaultIt != defaultValues.end()) {
+            try {
+                actualDefaultValue = std::stod(defaultIt->second);
+            } catch (const std::exception& e) {
+                std::cerr << "Error converting default value to double: " << e.what() << std::endl;
+                actualDefaultValue = defaultValue;
+            }
+        }
+    }
+    
     std::string value = get(name, "");
     if (value.empty()) {
-        return defaultValue;
+        return actualDefaultValue;
     }
     
     try {
         return std::stod(value);
     } catch (const std::exception& e) {
         std::cerr << "Error converting value to double: " << e.what() << std::endl;
-        return defaultValue;
+        return actualDefaultValue;
     }
 }
 
 bool Config::getBool(const std::string& name, bool defaultValue) {
+    // 如果传入的是默认值false，尝试使用setifno设置的默认值
+    bool actualDefaultValue = defaultValue;
+    if (defaultValue == false) {
+        auto defaultIt = defaultValues.find(name);
+        if (defaultIt != defaultValues.end()) {
+            std::string defValue = defaultIt->second;
+            std::transform(defValue.begin(), defValue.end(), defValue.begin(), 
+                          [](unsigned char c){ return std::tolower(c); });
+            if (defValue == "1" || defValue == "true" || defValue == "yes" || defValue == "on") {
+                actualDefaultValue = true;
+            } else if (defValue == "0" || defValue == "false" || defValue == "no" || defValue == "off") {
+                actualDefaultValue = false;
+            }
+        }
+    }
+    
     std::string value = get(name, "");
     if (value.empty()) {
-        return defaultValue;
+        return actualDefaultValue;
     }
     
     // 将值统一为小写
@@ -286,7 +406,7 @@ bool Config::getBool(const std::string& name, bool defaultValue) {
         return false;
     }
     
-    return defaultValue;
+    return actualDefaultValue;
 }
 
 // 获取配置值为JSON对象
@@ -375,6 +495,8 @@ void Config::setifno(const std::string &name, const std::string &value)
         Log<<Level::Info << "Config::setifno() setting default string value for: " << name << " to " << value << op::endl;
         configItems[name] = value;
     }
+    // 始终存储默认值
+    defaultValues[name] = value;
 }
 
 void Config::setifno(const std::string &name, const char* value)
@@ -383,6 +505,8 @@ void Config::setifno(const std::string &name, const char* value)
         Log<<Level::Info << "Config::setifno() setting default string value for: " << name << " to " << value << op::endl;
         configItems[name] = value;
     }
+    // 始终存储默认值
+    defaultValues[name] = value;
 }
 
 void Config::setifno(const std::string &name, int value)
@@ -391,6 +515,8 @@ void Config::setifno(const std::string &name, int value)
         Log<<Level::Info << "Config::setifno() setting default int value for: " << name << " to " << value << op::endl;
         configItems[name] = std::to_string(value);
     }
+    // 始终存储默认值
+    defaultValues[name] = std::to_string(value);
 }
 
 void Config::setifno(const std::string &name, unsigned int value)
@@ -399,6 +525,8 @@ void Config::setifno(const std::string &name, unsigned int value)
         Log<<Level::Info << "Config::setifno() setting default unsigned int value for: " << name << " to " << value << op::endl;
         configItems[name] = std::to_string(value);
     }
+    // 始终存储默认值
+    defaultValues[name] = std::to_string(value);
 }
 
 void Config::setifno(const std::string &name, double value)
@@ -408,6 +536,8 @@ void Config::setifno(const std::string &name, double value)
         configItems[name] = std::to_string(value);
         saveToFile(); // 自动保存
     }
+    // 始终存储默认值
+    defaultValues[name] = std::to_string(value);
 }
 
 void Config::setifno(const std::string &name, bool value)
@@ -417,6 +547,8 @@ void Config::setifno(const std::string &name, bool value)
         configItems[name] = value ? "1" : "0";
         saveToFile(); // 自动保存
     }
+    // 始终存储默认值
+    defaultValues[name] = value ? "1" : "0";
 }
 
 void Config::setifno(const std::string& name, const Region& region) {
@@ -424,6 +556,15 @@ void Config::setifno(const std::string& name, const Region& region) {
         Log << Level::Info << "Setting default region for: " << name << op::endl;
         set(name, region);
     }
+    // 始终存储默认值
+    nlohmann::json regionJson = {
+        {"x", region.getOriginX()},
+        {"y", region.getOriginY()},
+        {"xend", region.getOriginXEnd()},
+        {"yend", region.getOriginYEnd()},
+        {"screenRatio", region.getRatio()}
+    };
+    defaultValues[name] = regionJson.dump();
 }
 
 void Config::setifno(const RegionName category, const std::string& name, const Region& region) {

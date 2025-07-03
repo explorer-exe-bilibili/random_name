@@ -26,7 +26,7 @@ enum{
 
 void MainScreen::init() {
     // 初始化按钮和背景
-    mode=Config::getInstance()->getInt("mode", 0);
+    mode=Config::getInstance()->getInt("mode");
     buttons.resize(10);
     for(int i = 0; i < buttons.size(); ++i) {
         buttons[i] = std::make_shared<Button>();

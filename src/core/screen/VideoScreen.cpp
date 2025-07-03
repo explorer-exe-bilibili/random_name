@@ -74,10 +74,10 @@ void VideoScreen::enter(int mode)
         else {
             videoPlayer = new core::VideoPlayer();
             videoPlayer->setLoop(false);
-            if(nameItems[0].star==3)videoPlayer->load(core::Config::getInstance()->getPath(SIGNAL_3_STAR_VIDEO_PATH, "files/video/signal3star.mp4"));
-            else if(nameItems[0].star==4)videoPlayer->load(core::Config::getInstance()->getPath(SIGNAL_4_STAR_VIDEO_PATH, "files/video/signal4star.mp4"));
-            else videoPlayer->load(core::Config::getInstance()->getPath(SIGNAL_5_STAR_VIDEO_PATH, "files/video/signal5star.mp4"));
-            videoPlayer->setVolume(core::Config::getInstance()->getInt(VOLUME, 50));
+            if(nameItems[0].star==3)videoPlayer->load(core::Config::getInstance()->getPath(SIGNAL_3_STAR_VIDEO_PATH));
+            else if(nameItems[0].star==4)videoPlayer->load(core::Config::getInstance()->getPath(SIGNAL_4_STAR_VIDEO_PATH));
+            else videoPlayer->load(core::Config::getInstance()->getPath(SIGNAL_5_STAR_VIDEO_PATH));
+            videoPlayer->setVolume(core::Config::getInstance()->getInt(VOLUME));
         }
     }
     else{
@@ -95,9 +95,9 @@ void VideoScreen::enter(int mode)
         else{
             videoPlayer = new core::VideoPlayer();
             videoPlayer->setLoop(false);
-            if(starCount<=4)videoPlayer->load(core::Config::getInstance()->getPath(GROUP_4_STAR_VIDEO_PATH,"files/video/group-4star.webm"));
-            else videoPlayer->load(core::Config::getInstance()->getPath(GROUP_5_STAR_VIDEO_PATH,"files/video/group-5star.webm"));
-            videoPlayer->setVolume(core::Config::getInstance()->getInt(VOLUME, 50));
+            if(starCount<=4)videoPlayer->load(core::Config::getInstance()->getPath(GROUP_4_STAR_VIDEO_PATH));
+            else videoPlayer->load(core::Config::getInstance()->getPath(GROUP_5_STAR_VIDEO_PATH));
+            videoPlayer->setVolume(core::Config::getInstance()->getInt(VOLUME));
         }
     }
     core::Explorer::getInstance()->getAudio()->stopMusic();

@@ -69,7 +69,7 @@ void SettingScreen::Draw() {
     if(bools[boolconfig::use_video_background]){
         if(!videoBackground){
             if(!core::Explorer::getInstance()->isVideoLoaded(VideoID::Background)) {
-                core::Explorer::getInstance()->loadVideo(VideoID::Background, Config::getInstance()->getPath(BACKGROUND_VIDEO_PATH, "files/video/bg.webm"));
+                core::Explorer::getInstance()->loadVideo(VideoID::Background, Config::getInstance()->getPath(BACKGROUND_VIDEO_PATH));
             }
             videoBackground = core::Explorer::getInstance()->getVideo(VideoID::Background);
             videoBackground->setLoop(true);

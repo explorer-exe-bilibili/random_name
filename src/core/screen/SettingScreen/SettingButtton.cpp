@@ -600,7 +600,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
         }
         else if(item.type==SettingButtonType::Textbox){
             // 获取当前配置值作为默认文本
-            std::string currentValue = Config::getInstance()->get(item.configName, "");
+            std::string currentValue = Config::getInstance()->get(item.configName);
             button->SetText(currentValue.empty() ? "点击输入" : currentValue);
             // 设置编辑区域（使用按钮区域的完全相同尺寸）
             editingTextRegion = ButtonRegion;
@@ -616,7 +616,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
                     // 启动内嵌编辑模式
                     if (!isTextboxEditing) {
                         isTextboxEditing = true;
-                        editingText = Config::getInstance()->get(configName, "");
+                        editingText = Config::getInstance()->get(configName);
                         cursorPosition = core::utf8_length(editingText); // 使用UTF-8字符长度
                         lastCursorBlink = std::chrono::steady_clock::now();
                         showCursor = true;
@@ -642,7 +642,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
         else if(item.type==SettingButtonType::ColorSelect){
             button->SetEnableBitmap(false);
             button->SetEnableFill(true);
-            button->SetFillColor(Config::getInstance()->getUInt(item.configName, Color(0, 0, 0, 255)));
+            button->SetFillColor(Config::getInstance()->getUInt(item.configName));
             button->SetText("选择颜色");
             button->SetClickFunc([this, configName = item.configName]{
                 // 安全地访问configName
@@ -665,7 +665,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
             });
         }
         else if(item.type==SettingButtonType::FileSelect){
-            showText=Config::getInstance()->getPath(item.configName,"");
+            showText=Config::getInstance()->getPath(item.configName);
             if(!showText.empty()){
                 if(!core::isFileExists(showText)){
                     Log<<Level::Warn<<"FileSelect button - file does not exist: "<<showText<<op::endl;
@@ -747,7 +747,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
             });
         }
         else if(item.type==SettingButtonType::PathSelect){
-            showText=Config::getInstance()->get(item.configName,"");
+            showText=Config::getInstance()->get(item.configName);
             if(!showText.empty()){
                 if(!core::isFileExists(showText)){
                     showText="等待选择";
@@ -1044,7 +1044,7 @@ std::string SettingButton::selectFile() {
 
 std::string SettingButton::selectPath(){
     // 获取当前配置的路径作为初始路径
-    std::string defaultPath = Config::getInstance()->get(item.configName, "");
+    std::string defaultPath = Config::getInstance()->get(item.configName);
     std::string title = "选择" + item.name;
     // 调用 tinyfiledialogs 的文件夹选择对话框
     const char* selectedFolder = tinyfd_selectFolderDialog(
@@ -1076,7 +1076,7 @@ void SettingButton::checkActions(){
         }
     }
     if(item.action&SettingButtonAction::ResetWindowTitle){
-        glfwSetWindowTitle(WindowInfo.window, Config::getInstance()->get(WINDOW_TITLE, "祈愿").c_str());
+        glfwSetWindowTitle(WindowInfo.window, Config::getInstance()->get(WINDOW_TITLE).c_str());
     }
     if(item.action&SettingButtonAction::ReloadVideo){
         if(Config::getInstance()->getBool(NO_VIDEO_PRELOAD,false)){

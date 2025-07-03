@@ -36,17 +36,17 @@ boolconfig GetBoolConfigFromString(const std::string& configName) {
 // 从Config加载bool值到bools映射
 void LoadBoolsFromConfig() {
     core::Config* config = core::Config::getInstance();
-    bools[boolconfig::offmusic] = config->getBool(OFF_MUSIC, false);
-    bools[boolconfig::inwindow] = config->getBool(INWINDOW, true);
-    bools[boolconfig::off_video] = config->getBool(OFF_VIDEO, false);
-    bools[boolconfig::use_video_background] = config->getBool(USE_VIDEO_BACKGROUND, true);
-    bools[boolconfig::nosmoothui] = config->getBool(NOSMOOTHUI, false);
-    bools[boolconfig::floatwindow] = config->getBool(FLOATWINDOW, true);
-    bools[boolconfig::use_font_compatibility] = config->getBool(USE_FONT_COMPATIBILITY, false);
-    bools[boolconfig::no_video_preload] = config->getBool(NO_VIDEO_PRELOAD, false);
-    bools[boolconfig::debug] = config->getBool(DEBUG, false);
-    bools[boolconfig::show_fps] = config->getBool(SHOW_FPS, false);
-    bools[boolconfig::use_json_settings] = config->getBool(USE_JSON_SETTINGS, false);
+    bools[boolconfig::offmusic] = config->getBool(OFF_MUSIC);
+    bools[boolconfig::inwindow] = config->getBool(INWINDOW);
+    bools[boolconfig::off_video] = config->getBool(OFF_VIDEO);
+    bools[boolconfig::use_video_background] = config->getBool(USE_VIDEO_BACKGROUND);
+    bools[boolconfig::nosmoothui] = config->getBool(NOSMOOTHUI);
+    bools[boolconfig::floatwindow] = config->getBool(FLOATWINDOW);
+    bools[boolconfig::use_font_compatibility] = config->getBool(USE_FONT_COMPATIBILITY);
+    bools[boolconfig::no_video_preload] = config->getBool(NO_VIDEO_PRELOAD);
+    bools[boolconfig::debug] = config->getBool(DEBUG);
+    bools[boolconfig::show_fps] = config->getBool(SHOW_FPS);
+    bools[boolconfig::use_json_settings] = config->getBool(USE_JSON_SETTINGS);
 }
 
 void fullscreen(GLFWwindow* window){
@@ -99,10 +99,10 @@ void defullscreen(GLFWwindow* window){
     
     // 从配置中获取窗口参数
     core::Config* config = core::Config::getInstance();
-    int windowWidth = config->getInt(WINDOW_WIDTH, 800);
-    int windowHeight = config->getInt(WINDOW_HEIGHT, 600);
-    int windowX = config->getInt(WINDOW_X, 100);
-    int windowY = config->getInt(WINDOW_Y, 100);
+    int windowWidth = config->getInt(WINDOW_WIDTH);
+    int windowHeight = config->getInt(WINDOW_HEIGHT);
+    int windowX = config->getInt(WINDOW_X);
+    int windowY = config->getInt(WINDOW_Y);
     
     // 恢复窗口位置和大小
     glfwSetWindowPos(window, windowX, windowY);
@@ -145,12 +145,12 @@ void SyncConfig() {
             core::Explorer::getInstance()->playAudio(core::AudioID::bgm, -1);
     }
     screen::Screen::setUseVideoBackground(bools[boolconfig::use_video_background]);
-    screen::NameButton::setColor(core::Config::getInstance()->getUInt(NAME_COLOR, core::Color(200,200,200,255)));
-    screen::NameButton::set6Color(core::Config::getInstance()->getUInt(NAME_COLOR_6_STAR, core::Color(200,200,200,255)));
-    screen::NameScreen::setSmallNameColor(core::Config::getInstance()->getUInt(TEXT_COLOR, core::Color(250,250,250,255)));
-    core::Explorer::getInstance()->getAudio()->setMusicVolume(core::Config::getInstance()->getUInt(VOLUME, 100));
-    core::Explorer::getInstance()->getAudio()->setSoundVolume(core::AudioIDToString(core::AudioID::click),core::Config::getInstance()->getUInt(VOLUME, 100));
-    core::Explorer::getInstance()->getAudio()->setSoundVolume(core::AudioIDToString(core::AudioID::enter),core::Config::getInstance()->getUInt(VOLUME, 100));
+    screen::NameButton::setColor(core::Config::getInstance()->getUInt(NAME_COLOR));
+    screen::NameButton::set6Color(core::Config::getInstance()->getUInt(NAME_COLOR_6_STAR));
+    screen::NameScreen::setSmallNameColor(core::Config::getInstance()->getUInt(TEXT_COLOR));
+    core::Explorer::getInstance()->getAudio()->setMusicVolume(core::Config::getInstance()->getUInt(VOLUME));
+    core::Explorer::getInstance()->getAudio()->setSoundVolume(core::AudioIDToString(core::AudioID::click),core::Config::getInstance()->getUInt(VOLUME));
+    core::Explorer::getInstance()->getAudio()->setSoundVolume(core::AudioIDToString(core::AudioID::enter),core::Config::getInstance()->getUInt(VOLUME));
 }
 
 void SetConfigItems(){

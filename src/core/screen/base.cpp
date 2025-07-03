@@ -31,7 +31,7 @@ void Screen::Draw() {
     if(bools[boolconfig::use_video_background]){
         if(!videoBackground){
             if(!Explorer::getInstance()->isVideoLoaded(VideoID::Background)) {
-                Explorer::getInstance()->loadVideo(VideoID::Background, Config::getInstance()->getPath(BACKGROUND_VIDEO_PATH, "files/video/bg.webm"));
+                Explorer::getInstance()->loadVideo(VideoID::Background, Config::getInstance()->getPath(BACKGROUND_VIDEO_PATH));
             }
             videoBackground = Explorer::getInstance()->getVideo(VideoID::Background);
             videoBackground->setLoop(true);

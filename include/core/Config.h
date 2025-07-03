@@ -30,6 +30,9 @@ private:
     // 配置项存储
     std::unordered_map<std::string, std::string> configItems;
     
+    // 默认值存储
+    std::unordered_map<std::string, std::string> defaultValues;
+    
     // 配置文件路径
     std::string configFilePath;
     

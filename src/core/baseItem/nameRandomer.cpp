@@ -18,10 +18,10 @@ NameRandomer* NameRandomer::getInstance(int mode)  {
             instances[1]=createInstance(1);
             instances[2]=createInstance(2);
             instances[3]=createInstance(3);
-            instances[0]->setFile(Config::getInstance()->getPath(NAMES1, "files/name/names.txt"));
-            instances[1]->setFile(Config::getInstance()->getPath(NAMES2, "files/name/names.txt"));
-            instances[2]->setFile(Config::getInstance()->getPath(NAMES3, "files/name/names.txt"));
-            instances[3]->setFile(Config::getInstance()->getPath(NAMES4, "files/name/names.txt"));
+            instances[0]->setFile(Config::getInstance()->getPath(NAMES1));
+            instances[1]->setFile(Config::getInstance()->getPath(NAMES2));
+            instances[2]->setFile(Config::getInstance()->getPath(NAMES3));
+            instances[3]->setFile(Config::getInstance()->getPath(NAMES4));
             return getInstance(mode);
         }
         std::shared_ptr<NameRandomer> instance = instances[mode];
@@ -138,7 +138,7 @@ bool NameRandomer::addName(NameEntry entry) {
     entries.push_back(entry);
     std::filebuf fileBuf;
     std::string filePath = Config::getInstance()->
-        getPath(("names"+std::to_string(index+1)), "files/name/"+std::to_string(index+1)+".txt");
+        getPath(("names"+std::to_string(index+1)));
     if (!fileBuf.open(filePath, std::ios::out | std::ios::app)) {
         std::cerr << "无法打开文件: " << filePath << std::endl;
         return false;

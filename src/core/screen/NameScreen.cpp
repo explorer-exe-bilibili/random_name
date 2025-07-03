@@ -99,7 +99,8 @@ void NameScreen::enter(int times) {
     nameCount=times;
     if(times>1)buttons[SkipButton]->SetEnable(true);
     else buttons[SkipButton]->SetEnable(false);
-    if(nameItems[0].mode==Config::getInstance()->getInt(SPECIAL,0)-1)buttons[AddNameButton]->SetEnable(true);
+    if(nameItems[0].mode==Config::getInstance()->getInt(SPECIAL)-1)
+        buttons[AddNameButton]->SetEnable(true);
     else buttons[AddNameButton]->SetEnable(false);
     changeName();
 }
@@ -162,7 +163,7 @@ void NameScreen::changeName() {
         std::lock_guard<std::mutex> lock(starPositionsMutex);
         starPositions.clear();
     }
-    if(currentName.mode==Config::getInstance()->getInt(SPECIAL,0)-1)buttons[AddNameButton]->SetEnable(true);
+    if(currentName.mode==Config::getInstance()->getInt(SPECIAL)-1)buttons[AddNameButton]->SetEnable(true);
     else buttons[AddNameButton]->SetEnable(false);
     if(nameCount>1)buttons[SkipButton]->SetEnable(true);
     else buttons[SkipButton]->SetEnable(false);
