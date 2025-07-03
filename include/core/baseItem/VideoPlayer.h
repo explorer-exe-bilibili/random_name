@@ -60,6 +60,7 @@ public:
 
     void setLoop(bool loop);
     void setVolume(int volume);
+    void cleanBuffer();
     
     // 错误恢复友元类
     friend class VideoPlayerErrorRecovery;

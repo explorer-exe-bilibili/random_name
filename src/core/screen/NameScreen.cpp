@@ -20,12 +20,22 @@ static int nameCount=0;
 static unsigned int enterTime=0;
 
 enum ButtonID{
-    SkipButton = 0,
+    SkipButton = 0, 
     AddNameButton,
     TypeButton
 };
 
+enum RegionID {
+    firstName=0,
+    secondName,
+    endName,
+    firstType,
+    endType,
+    smallName
+};
+
 void NameScreen::init() {
+    regions.resize(6);
     background=Explorer::getInstance()->getBitmapPtr(BitmapID::NameBg);
     if(!background || !*background) {
         Log << Level::Warn << "NameScreen: Failed to load background bitmap." << op::endl;
@@ -41,8 +51,9 @@ void NameScreen::init() {
     for(int i = 0; i < buttons.size(); ++i) {
         buttons[i] = std::make_shared<core::Button>();
     }
+    reloadButtonsRegion();
     starPositions.clear();
-    buttons[SkipButton]->SetRegion({0.82,0.045,0.88,0.08});
+    buttons[SkipButton]->SetRegionStr(UI_REGION_SKIP);
     buttons[SkipButton]->SetText("跳过>>");
     buttons[SkipButton]->SetFontScale(0.3f);
     buttons[SkipButton]->SetFontID(FontID::Normal);
@@ -57,19 +68,18 @@ void NameScreen::init() {
     buttons[SkipButton]->SetEnableBitmap(false);
     buttons[SkipButton]->SetEnableFill(false);
     buttons[SkipButton]->SetEnable(false);
-    buttons[AddNameButton]->SetRegion({0.35,0.8,0.65,0.836});
+    buttons[AddNameButton]->SetRegionStr(UI_REGION_NAMESCREEN_ADDNAME);
     buttons[AddNameButton]->SetText("增加此名字几率");
     buttons[AddNameButton]->SetFontScale(0.3f);
     buttons[AddNameButton]->SetFontID(FontID::Normal);
     buttons[AddNameButton]->SetClickFunc([this] {
         NameRandomer::getInstance(currentName.mode)->addName(currentName);
     });
-    buttons[AddNameButton]->SetColor({255, 230, 34, 255});
     buttons[AddNameButton]->SetEnableText(true);
     buttons[AddNameButton]->SetEnableBitmap(false);
     buttons[AddNameButton]->SetEnableFill(false);
     buttons[AddNameButton]->SetEnable(false);
-    buttons[TypeButton]->SetRegion({0.2,0.25,0.6,-1});
+    buttons[TypeButton]->SetRegion(regions[firstType]);
     if(bools[boolconfig::use_font_compatibility]) nameButton.SetFontID(FontID::Default);
     else nameButton.SetFontID(FontID::Name);
 }
@@ -88,7 +98,7 @@ void NameScreen::Draw() {
     Point pos(0.177, (8.0/13.0));
     Font** fontPtr = Explorer::getInstance()->getFontPtr(FontID::Normal);
     if (fontPtr && *fontPtr) {
-        (*fontPtr)->RenderText(currentName.name, pos.getx(), pos.gety(), 0.3f, SmallNameColor);
+        (*fontPtr)->RenderText(currentName.name, regions[smallName].getx(), regions[smallName].gety(), 0.3f, SmallNameColor);
     }
     nameButton.Draw();
 }
@@ -177,32 +187,33 @@ void NameScreen::changeName() {
     default:break;
     }
     buttons[TypeButton]->SetEnable(false);
-    buttons[TypeButton]->SetRegion({0.2,0.25,0.6,-1});    nameButton.SetRegion({0,-0.15,1,1.15});
+    buttons[TypeButton]->SetRegion(regions[firstType]);
+    nameButton.SetRegion(regions[firstName]);
     nameButton.SetName(currentName);
     int nowIndex=currentIndex;
     if(bools[boolconfig::nosmoothui]){
-        nameButton.SetRegion({0.3,0.3,0.7,0.7});
+        nameButton.SetRegion(regions[endName]);
         if(currentName.type!=NameType::Unknow){
             if(buttons[TypeButton]) {
                 buttons[TypeButton]->SetEnable(true);
-                buttons[TypeButton]->MoveTo({0.3,0.25,0.7,-1},true,5);
+                buttons[TypeButton]->SetRegion(regions[endType]);
             }
         }
     }
     else{
         // 使用try-catch保护MoveTo调用
         try {
-            nameButton.MoveTo({0.2,0.3,0.6,0.7},true,10,[nowIndex,this]{
+            nameButton.MoveTo(regions[secondName],true,10,[nowIndex,this]{
                 // 检查对象是否仍然有效
                 if(nowIndex!=currentIndex)return;
                 if(Screen::getCurrentScreen()->getID() != ScreenID::Name)return;
                 
                 try {
-                    nameButton.MoveTo({0.3,0.3,0.7,0.7},true,5);
+                    nameButton.MoveTo(regions[endName],true,5);
                     if(currentName.type!=NameType::Unknow){
                         if(buttons[TypeButton]) {
                             buttons[TypeButton]->SetEnable(true);
-                            buttons[TypeButton]->MoveTo({0.3,0.25,0.7,-1},true,5);
+                            buttons[TypeButton]->MoveTo(regions[endType],true,5);
                         }
                     }
                 } catch (const std::exception& e) {
@@ -226,6 +237,16 @@ void NameScreen::changeName() {
     else if(currentName.star==5)core::Explorer::getInstance()->playAudio(AudioID::star5);
     else core::Explorer::getInstance()->playAudio(AudioID::starfull);
     Log << Level::Info << "当前名字: " << currentName.name << ", 星级: " << currentName.star << ", 类型: " << static_cast<int>(currentName.type) << op::endl;
+}
+
+void NameScreen::reloadButtonsRegion() {
+    regions[firstName] = Config::getInstance()->getRegion(UI_REGION_NAMESCREEN_BIGNAME_BEGIN);
+    regions[secondName] = Config::getInstance()->getRegion(UI_REGION_NAMESCREEN_BIGNAME_MIDDLE);
+    regions[endName] = Config::getInstance()->getRegion(UI_REGION_NAMESCREEN_BIGNAME_END);
+    regions[firstType] = Config::getInstance()->getRegion(UI_REGION_NAMESCREEN_TYPE_BEGIN);
+    regions[endType] = Config::getInstance()->getRegion(UI_REGION_NAMESCREEN_TYPE_END);
+    regions[smallName] = Config::getInstance()->getRegion(UI_REGION_NAMESCREEN_SMALLNAME);
+    for(auto& b:buttons)b->resetRegion();
 }
 
 void NameButton::Draw(unsigned char alpha) {

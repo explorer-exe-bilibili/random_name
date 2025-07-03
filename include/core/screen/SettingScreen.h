@@ -174,6 +174,7 @@ class SettingScreen : public Screen
     void changePage(bool forward);
     void updatePageTransition(); // 更新页面切换动画
     float calculateTransitionAlpha(bool isCurrentPage); // 计算页面透明度
+    void reloadButtonsRegion() override;
 public:
     SettingScreen() : Screen(ScreenID::Settings) {init();}
     ~SettingScreen() {}

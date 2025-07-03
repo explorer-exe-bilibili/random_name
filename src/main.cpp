@@ -1,4 +1,5 @@
 #include "mainloop.h"
+#include "version.h"
 #include <SDL.h>
 #include <stdio.h>
 #include <filesystem>
@@ -15,10 +16,55 @@
 #include <windows.h>
 #include <io.h>
 #include <fcntl.h>
+#include <shlobj.h>  // 用于获取用户目录
 #endif
 
 using namespace core;
 using namespace std;
+
+// 获取程序所在目录的安全函数
+std::filesystem::path getExecutableDirectory() {
+#ifdef _WIN32
+    wchar_t path[MAX_PATH];
+    DWORD length = GetModuleFileNameW(NULL, path, MAX_PATH);
+    if (length > 0) {
+        std::filesystem::path execPath(path);
+        return execPath.parent_path();
+    }
+#endif
+    return std::filesystem::current_path();
+}
+
+// 获取用户数据目录
+std::filesystem::path getUserDataDirectory() {
+#ifdef _WIN32
+    wchar_t* documentsPath = nullptr;
+    if (SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &documentsPath) == S_OK) {
+        std::filesystem::path userDir(documentsPath);
+        userDir = userDir / "RandomNameApp";
+        CoTaskMemFree(documentsPath);
+        return userDir;
+    }
+#endif
+    return std::filesystem::current_path();
+}
+
+// 检查目录是否可写
+bool isDirectoryWritable(const std::filesystem::path& dir) {
+    try {
+        std::filesystem::path testFile = dir / "test_write_permission.tmp";
+        std::ofstream test(testFile);
+        if (test.is_open()) {
+            test << "test";
+            test.close();
+            std::filesystem::remove(testFile);
+            return true;
+        }
+    } catch (...) {
+        // 忽略异常
+    }
+    return false;
+}
 
 // 当使用SDL2时，main函数需要被重新定义为SDL_main
 int main(int argc, char* argv[])
@@ -39,6 +85,44 @@ int main(int argc, char* argv[])
             OpenGLErrorRecovery::markContextInvalid();
         }
     );
+    
+    ErrorRecovery::registerErrorHandler(
+        ErrorRecovery::ErrorType::FFMPEG_DECODE,
+        []() {
+            Log << Level::Warn << "FFmpeg 解码错误，清理视频资源" << op::endl;
+            MemoryMonitor::getInstance().forceGarbageCollection();
+        }
+    );
+
+#ifdef _WIN32
+    // 设置控制台编码为 UTF-8
+    SetConsoleOutputCP(CP_UTF8);
+    SetConsoleCP(CP_UTF8);
+    
+    // 初始化目录状态
+    core::initializeDirectories();
+    
+    // 设置工作目录为程序所在目录（确保资源文件能正常加载）
+    try {
+        std::filesystem::current_path(core::g_executableDir);
+        Log << Level::Info << "设置工作目录为程序目录: " << core::g_executableDir.string() << op::endl;
+    } catch (const std::exception& e) {
+        Log << Level::Warn << "无法设置工作目录: " << e.what() << op::endl;
+    }
+    
+    if (core::g_programDirWritable) {
+        Log << Level::Info << "程序目录可写" << op::endl;
+    } else {
+        Log << Level::Info << "程序目录不可写，配置和日志将使用用户目录: " << core::g_userDataDir.string() << op::endl;
+        
+        // 确保用户数据目录存在
+        try {
+            std::filesystem::create_directories(core::g_userDataDir);
+        } catch (const std::exception& e) {
+            Log << Level::Error << "无法创建用户数据目录: " << e.what() << op::endl;
+        }
+    }
+#endif
     
     ErrorRecovery::registerErrorHandler(
         ErrorRecovery::ErrorType::FFMPEG_DECODE,
@@ -124,6 +208,7 @@ int init(){
     SetConsoleMode(hOut, dwMode);
     #endif
     Log.Init();
+    Log<<Level::Info<<"Starting initialization Version: "<< VERSION_FULL_STRING <<op::endl;
     Log<<Level::Info<<"Initializing GLFW"<<op::endl;
         // 初始化GLFW
     if (!glfwInit()) {

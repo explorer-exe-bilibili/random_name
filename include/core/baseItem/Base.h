@@ -3,6 +3,7 @@
 #include "../render/Texture.h"
 #include <string>
 #include <GLFW/glfw3.h>
+#include <filesystem>
 
 namespace core
 {
@@ -71,6 +72,8 @@ namespace core
         float getOriginY() const { return y; }
         float getOriginXEnd() const { return xend; }
         float getOriginYEnd() const { return yend; }
+        float getOriginW() const {return xend-x;}
+        float getOriginH() const {return yend-y;}
 
         float getx_() const { return screenRatio ? x * WindowInfo.width : x; }
         float gety_() const { return screenRatio ? y * WindowInfo.height : y; }
@@ -82,17 +85,17 @@ namespace core
     // Region预设名称
     enum class RegionName
     {
-        DEFAULT,
-        FULLSCREEN,
         SMALL_WINDOW,
-        SIMULATE_MOBILE
+        FULLSCREEN,
+        SIMULATE_MOBILE,
+        NONE
     };
     inline std::string to_string(RegionName name) {
         switch (name) {
-            case RegionName::DEFAULT: return "default";
             case RegionName::FULLSCREEN: return "fullscreen";
             case RegionName::SMALL_WINDOW: return "small_window";
             case RegionName::SIMULATE_MOBILE: return "simulate_mobile";
+            case RegionName::NONE: return "none";
             default: return "unknown";
         }
     }
@@ -149,4 +152,12 @@ namespace core
     bool stringContains(const std::string& str, const std::string& substr);
     void quit();
     void restart();
+
+    // 全局变量，用于跟踪程序目录状态
+    extern std::filesystem::path g_executableDir;
+    extern std::filesystem::path g_userDataDir;
+    extern bool g_programDirWritable;
+    
+    // 初始化目录状态
+    void initializeDirectories();
 }

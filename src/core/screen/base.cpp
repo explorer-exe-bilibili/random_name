@@ -12,6 +12,7 @@ ScreenID Screen::currentScreenID = ScreenID::MainMenu;
 std::map<ScreenID, std::shared_ptr<Screen>> Screen::screens;
 core::VideoPlayer* Screen::videoBackground = nullptr;
 std::vector<NameEntry> Screen::nameItems;
+std::unique_ptr<core::Button> Screen::exitButton;
 
 // 淡入淡出相关静态成员初始化
 TransitionState Screen::transitionState = TransitionState::Stable;
@@ -21,6 +22,7 @@ std::shared_ptr<Screen> Screen::nextScreen = nullptr;
 std::function<void()> Screen::transitionCompleteCallback = nullptr;
 std::mutex Screen::transitionMutex;
 static int param = 0;
+
 void Screen::Draw() {
     // 更新过渡状态
     updateTransition(param);
@@ -51,6 +53,8 @@ void Screen::Draw() {
         if(button)
             button->Draw(static_cast<unsigned char>(alpha * 255.0f));
     }
+    if(exitButton)
+        exitButton->Draw(static_cast<unsigned char>(alpha * 255.0f));
 }
 
 void Screen::init() {
@@ -62,18 +66,21 @@ void Screen::init() {
     if (bools[boolconfig::use_video_background]) {
         videoBackground = Explorer::getInstance()->getVideo(VideoID::Background);
     }
+    exitButton = std::make_unique<core::Button>();
+    exitButton->SetAudioID(AudioID::enter);
+    exitButton->SetBitmap(BitmapID::Exit);
+    exitButton->SetEnableBitmap(true);
+    exitButton->SetEnableText(false);
+    exitButton->SetText("exit");
+    exitButton->SetRegion(Config::getInstance()->getRegion(UI_REGION_EXIT));
 }
 
 bool Screen::Click(int x, int y) {
     bool return_value = false;
-    for (const auto& button : buttons) {
-        if(button)
-            if(button->OnClick(Point(x, y, false)))
-            {
-                return_value = true;
-            }
-    }
-    return return_value;
+    if(exitButton)if(exitButton->OnClick(Point(x,y,false)))return true;
+    for (const auto& button : buttons) 
+        if(button)if(button->OnClick(Point(x, y, false)))return true;
+    return false;
 }
 
 void Screen::RegisterScreen(ScreenID id, std::shared_ptr<Screen> screen) {
@@ -202,4 +209,9 @@ void Screen::setUseVideoBackground(bool use) {
     if (use && videoBackground == nullptr) {
         videoBackground = core::Explorer::getInstance()->getVideo(core::VideoID::Background);
     }
+}
+
+void Screen::reloadConfig() {
+    exitButton->SetRegion(Config::getInstance()->getRegion(UI_REGION_EXIT));
+    for(auto & s:screens)s.second->reloadButtonsRegion();
 }

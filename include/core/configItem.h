@@ -77,16 +77,35 @@
 #define NO_VIDEO_PRELOAD "no_video_preload"
 
 // Region相关配置键定义
-#define UI_REGION_MAIN_MENU "ui_region_main_menu"
-#define UI_REGION_SETTING_PANEL "ui_region_setting_panel"
-#define UI_REGION_NAME_DISPLAY "ui_region_name_display"
-#define UI_REGION_BUTTON_AREA "ui_region_button_area"
-#define UI_REGION_VIDEO_PLAYER "ui_region_video_player"
-#define UI_REGION_OVERLAY "ui_region_overlay"
-#define UI_REGION_FLOAT_WINDOW "ui_region_float_window"
-#define UI_REGION_SETTING_BUTTON "ui_region_setting_button"
-#define UI_REGION_NAME_LIST "ui_region_name_list"
-#define UI_REGION_CONTROL_PANEL "ui_region_control_panel"
+#define UI_REGION_EXIT "ui_region_exit"
+#define UI_REGION_SKIP "ui_region_skip"
+// 主菜单
+#define UI_REGION_MAINMENU_SETTING "ui_region_mainmenu_setting"
+#define UI_REGION_MAINMENU_OFFVIDEO "ui_region_mainmenu_offvideo"
+#define UI_REGION_MAINMENU_1STAR "ui_region_mainmenu_1star"
+#define UI_REGION_MAINMENU_10STAR "ui_region_mainmenu_10star"
+#define UI_REGION_MAINMENU_OVERLAY "ui_region_mainmenu_overlay"
+#define UI_REGION_MAINMENU_CHECK "ui_region_mainmenu_check"
+
+// 设置界面
+#define UI_REGION_SETTING_OPEN_CONFIG_FILE "ui_region_setting_open_config_file"
+#define UI_REGION_SETTING_LAST "ui_region_setting_last"
+#define UI_REGION_SETTING_NEXT "ui_region_setting_next"
+
+// 名字界面
+#define UI_REGION_NAMESCREEN_BIGNAME_BEGIN "ui_region_namescreen_bigname_begin"
+#define UI_REGION_NAMESCREEN_BIGNAME_MIDDLE "ui_region_namescreen_bigname_middle"
+#define UI_REGION_NAMESCREEN_BIGNAME_END "ui_region_namescreen_bigname_end"
+#define UI_REGION_NAMESCREEN_SMALLNAME "ui_region_namescreen_smallname"
+#define UI_REGION_NAMESCREEN_TYPE_BEGIN "ui_region_namescreen_type_begin"
+#define UI_REGION_NAMESCREEN_TYPE_END "ui_region_namescreen_type_end"
+#define UI_REGION_NAMESCREEN_ADDNAME "ui_region_namescreen_addname"
+#define UI_REGION_NAMESCREEN_SKIP "ui_region_namescreen_skip"
+
+// 列表界面
+#define UI_REGION_LISTNAME_BUTTON "ui_region_listname_button"
+
+
 
 enum class boolconfig {
     offmusic = 0,

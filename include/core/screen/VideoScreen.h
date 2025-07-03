@@ -22,6 +22,7 @@ enum class VideoID
 class VideoScreen : public Screen
 {
     core::VideoPlayer* videoPlayer=nullptr;
+    void reloadButtonsRegion() override;
 public:
     VideoScreen():Screen(ScreenID::Video){init();};
     ~VideoScreen();

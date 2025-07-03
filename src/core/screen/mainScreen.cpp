@@ -17,7 +17,6 @@ enum{
     his,
     x1,
     x10,
-    exitButton,
     o1,
     o2,
     o3,
@@ -27,7 +26,7 @@ enum{
 void MainScreen::init() {
     // 初始化按钮和背景
     mode=Config::getInstance()->getInt("mode");
-    buttons.resize(10);
+    buttons.resize(9);
     for(int i = 0; i < buttons.size(); ++i) {
         buttons[i] = std::make_shared<Button>();
     }
@@ -35,10 +34,8 @@ void MainScreen::init() {
     for(int i = 0; i < overlays.size(); ++i) {
         overlays[i] = std::make_shared<Button>();
     }
-    float x=0.2,tmp=(1-x*2)/Config::getInstance()->getInt(POOL_COUNT);
-    for(int i=0; i< Config::getInstance()->getInt(POOL_COUNT); i++)
+    for(int i=0; i< buttons.size()-o1; i++)
     {
-        buttons[i+o1]->SetRegion({x,0.1,x+tmp*0.8,0.2});
         buttons[i+o1]->SetBitmap(BitmapID(int(BitmapID::Overlay0)+i));
         buttons[i+o1]->SetText("over"+std::to_string(i+1));
         buttons[i+o1]->SetEnableText(false);
@@ -49,16 +46,15 @@ void MainScreen::init() {
         buttons[i+o1]->SetEnable(true);
         overlays[i]->SetBitmap(BitmapID(int(BitmapID::Overlay0)+i));
         overlays[i]->SetText("over"+std::to_string(i+1));
-        overlays[i]->SetRegion({1,0.25,1.68,0.75});
         overlays[i]->SetEnableText(false);
         overlays[i]->SetEnable(true);
-        x += tmp;
     }
     buttons[set]->SetEnableBitmap(false);
     buttons[set]->SetText(SETICON);
     buttons[set]->SetFontID(FontID::Icon);
-    buttons[set]->SetRegion({0.1,0.82,0.12,0.86});
-    buttons[set]->SetColor({211,188,142,255});    buttons[set]->SetClickFunc([this] {
+    buttons[set]->SetRegionStr(UI_REGION_MAINMENU_SETTING);
+    buttons[set]->SetColor({211,188,142,255});
+    buttons[set]->SetClickFunc([this] {
         Log << Level::Info << "进入设置界面" << op::endl;
         if(screens[ScreenID::Settings] == nullptr) {
             RegisterScreen(ScreenID::Settings, std::make_shared<screen::SettingScreen>());
@@ -67,21 +63,6 @@ void MainScreen::init() {
     });
     buttons[set]->SetEnable(true);
     buttons[set]->SetFontScale(0.35f);
-    buttons[exitButton]->SetBitmap(BitmapID::Exit);
-    buttons[exitButton]->SetClickFunc([]{core::quit();});
-    
-    // 调试信息：打印Region计算值
-    Region debugRegion(0.9, 0.03, 0.95, -1);
-    Log << Level::Info << "Debug Region values:" << op::endl;
-    Log << Level::Info << "  x=" << debugRegion.getx() << ", y=" << debugRegion.gety() << op::endl;
-    Log << Level::Info << "  xend=" << debugRegion.getxend() << ", yend=" << debugRegion.getyend() << op::endl;
-    Log << Level::Info << "  WindowInfo: width=" << WindowInfo.width << ", height=" << WindowInfo.height << op::endl;
-    
-    buttons[exitButton]->SetRegion({0.9,0.03,0.95,-1});
-    buttons[exitButton]->SetEnableText(false);
-    buttons[exitButton]->SetEnableBitmap(true);
-    buttons[exitButton]->SetEnableFill(false);
-    buttons[exitButton]->SetText("返回");
     buttons[offVideo]->SetBitmap(BitmapID::MainScreenButton);
     buttons[offVideo]->SetClickFunc([this]{
         bools[boolconfig::off_video] = !bools[boolconfig::off_video];
@@ -93,11 +74,11 @@ void MainScreen::init() {
     buttons[offVideo]->SetText(bools[boolconfig::off_video] ? "视频:关" : "视频:开");
     buttons[offVideo]->SetColor({0,0,0,255});
     buttons[offVideo]->SetFontID(FontID::Normal);
-    buttons[offVideo]->SetRegion({0.15, 0.82, 0.23, 0.86});
+    buttons[offVideo]->SetRegionStr(UI_REGION_MAINMENU_OFFVIDEO);
     buttons[x1]->SetEnableText(false);
     buttons[x10]->SetEnableText(false);
-    buttons[x1]->SetRegion({0.6, 0.82, 0.7, 0.86});
-    buttons[x10]->SetRegion({0.72, 0.82, 0.82, 0.86});
+    buttons[x1]->SetRegionStr(UI_REGION_MAINMENU_1STAR);
+    buttons[x10]->SetRegionStr(UI_REGION_MAINMENU_10STAR);
     if(mode<=3){
         buttons[x1]->SetBitmap(BitmapID::Pink1Button);
         buttons[x10]->SetBitmap(BitmapID::Pink10Button);
@@ -125,12 +106,14 @@ void MainScreen::init() {
     });
     background = core::Explorer::getInstance()->getBitmapPtr(BitmapID::Background);
 
-    tmp=0;
+    int tmp=0;
+    Region o_region(Config::getInstance()->getRegion(UI_REGION_MAINMENU_OVERLAY));
     for(auto& b:overlays){
         int t=tmp-mode;
-        b->MoveTo({0.16+t,0.25,0.84+t,0.75});
+        b->MoveTo({o_region.getOriginX()+t,o_region.getOriginY(),o_region.getOriginXEnd()+t,o_region.getOriginYEnd(),o_region.getRatio()});
         tmp++;
     }
+    reloadButtonsRegion();
 }
 
 MainScreen::~MainScreen() {
@@ -155,9 +138,11 @@ bool MainScreen::Click(int x, int y) {
 
 void MainScreen::changeMode() {
     int tmp=0;
+    Region o_region(Config::getInstance()->getRegion(UI_REGION_MAINMENU_OVERLAY));
     for(auto& b:overlays){
         int t=tmp-mode;
-        b->MoveTo({0.16+t,0.25,0.84+t,0.75},true,Config::getInstance()->getInt(EXCHANGE_SPEED)
+        b->MoveTo({o_region.getOriginX()+t,o_region.getOriginY(),o_region.getOriginXEnd()+t,o_region.getOriginYEnd(),o_region.getRatio()}
+            ,true,Config::getInstance()->getInt(EXCHANGE_SPEED)
         ,[&b,t]{
             Log<< "Overlay "<< t << op::endl;
             b->SetEnable(true);
@@ -175,8 +160,27 @@ void MainScreen::Draw(){
 }
 
 void MainScreen::enter(int){
+    exitButton->SetClickFunc([]{core::quit();});
     if(bools[boolconfig::use_video_background] && videoBackground) {
         videoBackground->resume();
     }
     Log << Level::Info << "进入主屏幕" << op::endl;
+}
+
+void MainScreen::reloadButtonsRegion() {
+    for(auto& b:buttons)b->resetRegion();
+    Region o_region(Config::getInstance()->getRegion(UI_REGION_MAINMENU_OVERLAY));
+    int tmp=0;
+    for(auto& b:overlays){
+        int t=tmp-mode;
+        b->MoveTo({o_region.getOriginX()+t,o_region.getOriginY(),o_region.getOriginXEnd()+t,o_region.getOriginYEnd(),o_region.getRatio()});
+        tmp++;
+    }
+    Region region(Config::getInstance()->getRegion(UI_REGION_MAINMENU_CHECK));
+    float x=region.getOriginX();
+    float tmp2=(region.getOriginXEnd()-x)/(buttons.size()-o1);
+    for(int i=0;i<buttons.size()-o1;i++){
+        buttons[i+o1]->SetRegion({x,region.getOriginY(),x+tmp2*0.8,region.getOriginYEnd(),region.getRatio()});
+        x+=tmp2;
+    }
 }

@@ -1,4 +1,5 @@
 #include"core/log.h"
+#include "core/baseItem/Base.h"
 
 #include <string>
 #include <iostream>
@@ -6,6 +7,12 @@
 #include <filesystem>
 #include <ctime>
 #include <mutex>
+
+#ifdef _WIN32
+#include <windows.h>
+#include <shlobj.h>
+#endif
+
 
 
 Log_ Log;
@@ -16,19 +23,49 @@ Level currentLevel=Level::none;
 std::mutex LogMutex, ErrorMutex;
 
 bool Log_::setFile(const std::string& filename) {
-    //检测文件夹是否存在
-    std::filesystem::path path(filename);
-    if (!std::filesystem::exists(path.parent_path())) {
-        std::filesystem::create_directories(path.parent_path());
+    std::string actualFilename = filename;
+    
+    try {
+        std::filesystem::path logPath;
+        
+        if (filename.find(':') == std::string::npos && filename.substr(0, 2) != "\\\\") {
+            // 相对路径
+#ifdef _WIN32
+            if (core::g_programDirWritable) {
+                // 程序目录可写，使用程序目录
+                logPath = core::g_executableDir / std::filesystem::u8path(filename);
+            } else {
+                // 程序目录不可写，使用用户数据目录
+                logPath = core::g_userDataDir / std::filesystem::u8path(filename);
+            }
+#else
+            logPath = std::filesystem::current_path() / filename;
+#endif
+        } else {
+            // 绝对路径
+            logPath = std::filesystem::u8path(filename);
+        }
+        
+        actualFilename = logPath.string();
+        
+    } catch (const std::exception& e) {
+        std::cout << "日志路径处理异常: " << e.what() << ", 使用原始路径" << std::endl;
+        actualFilename = filename;
     }
-    if(std::filesystem::exists(filename)) {
-        std::filesystem::remove(filename);
+
+    // 如果文件已存在，删除它
+    if(std::filesystem::exists(actualFilename)) {
+        std::filesystem::remove(actualFilename);
     }
+    
     //关闭之前的文件
     if (logFile.is_open()) {
         logFile.close();
     }
-    logFile.open(filename);
+    logFile.open(actualFilename);
+    if (logFile.is_open()) {
+        std::cout << "日志文件位置: " << actualFilename << std::endl;
+    }
     return logFile.is_open();
 }
 

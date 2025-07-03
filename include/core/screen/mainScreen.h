@@ -6,7 +6,8 @@ namespace screen
 class MainScreen : public Screen {
     int mode=1;
     std::vector<std::shared_ptr<core::Button>> overlays;
-    
+
+    void reloadButtonsRegion() override;
     public:
         MainScreen() : Screen(ScreenID::MainMenu) { Screen::init(); init(); }
         ~MainScreen();

@@ -15,10 +15,9 @@ void SettingScreen::init() {
     background=core::Explorer::getInstance()->getBitmapPtr(BitmapID::SettingBg);
     std::shared_ptr<Button> next=std::make_shared<Button>(Button());
     std::shared_ptr<Button> last=std::make_shared<Button>(Button());
-    std::shared_ptr<Button> back=std::make_shared<Button>(Button());
     std::shared_ptr<Button> openRAWFile=std::make_shared<Button>(Button());
     next->SetFontID(FontID::Icon);
-    next->SetRegion({0.94,0.905,0.97,0.935});
+    next->SetRegionStr(UI_REGION_SETTING_NEXT);
     next->SetColor(Color(0xFFB266));
     next->SetClickFunc([this]{
         changePage(true);
@@ -27,7 +26,7 @@ void SettingScreen::init() {
     next->SetFontScale(0.25);
     next->SetText(NEXT);
     last->SetFontID(FontID::Icon);
-    last->SetRegion({0.89,0.905,0.92,0.935});
+    last->SetRegionStr(UI_REGION_SETTING_LAST);
     last->SetColor(Color(0xFFB266));
     last->SetClickFunc([this]{
         changePage(false);
@@ -35,26 +34,18 @@ void SettingScreen::init() {
     last->SetEnableBitmap(false);
     last->SetFontScale(0.25);
     last->SetText(LAST);
-    back->SetBitmap(BitmapID::Exit);
-    back->SetClickFunc([]{Screen::SwitchToScreenWithFade(ScreenID::MainMenu);});
-    back->SetRegion({0.9,0.03,0.95,-1});
-    back->SetEnableText(false);
-    back->SetEnableBitmap(true);
-    back->SetEnableFill(false);
-    back->SetText("返回");
     openRAWFile->SetFontID(FontID::Default);
     openRAWFile->SetBitmap(BitmapID::MainScreenButton);
     openRAWFile->SetClickFunc([]{ openFile("files/config.json"); });
     openRAWFile->SetColor(Color(0,0,0,255));
-    openRAWFile->SetRegion({0.80, 0.905, 0.885, 0.943});
+    openRAWFile->SetRegionStr(UI_REGION_SETTING_OPEN_CONFIG_FILE);
     openRAWFile->SetText("打开配置文件");
     openRAWFile->SetEnableText(true);
     openRAWFile->SetEnableBitmap(true);
     openRAWFile->SetEnableFill(false);
     openRAWFile->SetFontScale(0.25);
-    buttons.push_back(next);
     buttons.push_back(last);
-    buttons.push_back(back);
+    buttons.push_back(next);
     buttons.push_back(openRAWFile);
 }
 
@@ -159,10 +150,14 @@ void SettingScreen::Draw() {
         (*font)->RenderTextBetween(std::to_string(currentPage + 1) + "/" + std::to_string(pages + 1), 
             {0.9, 0.9, 0.96, 0.93}, 0.3f, Color(255, 150, 20, 255));
     }
+    if (exitButton) {
+        exitButton->Draw(static_cast<unsigned char>(alpha * 255.0f));
+    }
 }
 
 void SettingScreen::enter(int) {
     Log << Level::Info << "进入设置界面" << op::endl;
+    exitButton->SetClickFunc([]{Screen::SwitchToScreenWithFade(ScreenID::MainMenu);});
     loadButtons();
 }
 
@@ -334,4 +329,14 @@ float SettingScreen::calculateTransitionAlpha(bool isCurrentPage) {
     } else {
         return targetPageAlpha;
     }
+}
+
+enum{
+    last=0,
+    next,
+    openRawFile
+};
+
+void SettingScreen::reloadButtonsRegion() {
+    for(auto& b:buttons)b->resetRegion();
 }

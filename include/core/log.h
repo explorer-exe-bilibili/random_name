@@ -63,6 +63,16 @@ public:
         LogMessage(core::wstring2string(message));
         return *this;
     }
+    // 添加对std::u8string的支持（C++20）
+    Log_& operator<<(const std::u8string& message) {
+        LogMessage(std::string(reinterpret_cast<const char*>(message.c_str())));
+        return *this;
+    }
+    // 添加对char8_t*的支持
+    Log_& operator<<(const char8_t* message) {
+        LogMessage(std::string(reinterpret_cast<const char*>(message)));
+        return *this;
+    }
     Log_& operator<<(Level level);
     Log_& operator<<(operation op);
     Log_& operator<<(const core::Point& point) {

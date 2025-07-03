@@ -1000,3 +1000,24 @@ void VideoPlayer::updateAudioClock(double audioTimestamp, int audioDataSize) {
     // 更新音频时钟
     audioClock = audioTimestamp + audioDuration;
 }
+
+void VideoPlayer::cleanBuffer(){
+    while(!packetVideoQueue.empty()) {
+        AVPacket* pkt = packetVideoQueue.front();
+        packetVideoQueue.pop();
+        if (pkt) {
+            av_packet_free(&pkt);
+        }
+    }
+    while(!packetAudioQueue.empty()) {
+        AVPacket* pkt = packetAudioQueue.front();
+        packetAudioQueue.pop();
+        if (pkt) {
+            av_packet_free(&pkt);
+        }
+    }
+    // 清空SDL音频队列
+    if (audioDeviceID) {
+        SDL_ClearQueuedAudio(audioDeviceID);
+    }
+}

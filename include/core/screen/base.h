@@ -30,7 +30,8 @@ enum class TransitionState {
 };
 
 class Screen {
-protected:    std::vector<std::shared_ptr<core::Button>> buttons;
+protected:
+    std::vector<std::shared_ptr<core::Button>> buttons;
     core::Bitmap** background;
     ScreenID ID;
     static core::VideoPlayer* videoBackground;
@@ -38,6 +39,7 @@ protected:    std::vector<std::shared_ptr<core::Button>> buttons;
     static std::shared_ptr<Screen> currentScreen;
     static std::map<ScreenID, std::shared_ptr<Screen>> screens;
     static std::vector<core::NameEntry> nameItems;
+    static std::unique_ptr<core::Button> exitButton;
 
     // 淡入淡出相关成员
     static TransitionState transitionState;
@@ -52,6 +54,7 @@ protected:    std::vector<std::shared_ptr<core::Button>> buttons;
     
     // 更新过渡状态
     static void updateTransition(int param = 0);
+    virtual void reloadButtonsRegion(){}
 public:
     Screen(ScreenID ID) : ID(ID) {}
     virtual ~Screen(){background=nullptr;};
@@ -76,6 +79,8 @@ public:
     static TransitionState GetTransitionState() { return transitionState; }
 
     static void setUseVideoBackground(bool use);
+
+    static void reloadConfig();
 private:
 };
 

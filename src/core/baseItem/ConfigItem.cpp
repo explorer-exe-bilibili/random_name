@@ -235,7 +235,33 @@ void SetConfigItems(){
     config->setifno(SHOW_FPS,0);
     config->setifno(USE_JSON_SETTINGS, 0);
     config->setifno(VOLUME, 100);
+
+    using namespace core;
     
+    config->setifno(RegionName::SMALL_WINDOW, UI_REGION_EXIT, {0.9,0.03,0.95,-1});
+    config->setifno(RegionName::SMALL_WINDOW, UI_REGION_SKIP, {0.82,0.045,0.88,0.08});
+
+    config->setifno(RegionName::SMALL_WINDOW, UI_REGION_MAINMENU_SETTING, {0.1,0.82,0.12,0.86});
+    config->setifno(RegionName::SMALL_WINDOW, UI_REGION_MAINMENU_OFFVIDEO, {0.15,0.82,0.23,0.86});
+    config->setifno(RegionName::SMALL_WINDOW, UI_REGION_MAINMENU_1STAR, {0.6,0.82,0.7,0.86});
+    config->setifno(RegionName::SMALL_WINDOW, UI_REGION_MAINMENU_10STAR, {0.72,0.82,0.82,0.86});
+    config->setifno(RegionName::SMALL_WINDOW, UI_REGION_MAINMENU_OVERLAY, {0.16,0.25,0.84,0.75});
+    config->setifno(RegionName::SMALL_WINDOW, UI_REGION_MAINMENU_CHECK, {0.2,0.1,0.8,0.2});
+
+    config->setifno(RegionName::SMALL_WINDOW, UI_REGION_SETTING_OPEN_CONFIG_FILE, {0.8,0.905,0.885,0.943});
+    config->setifno(RegionName::SMALL_WINDOW, UI_REGION_SETTING_LAST, {0.89,0.905,0.92,0.935});
+    config->setifno(RegionName::SMALL_WINDOW, UI_REGION_SETTING_NEXT, {0.94,0.905,0.97,0.935});
+
+    config->setifno(RegionName::SMALL_WINDOW, UI_REGION_NAMESCREEN_BIGNAME_BEGIN,{0,-0.15,1,1.15});
+    config->setifno(RegionName::SMALL_WINDOW, UI_REGION_NAMESCREEN_BIGNAME_MIDDLE,{0.2,0.3,0.6,0.7});
+    config->setifno(RegionName::SMALL_WINDOW, UI_REGION_NAMESCREEN_BIGNAME_END,{0.3,0.3,0.7,0.7});
+    config->setifno(RegionName::SMALL_WINDOW, UI_REGION_NAMESCREEN_SMALLNAME,{0.177,0.615,1,1});
+    config->setifno(RegionName::SMALL_WINDOW, UI_REGION_NAMESCREEN_TYPE_BEGIN,{0.2,0.25,0.6,-1});
+    config->setifno(RegionName::SMALL_WINDOW, UI_REGION_NAMESCREEN_TYPE_END,{0.3,0.25,0.7,-1});
+    config->setifno(RegionName::SMALL_WINDOW, UI_REGION_NAMESCREEN_ADDNAME,{0.35,0.8,0.65,0.836});
+
+    config->setifno(RegionName::SMALL_WINDOW,UI_REGION_LISTNAME_BUTTON,{0.1,0.1,0.183,0.9});
+
     // 在设置完配置后，加载bools映射
     LoadBoolsFromConfig();
     

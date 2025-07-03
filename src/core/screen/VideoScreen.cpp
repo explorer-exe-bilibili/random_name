@@ -20,7 +20,7 @@ void VideoScreen::init()
     buttons[0] = std::make_shared<Button>();
     buttons[0]->SetText("跳过>>");
     buttons[0]->SetEnableBitmap(false);
-    buttons[0]->SetRegion({0.82,0.045,0.88,0.08});
+    buttons[0]->SetRegionStr(UI_REGION_SKIP);
     buttons[0]->SetAudioID(AudioID::enter);
     buttons[0]->SetFontID(FontID::Normal);
     buttons[0]->SetColor(Color(255,255,255, 255));
@@ -38,6 +38,7 @@ void VideoScreen::init()
             SwitchToScreen(ScreenID::MainMenu);
         }
     });
+    reloadButtonsRegion();
 }
 
 void VideoScreen::enter(int mode)
@@ -103,6 +104,7 @@ void VideoScreen::enter(int mode)
     core::Explorer::getInstance()->getAudio()->stopMusic();
     if (videoPlayer)
     {
+        videoPlayer->cleanBuffer();
         videoPlayer->play();
     }
 }
@@ -152,5 +154,10 @@ void VideoScreen::exit()
     }
     auto duration = std::chrono::steady_clock::now() - now;
     Log << Level::Info << "VideoScreen Exit time:" << (int)std::chrono::duration_cast<std::chrono::milliseconds>(duration).count() << "ms" << op::endl;
+}
+
+void VideoScreen::reloadButtonsRegion()
+{
+    for(auto& b:buttons)b->resetRegion();
 }
 } // namespace screen

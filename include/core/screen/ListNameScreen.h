@@ -16,6 +16,8 @@ public:
 };
 class ListNameScreen : public Screen {
     std::vector<std::shared_ptr<ListNameButton>> m_buttons;
+    core::Region baseRegion;
+    void reloadButtonsRegion()override;
 public:
     ListNameScreen():Screen(ScreenID::ListName) {ListNameScreen::init();};
     ~ListNameScreen()=default;

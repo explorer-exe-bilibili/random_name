@@ -11,15 +11,7 @@ void ListNameScreen::init() {
     for(int i = 0; i < m_buttons.size(); ++i) {
         m_buttons[i] = std::make_shared<ListNameButton>();
     }
-    std::shared_ptr<Button> exitButton = std::make_shared<Button>();
-    exitButton->SetBitmap(BitmapID::Exit);
-    exitButton->SetRegion({0.8f, 0.05f, 0.95f, 0.15f});
-    exitButton->SetAudioID(AudioID::enter);
-    exitButton->SetClickFunc([]() {
-        SwitchToScreenWithFade(ScreenID::MainMenu, 0, 0.5f, []() {
-            core::Explorer::getInstance()->playAudio(AudioID::bgm, 0);
-        });
-    });
+    reloadButtonsRegion();
 }
 
 bool ListNameScreen::Click(int x, int y) {
@@ -52,7 +44,6 @@ void ListNameScreen::Draw() {
 
 void ListNameScreen::enter(int) {
     // 进入代码
-    core::Explorer::getInstance()->playSound(AudioID::enter,0);
     std::sort(nameItems.begin(), nameItems.end(), [](const NameEntry& a, const NameEntry& b) {
         return a.star > b.star; // 按星级降序排序
     });
@@ -72,14 +63,15 @@ void ListNameScreen::enter(int) {
             // button->SetClickFunc([this, i]{ 
                 // SwitchToScreenWithFade(ScreenID::NameInfo,i,0.5f);
             // });
-            button->SetRegion({0.1f + i * 0.1f + 1, 0.1f, 0.183f + i * 0.1f + 1, 0.9f});
+            //TODO:名字详情页面
+            button->SetRegion({baseRegion.getOriginX() + i * baseRegion.getOriginW()+1, baseRegion.getOriginY(), baseRegion.getOriginXEnd() + i * baseRegion.getOriginW() + 1, baseRegion.getOriginYEnd(),baseRegion.getRatio()});
         }
     }
     std::thread([this]{
         int index = 0;
         for(auto& button : m_buttons) {
             if(button) {
-                Region region = {(index+1) * 0.083f, 0.1f, (index+2) * 0.083f, 0.9f};
+                Region region = {(index+1) * baseRegion.getOriginW(), baseRegion.getOriginY(), (index+2) * baseRegion.getOriginW(), baseRegion.getOriginYEnd(),baseRegion.getRatio()};
                 button->MoveTo(region, true, 30.0f);
                 Log<<"Moving button "<<index<<" region: "<<region<<op::endl;
             }
@@ -88,6 +80,11 @@ void ListNameScreen::enter(int) {
             if(currentScreenID != ScreenID::ListName)return;
         }
     }).detach();
+}
+
+void ListNameScreen::reloadButtonsRegion(){
+    for(auto& b:buttons)b->resetRegion();
+    baseRegion=Config::getInstance()->getRegion(UI_REGION_LISTNAME_BUTTON);
 }
 
 ListNameButton::ListNameButton() {
@@ -119,7 +116,7 @@ void ListNameButton::Draw() {
         (*bitmapPtr)->Draw(region);
     }
     if (enableText && fontPtr && *fontPtr) {
-        Region textRegion={region.getOriginX(), region.getOriginY() + 0.1f, region.getOriginXEnd(), region.getOriginYEnd() - 0.2f, true};
+        Region textRegion={region.getOriginX(), region.getOriginY() + 0.1f, region.getOriginXEnd(), region.getOriginYEnd() - 0.2f, region.getRatio()};
         (*fontPtr)->RenderTextVerticalBetween(text, textRegion, fontScale,color);
     }
 }

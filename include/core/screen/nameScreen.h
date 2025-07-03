@@ -45,9 +45,11 @@ class NameScreen : public Screen {
     mutable std::uniform_real_distribution<float> dist;
     mutable std::vector<core::Point> starPositions;
     mutable std::mutex starPositionsMutex;
+    std::vector<core::Region> regions;
     core::NameEntry currentName;
     int currentIndex = 0;
     NameButton nameButton;
+    void reloadButtonsRegion() override;
 public:
     NameScreen():Screen(ScreenID::Name){init();}
     void Draw() override;

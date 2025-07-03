@@ -8,6 +8,7 @@
 #include <atomic>
 #include <memory>
 #include "../explorer.h"
+#include "../Config.h"
 
 namespace core {
 class Button {
@@ -37,6 +38,7 @@ public:
         }
     }
     void SetRegion(const Region& region) {this->region = region;}
+    void SetRegionStr(const std::string& name){this->regionConfig=name;resetRegion();}
     void SetFontID(FontID id);
     void SetAudioID(AudioID id) {this->audioid = id;}
     void SetTextCenterd(bool isCentered){this->isCentered = isCentered;}
@@ -48,6 +50,9 @@ public:
     void SetEnable(bool enable) {this->enable = enable;}
     void SetEnableBitmap(bool enable) {this->enableBitmap = enable;}
     void SetEnableFill(bool enable) {this->enableFill = enable;}
+
+    void resetRegion() {if(!regionConfig.empty())this->region=Config::getInstance()->getRegion(regionConfig);}
+    Region getRegion() const { return region; }
 protected:
     Region region;
     Color color=Color(255, 255, 255, 255);
@@ -58,6 +63,7 @@ protected:
     bool enableFill=false;
     bool isCentered=true; // 是否居中显示文本
     std::string text="";
+    std::string regionConfig="";
     Bitmap** bitmapPtr = nullptr; // 用于自动更新的指针
     std::function<void()> ClickFunc;
     BitmapID bitmapid=BitmapID::Unknown;

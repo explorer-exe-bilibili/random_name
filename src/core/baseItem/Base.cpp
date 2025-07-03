@@ -1,31 +1,69 @@
 #include "core/baseItem/Base.h"
-#include <locale>
-#include <cstring>
 #include "core/log.h"
-#include <utf8cpp/utf8.h>
-#include <vector>
-#include <string>
-#include <cstdlib>
+#include <iostream>
+#include <cstring>
+#include <sstream>
+#include <stdexcept>
+#include <GLFW/glfw3.h>
 #include <filesystem>
+#include <fstream>
 
 #ifdef _WIN32
-    #include <windows.h>
-    #include <shellapi.h>
-    #include <psapi.h>
-#else
-    #include <unistd.h>
-    #include <sys/types.h>
-    #include <sys/wait.h>
-    #include <sys/stat.h>
-    #include <limits.h>
-    #ifdef __APPLE__
-        #include <mach-o/dyld.h>
-    #else
-        #include <linux/limits.h>
-    #endif
+#include <windows.h>
+#include <shlobj.h>
 #endif
 
+#include "utf8.h"
+
 using namespace core;
+
+// 定义全局变量
+namespace core {
+    std::filesystem::path g_executableDir;
+    std::filesystem::path g_userDataDir;
+    bool g_programDirWritable = false;
+    
+    void initializeDirectories() {
+#ifdef _WIN32
+        // 获取程序所在目录
+        wchar_t path[MAX_PATH];
+        DWORD length = GetModuleFileNameW(NULL, path, MAX_PATH);
+        if (length > 0) {
+            std::filesystem::path execPath(path);
+            g_executableDir = execPath.parent_path();
+        } else {
+            g_executableDir = std::filesystem::current_path();
+        }
+        
+        // 获取用户数据目录
+        wchar_t* documentsPath = nullptr;
+        if (SHGetKnownFolderPath(FOLDERID_Documents, 0, NULL, &documentsPath) == S_OK) {
+            g_userDataDir = std::filesystem::path(documentsPath) / "RandomNameApp";
+            CoTaskMemFree(documentsPath);
+        } else {
+            g_userDataDir = g_executableDir;
+        }
+        
+        // 检查程序目录是否可写
+        try {
+            std::filesystem::path testFile = g_executableDir / "test_write_permission.tmp";
+            std::ofstream test(testFile);
+            if (test.is_open()) {
+                test << "test";
+                test.close();
+                std::filesystem::remove(testFile);
+                g_programDirWritable = true;
+            }
+        } catch (...) {
+            g_programDirWritable = false;
+        }
+#else
+        g_executableDir = std::filesystem::current_path();
+        g_userDataDir = g_executableDir;
+        g_programDirWritable = true;
+#endif
+    }
+}
 
 ScreenInfo core::WindowInfo,core::screenInfo;
 // 初始化静态成员变量
@@ -159,27 +197,70 @@ bool core::stringContains(const std::string& str, const std::string& substr) {
 
 void core::startFileWithoutWindow(const std::string& path) {
     if (path.empty()) return;
-    std::filesystem::path fspath(path);
-    if (fspath.is_relative()) {
-        // 获取可执行文件所在目录
-        std::filesystem::path exePath = std::filesystem::current_path();
-        fspath = exePath / fspath;
+    
+    try {
+        std::filesystem::path fspath;
+        
+#ifdef _WIN32
+        // 改进Windows路径处理
+        if (path.find(':') != std::string::npos || path.substr(0, 2) == "\\\\") {
+            // 绝对路径
+            fspath = std::filesystem::u8path(path);
+        } else {
+            // 相对路径，相对于当前工作目录
+            fspath = std::filesystem::current_path() / std::filesystem::u8path(path);
+        }
+        
+        // 规范化路径
+        fspath = std::filesystem::absolute(fspath);
+        
+        // 检查文件是否存在
+        if (!std::filesystem::exists(fspath)) {
+            Log << Level::Warn << "要启动的文件不存在: " << fspath.string() << op::endl;
+            return;
+        }
+        
+        // 使用ShellExecuteW启动程序
+        std::wstring wpath = fspath.wstring();
+        HINSTANCE result = ShellExecuteW(NULL, L"open", wpath.c_str(), NULL, NULL, SW_HIDE);
+        
+        // 检查启动结果
+        if ((intptr_t)result <= 32) {
+            Log << Level::Error << "启动程序失败，错误代码: " << (intptr_t)result 
+                << ", 路径: " << fspath.string() << op::endl;
+        } else {
+            Log << Level::Info << "成功启动程序: " << fspath.string() << op::endl;
+        }
+#else
+        // 非Windows平台的处理
+        if (std::filesystem::path(path).is_relative()) {
+            fspath = std::filesystem::current_path() / path;
+        } else {
+            fspath = path;
+        }
+        
+        fspath = std::filesystem::absolute(fspath);
+        
+        if (!std::filesystem::exists(fspath)) {
+            return;
+        }
+#endif
+
+#ifdef __APPLE__
+        // macOS 平台
+        std::string command = "open -a \"" + fspath.string() + "\"";
+        system(command.c_str());
+#endif
+#ifdef __linux__
+        // Linux 平台
+        std::string command = fspath.string() + " &"; // 在后台运行
+        system(command.c_str());
+#endif
+    } catch (const std::filesystem::filesystem_error& e) {
+        Log << Level::Error << "文件系统错误启动程序 '" << path << "': " << e.what() << op::endl;
+    } catch (const std::exception& e) {
+        Log << Level::Error << "启动程序时发生异常 '" << path << "': " << e.what() << op::endl;
     }
-    #ifdef _WIN32
-    // Windows 平台
-    std::wstring wpath = core::string2wstring(fspath.string());
-    ShellExecuteW(NULL, L"open", wpath.c_str(), NULL, NULL, SW_HIDE);
-    #endif
-    #ifdef __APPLE__
-    // macOS 平台
-    std::string command = "open -a \"" + fspath.string() + "\"";
-    system(command.c_str());
-    #endif
-    #ifdef __linux__
-    // Linux 平台
-    std::string command = fspath.string() + " &"; // 在后台运行
-    system(command.c_str());
-    #endif
 }
 
 void core::quit() {
