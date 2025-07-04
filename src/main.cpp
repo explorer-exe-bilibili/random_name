@@ -69,6 +69,59 @@ bool isDirectoryWritable(const std::filesystem::path& dir) {
 // 当使用SDL2时，main函数需要被重新定义为SDL_main
 int main(int argc, char* argv[])
 {
+    try {
+        // 使用错误恢复执行初始化
+        int result = ErrorRecovery::executeWithRetry<int>(
+            []() { return init(); },
+            {.maxRetries = 3, .baseDelay = std::chrono::milliseconds(1000)}
+        );
+        
+        if(result != 0){
+            Log<<Level::Error<<"Failed to initialize"<<op::endl;
+            return -1;
+        }
+        
+        // 初始化FPS计算
+        lastFPSUpdateTime = glfwGetTime();
+        frameCount = 0;
+        currentFPS = 0.0;
+        
+        // 渲染循环 - 现在包含错误恢复
+        while (!glfwWindowShouldClose(core::WindowInfo.window)) {
+            if (ErrorRecovery::shouldAbort()) {
+                Log << Level::Error << "连续错误过多，程序退出" << op::endl;
+                break;
+            }
+            
+            try {
+                mainloop();
+            } catch (const std::exception& e) {
+                Log << Level::Error << "主循环异常: " << e.what() << op::endl;
+                
+                // 尝试恢复OpenGL上下文
+                if (!OpenGLErrorRecovery::recoverLostContext(core::WindowInfo.window)) {
+                    Log << Level::Error << "无法恢复OpenGL上下文，程序退出" << op::endl;
+                    break;
+                }
+            }
+        }
+        
+    } catch (const std::exception& e) {
+        Log << Level::Error << "程序发生致命错误: " << e.what() << op::endl;
+        return -1;
+    }
+
+    // 执行清理操作并确保不再进行后续的OpenGL调用
+    int cleanupResult = cleanup();
+    if (cleanupResult != 0) {
+        Log<<Level::Error<<"Cleanup failed with code: "<<cleanupResult<<op::endl;
+    }
+    
+    return 0;
+}
+
+
+int init(){
     // 注册错误处理器
     ErrorRecovery::registerErrorHandler(
         ErrorRecovery::ErrorType::MEMORY_ALLOCATION,
@@ -142,60 +195,6 @@ int main(int argc, char* argv[])
 #else
     Log<<Level::Info<<"运行在非Debug模式"<<op::endl;
 #endif
-
-    try {
-        // 使用错误恢复执行初始化
-        int result = ErrorRecovery::executeWithRetry<int>(
-            []() { return init(); },
-            {.maxRetries = 3, .baseDelay = std::chrono::milliseconds(1000)}
-        );
-        
-        if(result != 0){
-            Log<<Level::Error<<"Failed to initialize"<<op::endl;
-            return -1;
-        }
-        
-        // 初始化FPS计算
-        lastFPSUpdateTime = glfwGetTime();
-        frameCount = 0;
-        currentFPS = 0.0;
-        
-        // 渲染循环 - 现在包含错误恢复
-        while (!glfwWindowShouldClose(core::WindowInfo.window)) {
-            if (ErrorRecovery::shouldAbort()) {
-                Log << Level::Error << "连续错误过多，程序退出" << op::endl;
-                break;
-            }
-            
-            try {
-                mainloop();
-            } catch (const std::exception& e) {
-                Log << Level::Error << "主循环异常: " << e.what() << op::endl;
-                
-                // 尝试恢复OpenGL上下文
-                if (!OpenGLErrorRecovery::recoverLostContext(core::WindowInfo.window)) {
-                    Log << Level::Error << "无法恢复OpenGL上下文，程序退出" << op::endl;
-                    break;
-                }
-            }
-        }
-        
-    } catch (const std::exception& e) {
-        Log << Level::Error << "程序发生致命错误: " << e.what() << op::endl;
-        return -1;
-    }
-
-    // 执行清理操作并确保不再进行后续的OpenGL调用
-    int cleanupResult = cleanup();
-    if (cleanupResult != 0) {
-        Log<<Level::Error<<"Cleanup failed with code: "<<cleanupResult<<op::endl;
-    }
-    
-    return 0;
-}
-
-
-int init(){
     // 设置控制台代码页为UTF-8
     #ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);

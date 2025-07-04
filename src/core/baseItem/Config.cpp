@@ -12,6 +12,7 @@
 #include <nlohmann/json.hpp>
 
 #ifdef _WIN32
+#undef APIENTRY
 #include <windows.h>
 #include <shlobj.h>
 #endif
@@ -246,6 +247,7 @@ Region Config::getRegion(const std::string& name, const RegionName& category, co
     if(category == RegionName::NONE)trueCategory = currentRegionName;
     std::string key=name;
     if(name.find(".") == std::string::npos)key = to_string(trueCategory) + "." + name;
+    
     // 如果传入的是空Region默认值，尝试使用setifno设置的默认值
     Region actualDefaultValue = defaultValue;
     if (defaultValue.getOriginX() == 0.0f && defaultValue.getOriginY() == 0.0f && 
@@ -263,12 +265,49 @@ Region Config::getRegion(const std::string& name, const RegionName& category, co
             } catch (const std::exception& e) {
                 Log << Level::Error << "Error parsing default region " << key << ": " << e.what() << op::endl;
             }
+        } else if (trueCategory != RegionName::SMALL_WINDOW) {
+            // 如果当前category没有默认值，且当前category不是SMALL_WINDOW，尝试使用SMALL_WINDOW的默认值
+            std::string fallbackDefaultKey = to_string(RegionName::SMALL_WINDOW) + "." + name;
+            auto fallbackDefaultIt = defaultValues.find(fallbackDefaultKey);
+            if (fallbackDefaultIt != defaultValues.end()) {
+                try {
+                    nlohmann::json regionJson = nlohmann::json::parse(fallbackDefaultIt->second);
+                    float x = regionJson.value("x", 0.0f);
+                    float y = regionJson.value("y", 0.0f);
+                    float xend = regionJson.value("xend", 1.0f);
+                    float yend = regionJson.value("yend", 1.0f);
+                    bool screenRatio = regionJson.value("screenRatio", true);
+                    actualDefaultValue = Region(x, y, xend, yend, screenRatio);
+                    Log << Level::Info << "Using SMALL_WINDOW fallback default value for " << name << op::endl;
+                } catch (const std::exception& e) {
+                    Log << Level::Error << "Error parsing fallback default region " << fallbackDefaultKey << ": " << e.what() << op::endl;
+                }
+            }
         }
     }
     
     try {
         nlohmann::json regionJson = getAsJson(key);
         if (regionJson.is_null() || !regionJson.is_object()) {
+            // 如果当前category没有找到配置，且当前category不是SMALL_WINDOW，尝试使用SMALL_WINDOW的配置
+            if (trueCategory != RegionName::SMALL_WINDOW) {
+                std::string fallbackKey = to_string(RegionName::SMALL_WINDOW) + "." + name;
+                Log << Level::Info << "Region not found for " << key << ", trying fallback: " << fallbackKey << op::endl;
+                
+                nlohmann::json fallbackJson = getAsJson(fallbackKey);
+                if (!fallbackJson.is_null() && fallbackJson.is_object()) {
+                    // 使用SMALL_WINDOW的配置
+                    float x = fallbackJson.value("x", actualDefaultValue.getOriginX());
+                    float y = fallbackJson.value("y", actualDefaultValue.getOriginY());
+                    float xend = fallbackJson.value("xend", actualDefaultValue.getOriginXEnd());
+                    float yend = fallbackJson.value("yend", actualDefaultValue.getOriginYEnd());
+                    bool screenRatio = fallbackJson.value("screenRatio", actualDefaultValue.getRatio());
+                    
+                    Region fallbackRegion(x, y, xend, yend, screenRatio);
+                    Log << Level::Info << "Using SMALL_WINDOW fallback region for " << name << op::endl;
+                    return fallbackRegion;
+                }
+            }
             return actualDefaultValue;
         }
         
@@ -283,6 +322,30 @@ Region Config::getRegion(const std::string& name, const RegionName& category, co
         return region;
     } catch (const std::exception& e) {
         Log << Level::Error << "Error parsing region " << key << ": " << e.what() << op::endl;
+        
+        // 如果解析出错，且当前category不是SMALL_WINDOW，尝试使用SMALL_WINDOW的配置作为回退
+        if (trueCategory != RegionName::SMALL_WINDOW) {
+            std::string fallbackKey = to_string(RegionName::SMALL_WINDOW) + "." + name;
+            Log << Level::Info << "Parse error for " << key << ", trying fallback: " << fallbackKey << op::endl;
+            
+            try {
+                nlohmann::json fallbackJson = getAsJson(fallbackKey);
+                if (!fallbackJson.is_null() && fallbackJson.is_object()) {
+                    float x = fallbackJson.value("x", actualDefaultValue.getOriginX());
+                    float y = fallbackJson.value("y", actualDefaultValue.getOriginY());
+                    float xend = fallbackJson.value("xend", actualDefaultValue.getOriginXEnd());
+                    float yend = fallbackJson.value("yend", actualDefaultValue.getOriginYEnd());
+                    bool screenRatio = fallbackJson.value("screenRatio", actualDefaultValue.getRatio());
+                    
+                    Region fallbackRegion(x, y, xend, yend, screenRatio);
+                    Log << Level::Info << "Using SMALL_WINDOW fallback region for " << name << " after parse error" << op::endl;
+                    return fallbackRegion;
+                }
+            } catch (const std::exception& fallbackException) {
+                Log << Level::Error << "Error parsing fallback region " << fallbackKey << ": " << fallbackException.what() << op::endl;
+            }
+        }
+        
         return actualDefaultValue;
     }
 }
