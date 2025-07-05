@@ -13,6 +13,7 @@
 #include "core/decrash/MemoryMonitor.h"
 
 #ifdef _WIN32
+#undef APIENTRY
 #include <windows.h>
 #include <io.h>
 #include <fcntl.h>

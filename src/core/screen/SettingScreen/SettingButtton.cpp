@@ -11,6 +11,7 @@
 #include <vector>
 
 #ifdef _WIN32
+#undef APIENTRY
 #include <windows.h>
 #include <shellapi.h>
 #include <tlhelp32.h>

@@ -15,7 +15,9 @@ enum class SettingButtonType{
     Textbox,
     ColorSelect,
     PathSelect,
-    FileSelect
+    FileSelect,
+    RegionEditor,     // 新增：区域编辑器
+    RegionPreset      // 新增：区域预设管理
 };
 enum SettingButtonAction{
     None=0,
@@ -36,6 +38,20 @@ enum class FileType{
     Font,
     Unknown
 };
+
+// Region编辑器拖拽模式
+enum class DragMode {
+    None,
+    Move,           // 移动整个区域
+    ResizeLeft,     // 调整左边界
+    ResizeRight,    // 调整右边界
+    ResizeTop,      // 调整上边界
+    ResizeBottom,   // 调整下边界
+    ResizeTopLeft,  // 调整左上角
+    ResizeTopRight, // 调整右上角
+    ResizeBottomLeft,  // 调整左下角
+    ResizeBottomRight  // 调整右下角
+};
 class sItem{
 public:
     // 默认构造函数，确保字符串成员正确初始化
@@ -53,7 +69,9 @@ public:
               bitmapName(""),
               outOfLimitOutPut(""),
               minCount(0),
-              maxCount(0) {}
+              maxCount(0),
+              regionCategory(core::RegionName::SMALL_WINDOW),
+              relatedRegions() {}
     
     // 拷贝构造函数，确保字符串正确复制
     sItem(const sItem& other) : fileType(other.fileType),
@@ -70,7 +88,9 @@ public:
                                 audioID(other.audioID),
                                 outOfLimitOutPut(other.outOfLimitOutPut),
                                 minCount(other.minCount),
-                                maxCount(other.maxCount) {}
+                                maxCount(other.maxCount),
+                                regionCategory(other.regionCategory),
+                                relatedRegions(other.relatedRegions) {}
     
     // 赋值操作符
     sItem& operator=(const sItem& other) {
@@ -90,6 +110,8 @@ public:
             outOfLimitOutPut = other.outOfLimitOutPut;
             minCount = other.minCount;
             maxCount = other.maxCount;
+            regionCategory = other.regionCategory;
+            relatedRegions = other.relatedRegions;
         }
         return *this;
     }
@@ -109,6 +131,10 @@ public:
     std::string outOfLimitOutPut;
     int minCount=0;
     int maxCount=0;
+    
+    // Region编辑器相关属性
+    core::RegionName regionCategory = core::RegionName::SMALL_WINDOW; // Region类别
+    std::vector<std::string> relatedRegions;     // 相关的Region列表
 };
 class SettingButton
 {

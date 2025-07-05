@@ -52,7 +52,8 @@ public:
     void SetEnableFill(bool enable) {this->enableFill = enable;}
 
     void resetRegion() {if(!regionConfig.empty())this->region=Config::getInstance()->getRegion(regionConfig);}
-    Region getRegion() const { return region; }
+    Region GetRegion() const { return region; }
+    std::string GetText() const { return text; }
 protected:
     Region region;
     Color color=Color(255, 255, 255, 255);

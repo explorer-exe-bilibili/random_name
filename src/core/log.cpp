@@ -9,6 +9,7 @@
 #include <mutex>
 
 #ifdef _WIN32
+#undef APIENTRY
 #include <windows.h>
 #include <shlobj.h>
 #endif
