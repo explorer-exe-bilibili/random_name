@@ -9,6 +9,30 @@
 #include <memory>
 #include "../explorer.h"
 #include "../Config.h"
+#include <vector>
+
+// 编辑模式相关枚举
+enum class EditMode {
+    None,           // 不在编辑模式
+    Move,           // 移动模式
+    ResizeTopLeft,  // 调整左上角
+    ResizeTopRight, // 调整右上角
+    ResizeBottomLeft,  // 调整左下角
+    ResizeBottomRight, // 调整右下角
+    ResizeLeft,     // 调整左边
+    ResizeRight,    // 调整右边
+    ResizeTop,      // 调整上边
+    ResizeBottom    // 调整下边
+};
+
+// 编辑手柄结构
+struct EditHandle {
+    core::Region region;
+    EditMode mode;
+    bool visible;
+    EditHandle() : region(), mode(EditMode::None), visible(false) {}
+    EditHandle(const core::Region& r, EditMode m) : region(r), mode(m), visible(true) {}
+};
 
 namespace core {
 class Button {
@@ -37,7 +61,7 @@ public:
             this->bitmapPtr = core::Explorer::getInstance()->getBitmapPtr(id);
         }
     }
-    void SetRegion(const Region& region) {this->region = region;}
+    void SetRegion(const Region& region) {this->region = region; UpdateEditHandles();}
     void SetRegionStr(const std::string& name){this->regionConfig=name;resetRegion();}
     void SetFontID(FontID id);
     void SetAudioID(AudioID id) {this->audioid = id;}
@@ -51,7 +75,21 @@ public:
     void SetEnableBitmap(bool enable) {this->enableBitmap = enable;}
     void SetEnableFill(bool enable) {this->enableFill = enable;}
 
-    void resetRegion() {if(!regionConfig.empty())this->region=Config::getInstance()->getRegion(regionConfig);}
+    // 编辑模式相关方法
+    void SetEditMode(bool enable);
+    bool IsEditModeEnabled() const {return editModeEnabled;}
+    void SetEditHandleSize(float size) {editHandleSize = size;UpdateEditHandles();}
+    void SetEditHandleColor(const Color& color) {editHandleColor = color;}
+    void SetEditBorderColor(const Color& color) {editBorderColor = color;}
+    void SetEditBorderWidth(float width) {editBorderWidth = width;}
+    void SetOnEditComplete(std::function<void(const Region&)> callback);
+    bool OnEditMouseDown(Point point);
+    bool OnEditMouseMove(Point point);
+    bool OnEditMouseUp(Point point);
+    void DrawEditOverlay();
+    EditMode GetEditModeAt(Point point) const;
+
+    void resetRegion() {if(!regionConfig.empty())this->region=Config::getInstance()->getRegion(regionConfig); UpdateEditHandles();}
     Region GetRegion() const { return region; }
     std::string GetText() const { return text; }
 protected:
@@ -83,5 +121,25 @@ protected:
     std::atomic<bool> fadeStopRequested{false}; // 请求停止淡出动画标志
     std::atomic<unsigned char> currentFadeAlpha{255}; // 当前淡出透明度值
     mutable std::timed_mutex fadeMutex;           // 淡出动画线程同步互斥锁（支持超时）
+
+    // 编辑模式相关成员
+    bool editModeEnabled = false;
+    EditMode currentEditMode = EditMode::None;
+    bool isDragging = false;
+    Point dragStartPoint;
+    Region originalRegion;
+    std::vector<EditHandle> editHandles;
+    float editHandleSize = 8.0f;
+    Color editHandleColor = Color(0, 120, 215, 255);
+    Color editBorderColor = Color(0, 120, 215, 255);
+    float editBorderWidth = 2.0f;
+    std::function<void(const Region&)> onEditComplete;
+    float minWidth = 10.0f;
+    float minHeight = 10.0f;
+    // 编辑模式辅助方法
+    void UpdateEditHandles();
+    void UpdateRegionFromEdit(Point currentPoint);
+    bool IsPointInHandle(Point point, const EditHandle& handle) const;
+    void ClampRegion();
 };
 }

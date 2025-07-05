@@ -39,7 +39,7 @@ protected:
     static std::shared_ptr<Screen> currentScreen;
     static std::map<ScreenID, std::shared_ptr<Screen>> screens;
     static std::vector<core::NameEntry> nameItems;
-    static std::unique_ptr<core::Button> exitButton;
+    static std::shared_ptr<core::Button> exitButton;
 
     // 淡入淡出相关成员
     static TransitionState transitionState;
@@ -48,6 +48,10 @@ protected:
     static std::shared_ptr<Screen> nextScreen; // 待切换的下一个屏幕
     static std::function<void()> transitionCompleteCallback;
     static std::mutex transitionMutex; // 保护过渡状态的互斥锁
+
+    // 编辑模式相关成员
+    bool editModeEnabled = false;
+    std::shared_ptr<core::Button> selectedButton = nullptr;
 
     // 计算当前的alpha值（基于过渡状态）
     static float getCurrentAlpha();
@@ -66,6 +70,18 @@ public:
     virtual void exit(){};
     virtual bool HandleKeyInput(char key) { return false; } // 处理键盘输入，默认不处理
     virtual bool HandleUnicodeInput(const std::string& utf8_char) { return false; } // 处理Unicode字符输入，默认不处理
+
+    // 编辑模式相关方法
+    virtual void SetEditMode(bool enable);
+    virtual bool IsEditModeEnabled() const { return editModeEnabled; }
+    virtual void OnEditMouseDown(int x, int y);
+    virtual void OnEditMouseMove(int x, int y);  
+    virtual void OnEditMouseUp(int x, int y);
+    virtual void DrawEditOverlays();
+    virtual void SaveButtonLayout();
+    virtual void LoadButtonLayout();
+    virtual void ResetButtonLayout();
+    virtual bool HasCustomLayout() const;
 
     ScreenID getID() const { return ID; }
     static std::shared_ptr<Screen> getCurrentScreen() { return currentScreen; }    // 屏幕管理系统功能

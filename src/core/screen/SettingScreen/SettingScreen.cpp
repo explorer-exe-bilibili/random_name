@@ -9,6 +9,7 @@
 
 using namespace screen;
 using namespace core;
+using namespace settingScreen;
 
 void SettingScreen::init() {
     Screen::init();

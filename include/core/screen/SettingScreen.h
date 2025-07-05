@@ -6,6 +6,8 @@
 
 namespace screen
 {
+namespace settingScreen
+{
 struct FileTypeFilter {
     std::string description;  // 描述，如"图片文件"
     std::vector<const char*> pattern;      // 模式，如"*.png"
@@ -175,9 +177,10 @@ private:
     void openFile();
     void checkActions();
 };
+}
 class SettingScreen : public Screen
 {
-    std::vector<std::shared_ptr<SettingButton>> s_buttons;
+    std::vector<std::shared_ptr<settingScreen::SettingButton>> s_buttons;
     std::vector<std::string> titles;
     int currentPage=0;
     int pages=-1;

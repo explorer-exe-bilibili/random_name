@@ -254,6 +254,7 @@ int init(){
     OpenGLErrorRecovery::reset();
     
     glfwSetMouseButtonCallback(WindowInfo.window, MouseButtonEvent);
+    glfwSetCursorPosCallback(WindowInfo.window, MouseMoveEvent);
     glfwSetKeyCallback(WindowInfo.window, KeyEvent);
     glfwSetCharCallback(WindowInfo.window, CharEvent); // 设置Unicode字符输入回调
     glfwSetFramebufferSizeCallback(WindowInfo.window, framebuffer_size_callback);

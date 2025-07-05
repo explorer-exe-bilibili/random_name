@@ -18,6 +18,7 @@ void executeRenderingWithRecovery();
 void KeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods);
 void CharEvent(GLFWwindow* window, unsigned int codepoint); // Unicode字符输入回调
 void MouseButtonEvent(GLFWwindow* window, int button, int action, int mods);
+void MouseMoveEvent(GLFWwindow* window, double xpos, double ypos); // 鼠标移动回调
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
 int init();

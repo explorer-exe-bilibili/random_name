@@ -369,3 +369,214 @@ void Button::FadeOut(float duration, unsigned char startAlpha, unsigned char end
         
     }).detach();
 }
+
+// 编辑模式方法实现
+void Button::SetEditMode(bool enable) {
+    editModeEnabled = enable;
+    UpdateEditHandles();
+}
+
+void Button::SetOnEditComplete(std::function<void(const Region&)> callback) {
+    onEditComplete = callback;
+}
+
+void Button::UpdateEditHandles() {
+    if (!editModeEnabled) {
+        editHandles.clear();
+        return;
+    }
+    editHandles.clear();
+    float handleSize = editHandleSize;
+    float halfH = handleSize / 2.0f;
+    float l = region.getx();
+    float r = region.getxend();
+    float t = region.gety();
+    float b = region.getyend();
+    float cx = (l + r) * 0.5f;
+    float cy = (t + b) * 0.5f;
+    // 角落
+    editHandles.emplace_back(Region(l-halfH, t-halfH, l+halfH, t+halfH, false), EditMode::ResizeTopLeft);
+    editHandles.emplace_back(Region(r-halfH, t-halfH, r+halfH, t+halfH, false), EditMode::ResizeTopRight);
+    editHandles.emplace_back(Region(l-halfH, b-halfH, l+halfH, b+halfH, false), EditMode::ResizeBottomLeft);
+    editHandles.emplace_back(Region(r-halfH, b-halfH, r+halfH, b+halfH, false), EditMode::ResizeBottomRight);
+    // 边框中点
+    editHandles.emplace_back(Region(cx-halfH, t-halfH, cx+halfH, t+halfH, false), EditMode::ResizeTop);
+    editHandles.emplace_back(Region(cx-halfH, b-halfH, cx+halfH, b+halfH, false), EditMode::ResizeBottom);
+    editHandles.emplace_back(Region(l-halfH, cy-halfH, l+halfH, cy+halfH, false), EditMode::ResizeLeft);
+    editHandles.emplace_back(Region(r-halfH, cy-halfH, r+halfH, cy+halfH, false), EditMode::ResizeRight);
+}
+
+EditMode Button::GetEditModeAt(Point point) const {
+    if (!editModeEnabled) return EditMode::None;
+    for (const auto& h : editHandles) {
+        if (IsPointInHandle(point, h)) return h.mode;
+    }
+    if (point.getx() >= region.getx() && point.getx() <= region.getxend() &&
+        point.gety() >= region.gety() && point.gety() <= region.getyend()) {
+        return EditMode::Move;
+    }
+    return EditMode::None;
+}
+
+bool Button::IsPointInHandle(Point point, const EditHandle& handle) const {
+    return point.getx() >= handle.region.getx() && point.getx() <= handle.region.getxend() &&
+           point.gety() >= handle.region.gety() && point.gety() <= handle.region.getyend();
+}
+
+bool Button::OnEditMouseDown(Point point) {
+    if (!editModeEnabled) return false;
+    
+    // 检查是否点击了编辑手柄
+    for (const auto& handle : editHandles) {
+        if (IsPointInHandle(point, handle)) {
+            Log << "Button " << text << " edit handle clicked: " << int(handle.mode) << op::endl;
+            currentEditMode = handle.mode;
+            isDragging = true;
+            dragStartPoint = point;
+            originalRegion = region;
+            return true;
+        }
+    }
+    
+    // 检查是否点击了按钮内部（移动模式）
+    if (point.getx() >= region.getx() && point.getx() <= region.getxend() && 
+        point.gety() >= region.gety() && point.gety() <= region.getyend()) {
+        Log << "Button " << text << " edit move started" << op::endl;
+        currentEditMode = EditMode::Move;
+        isDragging = true;
+        dragStartPoint = point;
+        originalRegion = region;
+        return true;
+    }
+    
+    return false;
+}
+
+bool Button::OnEditMouseMove(Point point) {
+    if (!editModeEnabled) return false;
+    
+    if (isDragging && currentEditMode != EditMode::None) {
+        UpdateRegionFromEdit(point);
+        UpdateEditHandles();
+        return true;
+    }
+    
+    return false;
+}
+
+bool Button::OnEditMouseUp(Point point) {
+    if (!editModeEnabled) return false;
+    
+    if (isDragging && currentEditMode != EditMode::None) {
+        Log << "Button " << text << " edit completed" << op::endl;
+        isDragging = false;
+        if (onEditComplete) onEditComplete(region);
+        currentEditMode = EditMode::None;
+        return true;
+    }
+    
+    return false;
+}
+
+void Button::UpdateRegionFromEdit(Point cur) {
+    float dx = cur.getx() - dragStartPoint.getx();
+    float dy = cur.gety() - dragStartPoint.gety();
+    float dxr = dx, dyr = dy;
+    if (region.getRatio()) { dxr = dx/WindowInfo.width; dyr = dy/WindowInfo.height; }
+    Region nr = originalRegion;
+    switch (currentEditMode) {
+        case EditMode::Move:
+            nr.setx(originalRegion.getOriginX()+dxr);
+            nr.sety(originalRegion.getOriginY()+dyr);
+            nr.setxend(originalRegion.getOriginXEnd()+dxr);
+            nr.setyend(originalRegion.getOriginYEnd()+dyr);
+            break;
+        case EditMode::ResizeTopLeft:
+            nr.setx(originalRegion.getOriginX()+dxr);
+            nr.sety(originalRegion.getOriginY()+dyr);
+            break;
+        case EditMode::ResizeTopRight:
+            nr.setxend(originalRegion.getOriginXEnd()+dxr);
+            nr.sety(originalRegion.getOriginY()+dyr);
+            break;
+        case EditMode::ResizeBottomLeft:
+            nr.setx(originalRegion.getOriginX()+dxr);
+            nr.setyend(originalRegion.getOriginYEnd()+dyr);
+            break;
+        case EditMode::ResizeBottomRight:
+            nr.setxend(originalRegion.getOriginXEnd()+dxr);
+            nr.setyend(originalRegion.getOriginYEnd()+dyr);
+            break;
+        case EditMode::ResizeLeft:
+            nr.setx(originalRegion.getOriginX()+dxr);
+            break;
+        case EditMode::ResizeRight:
+            nr.setxend(originalRegion.getOriginXEnd()+dxr);
+            break;
+        case EditMode::ResizeTop:
+            nr.sety(originalRegion.getOriginY()+dyr);
+            break;
+        case EditMode::ResizeBottom:
+            nr.setyend(originalRegion.getOriginYEnd()+dyr);
+            break;
+        default: break;
+    }
+    float minW = minWidth, minH = minHeight;
+    if (region.getRatio()) { minW = minWidth/WindowInfo.width; minH = minHeight/WindowInfo.height; }
+    if (nr.getOriginW() < minW) {
+        if (currentEditMode==EditMode::ResizeLeft || currentEditMode==EditMode::ResizeTopLeft || currentEditMode==EditMode::ResizeBottomLeft) {
+            nr.setx(nr.getOriginXEnd()-minW);
+        } else {
+            nr.setxend(nr.getOriginX()+minW);
+        }
+    }
+    if (nr.getOriginH() < minH) {
+        if (currentEditMode==EditMode::ResizeTop || currentEditMode==EditMode::ResizeTopLeft || currentEditMode==EditMode::ResizeTopRight) {
+            nr.sety(nr.getOriginYEnd()-minH);
+        } else {
+            nr.setyend(nr.getOriginY()+minH);
+        }
+    }
+    region = nr;
+    ClampRegion();
+}
+
+void Button::ClampRegion() {
+    float maxX = region.getRatio()?1.0f:WindowInfo.width;
+    float maxY = region.getRatio()?1.0f:WindowInfo.height;
+    if (region.getOriginX() < 0) {
+        float off = -region.getOriginX(); region.setx(0); region.setxend(region.getOriginXEnd()+off);
+    }
+    if (region.getOriginY() < 0) {
+        float off = -region.getOriginY(); region.sety(0); region.setyend(region.getOriginYEnd()+off);
+    }
+    if (region.getOriginXEnd() > maxX) {
+        float off = region.getOriginXEnd()-maxX; region.setxend(maxX); region.setx(region.getOriginX()-off);
+    }
+    if (region.getOriginYEnd() > maxY) {
+        float off = region.getOriginYEnd()-maxY; region.setyend(maxY); region.sety(region.getOriginY()-off);
+    }
+}
+
+void Button::DrawEditOverlay() {
+    if (!editModeEnabled) return;
+    Drawer* d = Drawer::getInstance();
+    Color bc = editBorderColor; bc.a = 200;
+    float bw = editBorderWidth;
+    Region lb(region.getx()-bw/2, region.gety()-bw, region.getx()+bw/2, region.getyend()+bw, false);
+    Region rb(region.getxend()-bw/2, region.gety()-bw, region.getxend()+bw/2, region.getyend()+bw, false);
+    Region tb(region.getx()-bw, region.gety()-bw/2, region.getxend()+bw, region.gety()+bw/2, false);
+    Region bb(region.getx()-bw, region.getyend()-bw/2, region.getxend()+bw, region.getyend()+bw/2, false);
+    d->DrawSquare(lb, bc, true);
+    d->DrawSquare(rb, bc, true);
+    d->DrawSquare(tb, bc, true);
+    d->DrawSquare(bb, bc, true);
+    Color hc = editHandleColor;
+    Color hb = Color(255,255,255,255);
+    for (const auto& h : editHandles) {
+        if (h.visible) {
+            d->DrawSquare(h.region, hc, true);
+            d->DrawSquare(h.region, hb, false);
+        }
+    }
+}

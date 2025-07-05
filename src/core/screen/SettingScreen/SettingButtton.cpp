@@ -28,6 +28,7 @@
 
 using namespace core;
 using namespace screen;
+using namespace settingScreen;
 
 // 文件类型过滤器映射表实现
 static std::vector<FileTypeFilter> getFiltersForType(FileType fileType) {

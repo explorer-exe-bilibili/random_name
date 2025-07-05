@@ -171,6 +171,30 @@ void KeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods) {
                         Log << Level::Info << "FPS display " << (bools[boolconfig::show_fps] ? "enabled" : "disabled") << op::endl;
                     }
                     break;
+                case GLFW_KEY_F2:
+                    // 按F2切换编辑模式
+                    {
+                        auto currentScreen = screen::Screen::getCurrentScreen();
+                        if (currentScreen) {
+                            bool currentEditMode = currentScreen->IsEditModeEnabled();
+                            bool newEditMode = !currentEditMode;
+                            
+                            currentScreen->SetEditMode(newEditMode);
+                            
+                            Log << Level::Info << "UI Edit mode " << (newEditMode ? "enabled" : "disabled") << op::endl;
+                        }
+                    }
+                    break;
+                case GLFW_KEY_F3:
+                    // 按F3重置当前屏幕的布局
+                    {
+                        auto currentScreen = screen::Screen::getCurrentScreen();
+                        if (currentScreen && currentScreen->HasCustomLayout()) {
+                            currentScreen->ResetButtonLayout();
+                            Log << Level::Info << "Button layout reset" << op::endl;
+                        }
+                    }
+                    break;
                 default:
                     break;
             }
@@ -183,16 +207,49 @@ void KeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods) {
 void MouseButtonEvent(GLFWwindow* window, int button, int action, int mods) {
     double x, y;
     glfwGetCursorPos(window, &x, &y);
+    auto currentScreen = screen::Screen::getCurrentScreen();
+    
+    if (!currentScreen) return;
+    
+    int mouseX = static_cast<int>(x);
+    int mouseY = static_cast<int>(y);
+    
     switch (action) {
         case GLFW_PRESS:
             Log << Level::Info << "Mouse button pressed at (" << x << ", " << y << "): " << button << op::endl;
+            if (button == GLFW_MOUSE_BUTTON_LEFT) {
+                if (currentScreen->IsEditModeEnabled()) {
+                    currentScreen->OnEditMouseDown(mouseX, mouseY);
+                } else {
+                    currentScreen->Click(mouseX, mouseY);
+                }
+            }
             break;
         case GLFW_RELEASE:
             Log << Level::Info << "Mouse button released at (" << x << ", " << y << "): " << button << op::endl;
-            screen::Screen::getCurrentScreen()->Click(static_cast<int>(x), static_cast<int>(y));
+            if (button == GLFW_MOUSE_BUTTON_LEFT) {
+                if (currentScreen->IsEditModeEnabled()) {
+                    currentScreen->OnEditMouseUp(mouseX, mouseY);
+                } else {
+                    // 正常点击处理已经在PRESS事件中完成
+                }
+            }
             break;
         default:
             break;
+    }
+}
+
+// 鼠标移动事件处理
+void MouseMoveEvent(GLFWwindow* window, double xpos, double ypos) {
+    auto currentScreen = screen::Screen::getCurrentScreen();
+    if (!currentScreen) return;
+    
+    // 只有在编辑模式下且鼠标左键按下时才处理移动事件
+    if (currentScreen->IsEditModeEnabled() && glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) == GLFW_PRESS) {
+        int mouseX = static_cast<int>(xpos);
+        int mouseY = static_cast<int>(ypos);
+        currentScreen->OnEditMouseMove(mouseX, mouseY);
     }
 }
 
