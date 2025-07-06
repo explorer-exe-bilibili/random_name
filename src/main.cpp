@@ -269,7 +269,7 @@ int init(){
     Log<<Level::Info<<"Init explorer"<<op::endl;
     core::Explorer::getInstance();
 
-    core::Explorer::getInstance()->playAudio(AudioID::bgm, -1);
+    core::Explorer::getInstance()->playAudio(AudioID::bgm);
     screen::Screen::RegisterScreen(screen::ScreenID::MainMenu, std::make_shared<screen::MainScreen>());
     screen::Screen::SwitchToScreen(screen::ScreenID::MainMenu);
     screen::Screen::RegisterScreen(screen::ScreenID::Settings, std::make_shared<screen::SettingScreen>());

@@ -368,7 +368,6 @@ void Font::RenderCharFitRegion(wchar_t text, float x, float y, float xend, float
 	
 	// 计算可用区域的宽度和高度
 	float availableWidth = xend - x;
-	float availableHeight = yend - y;
 	
 	// 计算字符的实际尺寸（不含缩放）
 	float charWidth = ch.Advance >> 6; // 字符的原始宽度（单位为像素）

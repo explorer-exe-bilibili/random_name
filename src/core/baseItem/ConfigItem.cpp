@@ -30,8 +30,7 @@ boolconfig GetBoolConfigFromString(const std::string& configName) {
     if (configName == SHOW_FPS) return boolconfig::show_fps;
     if (configName == USE_JSON_SETTINGS) return boolconfig::use_json_settings;
     if (configName == VERTICAL_SYNC) return boolconfig::vertical_sync;
-    // 默认返回debug
-    return (boolconfig)-1;
+    return boolconfig::unknown; // 如果没有匹配的配置名，返回未知配置
 }
 
 // 从Config加载bool值到bools映射
@@ -143,7 +142,7 @@ void SyncConfig() {
     if(bools[boolconfig::offmusic])core::Explorer::getInstance()->getAudio()->stopAll();
     else {
         if(!core::Explorer::getInstance()->getAudio()->isMusicPlaying())
-            core::Explorer::getInstance()->playAudio(core::AudioID::bgm, -1);
+            core::Explorer::getInstance()->playAudio(core::AudioID::bgm);
     }
     screen::Screen::setUseVideoBackground(bools[boolconfig::use_video_background]);
     screen::NameButton::setColor(core::Config::getInstance()->getUInt(NAME_COLOR));
@@ -241,6 +240,7 @@ void SetConfigItems(){
     
     config->setifno(RegionName::SMALL_WINDOW, UI_REGION_EXIT, {0.9,0.03,0.95,-1});
     config->setifno(RegionName::SMALL_WINDOW, UI_REGION_SKIP, {0.82,0.045,0.88,0.08});
+    config->setifno(RegionName::SMALL_WINDOW, UI_REGION_EXIT_EDIT, {0.85,0.4,0.95,0.43});
 
     config->setifno(RegionName::SMALL_WINDOW, UI_REGION_MAINMENU_SETTING, {0.1,0.82,0.12,0.86});
     config->setifno(RegionName::SMALL_WINDOW, UI_REGION_MAINMENU_OFFVIDEO, {0.15,0.82,0.23,0.86});

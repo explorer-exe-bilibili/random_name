@@ -154,6 +154,11 @@ void SettingScreen::Draw() {
     if (exitButton) {
         exitButton->Draw(static_cast<unsigned char>(alpha * 255.0f));
     }
+    
+    // 在最后绘制编辑覆盖层
+    if (editModeEnabled) {
+        DrawEditOverlays();
+    }
 }
 
 void SettingScreen::enter(int) {

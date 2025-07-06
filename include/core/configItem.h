@@ -79,6 +79,7 @@
 // Region相关配置键定义
 #define UI_REGION_EXIT "ui_region_exit"
 #define UI_REGION_SKIP "ui_region_skip"
+#define UI_REGION_EXIT_EDIT "ui_region_exit_edit"
 // 主菜单
 #define UI_REGION_MAINMENU_SETTING "ui_region_mainmenu_setting"
 #define UI_REGION_MAINMENU_OFFVIDEO "ui_region_mainmenu_offvideo"
@@ -108,6 +109,7 @@
 
 
 enum class boolconfig {
+    unknown = -1, // 未知配置
     offmusic = 0,
     inwindow = 1,
     off_video = 2,

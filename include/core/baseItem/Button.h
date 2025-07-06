@@ -87,6 +87,10 @@ public:
     bool OnEditMouseMove(Point point);
     bool OnEditMouseUp(Point point);
     void DrawEditOverlay();
+    void SaveRegionToConfig() const {
+        if(regionConfig.empty()) return;
+        Config::getInstance()->set(this->regionConfig, this->region);
+    }
     EditMode GetEditModeAt(Point point) const;
 
     void resetRegion() {if(!regionConfig.empty())this->region=Config::getInstance()->getRegion(regionConfig); UpdateEditHandles();}

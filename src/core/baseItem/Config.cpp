@@ -846,16 +846,16 @@ bool Config::readFromFile() {
                 } else {
                     // 其他类型的对象，直接转换为字符串
                     value = it.value().dump();
+                    Log << Level::Info << "Config::readFromFile() loaded unknown object: " << key << " = " << value << op::endl;
                 }
             } else {
                 // 对于其他复杂类型，转换为字符串表示
                 value = it.value().dump();
+                Log << Level::Info << "Config::readFromFile() loaded complex type: " << key << " = " << value << op::endl;
             }
             
             configItems[key] = value;
-            if (key.find("region") == std::string::npos) {
-                Log << Level::Info << "Config::readFromFile() loaded: " << key << " = " << value << op::endl;
-            }
+            Log << Level::Info << "Config::readFromFile() loaded: " << key << " = " << value << op::endl;
         }
         
         Log << Level::Info << "Config::readFromFile() finished loading config file" << op::endl;

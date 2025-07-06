@@ -492,323 +492,335 @@ namespace {
 
 SettingButton::SettingButton(sItem item_, int number, int page)
     : item(item_), number(number), page(page) {
-        
-        // 验证传入的item参数 - 使用更安全的字符串访问方式
-        try {
-            // 安全地验证 name 字符串
-            if (item.name.empty()) {
-                Log << Level::Warn << "SettingButton constructor - name is empty" << op::endl;
-                item.name = "unknown_button";
-            } else {
-                // 验证字符串的有效性，但不输出中文内容到日志
-                size_t nameLen = item.name.length();
-                if (nameLen > 1000) {
-                    Log << Level::Warn << "SettingButton constructor - name too long, truncating" << op::endl;
-                    item.name = "long_name_truncated";
-                }
-            }
-            
-            // 安全地验证 configName 字符串
-            if (item.configName.empty()) {
-                Log << Level::Warn << "SettingButton constructor - configName is empty" << op::endl;
-                item.configName = "unknown_config";
-            } else {
-                size_t len = item.configName.length();
-                if (len > 1000) {
-                    Log << Level::Error << "SettingButton constructor - configName too long" << op::endl;
-                    item.configName = "unknown_config";
-                }
-            }
-            
-            // 安全地验证 outOfLimitOutPut 字符串
-            if (!item.outOfLimitOutPut.empty() && item.outOfLimitOutPut.length() > 1000) {
-                Log << Level::Warn << "SettingButton constructor - outOfLimitOutPut too long, truncating" << op::endl;
-                item.outOfLimitOutPut = "error_message_truncated";
+    
+    // 验证传入的item参数 - 使用更安全的字符串访问方式
+    try {
+        // 安全地验证 name 字符串
+        if (item.name.empty()) {
+            Log << Level::Warn << "SettingButton constructor - name is empty" << op::endl;
+            item.name = "unknown_button";
+        } else {
+            // 验证字符串的有效性，但不输出中文内容到日志
+            size_t nameLen = item.name.length();
+            if (nameLen > 1000) {
+                Log << Level::Warn << "SettingButton constructor - name too long, truncating" << op::endl;
+                item.name = "long_name_truncated";
             }
         }
-        catch (const std::exception& e) {
-            Log << Level::Error << "SettingButton constructor - exception during string validation: " << e.what() << op::endl;
-            item.name = "error_button";
+        
+        // 安全地验证 configName 字符串
+        if (item.configName.empty()) {
+            Log << Level::Warn << "SettingButton constructor - configName is empty" << op::endl;
             item.configName = "unknown_config";
-            item.outOfLimitOutPut = "error";
-        }
-        catch (...) {
-            Log << Level::Error << "SettingButton constructor - unknown exception during string validation" << op::endl;
-            item.name = "error_button";
-            item.configName = "unknown_config";  
-            item.outOfLimitOutPut = "error";
+        } else {
+            size_t len = item.configName.length();
+            if (len > 1000) {
+                Log << Level::Error << "SettingButton constructor - configName too long" << op::endl;
+                item.configName = "unknown_config";
+            }
         }
         
-        font=core::Explorer::getInstance()->getFontPtr(FontID::Normal);
-        Region Button2Region;
-        if(number<=10){
-            TextRegion={0,number*0.08+0.1,0.4,number*0.08+0.15};
-            if(item.type!=SettingButtonType::PathSelect&&item.type!=SettingButtonType::FileSelect)
-                ButtonRegion={0.41,number*0.08+0.1,0.5,number*0.08+0.15};
-            else{
-                ButtonRegion={0.41,number*0.08+0.1,0.455,number*0.08+0.15};
-                Button2Region={0.455,number*0.08+0.1,0.5,number*0.08+0.15};
-            }
-        }else{
-            number-=10;
-            TextRegion={0.51,number*0.08+0.1,0.82,number*0.08+0.15};
-            if(item.type!=SettingButtonType::PathSelect&&item.type!=SettingButtonType::FileSelect)
-                ButtonRegion={0.83,number*0.08+0.1,0.92,number*0.08+0.15};
-            else{
-                ButtonRegion={0.83,number*0.08+0.1,0.875,number*0.08+0.15};
-                Button2Region={0.875,number*0.08+0.1,0.92,number*0.08+0.15};
-            }
+        // 安全地验证 outOfLimitOutPut 字符串
+        if (!item.outOfLimitOutPut.empty() && item.outOfLimitOutPut.length() > 1000) {
+            Log << Level::Warn << "SettingButton constructor - outOfLimitOutPut too long, truncating" << op::endl;
+            item.outOfLimitOutPut = "error_message_truncated";
         }
-        button=std::make_shared<core::Button>(Button());
-        button->SetColor({0,0,0,255});
-        button->SetFontID(FontID::Normal);
-        button->SetRegion(ButtonRegion);
-        button->SetEnableText(true);
-        button->SetFontScale(0.3);
-        button->SetBitmap(BitmapID::SettingButton);
-        if(item.type==SettingButtonType::Switch){
-            // 安全地访问configName
-            std::string safeConfigName;
-            try {
-                if (!item.configName.empty()) {
-                    safeConfigName = item.configName;
-                } else {
-                    Log << Level::Warn << "Switch button has empty configName" << op::endl;
-                    safeConfigName = "unknown_config";
-                }
-                
-                boolconfig configEnum = GetBoolConfigFromString(safeConfigName);
-                button->SetText(bools[configEnum] ? "开" : "关");
-                button->SetClickFunc([this, safeConfigName, configEnum]{
-                    try {
-                        if (configEnum == (boolconfig)-1) {
-                            Log << Level::Error << "Invalid configName: " << safeConfigName << op::endl;
-                            return;
-                        }
-                        bools[configEnum] = !bools[configEnum];
-                        button->SetText(bools[configEnum] ? "开" : "关");
-                        SyncConfig(); // 同步到配置文件
-                        checkActions();
-                    }
-                    catch (const std::exception& e) {
-                        Log << Level::Error << "Error in switch button click: " << e.what() << op::endl;
-                    }
-                });
-            }
-            catch (const std::exception& e) {
-                Log << Level::Error << "Error setting up switch button: " << e.what() << op::endl;
-                button->SetText("错误");
-            }
+    }
+    catch (const std::exception& e) {
+        Log << Level::Error << "SettingButton constructor - exception during string validation: " << e.what() << op::endl;
+        item.name = "error_button";
+        item.configName = "unknown_config";
+        item.outOfLimitOutPut = "error";
+    }
+    catch (...) {
+        Log << Level::Error << "SettingButton constructor - unknown exception during string validation" << op::endl;
+        item.name = "error_button";
+        item.configName = "unknown_config";  
+        item.outOfLimitOutPut = "error";
+    }
+    
+    font=core::Explorer::getInstance()->getFontPtr(FontID::Normal);
+    Region Button2Region;
+    if(number<=10){
+        TextRegion={0,number*0.08+0.1,0.4,number*0.08+0.15};
+        if(item.type!=SettingButtonType::PathSelect&&item.type!=SettingButtonType::FileSelect)
+            ButtonRegion={0.41,number*0.08+0.1,0.5,number*0.08+0.15};
+        else{
+            ButtonRegion={0.41,number*0.08+0.1,0.455,number*0.08+0.15};
+            Button2Region={0.455,number*0.08+0.1,0.5,number*0.08+0.15};
         }
-        else if(item.type==SettingButtonType::Textbox){
-            // 获取当前配置值作为默认文本
-            std::string currentValue = Config::getInstance()->get(item.configName);
-            button->SetText(currentValue.empty() ? "点击输入" : currentValue);
-            // 设置编辑区域（使用按钮区域的完全相同尺寸）
-            editingTextRegion = ButtonRegion;
+    }else{
+        number-=10;
+        TextRegion={0.51,number*0.08+0.1,0.82,number*0.08+0.15};
+        if(item.type!=SettingButtonType::PathSelect&&item.type!=SettingButtonType::FileSelect)
+            ButtonRegion={0.83,number*0.08+0.1,0.92,number*0.08+0.15};
+        else{
+            ButtonRegion={0.83,number*0.08+0.1,0.875,number*0.08+0.15};
+            Button2Region={0.875,number*0.08+0.1,0.92,number*0.08+0.15};
+        }
+    }
+    button=std::make_shared<core::Button>(Button());
+    button->SetColor({0,0,0,255});
+    button->SetFontID(FontID::Normal);
+    button->SetRegion(ButtonRegion);
+    button->SetEnableText(true);
+    button->SetFontScale(0.3);
+    button->SetBitmap(BitmapID::SettingButton);
+    if(item.type==SettingButtonType::Switch){
+        // 安全地访问configName
+        std::string safeConfigName;
+        try {
+            if (!item.configName.empty()) {
+                safeConfigName = item.configName;
+            } else {
+                Log << Level::Warn << "Switch button has empty configName" << op::endl;
+                safeConfigName = "unknown_config";
+            }
             
-            button->SetClickFunc([this, configName = item.configName]{
+            boolconfig configEnum = GetBoolConfigFromString(safeConfigName);
+            button->SetText(bools[configEnum] ? "开" : "关");
+            button->SetClickFunc([this, safeConfigName, configEnum]{
                 try {
-                    if (configName.empty()) {
-                        Log << Level::Error << "Textbox button has empty configName" << op::endl;
+                    if (configEnum == boolconfig::unknown) {
+                        Log << Level::Error << "Invalid configName: " << safeConfigName << op::endl;
                         return;
                     }
-                    
-                    Log << Level::Debug << "Textbox button clicked, configName: " << configName << op::endl;
-                    // 启动内嵌编辑模式
-                    if (!isTextboxEditing) {
-                        isTextboxEditing = true;
-                        editingText = Config::getInstance()->get(configName);
-                        cursorPosition = core::utf8_length(editingText); // 使用UTF-8字符长度
-                        lastCursorBlink = std::chrono::steady_clock::now();
-                        showCursor = true;
-                          // 跨平台显示软键盘（仅在支持的平台上）
-                        if (IsVirtualKeyboardSupported()) {
-                            ShowVirtualKeyboard();
-                        } else {
-                            Log << Level::Info << "Virtual keyboard not supported on this platform" << op::endl;
-                        }
-                        
-                        Log << Level::Debug << "Started inline text editing for: " << configName 
-                            << ", current text: '" << editingText << "'" << op::endl;
-                    }
-                    else {
-                        Log << Level::Debug << "Already editing, ignoring click" << op::endl;
-                    }
-                }
-                catch (const std::exception& e) {
-                    Log << Level::Error << "Error in textbox button: " << e.what() << op::endl;
-                }
-            });
-        }
-        else if(item.type==SettingButtonType::ColorSelect){
-            button->SetEnableBitmap(false);
-            button->SetEnableFill(true);
-            button->SetFillColor(Config::getInstance()->getUInt(item.configName));
-            button->SetText("选择颜色");
-            button->SetClickFunc([this, configName = item.configName]{
-                // 安全地访问configName
-                try {
-                    if (configName.empty()) {
-                        Log << Level::Error << "ColorSelect button has empty configName" << op::endl;
-                        return;
-                    }
-                    
-                    // 处理颜色选择的点击事件
-                    Color color = selectColor();
-                    Config::getInstance()->set(configName,color);
-                    Config::getInstance()->saveToFile();
-                    button->SetFillColor(Config::getInstance()->getUInt(configName));
+                    bools[configEnum] = !bools[configEnum];
+                    button->SetText(bools[configEnum] ? "开" : "关");
+                    SyncConfig(); // 同步到配置文件
                     checkActions();
                 }
                 catch (const std::exception& e) {
-                    Log << Level::Error << "Error in color select button: " << e.what() << op::endl;
+                    Log << Level::Error << "Error in switch button click: " << e.what() << op::endl;
                 }
             });
         }
-        else if(item.type==SettingButtonType::FileSelect){
-            showText=Config::getInstance()->getPath(item.configName);
-            if(!showText.empty()){
-                if(!core::isFileExists(showText)){
-                    Log<<Level::Warn<<"FileSelect button - file does not exist: "<<showText<<op::endl;
-                    showText="等待选择";
+        catch (const std::exception& e) {
+            Log << Level::Error << "Error setting up switch button: " << e.what() << op::endl;
+            button->SetText("错误");
+        }
+    }
+    else if(item.type==SettingButtonType::Textbox){
+        // 获取当前配置值作为默认文本
+        std::string currentValue = Config::getInstance()->get(item.configName);
+        button->SetText(currentValue.empty() ? "点击输入" : currentValue);
+        // 设置编辑区域（使用按钮区域的完全相同尺寸）
+        editingTextRegion = ButtonRegion;
+        
+        button->SetClickFunc([this, configName = item.configName]{
+            try {
+                if (configName.empty()) {
+                    Log << Level::Error << "Textbox button has empty configName" << op::endl;
+                    return;
                 }
-                else{
-                    // 只显示文件名，不显示完整路径
-                    size_t pos = showText.find_last_of("/\\");
-                    if (pos != std::string::npos) {
-                        showText = showText.substr(pos + 1);
-                    }
-                }
-            }
-            button2=std::make_shared<core::Button>(Button());
-            button2->SetRegion(Button2Region);
-            button2->SetBitmap(BitmapID::SettingButton);
-            button2->SetText("打开");
-            button2->SetEnableBitmap(true);
-            button2->SetEnableText(true);
-            button2->SetEnableFill(false);
-            button2->SetFontID(FontID::Normal);
-            button2->SetFontScale(0.3);
-            button2->SetColor({0,0,0,255});
-            button2->SetClickFunc([this]{
-                openFile();
-            });
-            button->SetText("选择");
-            button->SetClickFunc([this, configName = item.configName]{
-                try {
-                    if (configName.empty()) {
-                        Log << Level::Error << "FileSelect button has empty configName" << op::endl;
-                        return;
+                
+                Log << Level::Debug << "Textbox button clicked, configName: " << configName << op::endl;
+                // 启动内嵌编辑模式
+                if (!isTextboxEditing) {
+                    isTextboxEditing = true;
+                    editingText = Config::getInstance()->get(configName);
+                    cursorPosition = core::utf8_length(editingText); // 使用UTF-8字符长度
+                    lastCursorBlink = std::chrono::steady_clock::now();
+                    showCursor = true;
+                        // 跨平台显示软键盘（仅在支持的平台上）
+                    if (IsVirtualKeyboardSupported()) {
+                        ShowVirtualKeyboard();
+                    } else {
+                        Log << Level::Info << "Virtual keyboard not supported on this platform" << op::endl;
                     }
                     
-                    std::string path=selectFile();
-                    if (!path.empty()) {
-                        if(!core::isFileExists(path))return;
-                        Config::getInstance()->set(configName,path);
-                        Config::getInstance()->saveToFile();
+                    Log << Level::Debug << "Started inline text editing for: " << configName 
+                        << ", current text: '" << editingText << "'" << op::endl;
+                }
+                else {
+                    Log << Level::Debug << "Already editing, ignoring click" << op::endl;
+                }
+            }
+            catch (const std::exception& e) {
+                Log << Level::Error << "Error in textbox button: " << e.what() << op::endl;
+            }
+        });
+    }
+    else if(item.type==SettingButtonType::ColorSelect){
+        button->SetEnableBitmap(false);
+        button->SetEnableFill(true);
+        button->SetFillColor(Config::getInstance()->getUInt(item.configName));
+        button->SetText("选择颜色");
+        button->SetClickFunc([this, configName = item.configName]{
+            // 安全地访问configName
+            try {
+                if (configName.empty()) {
+                    Log << Level::Error << "ColorSelect button has empty configName" << op::endl;
+                    return;
+                }
+                
+                // 处理颜色选择的点击事件
+                Color color = selectColor();
+                Config::getInstance()->set(configName,color);
+                Config::getInstance()->saveToFile();
+                button->SetFillColor(Config::getInstance()->getUInt(configName));
+                checkActions();
+            }
+            catch (const std::exception& e) {
+                Log << Level::Error << "Error in color select button: " << e.what() << op::endl;
+            }
+        });
+    }
+    else if(item.type==SettingButtonType::FileSelect){
+        showText=Config::getInstance()->getPath(item.configName);
+        if(!showText.empty()){
+            if(!core::isFileExists(showText)){
+                Log<<Level::Warn<<"FileSelect button - file does not exist: "<<showText<<op::endl;
+                showText="等待选择";
+            }
+            else{
+                // 只显示文件名，不显示完整路径
+                size_t pos = showText.find_last_of("/\\");
+                if (pos != std::string::npos) {
+                    showText = showText.substr(pos + 1);
+                }
+            }
+        }
+        button2=std::make_shared<core::Button>(Button());
+        button2->SetRegion(Button2Region);
+        button2->SetBitmap(BitmapID::SettingButton);
+        button2->SetText("打开");
+        button2->SetEnableBitmap(true);
+        button2->SetEnableText(true);
+        button2->SetEnableFill(false);
+        button2->SetFontID(FontID::Normal);
+        button2->SetFontScale(0.3);
+        button2->SetColor({0,0,0,255});
+        button2->SetClickFunc([this]{
+            openFile();
+        });
+        button->SetText("选择");
+        button->SetClickFunc([this, configName = item.configName]{
+            try {
+                if (configName.empty()) {
+                    Log << Level::Error << "FileSelect button has empty configName" << op::endl;
+                    return;
+                }
+                
+                std::string path=selectFile();
+                if (!path.empty()) {
+                    if(!core::isFileExists(path))return;
+                    Config::getInstance()->set(configName,path);
+                    Config::getInstance()->saveToFile();
+                    // 只显示文件名，不显示完整路径
+                    size_t pos = path.find_last_of("/\\");
+                    if (pos != std::string::npos) {
+                        showText = path.substr(pos + 1);
+                    }
+                    int i=0;
+                    if(item.fileType==FileType::NameFile)
+                        for(const auto& c_char:item.configName){
+                            // 检查字符是否为数字
+                            if (std::isdigit(static_cast<unsigned char>(c_char))) {
+                                try{
+                                    i = std::stoi(std::string(1, c_char));
+                                }
+                                catch (...) {
+                                    // 如果转换失败，则忽略此字符
+                                }
+                                if(i>0&&i<10){ // 假设 i 应该是 1-9 之间的单个数字
+                                    break;
+                                }
+                            }
+                        }
+                    switch (item.fileType)
+                    {
+                    case FileType::Picture:core::Explorer::getInstance()->loadBitmap(item.bitmapID, path);break;
+                    case FileType::Video:core::Explorer::getInstance()->loadVideo(item.videoID, path);break;
+                    case FileType::Audio:core::Explorer::getInstance()->loadAudio(item.audioID, path);break;
+                    case FileType::Sound:core::Explorer::getInstance()->loadSound(item.audioID, path);break;
+                    case FileType::Font:
+                        if(item.fontID!=FontID::Name){core::Explorer::getInstance()->loadFont(item.fontID, path,false,48);}
+                        else core::Explorer::getInstance()->loadFont(item.fontID, path,false,150);break;
+                    case FileType::NameFile: core::NameRandomer::getInstance(i)->setFile(path); break;
+                    default:break;
+                    }
+                    checkActions();
+                }
+            }
+            catch (const std::exception& e) {
+                Log << Level::Error << "Error in file select button: " << e.what() << op::endl;
+            }
+        });
+    }
+    else if(item.type==SettingButtonType::PathSelect){
+        showText=Config::getInstance()->get(item.configName);
+        if(!showText.empty()){
+            if(!core::isFileExists(showText)){
+                showText="等待选择";
+            }
+            else{
+                // 只显示文件名，不显示完整路径
+                size_t pos = showText.find_last_of("/\\");
+                if (pos != std::string::npos) {
+                    showText = showText.substr(pos + 1);
+                }
+            }
+        }
+        button2=std::make_shared<core::Button>(Button());
+        button2->SetRegion(Button2Region);
+        button2->SetBitmap(BitmapID::SettingButton);
+        button2->SetText("打开");
+        button2->SetEnableBitmap(true);
+        button2->SetEnableText(true);
+        button2->SetEnableFill(false);
+        button2->SetFontID(FontID::Normal);
+        button2->SetFontScale(0.3);
+        button2->SetColor({0,0,0,255});
+        button2->SetClickFunc([this]{
+            openFile();
+        });
+        button->SetText("选择");
+        button->SetClickFunc([this, configName = item.configName]{
+            try {
+                if (configName.empty()) {
+                    Log << Level::Error << "PathSelect button has empty configName" << op::endl;
+                    return;
+                }
+                
+                std::string path=selectPath();
+                if (!path.empty()) {
+                    if(!core::isFileExists(path))return;
+                    if(!showText.empty()){
                         // 只显示文件名，不显示完整路径
                         size_t pos = path.find_last_of("/\\");
                         if (pos != std::string::npos) {
                             showText = path.substr(pos + 1);
                         }
-                        int i=0;
-                        if(item.fileType==FileType::NameFile)
-                            for(const auto& c_char:item.configName){
-                                // 检查字符是否为数字
-                                if (std::isdigit(static_cast<unsigned char>(c_char))) {
-                                    try{
-                                        i = std::stoi(std::string(1, c_char));
-                                    }
-                                    catch (...) {
-                                        // 如果转换失败，则忽略此字符
-                                    }
-                                    if(i>0&&i<10){ // 假设 i 应该是 1-9 之间的单个数字
-                                        break;
-                                    }
-                                }
-                            }
-                        switch (item.fileType)
-                        {
-                        case FileType::Picture:core::Explorer::getInstance()->loadBitmap(item.bitmapID, path);break;
-                        case FileType::Video:core::Explorer::getInstance()->loadVideo(item.videoID, path);break;
-                        case FileType::Audio:core::Explorer::getInstance()->loadAudio(item.audioID, path);break;
-                        case FileType::Sound:core::Explorer::getInstance()->loadSound(item.audioID, path);break;
-                        case FileType::Font:
-                            if(item.fontID!=FontID::Name){core::Explorer::getInstance()->loadFont(item.fontID, path,false,48);}
-                            else core::Explorer::getInstance()->loadFont(item.fontID, path,false,150);break;
-                        case FileType::NameFile: core::NameRandomer::getInstance(i)->setFile(path); break;
-                        default:break;
-                        }
-                        checkActions();
                     }
-                }
-                catch (const std::exception& e) {
-                    Log << Level::Error << "Error in file select button: " << e.what() << op::endl;
-                }
-            });
-        }
-        else if(item.type==SettingButtonType::PathSelect){
-            showText=Config::getInstance()->get(item.configName);
-            if(!showText.empty()){
-                if(!core::isFileExists(showText)){
-                    showText="等待选择";
-                }
-                else{
-                    // 只显示文件名，不显示完整路径
-                    size_t pos = showText.find_last_of("/\\");
-                    if (pos != std::string::npos) {
-                        showText = showText.substr(pos + 1);
-                    }
+                    Config::getInstance()->set(configName,path);
+                    Config::getInstance()->saveToFile();
+                    button->SetText(Config::getInstance()->get(configName));
+                    button->SetText(path);
+                    button->SetEnableFill(false);
+                    button->SetEnableBitmap(true);
+                    button->SetBitmap(BitmapID::SettingButton);
+                    if(item.fileType==FileType::Picture)core::Explorer::getInstance()->loadImagesFromDirectory(path);
+                    checkActions();
                 }
             }
-            button2=std::make_shared<core::Button>(Button());
-            button2->SetRegion(Button2Region);
-            button2->SetBitmap(BitmapID::SettingButton);
-            button2->SetText("打开");
-            button2->SetEnableBitmap(true);
-            button2->SetEnableText(true);
-            button2->SetEnableFill(false);
-            button2->SetFontID(FontID::Normal);
-            button2->SetFontScale(0.3);
-            button2->SetColor({0,0,0,255});
-            button2->SetClickFunc([this]{
-                openFile();
-            });
-            button->SetText("选择");
-            button->SetClickFunc([this, configName = item.configName]{
-                try {
-                    if (configName.empty()) {
-                        Log << Level::Error << "PathSelect button has empty configName" << op::endl;
-                        return;
-                    }
-                    
-                    std::string path=selectPath();
-                    if (!path.empty()) {
-                        if(!core::isFileExists(path))return;
-                        if(!showText.empty()){
-                            // 只显示文件名，不显示完整路径
-                            size_t pos = path.find_last_of("/\\");
-                            if (pos != std::string::npos) {
-                                showText = path.substr(pos + 1);
-                            }
-                        }
-                        Config::getInstance()->set(configName,path);
-                        Config::getInstance()->saveToFile();
-                        button->SetText(Config::getInstance()->get(configName));
-                        button->SetText(path);
-                        button->SetEnableFill(false);
-                        button->SetEnableBitmap(true);
-                        button->SetBitmap(BitmapID::SettingButton);
-                        if(item.fileType==FileType::Picture)core::Explorer::getInstance()->loadImagesFromDirectory(path);
-                        checkActions();
-                    }
-                }
-                catch (const std::exception& e) {
-                    Log << Level::Error << "Error in path select button: " << e.what() << op::endl;
-                }
-            });
+            catch (const std::exception& e) {
+                Log << Level::Error << "Error in path select button: " << e.what() << op::endl;
+            }
+        });
+    }
+    else if(item.type==SettingButtonType::RegionEditor){
+        if(item.screenID==screen::ScreenID::Unknown){
+            Log << Level::Error << "RegionEditor button requires a valid screenID" << op::endl;
+            button->SetText("错误");
+            return;
         }
+        button->SetText("编辑区域");
+        button->SetClickFunc([this]{
+            screen::Screen::SwitchToScreen(item.screenID);
+            screen::Screen::getCurrentScreen()->SetEditMode(true);
+        });
+    }
 }
 
 void SettingButton::Draw(int currentPage, unsigned char alpha)const {

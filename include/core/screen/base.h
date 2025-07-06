@@ -16,6 +16,7 @@
 
 namespace screen{
 enum class ScreenID {
+    Unknown = -1,
     MainMenu,
     Settings,
     Name,
@@ -32,6 +33,7 @@ enum class TransitionState {
 class Screen {
 protected:
     std::vector<std::shared_ptr<core::Button>> buttons;
+    std::vector<std::shared_ptr<core::Button>> additionalEditableButtons; // 额外的可编辑按钮容器
     core::Bitmap** background;
     ScreenID ID;
     static core::VideoPlayer* videoBackground;
@@ -40,6 +42,7 @@ protected:
     static std::map<ScreenID, std::shared_ptr<Screen>> screens;
     static std::vector<core::NameEntry> nameItems;
     static std::shared_ptr<core::Button> exitButton;
+    static std::shared_ptr<core::Button> exitButtonEdit; // 编辑模式下的退出按钮
 
     // 淡入淡出相关成员
     static TransitionState transitionState;
@@ -52,6 +55,11 @@ protected:
     // 编辑模式相关成员
     bool editModeEnabled = false;
     std::shared_ptr<core::Button> selectedButton = nullptr;
+
+    // 管理额外按钮的方法
+    void RegisterEditableButton(std::shared_ptr<core::Button> button);
+    void UnregisterEditableButton(std::shared_ptr<core::Button> button);
+    void ClearEditableButtons();
 
     // 计算当前的alpha值（基于过渡状态）
     static float getCurrentAlpha();
@@ -79,9 +87,6 @@ public:
     virtual void OnEditMouseUp(int x, int y);
     virtual void DrawEditOverlays();
     virtual void SaveButtonLayout();
-    virtual void LoadButtonLayout();
-    virtual void ResetButtonLayout();
-    virtual bool HasCustomLayout() const;
 
     ScreenID getID() const { return ID; }
     static std::shared_ptr<Screen> getCurrentScreen() { return currentScreen; }    // 屏幕管理系统功能

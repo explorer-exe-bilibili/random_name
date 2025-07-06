@@ -159,7 +159,7 @@ public:
 
     void unloadAllVideo();
 
-    bool playAudio(AudioID id, int loop = 0);
+    bool playAudio(AudioID id, int loop = -1);
     bool playSound(AudioID id, int loop = 0);
 
     void loadImagesFromDirectory(const std::string& directory);

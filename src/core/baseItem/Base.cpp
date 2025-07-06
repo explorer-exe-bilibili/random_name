@@ -12,6 +12,14 @@
 #undef APIENTRY
 #include <windows.h>
 #include <shlobj.h>
+#else
+#include <sys/stat.h>
+#include <unistd.h>
+#include <sys/wait.h>
+#include <climits>
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#endif
 #endif
 
 #include "utf8.h"
@@ -79,10 +87,12 @@ namespace core {
 }
 
 float core::Region::getyend() const { 
-    if(yend<=0)
-        return (gety()-getx()+getxend());
-    else 
+    if(aspectRatio1to1) {
+        // 1:1比例模式：高度等于宽度
+        return gety() + getWidth();
+    } else {
         return screenRatio ? yend * WindowInfo.height : yend; 
+    }
 }
 
 std::string core::wstring2string(const std::wstring& wstr) {

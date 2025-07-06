@@ -185,16 +185,6 @@ void KeyEvent(GLFWwindow* window, int key, int scancode, int action, int mods) {
                         }
                     }
                     break;
-                case GLFW_KEY_F3:
-                    // 按F3重置当前屏幕的布局
-                    {
-                        auto currentScreen = screen::Screen::getCurrentScreen();
-                        if (currentScreen && currentScreen->HasCustomLayout()) {
-                            currentScreen->ResetButtonLayout();
-                            Log << Level::Info << "Button layout reset" << op::endl;
-                        }
-                    }
-                    break;
                 default:
                     break;
             }
@@ -221,7 +211,7 @@ void MouseButtonEvent(GLFWwindow* window, int button, int action, int mods) {
                 if (currentScreen->IsEditModeEnabled()) {
                     currentScreen->OnEditMouseDown(mouseX, mouseY);
                 } else {
-                    currentScreen->Click(mouseX, mouseY);
+                    // 正常点击处理已经在RELEASE事件中完成
                 }
             }
             break;
@@ -231,7 +221,7 @@ void MouseButtonEvent(GLFWwindow* window, int button, int action, int mods) {
                 if (currentScreen->IsEditModeEnabled()) {
                     currentScreen->OnEditMouseUp(mouseX, mouseY);
                 } else {
-                    // 正常点击处理已经在PRESS事件中完成
+                    currentScreen->Click(mouseX, mouseY);
                 }
             }
             break;

@@ -13,6 +13,7 @@ std::map<ScreenID, std::shared_ptr<Screen>> Screen::screens;
 core::VideoPlayer* Screen::videoBackground = nullptr;
 std::vector<NameEntry> Screen::nameItems;
 std::shared_ptr<core::Button> Screen::exitButton;
+std::shared_ptr<core::Button> Screen::exitButtonEdit;
 
 // 淡入淡出相关静态成员初始化
 TransitionState Screen::transitionState = TransitionState::Stable;
@@ -77,7 +78,24 @@ void Screen::init() {
     exitButton->SetEnableBitmap(true);
     exitButton->SetEnableText(false);
     exitButton->SetText("exit");
-    exitButton->SetRegion(Config::getInstance()->getRegion(UI_REGION_EXIT));
+    exitButton->SetRegionStr(UI_REGION_EXIT);
+    exitButtonEdit = std::make_unique<core::Button>();
+    exitButtonEdit->SetAudioID(AudioID::enter);
+    exitButtonEdit->SetEnableBitmap(false);
+    exitButtonEdit->SetText("退出编辑模式");
+    exitButtonEdit->SetFontID(FontID::Normal);
+    exitButtonEdit->SetFillColor(Color(128,128,128,128));
+    exitButtonEdit->SetFontScale(0.3f);
+    exitButtonEdit->SetRegionStr(UI_REGION_EXIT_EDIT);
+    exitButtonEdit->SetEnableText(true);
+    exitButtonEdit->SetEnable(false);
+    exitButtonEdit->SetEnableFill(true);
+    exitButtonEdit->SetClickFunc([this](){
+        Screen::getCurrentScreen()->SetEditMode(false);
+        Screen::SwitchToScreen(ScreenID::Settings);
+        if(!Explorer::getInstance()->getAudio()->isMusicPlaying())
+            Explorer::getInstance()->playAudio(AudioID::bgm);
+    });
 }
 
 bool Screen::Click(int x, int y) {
@@ -104,7 +122,6 @@ bool Screen::Click(int x, int y) {
             return true;
         }
     }
-    
     return false;
 }
 
@@ -167,7 +184,6 @@ void Screen::updateTransition(int param) {
                 currentScreen = nextScreen;
                 currentScreenID = nextScreen->getID();
                 currentScreen->enter(param);
-                
                 // 开始淡入
                 transitionState = TransitionState::FadeIn;
                 transitionStartTime = now;
@@ -244,14 +260,22 @@ void Screen::reloadConfig() {
 // 编辑模式方法实现
 void Screen::SetEditMode(bool enable) {
     editModeEnabled = enable;
-    
-    if (enable) {
-        // 进入编辑模式时，先加载自定义布局
-        LoadButtonLayout();
-    }
-    
+    exitButtonEdit->SetEnable(enable);
     // 为所有按钮设置编辑模式
     for (auto& button : buttons) {
+        if (button) {
+            button->SetEditMode(enable);
+            if (enable) {
+                // 设置编辑完成回调
+                button->SetOnEditComplete([this](const core::Region& newRegion) {
+                    SaveButtonLayout();
+                });
+            }
+        }
+    }
+    
+    // 为额外的可编辑按钮设置编辑模式
+    for (auto& button : additionalEditableButtons) {
         if (button) {
             button->SetEditMode(enable);
             if (enable) {
@@ -297,6 +321,14 @@ void Screen::OnEditMouseDown(int x, int y) {
             return;
         }
     }
+    
+    // 检查额外的可编辑按钮
+    for (auto& button : additionalEditableButtons) {
+        if (button && button->OnEditMouseDown(point)) {
+            selectedButton = button;
+            return;
+        }
+    }
 }
 
 void Screen::OnEditMouseMove(int x, int y) {
@@ -305,11 +337,19 @@ void Screen::OnEditMouseMove(int x, int y) {
     core::Point point(x, y, false);
     
     // 所有按钮都尝试处理移动事件
+    exitButtonEdit->OnClick(point);
     if (exitButton) {
         exitButton->OnEditMouseMove(point);
     }
     
     for (auto& button : buttons) {
+        if (button) {
+            button->OnEditMouseMove(point);
+        }
+    }
+    
+    // 处理额外的可编辑按钮
+    for (auto& button : additionalEditableButtons) {
         if (button) {
             button->OnEditMouseMove(point);
         }
@@ -320,13 +360,22 @@ void Screen::OnEditMouseUp(int x, int y) {
     if (!editModeEnabled) return;
     
     core::Point point(x, y, false);
-    
+
+    exitButtonEdit->OnClick(point);
     // 所有按钮都尝试处理释放事件
+
     if (exitButton) {
         exitButton->OnEditMouseUp(point);
     }
     
     for (auto& button : buttons) {
+        if (button) {
+            button->OnEditMouseUp(point);
+        }
+    }
+    
+    // 处理额外的可编辑按钮
+    for (auto& button : additionalEditableButtons) {
         if (button) {
             button->OnEditMouseUp(point);
         }
@@ -346,30 +395,28 @@ void Screen::DrawEditOverlays() {
             button->DrawEditOverlay();
         }
     }
+    
+    // 绘制额外的可编辑按钮的编辑覆盖层
+    for (const auto& button : additionalEditableButtons) {
+        if (button) {
+            button->DrawEditOverlay();
+        }
+    }
+    
+    if (exitButtonEdit) {
+        exitButtonEdit->Draw();
+    }
 }
 
 void Screen::SaveButtonLayout() {
     core::Config* config = core::Config::getInstance();
     
-    // 使用当前屏幕ID作为区域类别来组织按钮布局
-    std::string screenPrefix = "screen_" + std::to_string(static_cast<int>(ID));
-    
     // 保存exitButton的布局
     if (exitButton) {
-        core::Region region = exitButton->GetRegion();
-        // 使用Config的Region设置方法，将区域保存到特定类别下
-        config->set(screenPrefix + "_exit", region);
+        exitButton->SaveRegionToConfig();
     }
-    
-    // 保存普通按钮的布局
-    for (size_t i = 0; i < buttons.size(); ++i) {
-        if (buttons[i]) {
-            core::Region region = buttons[i]->GetRegion();
-            std::string buttonName = screenPrefix + "_button_" + std::to_string(i);
-            
-            // 使用Config的Region设置方法
-            config->set(buttonName, region);
-        }
+    for(auto& b: buttons){
+        if(b)b->SaveRegionToConfig();
     }
     
     // 保存配置到文件
@@ -378,109 +425,55 @@ void Screen::SaveButtonLayout() {
     Log << "Button layout saved for screen " << static_cast<int>(ID) << op::endl;
 }
 
-void Screen::LoadButtonLayout() {
-    core::Config* config = core::Config::getInstance();
-    
-    // 使用当前屏幕ID作为区域类别
-    std::string screenPrefix = "screen_" + std::to_string(static_cast<int>(ID));
-    
-    // 加载exitButton的布局
-    if (exitButton) {
-        core::Region defaultRegion = exitButton->GetRegion(); // 使用当前区域作为默认值
-        core::Region region = config->getRegion(screenPrefix + "_exit", 
-                                               core::RegionName::NONE, 
-                                               defaultRegion);
-        
-        // 如果加载的区域与默认区域不同，说明有自定义布局
-        if (region.getOriginX() != defaultRegion.getOriginX() || 
-            region.getOriginY() != defaultRegion.getOriginY() ||
-            region.getOriginW() != defaultRegion.getOriginW() || 
-            region.getOriginH() != defaultRegion.getOriginH()) {
-            exitButton->SetRegion(region);
-        }
-    }
-    
-    // 加载普通按钮的布局
-    for (size_t i = 0; i < buttons.size(); ++i) {
-        if (buttons[i]) {
-            std::string buttonName = screenPrefix + "_button_" + std::to_string(i);
-            core::Region defaultRegion = buttons[i]->GetRegion(); // 使用当前区域作为默认值
-            core::Region region = config->getRegion(buttonName, 
-                                                   core::RegionName::NONE, 
-                                                   defaultRegion);
+// 管理额外可编辑按钮的方法实现
+void Screen::RegisterEditableButton(std::shared_ptr<core::Button> button) {
+    if (button) {
+        // 避免重复添加
+        auto it = std::find(additionalEditableButtons.begin(), additionalEditableButtons.end(), button);
+        if (it == additionalEditableButtons.end()) {
+            additionalEditableButtons.push_back(button);
             
-            // 如果加载的区域与默认区域不同，说明有自定义布局
-            if (region.getOriginX() != defaultRegion.getOriginX() || 
-                region.getOriginY() != defaultRegion.getOriginY() ||
-                region.getOriginW() != defaultRegion.getOriginW() || 
-                region.getOriginH() != defaultRegion.getOriginH()) {
-                buttons[i]->SetRegion(region);
+            // 如果当前已经在编辑模式，为新按钮设置编辑模式
+            if (editModeEnabled) {
+                button->SetEditMode(true);
+                button->SetOnEditComplete([this](const core::Region& newRegion) {
+                    SaveButtonLayout();
+                });
             }
+            
+            Log << "Button registered for editing" << op::endl;
         }
     }
-    
-    Log << "Button layout loaded for screen " << static_cast<int>(ID) << op::endl;
 }
 
-void Screen::ResetButtonLayout() {
-    core::Config* config = core::Config::getInstance();
-    
-    // 删除当前屏幕的自定义布局配置
-    std::string screenPrefix = "screen_" + std::to_string(static_cast<int>(ID));
-    
-    // 删除exitButton的自定义布局
-    if (exitButton) {
-        config->remove(screenPrefix + "_exit");
-    }
-    
-    // 删除普通按钮的自定义布局
-    for (size_t i = 0; i < buttons.size(); ++i) {
-        if (buttons[i]) {
-            std::string buttonName = screenPrefix + "_button_" + std::to_string(i);
-            config->remove(buttonName);
+void Screen::UnregisterEditableButton(std::shared_ptr<core::Button> button) {
+    if (button) {
+        auto it = std::find(additionalEditableButtons.begin(), additionalEditableButtons.end(), button);
+        if (it != additionalEditableButtons.end()) {
+            // 退出编辑模式
+            button->SetEditMode(false);
+            additionalEditableButtons.erase(it);
+            
+            // 如果这是当前选中的按钮，清除选择
+            if (selectedButton == button) {
+                selectedButton = nullptr;
+            }
+            
+            Log << "Button unregistered from editing" << op::endl;
         }
     }
-    
-    // 重新加载默认布局（通过调用reloadButtonsRegion或重新初始化）
-    reloadButtonsRegion();
-    
-    config->saveToFile();
-    Log << "Button layout reset for screen " << static_cast<int>(ID) << op::endl;
 }
 
-bool Screen::HasCustomLayout() const {
-    core::Config* config = core::Config::getInstance();
-    std::string screenPrefix = "screen_" + std::to_string(static_cast<int>(ID));
-    
-    // 检查是否存在任何自定义布局配置
-    if (exitButton) {
-        core::Region defaultRegion = exitButton->GetRegion();
-        core::Region customRegion = config->getRegion(screenPrefix + "_exit", 
-                                                     core::RegionName::NONE, 
-                                                     defaultRegion);
-        if (customRegion.getOriginX() != defaultRegion.getOriginX() || 
-            customRegion.getOriginY() != defaultRegion.getOriginY() ||
-            customRegion.getOriginW() != defaultRegion.getOriginW() || 
-            customRegion.getOriginH() != defaultRegion.getOriginH()) {
-            return true;
+void Screen::ClearEditableButtons() {
+    // 为所有额外按钮退出编辑模式
+    for (auto& button : additionalEditableButtons) {
+        if (button) {
+            button->SetEditMode(false);
         }
     }
     
-    for (size_t i = 0; i < buttons.size(); ++i) {
-        if (buttons[i]) {
-            std::string buttonName = screenPrefix + "_button_" + std::to_string(i);
-            core::Region defaultRegion = buttons[i]->GetRegion();
-            core::Region customRegion = config->getRegion(buttonName, 
-                                                         core::RegionName::NONE, 
-                                                         defaultRegion);
-            if (customRegion.getOriginX() != defaultRegion.getOriginX() || 
-                customRegion.getOriginY() != defaultRegion.getOriginY() ||
-                customRegion.getOriginW() != defaultRegion.getOriginW() || 
-                customRegion.getOriginH() != defaultRegion.getOriginH()) {
-                return true;
-            }
-        }
-    }
+    additionalEditableButtons.clear();
+    selectedButton = nullptr;
     
-    return false;
+    Log << "All additional editable buttons cleared" << op::endl;
 }

@@ -101,12 +101,20 @@ void NameScreen::Draw() {
         (*fontPtr)->RenderText(currentName.name, regions[smallName].getx(), regions[smallName].gety(), 0.3f, SmallNameColor);
     }
     nameButton.Draw();
+    
+    // 在最后绘制编辑覆盖层
+    if (editModeEnabled) {
+        DrawEditOverlays();
+    }
 }
 
 void NameScreen::enter(int times) {
     currentIndex=0;
     enterTime++;
     nameCount=times;
+    if(nameItems.empty()) {
+        nameItems.emplace_back("未知", 4, NameType::bow, Config::getInstance()->getInt(SPECIAL)-1);
+    }
     if(times>1)buttons[SkipButton]->SetEnable(true);
     else buttons[SkipButton]->SetEnable(false);
     if(nameItems[0].mode==Config::getInstance()->getInt(SPECIAL)-1)
@@ -160,7 +168,7 @@ void NameScreen::changeName() {
     if(currentIndex>=nameItems.size()){
         if(nameCount==1){
             Log << Level::Info << "所有名字已显示完毕" << op::endl;
-            core::Explorer::getInstance()->playAudio(AudioID::bgm, 0);
+            core::Explorer::getInstance()->playAudio(AudioID::bgm);
             SwitchToScreenWithFade(ScreenID::MainMenu);
             return;
         }

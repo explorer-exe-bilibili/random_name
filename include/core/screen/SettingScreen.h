@@ -18,8 +18,7 @@ enum class SettingButtonType{
     ColorSelect,
     PathSelect,
     FileSelect,
-    RegionEditor,     // 新增：区域编辑器
-    RegionPreset      // 新增：区域预设管理
+    RegionEditor
 };
 enum SettingButtonAction{
     None=0,
@@ -41,19 +40,6 @@ enum class FileType{
     Unknown
 };
 
-// Region编辑器拖拽模式
-enum class DragMode {
-    None,
-    Move,           // 移动整个区域
-    ResizeLeft,     // 调整左边界
-    ResizeRight,    // 调整右边界
-    ResizeTop,      // 调整上边界
-    ResizeBottom,   // 调整下边界
-    ResizeTopLeft,  // 调整左上角
-    ResizeTopRight, // 调整右上角
-    ResizeBottomLeft,  // 调整左下角
-    ResizeBottomRight  // 调整右下角
-};
 class sItem{
 public:
     // 默认构造函数，确保字符串成员正确初始化
@@ -65,16 +51,15 @@ public:
               fontID(core::FontID::Unknown),
               videoID(core::VideoID::Unknown),
               color(core::Color(0,0,0,255)),
+              screenID(screen::ScreenID::Unknown),
               name(""),
               configName(""),
               fileChooseWindowName(""),
               bitmapName(""),
               outOfLimitOutPut(""),
               minCount(0),
-              maxCount(0),
-              regionCategory(core::RegionName::SMALL_WINDOW),
-              relatedRegions() {}
-    
+              maxCount(0){}
+
     // 拷贝构造函数，确保字符串正确复制
     sItem(const sItem& other) : fileType(other.fileType),
                                 action(other.action),
@@ -83,6 +68,7 @@ public:
                                 fontID(other.fontID),
                                 videoID(other.videoID),
                                 color(other.color),
+                                screenID(other.screenID),
                                 name(other.name),
                                 configName(other.configName),
                                 fileChooseWindowName(other.fileChooseWindowName),
@@ -90,9 +76,7 @@ public:
                                 audioID(other.audioID),
                                 outOfLimitOutPut(other.outOfLimitOutPut),
                                 minCount(other.minCount),
-                                maxCount(other.maxCount),
-                                regionCategory(other.regionCategory),
-                                relatedRegions(other.relatedRegions) {}
+                                maxCount(other.maxCount) {}
     
     // 赋值操作符
     sItem& operator=(const sItem& other) {
@@ -104,6 +88,7 @@ public:
             fontID = other.fontID;
             videoID = other.videoID;
             color = other.color;
+            screenID = other.screenID;
             name = other.name;
             configName = other.configName;
             fileChooseWindowName = other.fileChooseWindowName;
@@ -112,8 +97,6 @@ public:
             outOfLimitOutPut = other.outOfLimitOutPut;
             minCount = other.minCount;
             maxCount = other.maxCount;
-            regionCategory = other.regionCategory;
-            relatedRegions = other.relatedRegions;
         }
         return *this;
     }
@@ -125,6 +108,7 @@ public:
     core::FontID fontID=core::FontID::Unknown;
     core::VideoID videoID=core::VideoID::Unknown;
     core::Color color=core::Color(0,0,0,255);
+    screen::ScreenID screenID=screen::ScreenID::Unknown;
     std::string name;
     std::string configName;
     std::string fileChooseWindowName;
@@ -132,11 +116,7 @@ public:
     core::AudioID audioID;
     std::string outOfLimitOutPut;
     int minCount=0;
-    int maxCount=0;
-    
-    // Region编辑器相关属性
-    core::RegionName regionCategory = core::RegionName::SMALL_WINDOW; // Region类别
-    std::vector<std::string> relatedRegions;     // 相关的Region列表
+    int maxCount=0;    
 };
 class SettingButton
 {

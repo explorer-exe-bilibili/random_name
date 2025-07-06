@@ -48,11 +48,18 @@ namespace core
         float x,xend;
         float y,yend;
         bool screenRatio=true;
+        bool aspectRatio1to1=false; // 标识是否使用1:1比例
     public:
         Region() : x(0), y(0), xend(0), yend(0) {}
-        Region(double x, double y, double xend, double yend, bool Ratio=true) : x(x), y(y), xend(xend), yend(yend), screenRatio(Ratio) {}
-        Region(const Region& region) : x(region.x), y(region.y), xend(region.xend), yend(region.yend), screenRatio(region.screenRatio) {}
-        Region(const glm::vec4& region) : x(region.x), y(region.y), xend(region.z), yend(region.w), screenRatio(true) {}
+        Region(double x, double y, double xend, double yend, bool Ratio=true) : x(x), y(y), xend(xend), yend(yend), screenRatio(Ratio) {
+            // 检测是否是1:1比例模式（通过yend <= 0判断）
+            if (yend <= 0) {
+                aspectRatio1to1 = true;
+                this->yend = 0; // 标准化存储
+            }
+        }
+        Region(const Region& region) : x(region.x), y(region.y), xend(region.xend), yend(region.yend), screenRatio(region.screenRatio), aspectRatio1to1(region.aspectRatio1to1) {}
+        Region(const glm::vec4& region) : x(region.x), y(region.y), xend(region.z), yend(region.w), screenRatio(true), aspectRatio1to1(false) {}
         
         float getx() const { return screenRatio ? x * WindowInfo.width : x; }
         float gety() const { return screenRatio ? y * WindowInfo.height : y; }
@@ -61,19 +68,43 @@ namespace core
         float getWidth() const {return getxend()-getx();}
         float getHeight() const {return getyend()-gety();}
         bool getRatio() const { return screenRatio; }
+        bool isAspectRatio1to1() const { return aspectRatio1to1; }
         
         void setx(float x) { this->x = x; }
         void sety(float y) { this->y = y; }
         void setxend(float xend) { this->xend = xend; }
-        void setyend(float yend) { this->yend = yend; }
+        void setyend(float yend) { 
+            this->yend = yend; 
+            // 如果设置了非零的yend，则退出1:1比例模式
+            if (yend > 0) {
+                aspectRatio1to1 = false;
+            }
+        }
         void setRatio(bool Ratio) { this->screenRatio = Ratio; }
+        void setAspectRatio1to1(bool enable) { 
+            aspectRatio1to1 = enable; 
+            if (enable) {
+                yend = 0; // 1:1模式下yend存储为0
+            }
+        }
 
         float getOriginX() const { return x; }
         float getOriginY() const { return y; }
         float getOriginXEnd() const { return xend; }
-        float getOriginYEnd() const { return yend; }
+        float getOriginYEnd() const { 
+            if (aspectRatio1to1) {
+                // 对于1:1比例，返回计算后的实际yend值（用于编辑器显示）
+                return y + (xend - x); // 保持原始坐标系的1:1比例
+            }
+            return yend; 
+        }
         float getOriginW() const {return xend-x;}
-        float getOriginH() const {return yend-y;}
+        float getOriginH() const {
+            if (aspectRatio1to1) {
+                return xend - x; // 1:1比例时高度等于宽度
+            }
+            return yend-y;
+        }
 
         float getx_() const { return screenRatio ? x * WindowInfo.width : x; }
         float gety_() const { return screenRatio ? y * WindowInfo.height : y; }

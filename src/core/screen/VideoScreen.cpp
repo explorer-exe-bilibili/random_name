@@ -136,6 +136,11 @@ void VideoScreen::Draw()
         if(button)
             button->Draw();
     }
+    
+    // 在最后绘制编辑覆盖层
+    if (editModeEnabled) {
+        DrawEditOverlays();
+    }
 }
 
 void VideoScreen::exit()

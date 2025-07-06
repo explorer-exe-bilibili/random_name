@@ -16,10 +16,10 @@ void ListNameScreen::init() {
 
 bool ListNameScreen::Click(int x, int y) {
     // 点击处理代码
-    for(auto& button : buttons)if(button) if(button && button->OnClick(Point(x, y))) return true;
-    for(auto& b: m_buttons)if(b) if( b->OnClick(Point(x, y))) return true;
+    for(auto& button : buttons)if(button) if(button && button->OnClick(Point(x, y,false))) return true;
+    for(auto& b: m_buttons)if(b) if( b->OnClick(Point(x, y,false))) return true;
     SwitchToScreenWithFade(ScreenID::MainMenu,0,0.5f, []() {
-        core::Explorer::getInstance()->playAudio(AudioID::bgm, 0);
+        core::Explorer::getInstance()->playAudio(AudioID::bgm);
     });
     return false;
 }
@@ -39,6 +39,11 @@ void ListNameScreen::Draw() {
         if(b) {
             b->Draw();
         }
+    }
+    
+    // 在最后绘制编辑覆盖层
+    if (editModeEnabled) {
+        DrawEditOverlays();
     }
 }
 

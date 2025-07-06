@@ -28,6 +28,7 @@ using namespace settingScreen;
 #define MAX_COUNT "maxCount"
 #define OUT_OF_LIMIT_OUTPUT "outOfLimitOutPut"
 #define NUMBER "number"
+#define SCREENID "screenID"
 
 static nlohmann::json RollBack(std::string jsonpath) {
     Log << Level::Info << "开始回滚设置页面" << op::endl;
@@ -514,6 +515,39 @@ static nlohmann::json RollBack(std::string jsonpath) {
     j[PAGES].push_back(p);
     p.clear();
 
+    p[TITLE] = "控件布局";
+
+    i[NAME] = "主界面布局设置";
+    i[TYPE] = SettingButtonType::RegionEditor;
+    i[SCREENID] = ScreenID::MainMenu;
+    i[NUMBER] = 1;
+    p[ITEM].push_back(i);
+    i.clear();
+    
+    i[NAME] = "设置界面布局设置";
+    i[TYPE] = SettingButtonType::RegionEditor;
+    i[SCREENID] = ScreenID::Settings;
+    i[NUMBER] = 2;
+    p[ITEM].push_back(i);
+    i.clear();
+
+    i[NAME] = "姓名界面布局设置";
+    i[TYPE] = SettingButtonType::RegionEditor;
+    i[SCREENID] = ScreenID::Name;
+    i[NUMBER] = 11;
+    p[ITEM].push_back(i);
+    i.clear();
+
+    i[NAME] = "列表界面布局设置";
+    i[TYPE] = SettingButtonType::RegionEditor;
+    i[SCREENID] = ScreenID::ListName;
+    i[NUMBER] = 12;
+    p[ITEM].push_back(i);
+    i.clear();
+
+    j[PAGES].push_back(p);
+    p.clear();
+
     // 杂项页
     p[TITLE] = "杂项";
 
@@ -658,6 +692,9 @@ void SettingScreen::loadButtons() {
                     item.minCount = button.value(MIN_COUNT, 0);
                     item.maxCount = button.value(MAX_COUNT, 0);
                     item.outOfLimitOutPut = button.value(OUT_OF_LIMIT_OUTPUT, "");
+                }
+                else if(item.type==SettingButtonType::RegionEditor){
+                    item.screenID = button.value(SCREENID, screen::ScreenID::Unknown);
                 }
                 int number=button.value(NUMBER, 0);
                 s_buttons.emplace_back(std::make_shared<SettingButton>(item, number, page));

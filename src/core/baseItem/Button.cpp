@@ -6,6 +6,7 @@
 #include "core/Config.h"
 #include <thread>
 #include <chrono>
+#include <algorithm>
 
 using namespace core;
 
@@ -95,7 +96,7 @@ bool core::Button::OnClick(Point point)
     if (point.getx() >= region.getx() && point.getx() <= region.getxend() && 
     point.gety() >= region.gety() && point.gety() <= region.getyend())
     {
-        Log << "Button "<<text<<" clicked" << op::endl;
+        Log << Level::Info << "Button "<<text<<" clicked" << op::endl;
         if(audioid!=AudioID::Unknown && core::Explorer::getInstance()->isAudioLoaded(audioid)) {
             core::Explorer::getInstance()->playSound(audioid, 0);
         }
@@ -484,59 +485,115 @@ void Button::UpdateRegionFromEdit(Point cur) {
     float dxr = dx, dyr = dy;
     if (region.getRatio()) { dxr = dx/WindowInfo.width; dyr = dy/WindowInfo.height; }
     Region nr = originalRegion;
+    
+    // 检查是否是1:1比例模式
+    bool was1to1 = originalRegion.isAspectRatio1to1();
+    
     switch (currentEditMode) {
         case EditMode::Move:
             nr.setx(originalRegion.getOriginX()+dxr);
             nr.sety(originalRegion.getOriginY()+dyr);
             nr.setxend(originalRegion.getOriginXEnd()+dxr);
-            nr.setyend(originalRegion.getOriginYEnd()+dyr);
+            if (!was1to1) {
+                nr.setyend(originalRegion.getOriginYEnd()+dyr);
+            }
             break;
         case EditMode::ResizeTopLeft:
             nr.setx(originalRegion.getOriginX()+dxr);
             nr.sety(originalRegion.getOriginY()+dyr);
+            if (was1to1) {
+                // 1:1比例模式下，保持正方形
+                float newWidth = originalRegion.getOriginW() - dxr;
+                float newHeight = newWidth;
+                nr.setxend(nr.getOriginX() + newWidth);
+            }
             break;
         case EditMode::ResizeTopRight:
             nr.setxend(originalRegion.getOriginXEnd()+dxr);
             nr.sety(originalRegion.getOriginY()+dyr);
+            if (was1to1) {
+                // 1:1比例模式下，保持正方形
+                float newWidth = originalRegion.getOriginW() + dxr;
+                float newHeight = newWidth;
+                nr.sety(nr.getOriginYEnd() - newHeight);
+            }
             break;
         case EditMode::ResizeBottomLeft:
             nr.setx(originalRegion.getOriginX()+dxr);
-            nr.setyend(originalRegion.getOriginYEnd()+dyr);
+            if (was1to1) {
+                // 1:1比例模式下，保持正方形
+                float newWidth = originalRegion.getOriginW() - dxr;
+                nr.setxend(nr.getOriginX() + newWidth);
+            } else {
+                nr.setyend(originalRegion.getOriginYEnd()+dyr);
+            }
             break;
         case EditMode::ResizeBottomRight:
             nr.setxend(originalRegion.getOriginXEnd()+dxr);
-            nr.setyend(originalRegion.getOriginYEnd()+dyr);
+            if (!was1to1) {
+                nr.setyend(originalRegion.getOriginYEnd()+dyr);
+            }
             break;
         case EditMode::ResizeLeft:
             nr.setx(originalRegion.getOriginX()+dxr);
+            if (was1to1) {
+                // 1:1比例模式下，调整宽度时保持正方形
+                float newWidth = originalRegion.getOriginW() - dxr;
+                nr.setxend(nr.getOriginX() + newWidth);
+            }
             break;
         case EditMode::ResizeRight:
             nr.setxend(originalRegion.getOriginXEnd()+dxr);
             break;
         case EditMode::ResizeTop:
-            nr.sety(originalRegion.getOriginY()+dyr);
+            if (!was1to1) {
+                nr.sety(originalRegion.getOriginY()+dyr);
+            }
             break;
         case EditMode::ResizeBottom:
-            nr.setyend(originalRegion.getOriginYEnd()+dyr);
+            if (!was1to1) {
+                nr.setyend(originalRegion.getOriginYEnd()+dyr);
+            }
             break;
         default: break;
     }
+    
+    // 确保保持1:1比例标志
+    if (was1to1) {
+        nr.setAspectRatio1to1(true);
+    }
+    
     float minW = minWidth, minH = minHeight;
     if (region.getRatio()) { minW = minWidth/WindowInfo.width; minH = minHeight/WindowInfo.height; }
-    if (nr.getOriginW() < minW) {
-        if (currentEditMode==EditMode::ResizeLeft || currentEditMode==EditMode::ResizeTopLeft || currentEditMode==EditMode::ResizeBottomLeft) {
-            nr.setx(nr.getOriginXEnd()-minW);
-        } else {
-            nr.setxend(nr.getOriginX()+minW);
+    
+    // 对于1:1比例，确保最小尺寸是正方形
+    if (was1to1) {
+        float minSize = std::max(minW, minH);
+        if (nr.getOriginW() < minSize) {
+            if (currentEditMode==EditMode::ResizeLeft || currentEditMode==EditMode::ResizeTopLeft || currentEditMode==EditMode::ResizeBottomLeft) {
+                nr.setx(nr.getOriginXEnd()-minSize);
+            } else {
+                nr.setxend(nr.getOriginX()+minSize);
+            }
+        }
+    } else {
+        // 非1:1比例的原有逻辑
+        if (nr.getOriginW() < minW) {
+            if (currentEditMode==EditMode::ResizeLeft || currentEditMode==EditMode::ResizeTopLeft || currentEditMode==EditMode::ResizeBottomLeft) {
+                nr.setx(nr.getOriginXEnd()-minW);
+            } else {
+                nr.setxend(nr.getOriginX()+minW);
+            }
+        }
+        if (nr.getOriginH() < minH) {
+            if (currentEditMode==EditMode::ResizeTop || currentEditMode==EditMode::ResizeTopLeft || currentEditMode==EditMode::ResizeTopRight) {
+                nr.sety(nr.getOriginYEnd()-minH);
+            } else {
+                nr.setyend(nr.getOriginY()+minH);
+            }
         }
     }
-    if (nr.getOriginH() < minH) {
-        if (currentEditMode==EditMode::ResizeTop || currentEditMode==EditMode::ResizeTopLeft || currentEditMode==EditMode::ResizeTopRight) {
-            nr.sety(nr.getOriginYEnd()-minH);
-        } else {
-            nr.setyend(nr.getOriginY()+minH);
-        }
-    }
+    
     region = nr;
     ClampRegion();
 }

@@ -108,6 +108,11 @@ bool unzip::extract(const std::string& destDir){
 			if (!fs::is_directory(destFilePath)){
 				// 创建多级目录
 				int bRet = CreatedMultipleDirectory(destFilePath);
+				if (!bRet) {
+					Log << Level::Error << "Failed to create directory: " << destFilePath << op::endl;
+					unzCloseCurrentFile(zipFileHandle);
+					return false;
+				}
 			}
             // 创建文件
             FILE* hFile = fopen(strFullFilePath.c_str(), "wb");
@@ -134,7 +139,6 @@ bool unzip::extract(const std::string& destDir){
 				break;
 			}
 			if (!fileusing) {
-				fileusing = 0;
 				while (1)
 				{
 					memset(szReadBuffer, 0, BUFFER_SIZE);
