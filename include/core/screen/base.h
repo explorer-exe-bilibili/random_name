@@ -90,6 +90,7 @@ public:
 
     ScreenID getID() const { return ID; }
     static std::shared_ptr<Screen> getCurrentScreen() { return currentScreen; }    // 屏幕管理系统功能
+    static std::shared_ptr<Screen> getScreen(ScreenID id);
     static void RegisterScreen(ScreenID id, std::shared_ptr<Screen> screen);
     static bool SwitchToScreen(ScreenID id,int param = 0); // 切换到指定屏幕
     

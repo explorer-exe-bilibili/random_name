@@ -33,9 +33,9 @@ void MainScreen::init() {
     overlays.resize(Config::getInstance()->getInt(POOL_COUNT));
     for(int i = 0; i < overlays.size(); ++i) {
         overlays[i] = std::make_shared<Button>();
-        Screen::RegisterEditableButton(overlays[i]);
-        overlays[i]->SetRegionStr(UI_REGION_MAINMENU_OVERLAY);
     }
+        Screen::RegisterEditableButton(overlays[0]);
+    overlays[0]->SetRegionStr(UI_REGION_MAINMENU_OVERLAY);
     for(int i=0; i< buttons.size()-o1; i++)
     {
         buttons[i+o1]->SetBitmap(BitmapID(int(BitmapID::Overlay0)+i));

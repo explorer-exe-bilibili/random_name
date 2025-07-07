@@ -524,7 +524,7 @@ else()
         find_package(Stb REQUIRED)
         find_package(tinyfiledialogs CONFIG REQUIRED)
         find_package(CURL REQUIRED)
-        find_package(minizip CONFIG REQUIRED)
+        find_package(unofficial-minizip CONFIG REQUIRED)
     endif()
 
     # 编译定义

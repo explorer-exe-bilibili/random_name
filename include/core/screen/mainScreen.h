@@ -15,6 +15,7 @@ class MainScreen : public Screen {
         bool Click(int x, int y) override;
         void Draw() override;
         void enter(int) override;
+        void setMode(int mode) { this->mode = mode; changeMode(); }
     private:
         void changeMode(); 
     };

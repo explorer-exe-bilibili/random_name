@@ -125,6 +125,13 @@ bool Screen::Click(int x, int y) {
     return false;
 }
 
+std::shared_ptr<Screen> Screen::getScreen(ScreenID id) {
+    if (screens.contains(id)) {
+        return screens[id];
+    }
+    return nullptr;
+}
+
 void Screen::RegisterScreen(ScreenID id, std::shared_ptr<Screen> screen) {
     if (!screens.contains(id)) {
         screens[id] = screen;
@@ -416,6 +423,9 @@ void Screen::SaveButtonLayout() {
         exitButton->SaveRegionToConfig();
     }
     for(auto& b: buttons){
+        if(b)b->SaveRegionToConfig();
+    }
+    for(auto& b: additionalEditableButtons){
         if(b)b->SaveRegionToConfig();
     }
     
