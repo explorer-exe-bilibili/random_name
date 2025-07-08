@@ -261,7 +261,8 @@ Region Config::getRegion(const std::string& name, const RegionName& category, co
                 float xend = regionJson.value("xend", 1.0f);
                 float yend = regionJson.value("yend", 1.0f);
                 bool screenRatio = regionJson.value("screenRatio", true);
-                actualDefaultValue = Region(x, y, xend, yend, screenRatio);
+                bool aspectRatio1to1 = regionJson.value("aspectRatio1to1", false);
+                actualDefaultValue = Region(x, y, xend, yend, screenRatio, aspectRatio1to1);
             } catch (const std::exception& e) {
                 Log << Level::Error << "Error parsing default region " << key << ": " << e.what() << op::endl;
             }
@@ -277,7 +278,8 @@ Region Config::getRegion(const std::string& name, const RegionName& category, co
                     float xend = regionJson.value("xend", 1.0f);
                     float yend = regionJson.value("yend", 1.0f);
                     bool screenRatio = regionJson.value("screenRatio", true);
-                    actualDefaultValue = Region(x, y, xend, yend, screenRatio);
+                    bool aspectRatio1to1 = regionJson.value("aspectRatio1to1", false);
+                    actualDefaultValue = Region(x, y, xend, yend, screenRatio, aspectRatio1to1);
                     Log << Level::Info << "Using SMALL_WINDOW fallback default value for " << name << op::endl;
                 } catch (const std::exception& e) {
                     Log << Level::Error << "Error parsing fallback default region " << fallbackDefaultKey << ": " << e.what() << op::endl;
@@ -302,8 +304,8 @@ Region Config::getRegion(const std::string& name, const RegionName& category, co
                     float xend = fallbackJson.value("xend", actualDefaultValue.getOriginXEnd());
                     float yend = fallbackJson.value("yend", actualDefaultValue.getOriginYEnd());
                     bool screenRatio = fallbackJson.value("screenRatio", actualDefaultValue.getRatio());
-                    
-                    Region fallbackRegion(x, y, xend, yend, screenRatio);
+                    bool aspectRatio1to1 = fallbackJson.value("aspectRatio1to1", false);
+                    Region fallbackRegion(x, y, xend, yend, screenRatio, aspectRatio1to1);
                     Log << Level::Info << "Using SMALL_WINDOW fallback region for " << name << op::endl;
                     return fallbackRegion;
                 }
@@ -317,8 +319,8 @@ Region Config::getRegion(const std::string& name, const RegionName& category, co
         float xend = regionJson.value("xend", actualDefaultValue.getOriginXEnd());
         float yend = regionJson.value("yend", actualDefaultValue.getOriginYEnd());
         bool screenRatio = regionJson.value("screenRatio", actualDefaultValue.getRatio());
-        
-        Region region(x, y, xend, yend, screenRatio);
+        bool aspectRatio1to1 = regionJson.value("aspectRatio1to1", false);
+        Region region(x, y, xend, yend, screenRatio, aspectRatio1to1);
         return region;
     } catch (const std::exception& e) {
         Log << Level::Error << "Error parsing region " << key << ": " << e.what() << op::endl;
@@ -336,8 +338,8 @@ Region Config::getRegion(const std::string& name, const RegionName& category, co
                     float xend = fallbackJson.value("xend", actualDefaultValue.getOriginXEnd());
                     float yend = fallbackJson.value("yend", actualDefaultValue.getOriginYEnd());
                     bool screenRatio = fallbackJson.value("screenRatio", actualDefaultValue.getRatio());
-                    
-                    Region fallbackRegion(x, y, xend, yend, screenRatio);
+                    bool aspectRatio1to1 = fallbackJson.value("aspectRatio1to1", false);
+                    Region fallbackRegion(x, y, xend, yend, screenRatio, aspectRatio1to1);
                     Log << Level::Info << "Using SMALL_WINDOW fallback region for " << name << " after parse error" << op::endl;
                     return fallbackRegion;
                 }
@@ -533,12 +535,14 @@ void Config::set(const std::string& name, const Region& region) {
             {"y", region.getOriginY()},
             {"xend", region.getOriginXEnd()},
             {"yend", region.getOriginYEnd()},
-            {"screenRatio", region.getRatio()}
+            {"screenRatio", region.getRatio()},
+            {"aspectRatio1to1", region.isAspectRatio1to1()}
         };
         
         setJson(key, regionJson);
         Log << Level::Info << "Set region " << key << ": (" << region.getOriginX() << "," << region.getOriginY() 
-              << ") to (" << region.getOriginXEnd() << "," << region.getOriginYEnd() << ")" << op::endl;
+              << ") to (" << region.getOriginXEnd() << "," << region.getOriginYEnd() << ")"
+              << " with screenRatio: " << region.getRatio() << " and aspectRatio1to1: " << region.isAspectRatio1to1() << op::endl;
     } catch (const std::exception& e) {
         Log << Level::Error << "Error setting region " << key << ": " << e.what() << op::endl;
     }
@@ -624,7 +628,8 @@ void Config::setifno(const std::string& name, const Region& region) {
         {"y", region.getOriginY()},
         {"xend", region.getOriginXEnd()},
         {"yend", region.getOriginYEnd()},
-        {"screenRatio", region.getRatio()}
+        {"screenRatio", region.getRatio()},
+        {"aspectRatio1to1", region.isAspectRatio1to1()}
     };
     defaultValues[key] = regionJson.dump();
 }

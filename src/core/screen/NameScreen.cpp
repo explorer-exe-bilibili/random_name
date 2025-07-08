@@ -80,8 +80,27 @@ void NameScreen::init() {
     buttons[AddNameButton]->SetEnableFill(false);
     buttons[AddNameButton]->SetEnable(false);
     buttons[TypeButton]->SetRegion(regions[firstType]);
-    if(bools[boolconfig::use_font_compatibility]) nameButton.SetFontID(FontID::Default);
-    else nameButton.SetFontID(FontID::Name);
+    nameButton = std::make_shared<NameButton>();
+    if(bools[boolconfig::use_font_compatibility]) nameButton->SetFontID(FontID::Default);
+    else nameButton->SetFontID(FontID::Name);
+    std::shared_ptr<core::Button> nextStatus=std::make_shared<core::Button>();
+    nextStatus->SetText("下一页");
+    nextStatus->SetFontID(FontID::Normal);
+    nextStatus->SetRegion({0.85,0.43,0.95,0.46});
+    nextStatus->SetAudioID(AudioID::click);
+    nextStatus->SetEnableBitmap(false);
+    nextStatus->SetEnable(false);
+    nextStatus->SetFillColor(Color(128, 128, 128, 128));
+    nextStatus->SetEnableFill(true);
+    nextStatus->SetFontScale(0.3f);
+    nextStatus->SetClickFunc([this]{
+        if(currentRegionState < RegionState::Complete)
+            currentRegionState=currentRegionState+1;
+        else currentRegionState = RegionState::NameAppear;
+        setRegionState((RegionState)currentRegionState);
+    });
+    EditingButtons.push_back(nextStatus);
+    RegisterEditableButton(std::static_pointer_cast<core::Button>(nameButton));
 }
 
 void NameScreen::Draw() {
@@ -100,7 +119,7 @@ void NameScreen::Draw() {
     if (fontPtr && *fontPtr) {
         (*fontPtr)->RenderText(currentName.name, regions[smallName].getx(), regions[smallName].gety(), 0.3f, SmallNameColor);
     }
-    nameButton.Draw();
+    nameButton->Draw();
     
     // 在最后绘制编辑覆盖层
     if (editModeEnabled) {
@@ -109,11 +128,21 @@ void NameScreen::Draw() {
 }
 
 void NameScreen::enter(int times) {
+    if(times==11){
+        currentIndex=0;
+        nameCount=1;
+        nameItems.clear();
+        nameItems.emplace_back("未知", 4, NameType::sword, Config::getInstance()->getInt(SPECIAL)-1);
+        buttons[SkipButton]->SetEnable(true);
+        buttons[AddNameButton]->SetEnable(true);
+        this->setRegionState(RegionState::NameAppear);
+        return;
+    }
     currentIndex=0;
     enterTime++;
     nameCount=times;
     if(nameItems.empty()) {
-        nameItems.emplace_back("未知", 4, NameType::bow, Config::getInstance()->getInt(SPECIAL)-1);
+        nameItems.emplace_back("未知", 4, NameType::sword, Config::getInstance()->getInt(SPECIAL)-1);
     }
     if(times>1)buttons[SkipButton]->SetEnable(true);
     else buttons[SkipButton]->SetEnable(false);
@@ -196,11 +225,11 @@ void NameScreen::changeName() {
     }
     buttons[TypeButton]->SetEnable(false);
     buttons[TypeButton]->SetRegion(regions[firstType]);
-    nameButton.SetRegion(regions[firstName]);
-    nameButton.SetName(currentName);
+    nameButton->SetRegion(regions[firstName]);
+    nameButton->SetName(currentName);
     int nowIndex=currentIndex;
     if(bools[boolconfig::nosmoothui]){
-        nameButton.SetRegion(regions[endName]);
+        nameButton->SetRegion(regions[endName]);
         if(currentName.type!=NameType::Unknow){
             if(buttons[TypeButton]) {
                 buttons[TypeButton]->SetEnable(true);
@@ -211,13 +240,13 @@ void NameScreen::changeName() {
     else{
         // 使用try-catch保护MoveTo调用
         try {
-            nameButton.MoveTo(regions[secondName],true,10,[nowIndex,this]{
+            nameButton->MoveTo(regions[secondName],true,10,[nowIndex,this]{
                 // 检查对象是否仍然有效
                 if(nowIndex!=currentIndex)return;
                 if(Screen::getCurrentScreen()->getID() != ScreenID::Name)return;
                 
                 try {
-                    nameButton.MoveTo(regions[endName],true,5);
+                    nameButton->MoveTo(regions[endName],true,5);
                     if(currentName.type!=NameType::Unknow){
                         if(buttons[TypeButton]) {
                             buttons[TypeButton]->SetEnable(true);
@@ -240,10 +269,10 @@ void NameScreen::changeName() {
             Log << Level::Error << "NameScreen::PaintStars - 异常: " << e.what() << op::endl;
         }
     }).detach();
-    if(currentName.star==3)core::Explorer::getInstance()->playAudio(AudioID::star3);
-    else if(currentName.star==4)core::Explorer::getInstance()->playAudio(AudioID::star4);
-    else if(currentName.star==5)core::Explorer::getInstance()->playAudio(AudioID::star5);
-    else core::Explorer::getInstance()->playAudio(AudioID::starfull);
+    if(currentName.star==3)core::Explorer::getInstance()->playAudio(AudioID::star3,0);
+    else if(currentName.star==4)core::Explorer::getInstance()->playAudio(AudioID::star4,0);
+    else if(currentName.star==5)core::Explorer::getInstance()->playAudio(AudioID::star5,0);
+    else core::Explorer::getInstance()->playAudio(AudioID::starfull,0);
     Log << Level::Info << "当前名字: " << currentName.name << ", 星级: " << currentName.star << ", 类型: " << static_cast<int>(currentName.type) << op::endl;
 }
 
@@ -255,6 +284,29 @@ void NameScreen::reloadButtonsRegion() {
     regions[endType] = Config::getInstance()->getRegion(UI_REGION_NAMESCREEN_TYPE_END);
     regions[smallName] = Config::getInstance()->getRegion(UI_REGION_NAMESCREEN_SMALLNAME);
     for(auto& b:buttons)b->resetRegion();
+}
+
+
+void NameScreen::setRegionState(RegionState mode) {
+    switch (mode) {
+        case RegionState::NameAppear: // 名字出现
+            nameButton->SetRegionStr(UI_REGION_NAMESCREEN_BIGNAME_BEGIN);
+            nameButton->SetEnable(true);
+            buttons[TypeButton]->SetEnable(false);
+            break;
+        case RegionState::TypeAppear: // 类型出现
+            nameButton->SetRegionStr(UI_REGION_NAMESCREEN_BIGNAME_MIDDLE);
+            buttons[TypeButton]->SetEnable(true);
+            buttons[TypeButton]->SetRegionStr(UI_REGION_NAMESCREEN_TYPE_BEGIN);
+            break;
+        case RegionState::Complete: // 完成
+            nameButton->SetRegionStr(UI_REGION_NAMESCREEN_BIGNAME_END);
+            buttons[TypeButton]->SetRegionStr(UI_REGION_NAMESCREEN_TYPE_END);
+            break;
+        default:
+            Log<<"Unknown region state mode: "<<mode<<op::endl;
+            break;
+    }
 }
 
 void NameButton::Draw(unsigned char alpha) {

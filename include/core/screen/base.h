@@ -43,6 +43,7 @@ protected:
     static std::vector<core::NameEntry> nameItems;
     static std::shared_ptr<core::Button> exitButton;
     static std::shared_ptr<core::Button> exitButtonEdit; // 编辑模式下的退出按钮
+    std::vector<std::shared_ptr<core::Button>> EditingButtons; // 用于主菜单的覆盖按钮
 
     // 淡入淡出相关成员
     static TransitionState transitionState;
@@ -74,6 +75,7 @@ public:
     virtual bool Click(int x, int y);
 
     virtual void Draw();
+    virtual void DrawEditOverlays();
     virtual void enter(int param)=0;
     virtual void exit(){};
     virtual bool HandleKeyInput(char key) { return false; } // 处理键盘输入，默认不处理
@@ -85,7 +87,6 @@ public:
     virtual void OnEditMouseDown(int x, int y);
     virtual void OnEditMouseMove(int x, int y);  
     virtual void OnEditMouseUp(int x, int y);
-    virtual void DrawEditOverlays();
     virtual void SaveButtonLayout();
 
     ScreenID getID() const { return ID; }

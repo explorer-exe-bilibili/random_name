@@ -91,6 +91,7 @@ void Screen::init() {
     exitButtonEdit->SetEnable(false);
     exitButtonEdit->SetEnableFill(true);
     exitButtonEdit->SetClickFunc([this](){
+        SaveButtonLayout();
         Screen::getCurrentScreen()->SetEditMode(false);
         Screen::SwitchToScreen(ScreenID::Settings);
         if(!Explorer::getInstance()->getAudio()->isMusicPlaying())
@@ -268,41 +269,19 @@ void Screen::reloadConfig() {
 void Screen::SetEditMode(bool enable) {
     editModeEnabled = enable;
     exitButtonEdit->SetEnable(enable);
+    for(auto& b:EditingButtons)if(b)b->SetEnable(enable);
     // 为所有按钮设置编辑模式
     for (auto& button : buttons) {
-        if (button) {
-            button->SetEditMode(enable);
-            if (enable) {
-                // 设置编辑完成回调
-                button->SetOnEditComplete([this](const core::Region& newRegion) {
-                    SaveButtonLayout();
-                });
-            }
-        }
+        if (button)button->SetEditMode(enable);
     }
     
     // 为额外的可编辑按钮设置编辑模式
     for (auto& button : additionalEditableButtons) {
-        if (button) {
-            button->SetEditMode(enable);
-            if (enable) {
-                // 设置编辑完成回调
-                button->SetOnEditComplete([this](const core::Region& newRegion) {
-                    SaveButtonLayout();
-                });
-            }
-        }
+        if (button)button->SetEditMode(enable);
     }
     
     // 也为exitButton设置编辑模式
-    if (exitButton) {
-        exitButton->SetEditMode(enable);
-        if (enable) {
-            exitButton->SetOnEditComplete([this](const core::Region& newRegion) {
-                SaveButtonLayout();
-            });
-        }
-    }
+    if (exitButton)exitButton->SetEditMode(enable);
     
     if (!enable) {
         selectedButton = nullptr;
@@ -344,7 +323,6 @@ void Screen::OnEditMouseMove(int x, int y) {
     core::Point point(x, y, false);
     
     // 所有按钮都尝试处理移动事件
-    exitButtonEdit->OnClick(point);
     if (exitButton) {
         exitButton->OnEditMouseMove(point);
     }
@@ -368,8 +346,12 @@ void Screen::OnEditMouseUp(int x, int y) {
     
     core::Point point(x, y, false);
 
-    exitButtonEdit->OnClick(point);
     // 所有按钮都尝试处理释放事件
+    exitButtonEdit->OnClick(point);
+
+    for(auto &b:EditingButtons){
+        if(b)b->OnClick(point);
+    }
 
     if (exitButton) {
         exitButton->OnEditMouseUp(point);
@@ -413,6 +395,9 @@ void Screen::DrawEditOverlays() {
     if (exitButtonEdit) {
         exitButtonEdit->Draw();
     }
+    for(auto &b:EditingButtons){
+        if(b)b->Draw();
+    }
 }
 
 void Screen::SaveButtonLayout() {
@@ -444,13 +429,8 @@ void Screen::RegisterEditableButton(std::shared_ptr<core::Button> button) {
             additionalEditableButtons.push_back(button);
             
             // 如果当前已经在编辑模式，为新按钮设置编辑模式
-            if (editModeEnabled) {
-                button->SetEditMode(true);
-                button->SetOnEditComplete([this](const core::Region& newRegion) {
-                    SaveButtonLayout();
-                });
-            }
-            
+            if (editModeEnabled) button->SetEditMode(true);
+
             Log << "Button registered for editing" << op::endl;
         }
     }

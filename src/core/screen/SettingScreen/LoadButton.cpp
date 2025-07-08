@@ -620,6 +620,9 @@ static nlohmann::json RollBack(std::string jsonpath) {
 }
 
 void SettingScreen::loadButtons() {
+    static bool loaded=false;
+    if(loaded)return;
+    loaded=true;
     s_buttons.clear();
     titles.clear();
     nlohmann::json jsonData;

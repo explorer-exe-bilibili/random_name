@@ -51,7 +51,8 @@ namespace core
         bool aspectRatio1to1=false; // 标识是否使用1:1比例
     public:
         Region() : x(0), y(0), xend(0), yend(0) {}
-        Region(double x, double y, double xend, double yend, bool Ratio=true) : x(x), y(y), xend(xend), yend(yend), screenRatio(Ratio) {
+        Region(double x, double y, double xend, double yend, bool Ratio=true, bool AspectRatio1to1=false) :
+         x(x), y(y), xend(xend), yend(yend), screenRatio(Ratio), aspectRatio1to1(AspectRatio1to1) {
             // 检测是否是1:1比例模式（通过yend <= 0判断）
             if (yend <= 0) {
                 aspectRatio1to1 = true;

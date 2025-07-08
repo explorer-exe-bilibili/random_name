@@ -24,6 +24,8 @@ public:
     float getxend() const;
     float getyend() const ;
 };
+
+
 class NameButton:public core::Button {
     std::vector<NameRegion> regions;
     std::wstring text;
@@ -35,6 +37,11 @@ public:
     void SetName(const core::NameEntry& name);
     static void setColor(const core::Color& newColor){color=newColor;}
     static void set6Color(const core::Color& newColor){star6Color=newColor;}
+};
+enum RegionState{
+    NameAppear,
+    TypeAppear,
+    Complete
 };
 class NameScreen : public Screen {
     core::Font** StarFont;
@@ -48,7 +55,8 @@ class NameScreen : public Screen {
     std::vector<core::Region> regions;
     core::NameEntry currentName;
     int currentIndex = 0;
-    NameButton nameButton;
+    std::shared_ptr<NameButton> nameButton;
+    int currentRegionState=0;
     void reloadButtonsRegion() override;
 public:
     NameScreen():Screen(ScreenID::Name){init();}
@@ -57,6 +65,7 @@ public:
     void enter(int mode) override;
     bool Click(int x, int y)override;
     static void setSmallNameColor(const core::Color& color) { SmallNameColor = color; }
+    void setRegionState(RegionState mode);
 private:
     void PaintStars() const;
     void changeName();

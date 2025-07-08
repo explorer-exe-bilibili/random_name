@@ -426,6 +426,7 @@ bool Button::IsPointInHandle(Point point, const EditHandle& handle) const {
 
 bool Button::OnEditMouseDown(Point point) {
     if (!editModeEnabled) return false;
+    if (!enable) return false; // 如果按钮不可用，忽略编辑事件
     
     // 检查是否点击了编辑手柄
     for (const auto& handle : editHandles) {
@@ -455,7 +456,8 @@ bool Button::OnEditMouseDown(Point point) {
 
 bool Button::OnEditMouseMove(Point point) {
     if (!editModeEnabled) return false;
-    
+    if (!enable) return false; // 如果按钮不可用，忽略编辑事件
+
     if (isDragging && currentEditMode != EditMode::None) {
         UpdateRegionFromEdit(point);
         UpdateEditHandles();
@@ -467,6 +469,7 @@ bool Button::OnEditMouseMove(Point point) {
 
 bool Button::OnEditMouseUp(Point point) {
     if (!editModeEnabled) return false;
+    if (!enable) return false; // 如果按钮不可用，忽略编辑事件
     
     if (isDragging && currentEditMode != EditMode::None) {
         Log << "Button " << text << " edit completed" << op::endl;
@@ -617,6 +620,7 @@ void Button::ClampRegion() {
 
 void Button::DrawEditOverlay() {
     if (!editModeEnabled) return;
+    if (!enable) return;
     Drawer* d = Drawer::getInstance();
     Color bc = editBorderColor; bc.a = 200;
     float bw = editBorderWidth;
@@ -636,4 +640,12 @@ void Button::DrawEditOverlay() {
             d->DrawSquare(h.region, hb, false);
         }
     }
+}
+
+void Button::resetRegion() {
+    if (!regionConfig.empty()) {
+        this->region = Config::getInstance()->getRegion(regionConfig);
+        this->MoveTo(this->region);
+    }
+    UpdateEditHandles();
 }

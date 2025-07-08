@@ -1,5 +1,6 @@
 #include "core/screen/SettingScreen.h"
 #include "core/screen/mainScreen.h"
+#include "core/screen/nameScreen.h"
 #include "core/log.h"
 
 #include "core/Config.h"
@@ -818,9 +819,11 @@ SettingButton::SettingButton(sItem item_, int number, int page)
         }
         button->SetText("编辑区域");
         button->SetClickFunc([this]{
-            screen::Screen::SwitchToScreen(item.screenID);
+            screen::Screen::SwitchToScreen(item.screenID,11);
             if(item.screenID==screen::ScreenID::MainMenu)
                 static_cast<screen::MainScreen*>(screen::Screen::getScreen(screen::ScreenID::MainMenu).get())->setMode(0);
+            else if(item.screenID==screen::ScreenID::Name)
+                static_cast<screen::NameScreen*>(screen::Screen::getScreen(screen::ScreenID::Name).get())->setRegionState(RegionState::NameAppear);
             screen::Screen::getCurrentScreen()->SetEditMode(true);
         });
     }

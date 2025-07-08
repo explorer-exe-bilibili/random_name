@@ -61,7 +61,7 @@ public:
             this->bitmapPtr = core::Explorer::getInstance()->getBitmapPtr(id);
         }
     }
-    void SetRegion(const Region& region) {this->region = region; UpdateEditHandles();}
+    void SetRegion(const Region& region) {MoveTo(region); UpdateEditHandles();}
     void SetRegionStr(const std::string& name){this->regionConfig=name;resetRegion();}
     void SetFontID(FontID id);
     void SetAudioID(AudioID id) {this->audioid = id;}
@@ -93,7 +93,7 @@ public:
     }
     EditMode GetEditModeAt(Point point) const;
 
-    void resetRegion() {if(!regionConfig.empty())this->region=Config::getInstance()->getRegion(regionConfig); UpdateEditHandles();}
+    void resetRegion();
     Region GetRegion() const { return region; }
     std::string GetText() const { return text; }
 protected:
