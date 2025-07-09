@@ -112,7 +112,7 @@ void MainScreen::init() {
     Region o_region(Config::getInstance()->getRegion(UI_REGION_MAINMENU_OVERLAY));
     for(auto& b:overlays){
         int t=tmp-mode;
-        b->MoveTo({o_region.getOriginX()+t,o_region.getOriginY(),o_region.getOriginXEnd()+t,o_region.getOriginYEnd(),o_region.getRatio()});
+        b->MoveTo({o_region.getOriginX()+t,o_region.getOriginY(),o_region.getOriginXEnd()+t,o_region.getOriginYEnd(),o_region.isScreenRatio()});
         tmp++;
     }
     reloadButtonsRegion();
@@ -143,7 +143,7 @@ void MainScreen::changeMode() {
     Region o_region(Config::getInstance()->getRegion(UI_REGION_MAINMENU_OVERLAY));
     for(auto& b:overlays){
         int t=tmp-mode;
-        b->MoveTo({o_region.getOriginX()+t,o_region.getOriginY(),o_region.getOriginXEnd()+t,o_region.getOriginYEnd(),o_region.getRatio()}
+        b->MoveTo({o_region.getOriginX()+t,o_region.getOriginY(),o_region.getOriginXEnd()+t,o_region.getOriginYEnd(),o_region.isScreenRatio()}
             ,true,Config::getInstance()->getInt(EXCHANGE_SPEED)
         ,[&b,t]{
             Log<< "Overlay "<< t << op::endl;
@@ -175,14 +175,14 @@ void MainScreen::reloadButtonsRegion() {
     int tmp=0;
     for(auto& b:overlays){
         int t=tmp-mode;
-        b->MoveTo({o_region.getOriginX()+t,o_region.getOriginY(),o_region.getOriginXEnd()+t,o_region.getOriginYEnd(),o_region.getRatio()});
+        b->MoveTo({o_region.getOriginX()+t,o_region.getOriginY(),o_region.getOriginXEnd()+t,o_region.getOriginYEnd(),o_region.isScreenRatio()});
         tmp++;
     }
     Region region(Config::getInstance()->getRegion(UI_REGION_MAINMENU_CHECK));
     float x=region.getOriginX();
     float tmp2=(region.getOriginXEnd()-x)/(buttons.size()-o1);
     for(int i=0;i<buttons.size()-o1;i++){
-        buttons[i+o1]->SetRegion({x,region.getOriginY(),x+tmp2*0.8,region.getOriginYEnd(),region.getRatio()});
+        buttons[i+o1]->SetRegion({x,region.getOriginY(),x+tmp2*0.8,region.getOriginYEnd(),region.isScreenRatio()});
         x+=tmp2;
     }
 }

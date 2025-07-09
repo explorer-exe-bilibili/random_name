@@ -53,12 +53,14 @@ public:
     void SetBitmap(const std::string& bitmapID){
         if(core::Explorer::getInstance()->isBitmapLoaded(bitmapID)) {
             this->bitmapPtr = core::Explorer::getInstance()->getBitmapPtr(bitmapID);
+            UpdateImageAspectRatio();
         }
     }
     void SetBitmap(BitmapID id) {
         this->bitmapid = id;
         if(core::Explorer::getInstance()->isBitmapLoaded(id)) {
             this->bitmapPtr = core::Explorer::getInstance()->getBitmapPtr(id);
+            UpdateImageAspectRatio();
         }
     }
     void SetRegion(const Region& region) {MoveTo(region); UpdateEditHandles();}
@@ -92,6 +94,12 @@ public:
         Config::getInstance()->set(this->regionConfig, this->region);
     }
     EditMode GetEditModeAt(Point point) const;
+
+    // 图像原比例吸附功能
+    void SetAspectRatioSnap(bool enable) {enableAspectRatioSnap = enable;}
+    bool IsAspectRatioSnapEnabled() const {return enableAspectRatioSnap;}
+    void SetAspectRatioSnapThreshold(float threshold) {aspectRatioSnapThreshold = threshold;}
+    float GetImageAspectRatio() const {return originalImageAspectRatio;}
 
     void resetRegion();
     Region GetRegion() const { return region; }
@@ -140,10 +148,23 @@ protected:
     std::function<void(const Region&)> onEditComplete;
     float minWidth = 10.0f;
     float minHeight = 10.0f;
+    
+    // 图像原比例吸附相关成员
+    bool enableAspectRatioSnap = true; // 默认开启吸附功能
+    static float aspectRatioSnapThreshold; // 吸附阈值，当前比例与原始比例差值小于此值时触发吸附
+    float originalImageAspectRatio = 1.0f; // 图像原始宽高比
+    bool hasValidImageAspectRatio = false; // 是否有有效的图像宽高比
+
     // 编辑模式辅助方法
     void UpdateEditHandles();
     void UpdateRegionFromEdit(Point currentPoint);
     bool IsPointInHandle(Point point, const EditHandle& handle) const;
     void ClampRegion();
+    
+private:
+    // 图像原比例吸附辅助方法
+    void UpdateImageAspectRatio();
+    bool ShouldSnapToAspectRatio(float currentAspectRatio) const;
+    void ApplyAspectRatioSnap(Region& targetRegion) const;
 };
 }

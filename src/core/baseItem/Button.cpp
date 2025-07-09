@@ -10,8 +10,12 @@
 
 using namespace core;
 
+float Button::aspectRatioSnapThreshold = 0.2f;
+
 Button::Button(const std::string& text, FontID fontid, const Region& region, Bitmap** bitmapPtr) :
- text(text), fontid(fontid), region(region), bitmapPtr(bitmapPtr), fontPtr(nullptr) {}
+ text(text), fontid(fontid), region(region), bitmapPtr(bitmapPtr), fontPtr(nullptr) {
+     UpdateImageAspectRatio();
+ }
 
 Button::Button(const Button& button) :
     region(button.region),
@@ -486,7 +490,7 @@ void Button::UpdateRegionFromEdit(Point cur) {
     float dx = cur.getx() - dragStartPoint.getx();
     float dy = cur.gety() - dragStartPoint.gety();
     float dxr = dx, dyr = dy;
-    if (region.getRatio()) { dxr = dx/WindowInfo.width; dyr = dy/WindowInfo.height; }
+    if (region.isScreenRatio()) { dxr = dx/WindowInfo.width; dyr = dy/WindowInfo.height; }
     Region nr = originalRegion;
     
     // 检查是否是1:1比例模式
@@ -561,13 +565,23 @@ void Button::UpdateRegionFromEdit(Point cur) {
         default: break;
     }
     
+    // 图像原比例吸附逻辑（仅在非1:1比例模式下应用）
+    if (!was1to1 && enableAspectRatioSnap && hasValidImageAspectRatio) {
+        float currentAspectRatio = nr.getRatio(); // 使用像素比例
+        if (ShouldSnapToAspectRatio(currentAspectRatio)) {
+            ApplyAspectRatioSnap(nr);
+            Log << Level::Debug << "Button " << text << " snapped to original aspect ratio: " 
+                << originalImageAspectRatio << op::endl;
+        }
+    }
+    
     // 确保保持1:1比例标志
     if (was1to1) {
         nr.setAspectRatio1to1(true);
     }
     
     float minW = minWidth, minH = minHeight;
-    if (region.getRatio()) { minW = minWidth/WindowInfo.width; minH = minHeight/WindowInfo.height; }
+    if (region.isScreenRatio()) { minW = minWidth/WindowInfo.width; minH = minHeight/WindowInfo.height; }
     
     // 对于1:1比例，确保最小尺寸是正方形
     if (was1to1) {
@@ -602,8 +616,8 @@ void Button::UpdateRegionFromEdit(Point cur) {
 }
 
 void Button::ClampRegion() {
-    float maxX = region.getRatio()?1.0f:WindowInfo.width;
-    float maxY = region.getRatio()?1.0f:WindowInfo.height;
+    float maxX = region.isScreenRatio()?1.0f:WindowInfo.width;
+    float maxY = region.isScreenRatio()?1.0f:WindowInfo.height;
     if (region.getOriginX() < 0) {
         float off = -region.getOriginX(); region.setx(0); region.setxend(region.getOriginXEnd()+off);
     }
@@ -622,7 +636,22 @@ void Button::DrawEditOverlay() {
     if (!editModeEnabled) return;
     if (!enable) return;
     Drawer* d = Drawer::getInstance();
-    Color bc = editBorderColor; bc.a = 200;
+    
+    // 根据吸附状态选择边框颜色
+    Color bc = editBorderColor;
+    if (enableAspectRatioSnap && hasValidImageAspectRatio) {
+        float currentAspectRatio = region.getRatio(); // 使用像素比例
+        if (ShouldSnapToAspectRatio(currentAspectRatio)) {
+            // 吸附激活时使用绿色边框
+            bc = Color(0, 255, 0, 200);
+        } else {
+            // 吸附启用但未激活时使用橙色边框
+            bc = Color(255, 165, 0, 200);
+        }
+    } else {
+        bc.a = 200;
+    }
+    
     float bw = editBorderWidth;
     Region lb(region.getx()-bw/2, region.gety()-bw, region.getx()+bw/2, region.getyend()+bw, false);
     Region rb(region.getxend()-bw/2, region.gety()-bw, region.getxend()+bw/2, region.getyend()+bw, false);
@@ -648,4 +677,148 @@ void Button::resetRegion() {
         this->MoveTo(this->region);
     }
     UpdateEditHandles();
+}
+
+// 图像原比例吸附功能实现
+void Button::UpdateImageAspectRatio() {
+    hasValidImageAspectRatio = false;
+    originalImageAspectRatio = 1.0f;
+
+    if (bitmapPtr && *bitmapPtr) {
+        unsigned int width = (*bitmapPtr)->getWidth();
+        unsigned int height = (*bitmapPtr)->getHeight();
+        if (width > 0 && height > 0) {
+            originalImageAspectRatio = static_cast<float>(width) / static_cast<float>(height);
+            hasValidImageAspectRatio = true;
+            Log << Level::Info << "Button " << text << " image aspect ratio updated: " 
+                << originalImageAspectRatio << " (" << width << "x" << height << ")" << op::endl;
+        }
+    } else if (bitmapid != BitmapID::Unknown && core::Explorer::getInstance()->isBitmapLoaded(bitmapid)) {
+        // 尝试从bitmapid获取bitmap
+        Bitmap** tmpPtr = core::Explorer::getInstance()->getBitmapPtr(bitmapid);
+        if (tmpPtr && *tmpPtr) {
+            unsigned int width = (*tmpPtr)->getWidth();
+            unsigned int height = (*tmpPtr)->getHeight();
+            if (width > 0 && height > 0) {
+                originalImageAspectRatio = static_cast<float>(width) / static_cast<float>(height);
+                hasValidImageAspectRatio = true;
+                Log << Level::Info << "Button " << text << " image aspect ratio updated from ID: " 
+                    << originalImageAspectRatio << " (" << width << "x" << height << ")" << op::endl;
+            }
+        }
+    }
+}
+
+bool Button::ShouldSnapToAspectRatio(float currentAspectRatio) const {
+    if (!enableAspectRatioSnap || !hasValidImageAspectRatio) {
+        return false;
+    }
+    
+    float diff = std::abs(currentAspectRatio - originalImageAspectRatio);
+    return diff <= aspectRatioSnapThreshold;
+}
+
+void Button::ApplyAspectRatioSnap(Region& targetRegion) const {
+    if (!hasValidImageAspectRatio) {
+        return;
+    }
+    
+    float currentWidth = targetRegion.getWidth();   // 像素宽度
+    float currentHeight = targetRegion.getHeight(); // 像素高度
+    
+    // 根据编辑模式确定调整策略
+    switch (currentEditMode) {
+        case EditMode::ResizeTopLeft:
+            // 左上角调整：保持右下角不变，根据宽度调整高度
+            {
+                float targetHeight = currentWidth / originalImageAspectRatio;
+                float newTop = targetRegion.getyend() - targetHeight;
+                targetRegion.sety(targetRegion.isScreenRatio() ? newTop / WindowInfo.height : newTop);
+            }
+            break;
+        case EditMode::ResizeTopRight:
+            // 右上角调整：保持左下角不变，根据宽度调整高度
+            {
+                float targetHeight = currentWidth / originalImageAspectRatio;
+                float newTop = targetRegion.getyend() - targetHeight;
+                targetRegion.sety(targetRegion.isScreenRatio() ? newTop / WindowInfo.height : newTop);
+            }
+            break;
+        case EditMode::ResizeBottomLeft:
+            // 左下角调整：保持右上角不变，根据宽度调整高度
+            {
+                float targetHeight = currentWidth / originalImageAspectRatio;
+                float newBottom = targetRegion.gety() + targetHeight;
+                targetRegion.setyend(targetRegion.isScreenRatio() ? newBottom / WindowInfo.height : newBottom);
+            }
+            break;
+        case EditMode::ResizeBottomRight:
+            // 右下角调整：保持左上角不变，根据宽度调整高度
+            {
+                float targetHeight = currentWidth / originalImageAspectRatio;
+                float newBottom = targetRegion.gety() + targetHeight;
+                targetRegion.setyend(targetRegion.isScreenRatio() ? newBottom / WindowInfo.height : newBottom);
+            }
+            break;
+        case EditMode::ResizeLeft:
+            // 左边调整：根据新宽度计算高度，保持中心位置
+            {
+                float targetHeight = currentWidth / originalImageAspectRatio;
+                float centerY = (targetRegion.gety() + targetRegion.getyend()) * 0.5f;
+                float halfHeight = targetHeight * 0.5f;
+                if (targetRegion.isScreenRatio()) {
+                    halfHeight /= WindowInfo.height;
+                }
+                targetRegion.sety(centerY - halfHeight);
+                targetRegion.setyend(centerY + halfHeight);
+            }
+            break;
+        case EditMode::ResizeRight:
+            // 右边调整：根据新宽度计算高度，保持中心位置
+            {
+                float targetHeight = currentWidth / originalImageAspectRatio;
+                float centerY = (targetRegion.gety() + targetRegion.getyend()) * 0.5f;
+                float halfHeight = targetHeight * 0.5f;
+                if (targetRegion.isScreenRatio()) {
+                    halfHeight /= WindowInfo.height;
+                }
+                targetRegion.sety(centerY - halfHeight);
+                targetRegion.setyend(centerY + halfHeight);
+            }
+            break;
+        case EditMode::ResizeTop:
+            // 上边调整：根据当前高度计算应有的宽度，保持水平中心
+            {
+                float targetWidth = currentHeight * originalImageAspectRatio;
+                float centerX = (targetRegion.getx() + targetRegion.getxend()) * 0.5f;
+                float halfWidth = targetWidth * 0.5f;
+                if (targetRegion.isScreenRatio()) {
+                    halfWidth /= WindowInfo.width;
+                }
+                targetRegion.setx(centerX - halfWidth);
+                targetRegion.setxend(centerX + halfWidth);
+            }
+            break;
+        case EditMode::ResizeBottom:
+            // 下边调整：根据当前高度计算应有的宽度，保持水平中心
+            {
+                float targetWidth = currentHeight * originalImageAspectRatio;
+                float centerX = (targetRegion.getx() + targetRegion.getxend()) * 0.5f;
+                float halfWidth = targetWidth * 0.5f;
+                if (targetRegion.isScreenRatio()) {
+                    halfWidth /= WindowInfo.width;
+                }
+                targetRegion.setx(centerX - halfWidth);
+                targetRegion.setxend(centerX + halfWidth);
+            }
+            break;
+        default:
+            // 默认调整底部
+            {
+                float targetHeight = currentWidth / originalImageAspectRatio;
+                float newBottom = targetRegion.gety() + targetHeight;
+                targetRegion.setyend(targetRegion.isScreenRatio() ? newBottom / WindowInfo.height : newBottom);
+            }
+            break;
+    }
 }

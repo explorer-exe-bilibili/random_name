@@ -88,6 +88,10 @@ public:
     virtual void OnEditMouseMove(int x, int y);  
     virtual void OnEditMouseUp(int x, int y);
     virtual void SaveButtonLayout();
+    
+    // 图像原比例吸附功能
+    virtual void ToggleAspectRatioSnap(); // 切换所有按钮的图像原比例吸附功能
+    virtual void SetAspectRatioSnapForAllButtons(bool enable); // 设置所有按钮的图像原比例吸附功能
 
     ScreenID getID() const { return ID; }
     static std::shared_ptr<Screen> getCurrentScreen() { return currentScreen; }    // 屏幕管理系统功能

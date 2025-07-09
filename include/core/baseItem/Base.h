@@ -68,7 +68,8 @@ namespace core
         float getyend() const;
         float getWidth() const {return getxend()-getx();}
         float getHeight() const {return getyend()-gety();}
-        bool getRatio() const { return screenRatio; }
+        float getRatio() const { return getWidth() / getHeight(); }
+        bool isScreenRatio() const { return screenRatio; }
         bool isAspectRatio1to1() const { return aspectRatio1to1; }
         
         void setx(float x) { this->x = x; }
@@ -142,7 +143,7 @@ namespace core
         
         float getx() const { return screenRatio ? x * WindowInfo.width : x; }
         float gety() const { return screenRatio ? y * WindowInfo.height : y; }
-        bool getRatio() const { return screenRatio; }
+        bool isScreenRatio() const { return screenRatio; }
         
         void setx(float x) { this->x = x; }
         void sety(float y) { this->y = y; }
@@ -165,7 +166,7 @@ namespace core
         
         float getw() const { return screenRatio ? width * WindowInfo.width : width; }
         float geth() const { return screenRatio ? height * WindowInfo.height : height; }
-        bool getRatio() const { return screenRatio; }
+        bool isScreenRatio() const { return screenRatio; }
         
         void setw(float w) { width = w; }
         void seth(float h) { height = h; }

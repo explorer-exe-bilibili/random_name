@@ -211,6 +211,15 @@ bool SettingScreen::Click(int x, int y) {
 bool SettingScreen::HandleKeyInput(char key) {
     Log << Level::Debug << "SettingScreen::HandleKeyInput called with key: " << (int)key << op::endl;
     
+    // 编辑模式下的快捷键
+    if (editModeEnabled) {
+        // 'A' 或 'a' 键切换图像原比例吸附功能
+        if (key == 'A' || key == 'a') {
+            ToggleAspectRatioSnap();
+            return true;
+        }
+    }
+    
     // 将键盘输入传递给正在编辑的文本框
     for(auto& button : s_buttons) {
         if(button && button->HandleKeyInput(key)) {

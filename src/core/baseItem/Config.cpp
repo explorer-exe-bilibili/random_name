@@ -303,7 +303,7 @@ Region Config::getRegion(const std::string& name, const RegionName& category, co
                     float y = fallbackJson.value("y", actualDefaultValue.getOriginY());
                     float xend = fallbackJson.value("xend", actualDefaultValue.getOriginXEnd());
                     float yend = fallbackJson.value("yend", actualDefaultValue.getOriginYEnd());
-                    bool screenRatio = fallbackJson.value("screenRatio", actualDefaultValue.getRatio());
+                    bool screenRatio = fallbackJson.value("screenRatio", actualDefaultValue.isScreenRatio());
                     bool aspectRatio1to1 = fallbackJson.value("aspectRatio1to1", false);
                     Region fallbackRegion(x, y, xend, yend, screenRatio, aspectRatio1to1);
                     Log << Level::Info << "Using SMALL_WINDOW fallback region for " << name << op::endl;
@@ -318,7 +318,7 @@ Region Config::getRegion(const std::string& name, const RegionName& category, co
         float y = regionJson.value("y", actualDefaultValue.getOriginY());
         float xend = regionJson.value("xend", actualDefaultValue.getOriginXEnd());
         float yend = regionJson.value("yend", actualDefaultValue.getOriginYEnd());
-        bool screenRatio = regionJson.value("screenRatio", actualDefaultValue.getRatio());
+        bool screenRatio = regionJson.value("screenRatio", actualDefaultValue.isScreenRatio());
         bool aspectRatio1to1 = regionJson.value("aspectRatio1to1", false);
         Region region(x, y, xend, yend, screenRatio, aspectRatio1to1);
         return region;
@@ -337,7 +337,7 @@ Region Config::getRegion(const std::string& name, const RegionName& category, co
                     float y = fallbackJson.value("y", actualDefaultValue.getOriginY());
                     float xend = fallbackJson.value("xend", actualDefaultValue.getOriginXEnd());
                     float yend = fallbackJson.value("yend", actualDefaultValue.getOriginYEnd());
-                    bool screenRatio = fallbackJson.value("screenRatio", actualDefaultValue.getRatio());
+                    bool screenRatio = fallbackJson.value("screenRatio", actualDefaultValue.isScreenRatio());
                     bool aspectRatio1to1 = fallbackJson.value("aspectRatio1to1", false);
                     Region fallbackRegion(x, y, xend, yend, screenRatio, aspectRatio1to1);
                     Log << Level::Info << "Using SMALL_WINDOW fallback region for " << name << " after parse error" << op::endl;
@@ -535,14 +535,14 @@ void Config::set(const std::string& name, const Region& region) {
             {"y", region.getOriginY()},
             {"xend", region.getOriginXEnd()},
             {"yend", region.getOriginYEnd()},
-            {"screenRatio", region.getRatio()},
+            {"screenRatio", region.isScreenRatio()},
             {"aspectRatio1to1", region.isAspectRatio1to1()}
         };
         
         setJson(key, regionJson);
         Log << Level::Info << "Set region " << key << ": (" << region.getOriginX() << "," << region.getOriginY() 
               << ") to (" << region.getOriginXEnd() << "," << region.getOriginYEnd() << ")"
-              << " with screenRatio: " << region.getRatio() << " and aspectRatio1to1: " << region.isAspectRatio1to1() << op::endl;
+              << " with screenRatio: " << region.isScreenRatio() << " and aspectRatio1to1: " << region.isAspectRatio1to1() << op::endl;
     } catch (const std::exception& e) {
         Log << Level::Error << "Error setting region " << key << ": " << e.what() << op::endl;
     }
@@ -628,7 +628,7 @@ void Config::setifno(const std::string& name, const Region& region) {
         {"y", region.getOriginY()},
         {"xend", region.getOriginXEnd()},
         {"yend", region.getOriginYEnd()},
-        {"screenRatio", region.getRatio()},
+        {"screenRatio", region.isScreenRatio()},
         {"aspectRatio1to1", region.isAspectRatio1to1()}
     };
     defaultValues[key] = regionJson.dump();
@@ -836,7 +836,7 @@ bool Config::readFromFile() {
                             {"y", region.getOriginY()},
                             {"xend", region.getOriginXEnd()},
                             {"yend", region.getOriginYEnd()},
-                            {"screenRatio", region.getRatio()}
+                            {"screenRatio", region.isScreenRatio()}
                         };
                         value = regionJson.dump();
                         

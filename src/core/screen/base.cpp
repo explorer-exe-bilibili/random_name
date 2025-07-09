@@ -467,3 +467,48 @@ void Screen::ClearEditableButtons() {
     
     Log << "All additional editable buttons cleared" << op::endl;
 }
+
+// 图像原比例吸附功能实现
+void Screen::ToggleAspectRatioSnap() {
+    if (!editModeEnabled) return;
+    
+    // 检查第一个按钮的吸附状态，用作基准
+    bool currentState = false;
+    if (!buttons.empty() && buttons[0]) {
+        currentState = buttons[0]->IsAspectRatioSnapEnabled();
+    }
+    
+    // 切换状态
+    bool newState = !currentState;
+    SetAspectRatioSnapForAllButtons(newState);
+    
+    Log << Level::Info << "Aspect ratio snap toggled: " << (newState ? "ON" : "OFF") << op::endl;
+}
+
+void Screen::SetAspectRatioSnapForAllButtons(bool enable) {
+    if (!editModeEnabled) return;
+    
+    // 设置所有普通按钮的吸附状态
+    for (auto& button : buttons) {
+        if (button) {
+            button->SetAspectRatioSnap(enable);
+        }
+    }
+    
+    // 设置所有额外可编辑按钮的吸附状态
+    for (auto& button : additionalEditableButtons) {
+        if (button) {
+            button->SetAspectRatioSnap(enable);
+        }
+    }
+    
+    // 也设置退出按钮的吸附状态
+    if (exitButton) {
+        exitButton->SetAspectRatioSnap(enable);
+    }
+    if (exitButtonEdit) {
+        exitButtonEdit->SetAspectRatioSnap(enable);
+    }
+    
+    Log << Level::Info << "Aspect ratio snap set for all buttons: " << (enable ? "ON" : "OFF") << op::endl;
+}

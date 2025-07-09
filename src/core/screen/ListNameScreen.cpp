@@ -69,14 +69,14 @@ void ListNameScreen::enter(int) {
                 // SwitchToScreenWithFade(ScreenID::NameInfo,i,0.5f);
             // });
             //TODO:名字详情页面
-            button->SetRegion({baseRegion.getOriginX() + i * baseRegion.getOriginW()+1, baseRegion.getOriginY(), baseRegion.getOriginXEnd() + i * baseRegion.getOriginW() + 1, baseRegion.getOriginYEnd(),baseRegion.getRatio()});
+            button->SetRegion({baseRegion.getOriginX() + i * baseRegion.getOriginW()+1, baseRegion.getOriginY(), baseRegion.getOriginXEnd() + i * baseRegion.getOriginW() + 1, baseRegion.getOriginYEnd(),baseRegion.isScreenRatio()});
         }
     }
     std::thread([this]{
         int index = 0;
         for(auto& button : m_buttons) {
             if(button) {
-                Region region = {(index+1) * baseRegion.getOriginW(), baseRegion.getOriginY(), (index+2) * baseRegion.getOriginW(), baseRegion.getOriginYEnd(),baseRegion.getRatio()};
+                Region region = {(index+1) * baseRegion.getOriginW(), baseRegion.getOriginY(), (index+2) * baseRegion.getOriginW(), baseRegion.getOriginYEnd(),baseRegion.isScreenRatio()};
                 button->MoveTo(region, true, 30.0f);
                 Log<<"Moving button "<<index<<" region: "<<region<<op::endl;
             }
@@ -121,7 +121,7 @@ void ListNameButton::Draw() {
         (*bitmapPtr)->Draw(region);
     }
     if (enableText && fontPtr && *fontPtr) {
-        Region textRegion={region.getOriginX(), region.getOriginY() + 0.1f, region.getOriginXEnd(), region.getOriginYEnd() - 0.2f, region.getRatio()};
+        Region textRegion={region.getOriginX(), region.getOriginY() + 0.1f, region.getOriginXEnd(), region.getOriginYEnd() - 0.2f, region.isScreenRatio()};
         (*fontPtr)->RenderTextVerticalBetween(text, textRegion, fontScale,color);
     }
 }
