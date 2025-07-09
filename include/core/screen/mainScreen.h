@@ -18,5 +18,5 @@ class MainScreen : public Screen {
         void setMode(int mode) { this->mode = mode; changeMode(); }
     private:
         void changeMode(); 
-    };
+};
 } // namespace screen

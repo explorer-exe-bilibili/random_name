@@ -93,6 +93,7 @@ void Screen::init() {
     exitButtonEdit->SetClickFunc([this](){
         SaveButtonLayout();
         Screen::getCurrentScreen()->SetEditMode(false);
+        if (onEditCompleteCallback) onEditCompleteCallback();
         Screen::SwitchToScreen(ScreenID::Settings);
         if(!Explorer::getInstance()->getAudio()->isMusicPlaying())
             Explorer::getInstance()->playAudio(AudioID::bgm);

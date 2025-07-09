@@ -115,6 +115,7 @@ void MainScreen::init() {
         b->MoveTo({o_region.getOriginX()+t,o_region.getOriginY(),o_region.getOriginXEnd()+t,o_region.getOriginYEnd(),o_region.isScreenRatio()});
         tmp++;
     }
+    onEditCompleteCallback=[this]{changeMode();};
     reloadButtonsRegion();
 }
 

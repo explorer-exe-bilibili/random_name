@@ -94,6 +94,7 @@ void NameScreen::init() {
     nextStatus->SetEnableFill(true);
     nextStatus->SetFontScale(0.3f);
     nextStatus->SetClickFunc([this]{
+        SaveButtonLayout();
         if(currentRegionState < RegionState::Complete)
             currentRegionState=currentRegionState+1;
         else currentRegionState = RegionState::NameAppear;
@@ -101,6 +102,7 @@ void NameScreen::init() {
     });
     EditingButtons.push_back(nextStatus);
     RegisterEditableButton(std::static_pointer_cast<core::Button>(nameButton));
+    onEditCompleteCallback=[this]{reloadButtonsRegion();};
 }
 
 void NameScreen::Draw() {
@@ -133,6 +135,8 @@ void NameScreen::enter(int times) {
         nameCount=1;
         nameItems.clear();
         nameItems.emplace_back("未知", 4, NameType::sword, Config::getInstance()->getInt(SPECIAL)-1);
+        nameButton->SetName(nameItems[0]);
+        buttons[TypeButton]->SetBitmap(BitmapID::Weapon_swordBg);
         buttons[SkipButton]->SetEnable(true);
         buttons[AddNameButton]->SetEnable(true);
         this->setRegionState(RegionState::NameAppear);

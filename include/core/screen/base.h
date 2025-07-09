@@ -56,6 +56,7 @@ protected:
     // 编辑模式相关成员
     bool editModeEnabled = false;
     std::shared_ptr<core::Button> selectedButton = nullptr;
+    std::function<void()> onEditCompleteCallback = nullptr;
 
     // 管理额外按钮的方法
     void RegisterEditableButton(std::shared_ptr<core::Button> button);
