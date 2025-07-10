@@ -101,6 +101,24 @@ public:
     void SetAspectRatioSnapThreshold(float threshold) {aspectRatioSnapThreshold = threshold;}
     float GetImageAspectRatio() const {return originalImageAspectRatio;}
 
+    // 居中自动吸附功能
+    void SetCenterSnap(bool enable) {enableCenterSnap = enable;}
+    bool IsCenterSnapEnabled() const {return enableCenterSnap;}
+    void SetCenterSnapThreshold(float threshold) {centerSnapThreshold = threshold;}
+
+    // 自定义吸附点功能
+    void AddCustomSnapX(float x);                  // 添加自定义X轴吸附点
+    void AddCustomSnapY(float y);                  // 添加自定义Y轴吸附点
+    void RemoveCustomSnapX(float x);               // 移除指定的X轴吸附点
+    void RemoveCustomSnapY(float y);               // 移除指定的Y轴吸附点
+    void ClearCustomSnapX();                       // 清除所有X轴吸附点
+    void ClearCustomSnapY();                       // 清除所有Y轴吸附点
+    void SetCustomSnap(bool enable) {enableCustomSnap = enable;}
+    bool IsCustomSnapEnabled() const {return enableCustomSnap;}
+    void SetCustomSnapThreshold(float threshold) {customSnapThreshold = threshold;}
+    const std::vector<float>& GetCustomSnapX() const {return customSnapX;}
+    const std::vector<float>& GetCustomSnapY() const {return customSnapY;}
+    
     void resetRegion();
     Region GetRegion() const { return region; }
     std::string GetText() const { return text; }
@@ -150,10 +168,22 @@ protected:
     float minHeight = 10.0f;
     
     // 图像原比例吸附相关成员
-    bool enableAspectRatioSnap = true; // 默认开启吸附功能
+    static bool enableAspectRatioSnap; // 默认开启吸附功能
     static float aspectRatioSnapThreshold; // 吸附阈值，当前比例与原始比例差值小于此值时触发吸附
     float originalImageAspectRatio = 1.0f; // 图像原始宽高比
     bool hasValidImageAspectRatio = false; // 是否有有效的图像宽高比
+
+    // 居中自动吸附相关成员
+    static bool enableCenterSnap; // 是否启用居中吸附功能
+    static float centerSnapThreshold; // 居中吸附阈值（像素）
+    bool isSnappedToCenter = false; // 当前是否已吸附到中心
+
+    // 自定义吸附点相关成员
+    static bool enableCustomSnap; // 是否启用自定义吸附功能
+    static float customSnapThreshold; // 自定义吸附阈值（像素）
+    std::vector<float> customSnapX; // 自定义X轴吸附点列表
+    std::vector<float> customSnapY; // 自定义Y轴吸附点列表
+    bool isSnappedToCustom = false; // 当前是否已吸附到自定义点
 
     // 编辑模式辅助方法
     void UpdateEditHandles();
@@ -166,5 +196,13 @@ private:
     void UpdateImageAspectRatio();
     bool ShouldSnapToAspectRatio(float currentAspectRatio) const;
     void ApplyAspectRatioSnap(Region& targetRegion) const;
+
+    // 居中自动吸附辅助方法
+    bool ShouldSnapToCenter(const Region& targetRegion) const;
+    void ApplyCenterSnap(Region& targetRegion) const;
+
+    // 自定义吸附点辅助方法
+    bool ShouldSnapToCustomPoints(const Region& targetRegion, float& snapX, float& snapY) const;
+    void ApplyCustomSnap(Region& targetRegion, float snapX, float snapY) const;
 };
 }

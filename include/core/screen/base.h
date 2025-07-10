@@ -93,6 +93,17 @@ public:
     // 图像原比例吸附功能
     virtual void ToggleAspectRatioSnap(); // 切换所有按钮的图像原比例吸附功能
     virtual void SetAspectRatioSnapForAllButtons(bool enable); // 设置所有按钮的图像原比例吸附功能
+    
+    // 居中自动吸附功能
+    virtual void ToggleCenterSnap(); // 切换所有按钮的居中自动吸附功能
+    virtual void SetCenterSnapForAllButtons(bool enable); // 设置所有按钮的居中自动吸附功能
+
+    // 自定义吸附点功能
+    virtual void ToggleCustomSnap(); // 切换所有按钮的自定义吸附功能
+    virtual void SetCustomSnapForAllButtons(bool enable); // 设置所有按钮的自定义吸附功能
+    virtual void AddCustomSnapXForAllButtons(float x); // 为所有按钮添加X轴吸附点
+    virtual void AddCustomSnapYForAllButtons(float y); // 为所有按钮添加Y轴吸附点
+    virtual void ClearCustomSnapForAllButtons(); // 清除所有按钮的自定义吸附点
 
     ScreenID getID() const { return ID; }
     static std::shared_ptr<Screen> getCurrentScreen() { return currentScreen; }    // 屏幕管理系统功能

@@ -7,10 +7,16 @@
 #include <thread>
 #include <chrono>
 #include <algorithm>
+#include <vector>
 
 using namespace core;
 
+bool Button::enableAspectRatioSnap = true; // 默认开启吸附功能
 float Button::aspectRatioSnapThreshold = 0.2f;
+bool Button::enableCenterSnap = true; // 是否启用居中吸附功能
+float Button::centerSnapThreshold = 10.0f; // 居中吸附阈值（像素）
+bool Button::enableCustomSnap = true; // 自定义吸附功能默认开启
+float Button::customSnapThreshold = 8.0f; // 自定义吸附阈值（像素）
 
 Button::Button(const std::string& text, FontID fontid, const Region& region, Bitmap** bitmapPtr) :
  text(text), fontid(fontid), region(region), bitmapPtr(bitmapPtr), fontPtr(nullptr) {
@@ -574,6 +580,35 @@ void Button::UpdateRegionFromEdit(Point cur) {
                 << originalImageAspectRatio << op::endl;
         }
     }
+
+    // 自定义吸附点逻辑（优先级最高，仅在移动模式下应用）
+    float snapX = -1.0f, snapY = -1.0f;
+    if (currentEditMode == EditMode::Move && enableCustomSnap) {
+        if (ShouldSnapToCustomPoints(nr, snapX, snapY)) {
+            ApplyCustomSnap(nr, snapX, snapY);
+            isSnappedToCustom = true;
+            isSnappedToCenter = false; // 自定义吸附优先于居中吸附
+            Log << Level::Debug << "Button " << text << " snapped to custom points (X:" 
+                << snapX << ", Y:" << snapY << ")" << op::endl;
+        } else {
+            isSnappedToCustom = false;
+        }
+    } else {
+        isSnappedToCustom = false;
+    }
+
+    // 居中自动吸附逻辑（仅在移动模式下应用，且未触发自定义吸附）
+    if (currentEditMode == EditMode::Move && enableCenterSnap && !isSnappedToCustom) {
+        if (ShouldSnapToCenter(nr)) {
+            ApplyCenterSnap(nr);
+            isSnappedToCenter = true;
+            Log << Level::Debug << "Button " << text << " snapped to center" << op::endl;
+        } else {
+            isSnappedToCenter = false;
+        }
+    } else {
+        isSnappedToCenter = false;
+    }
     
     // 确保保持1:1比例标志
     if (was1to1) {
@@ -639,7 +674,15 @@ void Button::DrawEditOverlay() {
     
     // 根据吸附状态选择边框颜色
     Color bc = editBorderColor;
-    if (enableAspectRatioSnap && hasValidImageAspectRatio) {
+    
+    // 优先显示自定义吸附状态
+    if (enableCustomSnap && isSnappedToCustom) {
+        // 自定义吸附激活时使用青色边框
+        bc = Color(0, 255, 255, 200);
+    } else if (enableCenterSnap && isSnappedToCenter) {
+        // 居中吸附激活时使用紫色边框
+        bc = Color(128, 0, 128, 200);
+    } else if (enableAspectRatioSnap && hasValidImageAspectRatio) {
         float currentAspectRatio = region.getRatio(); // 使用像素比例
         if (ShouldSnapToAspectRatio(currentAspectRatio)) {
             // 吸附激活时使用绿色边框
@@ -661,6 +704,67 @@ void Button::DrawEditOverlay() {
     d->DrawSquare(rb, bc, true);
     d->DrawSquare(tb, bc, true);
     d->DrawSquare(bb, bc, true);
+    
+    // 绘制自定义吸附点辅助线
+    if (enableCustomSnap && isDragging && currentEditMode == EditMode::Move) {
+        Color customGuideLineColor = Color(0, 255, 255, 128); // 半透明青色
+        float lineWidth = 1.0f;
+        
+        // 按钮中心点
+        float buttonCenterX = (region.getx() + region.getxend()) * 0.5f;
+        float buttonCenterY = (region.gety() + region.getyend()) * 0.5f;
+        
+        // 绘制X轴吸附点的垂直辅助线
+        for (float snapX : customSnapX) {
+            snapX = snapX * WindowInfo.width; // 转换为像素坐标
+            float distanceX = std::abs(buttonCenterX - snapX);
+            if (distanceX <= customSnapThreshold * 2) {
+                Region vLine(snapX - lineWidth/2, 0, snapX + lineWidth/2, WindowInfo.height, false);
+                d->DrawSquare(vLine, customGuideLineColor, true);
+            }
+        }
+        
+        // 绘制Y轴吸附点的水平辅助线
+        for (float snapY : customSnapY) {
+            snapY = snapY * WindowInfo.height; // 转换为像素坐标
+            float distanceY = std::abs(buttonCenterY - snapY);
+            if (distanceY <= customSnapThreshold * 2) {
+                Region hLine(0, snapY - lineWidth/2, WindowInfo.width, snapY + lineWidth/2, false);
+                d->DrawSquare(hLine, customGuideLineColor, true);
+            }
+        }
+    }
+
+    // 绘制居中吸附辅助线
+    if (enableCenterSnap && isDragging && currentEditMode == EditMode::Move) {
+        Color guideLineColor = Color(128, 0, 128, 128); // 半透明紫色
+        float lineWidth = 1.0f;
+        
+        // 屏幕中心点
+        float screenCenterX = WindowInfo.width * 0.5f;
+        float screenCenterY = WindowInfo.height * 0.5f;
+        
+        // 按钮中心点
+        float buttonCenterX = (region.getx() + region.getxend()) * 0.5f;
+        float buttonCenterY = (region.gety() + region.getyend()) * 0.5f;
+        
+        // 计算距离
+        float distanceX = std::abs(buttonCenterX - screenCenterX);
+        float distanceY = std::abs(buttonCenterY - screenCenterY);
+        
+        // 如果接近水平中心，绘制垂直辅助线
+        if (distanceX <= centerSnapThreshold * 2) {
+            Region vLine(screenCenterX - lineWidth/2, 0, screenCenterX + lineWidth/2, WindowInfo.height, false);
+            d->DrawSquare(vLine, guideLineColor, true);
+        }
+        
+        // 如果接近垂直中心，绘制水平辅助线
+        if (distanceY <= centerSnapThreshold * 2) {
+            Region hLine(0, screenCenterY - lineWidth/2, WindowInfo.width, screenCenterY + lineWidth/2, false);
+            d->DrawSquare(hLine, guideLineColor, true);
+        }
+    }
+    
     Color hc = editHandleColor;
     Color hb = Color(255,255,255,255);
     for (const auto& h : editHandles) {
@@ -820,5 +924,203 @@ void Button::ApplyAspectRatioSnap(Region& targetRegion) const {
                 targetRegion.setyend(targetRegion.isScreenRatio() ? newBottom / WindowInfo.height : newBottom);
             }
             break;
+    }
+}
+
+// 居中自动吸附功能实现
+bool Button::ShouldSnapToCenter(const Region& targetRegion) const {
+    if (!enableCenterSnap) {
+        return false;
+    }
+    
+    // 计算按钮中心点（像素坐标）
+    float buttonCenterX = (targetRegion.getx() + targetRegion.getxend()) * 0.5f;
+    float buttonCenterY = (targetRegion.gety() + targetRegion.getyend()) * 0.5f;
+    
+    // 计算屏幕中心点（像素坐标）
+    float screenCenterX = WindowInfo.width * 0.5f;
+    float screenCenterY = WindowInfo.height * 0.5f;
+    
+    // 计算距离
+    float distanceX = std::abs(buttonCenterX - screenCenterX);
+    float distanceY = std::abs(buttonCenterY - screenCenterY);
+    
+    // 检查是否在吸附阈值内（水平或垂直方向任一满足即可）
+    return (distanceX <= centerSnapThreshold) || (distanceY <= centerSnapThreshold);
+}
+
+void Button::ApplyCenterSnap(Region& targetRegion) const {
+    // 计算按钮中心点（像素坐标）
+    float buttonCenterX = (targetRegion.getx() + targetRegion.getxend()) * 0.5f;
+    float buttonCenterY = (targetRegion.gety() + targetRegion.getyend()) * 0.5f;
+    
+    // 计算屏幕中心点（像素坐标）
+    float screenCenterX = WindowInfo.width * 0.5f;
+    float screenCenterY = WindowInfo.height * 0.5f;
+    
+    // 计算按钮尺寸
+    float buttonWidth = targetRegion.getWidth();
+    float buttonHeight = targetRegion.getHeight();
+    
+    // 计算距离
+    float distanceX = std::abs(buttonCenterX - screenCenterX);
+    float distanceY = std::abs(buttonCenterY - screenCenterY);
+    
+    // 如果水平距离在阈值内，吸附到水平中心
+    if (distanceX <= centerSnapThreshold) {
+        float newLeft = screenCenterX - buttonWidth * 0.5f;
+        float newRight = screenCenterX + buttonWidth * 0.5f;
+        
+        if (targetRegion.isScreenRatio()) {
+            targetRegion.setx(newLeft / WindowInfo.width);
+            targetRegion.setxend(newRight / WindowInfo.width);
+        } else {
+            targetRegion.setx(newLeft);
+            targetRegion.setxend(newRight);
+        }
+    }
+    
+    // 如果垂直距离在阈值内，吸附到垂直中心
+    if (distanceY <= centerSnapThreshold) {
+        float newTop = screenCenterY - buttonHeight * 0.5f;
+        float newBottom = screenCenterY + buttonHeight * 0.5f;
+        
+        if (targetRegion.isScreenRatio()) {
+            targetRegion.sety(newTop / WindowInfo.height);
+            targetRegion.setyend(newBottom / WindowInfo.height);
+        } else {
+            targetRegion.sety(newTop);
+            targetRegion.setyend(newBottom);
+        }
+    }
+}
+
+// 自定义吸附点管理方法
+void Button::AddCustomSnapX(float x) {
+    // 检查是否已经存在这个X值
+    auto it = std::find_if(customSnapX.begin(), customSnapX.end(), 
+        [x](float existing) { return std::abs(existing - x) < 0.01f; });
+
+    if (it == customSnapX.end()) {
+        customSnapX.push_back(x);
+        std::sort(customSnapX.begin(), customSnapX.end());
+        Log << Level::Debug << "Added custom snap X: " << x << op::endl;
+    }
+}
+
+void Button::AddCustomSnapY(float y) {
+    // 检查是否已经存在这个Y值
+    auto it = std::find_if(customSnapY.begin(), customSnapY.end(), 
+        [y](float existing) { return std::abs(existing - y) < 0.01f; });
+    
+    if (it == customSnapY.end()) {
+        customSnapY.push_back(y);
+        std::sort(customSnapY.begin(), customSnapY.end());
+        Log << Level::Debug << "Added custom snap Y: " << y << op::endl;
+    }
+}
+
+void Button::RemoveCustomSnapX(float x) {
+    auto it = std::remove_if(customSnapX.begin(), customSnapX.end(), 
+        [x](float existing) { return std::abs(existing - x) < 0.01f; });
+    
+    if (it != customSnapX.end()) {
+        customSnapX.erase(it, customSnapX.end());
+        Log << Level::Debug << "Removed custom snap X: " << x << op::endl;
+    }
+}
+
+void Button::RemoveCustomSnapY(float y) {
+    auto it = std::remove_if(customSnapY.begin(), customSnapY.end(), 
+        [y](float existing) { return std::abs(existing - y) < 0.01f; });
+    
+    if (it != customSnapY.end()) {
+        customSnapY.erase(it, customSnapY.end());
+        Log << Level::Debug << "Removed custom snap Y: " << y << op::endl;
+    }
+}
+
+void Button::ClearCustomSnapX() {
+    customSnapX.clear();
+    Log << Level::Debug << "Cleared all custom snap X points" << op::endl;
+}
+
+void Button::ClearCustomSnapY() {
+    customSnapY.clear();
+    Log << Level::Debug << "Cleared all custom snap Y points" << op::endl;
+}
+
+// 自定义吸附点检测和应用方法
+bool Button::ShouldSnapToCustomPoints(const Region& targetRegion, float& snapX, float& snapY) const {
+    if (!enableCustomSnap) {
+        return false;
+    }
+    
+    // 计算按钮中心点（像素坐标）
+    float buttonCenterX = (targetRegion.getx() + targetRegion.getxend()) * 0.5f;
+    float buttonCenterY = (targetRegion.gety() + targetRegion.getyend()) * 0.5f;
+    
+    bool hasSnapX = false, hasSnapY = false;
+    snapX = -1.0f;
+    snapY = -1.0f;
+    
+    // 检查X轴吸附点
+    float minDistanceX = customSnapThreshold + 1.0f;
+    for (float x : customSnapX) {
+        x = x * WindowInfo.width; // 转换为像素坐标
+        float distance = std::abs(buttonCenterX - x);
+        if (distance <= customSnapThreshold && distance < minDistanceX) {
+            minDistanceX = distance;
+            snapX = x;
+            hasSnapX = true;
+        }
+    }
+    
+    // 检查Y轴吸附点
+    float minDistanceY = customSnapThreshold + 1.0f;
+    for (float y : customSnapY) {
+        y = y * WindowInfo.height; // 转换为像素坐标
+        float distance = std::abs(buttonCenterY - y);
+        if (distance <= customSnapThreshold && distance < minDistanceY) {
+            minDistanceY = distance;
+            snapY = y;
+            hasSnapY = true;
+        }
+    }
+    
+    return hasSnapX || hasSnapY;
+}
+
+void Button::ApplyCustomSnap(Region& targetRegion, float snapX, float snapY) const {
+    // 计算按钮尺寸
+    float buttonWidth = targetRegion.getWidth();
+    float buttonHeight = targetRegion.getHeight();
+    
+    // 如果有X轴吸附点，调整水平位置
+    if (snapX >= 0.0f) {
+        float newLeft = snapX - buttonWidth * 0.5f;
+        float newRight = snapX + buttonWidth * 0.5f;
+        
+        if (targetRegion.isScreenRatio()) {
+            targetRegion.setx(newLeft / WindowInfo.width);
+            targetRegion.setxend(newRight / WindowInfo.width);
+        } else {
+            targetRegion.setx(newLeft);
+            targetRegion.setxend(newRight);
+        }
+    }
+    
+    // 如果有Y轴吸附点，调整垂直位置
+    if (snapY >= 0.0f) {
+        float newTop = snapY - buttonHeight * 0.5f;
+        float newBottom = snapY + buttonHeight * 0.5f;
+        
+        if (targetRegion.isScreenRatio()) {
+            targetRegion.sety(newTop / WindowInfo.height);
+            targetRegion.setyend(newBottom / WindowInfo.height);
+        } else {
+            targetRegion.sety(newTop);
+            targetRegion.setyend(newBottom);
+        }
     }
 }

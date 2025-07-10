@@ -186,4 +186,9 @@ void MainScreen::reloadButtonsRegion() {
         buttons[i+o1]->SetRegion({x,region.getOriginY(),x+tmp2*0.8,region.getOriginYEnd(),region.isScreenRatio()});
         x+=tmp2;
     }
+    AddCustomSnapYForAllButtons(0.1f);
+    AddCustomSnapXForAllButtons(0.2f);
+    AddCustomSnapXForAllButtons(0.4f);
+    AddCustomSnapXForAllButtons(0.6f);
+    AddCustomSnapXForAllButtons(0.8f);
 }

@@ -218,6 +218,16 @@ bool SettingScreen::HandleKeyInput(char key) {
             ToggleAspectRatioSnap();
             return true;
         }
+        // 'C' 或 'c' 键切换居中自动吸附功能
+        if (key == 'C' || key == 'c') {
+            ToggleCenterSnap();
+            return true;
+        }
+        // 'S' 或 's' 键切换自定义吸附功能
+        if (key == 'S' || key == 's') {
+            ToggleCustomSnap();
+            return true;
+        }
     }
     
     // 将键盘输入传递给正在编辑的文本框

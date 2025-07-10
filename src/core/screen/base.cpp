@@ -469,47 +469,139 @@ void Screen::ClearEditableButtons() {
     Log << "All additional editable buttons cleared" << op::endl;
 }
 
-// 图像原比例吸附功能实现
+// 图像原比例吸附功能
 void Screen::ToggleAspectRatioSnap() {
-    if (!editModeEnabled) return;
-    
-    // 检查第一个按钮的吸附状态，用作基准
-    bool currentState = false;
-    if (!buttons.empty() && buttons[0]) {
-        currentState = buttons[0]->IsAspectRatioSnapEnabled();
+    bool newState = false;
+    // 检查第一个有效按钮的当前状态
+    for (const auto& button : buttons) {
+        if (button) {
+            newState = !button->IsAspectRatioSnapEnabled();
+            break;
+        }
     }
-    
-    // 切换状态
-    bool newState = !currentState;
     SetAspectRatioSnapForAllButtons(newState);
-    
-    Log << Level::Info << "Aspect ratio snap toggled: " << (newState ? "ON" : "OFF") << op::endl;
+    Log << Level::Info << "Aspect ratio snap " << (newState ? "enabled" : "disabled") << " for all buttons" << op::endl;
 }
 
 void Screen::SetAspectRatioSnapForAllButtons(bool enable) {
-    if (!editModeEnabled) return;
-    
-    // 设置所有普通按钮的吸附状态
-    for (auto& button : buttons) {
+    for (const auto& button : buttons) {
         if (button) {
             button->SetAspectRatioSnap(enable);
         }
     }
     
-    // 设置所有额外可编辑按钮的吸附状态
-    for (auto& button : additionalEditableButtons) {
+    // 也设置额外的可编辑按钮
+    for (const auto& button : additionalEditableButtons) {
         if (button) {
             button->SetAspectRatioSnap(enable);
         }
     }
-    
-    // 也设置退出按钮的吸附状态
-    if (exitButton) {
-        exitButton->SetAspectRatioSnap(enable);
+}
+
+// 居中自动吸附功能
+void Screen::ToggleCenterSnap() {
+    bool newState = false;
+    // 检查第一个有效按钮的当前状态
+    for (const auto& button : buttons) {
+        if (button) {
+            newState = !button->IsCenterSnapEnabled();
+            break;
+        }
     }
-    if (exitButtonEdit) {
-        exitButtonEdit->SetAspectRatioSnap(enable);
+    SetCenterSnapForAllButtons(newState);
+    Log << Level::Info << "Center snap " << (newState ? "enabled" : "disabled") << " for all buttons" << op::endl;
+}
+
+void Screen::SetCenterSnapForAllButtons(bool enable) {
+    for (const auto& button : buttons) {
+        if (button) {
+            button->SetCenterSnap(enable);
+        }
     }
     
-    Log << Level::Info << "Aspect ratio snap set for all buttons: " << (enable ? "ON" : "OFF") << op::endl;
+    // 也设置额外的可编辑按钮
+    for (const auto& button : additionalEditableButtons) {
+        if (button) {
+            button->SetCenterSnap(enable);
+        }
+    }
+}
+
+// 自定义吸附点功能
+void Screen::ToggleCustomSnap() {
+    bool newState = false;
+    // 检查第一个有效按钮的当前状态
+    for (const auto& button : buttons) {
+        if (button) {
+            newState = !button->IsCustomSnapEnabled();
+            break;
+        }
+    }
+    SetCustomSnapForAllButtons(newState);
+    Log << Level::Info << "Custom snap " << (newState ? "enabled" : "disabled") << " for all buttons" << op::endl;
+}
+
+void Screen::SetCustomSnapForAllButtons(bool enable) {
+    for (const auto& button : buttons) {
+        if (button) {
+            button->SetCustomSnap(enable);
+        }
+    }
+    
+    // 也设置额外的可编辑按钮
+    for (const auto& button : additionalEditableButtons) {
+        if (button) {
+            button->SetCustomSnap(enable);
+        }
+    }
+}
+
+void Screen::AddCustomSnapXForAllButtons(float x) {
+    for (const auto& button : buttons) {
+        if (button) {
+            button->AddCustomSnapX(x);
+        }
+    }
+    
+    // 也设置额外的可编辑按钮
+    for (const auto& button : additionalEditableButtons) {
+        if (button) {
+            button->AddCustomSnapX(x);
+        }
+    }
+    Log << Level::Info << "Added custom snap X (" << x << ") for all buttons" << op::endl;
+}
+
+void Screen::AddCustomSnapYForAllButtons(float y) {
+    for (const auto& button : buttons) {
+        if (button) {
+            button->AddCustomSnapY(y);
+        }
+    }
+    
+    // 也设置额外的可编辑按钮
+    for (const auto& button : additionalEditableButtons) {
+        if (button) {
+            button->AddCustomSnapY(y);
+        }
+    }
+    Log << Level::Info << "Added custom snap Y (" << y << ") for all buttons" << op::endl;
+}
+
+void Screen::ClearCustomSnapForAllButtons() {
+    for (const auto& button : buttons) {
+        if (button) {
+            button->ClearCustomSnapX();
+            button->ClearCustomSnapY();
+        }
+    }
+    
+    // 也设置额外的可编辑按钮
+    for (const auto& button : additionalEditableButtons) {
+        if (button) {
+            button->ClearCustomSnapX();
+            button->ClearCustomSnapY();
+        }
+    }
+    Log << Level::Info << "Cleared all custom snap points for all buttons" << op::endl;
 }
