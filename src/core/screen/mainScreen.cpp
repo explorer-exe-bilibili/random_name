@@ -117,6 +117,7 @@ void MainScreen::init() {
     }
     onEditCompleteCallback=[this]{changeMode();};
     reloadButtonsRegion();
+    SetupButtonAlignmentForAllButtons();
 }
 
 MainScreen::~MainScreen() {

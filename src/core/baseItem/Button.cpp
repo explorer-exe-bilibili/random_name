@@ -17,6 +17,8 @@ bool Button::enableCenterSnap = true; // 是否启用居中吸附功能
 float Button::centerSnapThreshold = 10.0f; // 居中吸附阈值（像素）
 bool Button::enableCustomSnap = true; // 自定义吸附功能默认开启
 float Button::customSnapThreshold = 8.0f; // 自定义吸附阈值（像素）
+bool Button::enableButtonAlignSnap = true; // 按钮间对齐吸附功能默认开启
+float Button::buttonAlignSnapThreshold = 5.0f; // 按钮间对齐吸附阈值（像素）
 
 Button::Button(const std::string& text, FontID fontid, const Region& region, Bitmap** bitmapPtr) :
  text(text), fontid(fontid), region(region), bitmapPtr(bitmapPtr), fontPtr(nullptr) {
@@ -58,6 +60,9 @@ Button::~Button() {
     if (animationRunning || fadeAnimationRunning) {
         std::this_thread::sleep_for(std::chrono::milliseconds(50));
     }
+    
+    // 清理按钮间对齐引用，避免悬空指针
+    otherButtonsPtr = nullptr;
     
     // 清理资源
 }
@@ -484,6 +489,12 @@ bool Button::OnEditMouseUp(Point point) {
     if (isDragging && currentEditMode != EditMode::None) {
         Log << "Button " << text << " edit completed" << op::endl;
         isDragging = false;
+        
+        // 重置所有吸附状态，恢复正常边框颜色
+        isSnappedToCustom = false;
+        isSnappedToButton = false;
+        isSnappedToCenter = false;
+        
         if (onEditComplete) onEditComplete(region);
         currentEditMode = EditMode::None;
         return true;
@@ -588,6 +599,7 @@ void Button::UpdateRegionFromEdit(Point cur) {
             ApplyCustomSnap(nr, snapX, snapY);
             isSnappedToCustom = true;
             isSnappedToCenter = false; // 自定义吸附优先于居中吸附
+            isSnappedToButton = false; // 自定义吸附优先于按钮吸附
             Log << Level::Debug << "Button " << text << " snapped to custom points (X:" 
                 << snapX << ", Y:" << snapY << ")" << op::endl;
         } else {
@@ -597,8 +609,24 @@ void Button::UpdateRegionFromEdit(Point cur) {
         isSnappedToCustom = false;
     }
 
-    // 居中自动吸附逻辑（仅在移动模式下应用，且未触发自定义吸附）
-    if (currentEditMode == EditMode::Move && enableCenterSnap && !isSnappedToCustom) {
+    // 按钮间对齐吸附逻辑（仅在移动模式下应用，且未触发自定义吸附）
+    float buttonSnapX = -1.0f, buttonSnapY = -1.0f;
+    if (currentEditMode == EditMode::Move && enableButtonAlignSnap && !isSnappedToCustom) {
+        if (ShouldSnapToOtherButtons(nr, buttonSnapX, buttonSnapY)) {
+            ApplyButtonAlignSnap(nr, buttonSnapX, buttonSnapY);
+            isSnappedToButton = true;
+            isSnappedToCenter = false; // 按钮吸附优先于居中吸附
+            Log << Level::Debug << "Button " << text << " snapped to other buttons (X:" 
+                << buttonSnapX << ", Y:" << buttonSnapY << ")" << op::endl;
+        } else {
+            isSnappedToButton = false;
+        }
+    } else {
+        isSnappedToButton = false;
+    }
+
+    // 居中自动吸附逻辑（仅在移动模式下应用，且未触发自定义吸附和按钮吸附）
+    if (currentEditMode == EditMode::Move && enableCenterSnap && !isSnappedToCustom && !isSnappedToButton) {
         if (ShouldSnapToCenter(nr)) {
             ApplyCenterSnap(nr);
             isSnappedToCenter = true;
@@ -676,11 +704,14 @@ void Button::DrawEditOverlay() {
     Color bc = editBorderColor;
     
     // 优先显示自定义吸附状态
-    if (enableCustomSnap && isSnappedToCustom) {
-        // 自定义吸附激活时使用青色边框
+    if (enableCustomSnap && isSnappedToCustom && isDragging) {
+        // 自定义吸附激活时使用青色边框（仅在拖拽时）
         bc = Color(0, 255, 255, 200);
-    } else if (enableCenterSnap && isSnappedToCenter) {
-        // 居中吸附激活时使用紫色边框
+    } else if (enableButtonAlignSnap && isSnappedToButton && isDragging) {
+        // 按钮间吸附激活时使用黄色边框（仅在拖拽时）
+        bc = Color(255, 255, 0, 200);
+    } else if (enableCenterSnap && isSnappedToCenter && isDragging) {
+        // 居中吸附激活时使用紫色边框（仅在拖拽时）
         bc = Color(128, 0, 128, 200);
     } else if (enableAspectRatioSnap && hasValidImageAspectRatio) {
         float currentAspectRatio = region.getRatio(); // 使用像素比例
@@ -732,6 +763,75 @@ void Button::DrawEditOverlay() {
                 Region hLine(0, snapY - lineWidth/2, WindowInfo.width, snapY + lineWidth/2, false);
                 d->DrawSquare(hLine, customGuideLineColor, true);
             }
+        }
+    }
+
+    // 绘制按钮间对齐吸附辅助线
+    if (enableButtonAlignSnap && isDragging && currentEditMode == EditMode::Move && otherButtonsPtr) {
+        // 安全检查：确保otherButtonsPtr是有效的，并且指向的vector存在
+        try {
+            // 额外检查：确保指针指向的内存区域是有效的
+            if (otherButtonsPtr == nullptr) {
+                return; // 直接返回，避免继续执行
+            }
+            
+            // 使用volatile来确保编译器不会优化掉这个检查
+            volatile const void* ptrCheck = static_cast<volatile const void*>(otherButtonsPtr);
+            if (ptrCheck == nullptr) {
+                otherButtonsPtr = nullptr; // 清理无效指针
+                return;
+            }
+            
+            Color buttonAlignGuideLineColor = Color(255, 255, 0, 128); // 半透明黄色
+            float lineWidth = 1.0f;
+            
+            // 当前按钮中心点
+            float buttonCenterX = (region.getx() + region.getxend()) * 0.5f;
+            float buttonCenterY = (region.gety() + region.getyend()) * 0.5f;
+            
+            // 检查与其他按钮的对齐 - 使用范围for循环的安全版本
+            const auto& buttonVector = *otherButtonsPtr;
+            for (size_t i = 0; i < buttonVector.size(); ++i) {
+                const auto& otherButton = buttonVector[i];
+                
+                // 更严格的空指针检查
+                if (!otherButton || otherButton.get() == nullptr || otherButton.get() == this) {
+                    continue; // 跳过空指针和自己
+                }
+                
+                // 检查按钮是否启用
+                if (!otherButton->IsEnable()) {
+                    continue; // 跳过未启用的按钮
+                }
+                
+                Region otherRegion = otherButton->GetRegion();
+                float otherCenterX = (otherRegion.getx() + otherRegion.getxend()) * 0.5f;
+                float otherCenterY = (otherRegion.gety() + otherRegion.getyend()) * 0.5f;
+                
+                // 检查X轴对齐（垂直线）
+                float distanceX = std::abs(buttonCenterX - otherCenterX);
+                if (distanceX <= buttonAlignSnapThreshold * 2) {
+                    Region vLine(otherCenterX - lineWidth/2, 0, otherCenterX + lineWidth/2, WindowInfo.height, false);
+                    d->DrawSquare(vLine, buttonAlignGuideLineColor, true);
+                }
+                
+                // 检查Y轴对齐（水平线）
+                float distanceY = std::abs(buttonCenterY - otherCenterY);
+                if (distanceY <= buttonAlignSnapThreshold * 2) {
+                    Region hLine(0, otherCenterY - lineWidth/2, WindowInfo.width, otherCenterY + lineWidth/2, false);
+                    d->DrawSquare(hLine, buttonAlignGuideLineColor, true);
+                }
+            }
+        } catch (const std::exception& e) {
+            // 记录标准异常
+            Log<< Level::Error << "Button::DrawEditOverlay - 按钮间对齐吸附异常: " << e.what() << op::endl;
+            // 清理无效指针，禁用按钮间吸附以避免进一步的错误
+            const_cast<Button*>(this)->otherButtonsPtr = nullptr;
+        } catch (...) {
+            // 捕获所有其他异常
+            Log << Level::Error << "Button::DrawEditOverlay - 按钮间对齐吸附发生未知异常" << op::endl;
+            // 清理无效指针，禁用按钮间吸附以避免进一步的错误
+            const_cast<Button*>(this)->otherButtonsPtr = nullptr;
         }
     }
 
@@ -1111,6 +1211,126 @@ void Button::ApplyCustomSnap(Region& targetRegion, float snapX, float snapY) con
     }
     
     // 如果有Y轴吸附点，调整垂直位置
+    if (snapY >= 0.0f) {
+        float newTop = snapY - buttonHeight * 0.5f;
+        float newBottom = snapY + buttonHeight * 0.5f;
+        
+        if (targetRegion.isScreenRatio()) {
+            targetRegion.sety(newTop / WindowInfo.height);
+            targetRegion.setyend(newBottom / WindowInfo.height);
+        } else {
+            targetRegion.sety(newTop);
+            targetRegion.setyend(newBottom);
+        }
+    }
+}
+
+// 按钮间对齐吸附检测方法
+bool Button::ShouldSnapToOtherButtons(const Region& targetRegion, float& snapX, float& snapY) const {
+    if (!enableButtonAlignSnap || !otherButtonsPtr) {
+        return false;
+    }
+    
+    // 安全检查：确保otherButtonsPtr是有效的，并且指向的vector存在
+    try {
+        // 额外检查：确保指针指向的内存区域是有效的
+        if (otherButtonsPtr == nullptr) {
+            return false; // 直接返回，避免继续执行
+        }
+        
+        // 使用volatile来确保编译器不会优化掉这个检查
+        volatile const void* ptrCheck = static_cast<volatile const void*>(otherButtonsPtr);
+        if (ptrCheck == nullptr) {
+            const_cast<Button*>(this)->otherButtonsPtr = nullptr; // 清理无效指针
+            return false;
+        }
+        
+        // 计算当前按钮的中心点（像素坐标）
+        float buttonCenterX = (targetRegion.getx() + targetRegion.getxend()) * 0.5f;
+        float buttonCenterY = (targetRegion.gety() + targetRegion.getyend()) * 0.5f;
+        
+        bool hasSnapX = false, hasSnapY = false;
+        float closestX = -1.0f, closestY = -1.0f;
+        float minDistanceX = buttonAlignSnapThreshold + 1.0f;
+        float minDistanceY = buttonAlignSnapThreshold + 1.0f;
+        
+        // 遍历其他所有按钮，寻找最近的对齐点 - 使用范围for循环的安全版本
+        const auto& buttonVector = *otherButtonsPtr;
+        for (size_t i = 0; i < buttonVector.size(); ++i) {
+            const auto& otherButton = buttonVector[i];
+            
+            // 更严格的空指针检查
+            if (!otherButton || otherButton.get() == nullptr || otherButton.get() == this) {
+                continue; // 跳过空指针和自己
+            }
+            
+            // 检查按钮是否启用
+            if (!otherButton->IsEnable()) {
+                continue; // 跳过未启用的按钮
+            }
+            
+            Region otherRegion = otherButton->GetRegion();
+            float otherCenterX = (otherRegion.getx() + otherRegion.getxend()) * 0.5f;
+            float otherCenterY = (otherRegion.gety() + otherRegion.getyend()) * 0.5f;
+            
+            // 检查X轴对齐（垂直对齐）
+            float distanceX = std::abs(buttonCenterX - otherCenterX);
+            if (distanceX <= buttonAlignSnapThreshold && distanceX < minDistanceX) {
+                minDistanceX = distanceX;
+                closestX = otherCenterX;
+                hasSnapX = true;
+            }
+            
+            // 检查Y轴对齐（水平对齐）
+            float distanceY = std::abs(buttonCenterY - otherCenterY);
+            if (distanceY <= buttonAlignSnapThreshold && distanceY < minDistanceY) {
+                minDistanceY = distanceY;
+                closestY = otherCenterY;
+                hasSnapY = true;
+            }
+        }
+        
+        // 设置输出参数
+        snapX = hasSnapX ? closestX : -1.0f;
+        snapY = hasSnapY ? closestY : -1.0f;
+        
+        return hasSnapX || hasSnapY;
+    } catch (const std::exception& e) {
+        // 记录标准异常
+        Log<< Level::Error << "Button::ShouldSnapToOtherButtons - 按钮间对齐吸附异常: " << e.what() << op::endl;
+        // 清理无效指针，禁用按钮间吸附以避免进一步的错误
+        const_cast<Button*>(this)->otherButtonsPtr = nullptr;
+        return false;
+    } catch (...) {
+        // 捕获所有其他异常
+        Log<< Level::Error << "Button::ShouldSnapToOtherButtons - Unknown exception occurred" << op::endl;
+        // 清理无效指针，禁用按钮间吸附以避免进一步的错误
+        const_cast<Button*>(this)->otherButtonsPtr = nullptr;
+        return false;
+    }
+}
+
+// 按钮间对齐吸附应用方法
+void Button::ApplyButtonAlignSnap(Region& targetRegion, float snapX, float snapY) const {
+    // 计算按钮尺寸
+    float buttonWidth = targetRegion.getWidth();
+    float buttonHeight = targetRegion.getHeight();
+    
+    // 如果有X轴对齐点，调整水平位置
+    if (snapX >= 0.0f) {
+        float newLeft = snapX - buttonWidth * 0.5f;
+        float newRight = snapX + buttonWidth * 0.5f;
+        
+        if (targetRegion.isScreenRatio()) {
+            targetRegion.setx(newLeft / WindowInfo.width);
+            targetRegion.setxend(newRight / WindowInfo.width);
+        } else {
+            targetRegion.setx(newLeft);
+            targetRegion.setxend(newRight);
+        }
+    }
+    
+    // 如果有Y轴对齐点，调整垂直位置
     if (snapY >= 0.0f) {
         float newTop = snapY - buttonHeight * 0.5f;
         float newBottom = snapY + buttonHeight * 0.5f;

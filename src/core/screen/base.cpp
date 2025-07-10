@@ -24,6 +24,34 @@ std::function<void()> Screen::transitionCompleteCallback = nullptr;
 std::mutex Screen::transitionMutex;
 static int param = 0;
 
+// Screen析构函数实现
+Screen::~Screen() {
+    // 清理所有按钮的otherButtonsPtr引用，避免悬空指针
+    for (const auto& button : allButtonsForAlignment) {
+        if (button) {
+            button->SetOtherButtonsForAlignment(std::vector<std::shared_ptr<core::Button>>{}); // 清空引用
+        }
+    }
+    
+    // 清空持久容器
+    allButtonsForAlignment.clear();
+    
+    // 清理其他按钮的引用
+    for (const auto& button : buttons) {
+        if (button) {
+            button->SetOtherButtonsForAlignment(std::vector<std::shared_ptr<core::Button>>{}); // 清空引用
+        }
+    }
+    for (const auto& button : additionalEditableButtons) {
+        if (button) {
+            button->SetOtherButtonsForAlignment(std::vector<std::shared_ptr<core::Button>>{}); // 清空引用
+        }
+    }
+    
+    // 调用原有的析构逻辑（如果有的话）
+    background = nullptr;
+}
+
 void Screen::Draw() {
     // 更新过渡状态
     updateTransition(param);
@@ -432,6 +460,9 @@ void Screen::RegisterEditableButton(std::shared_ptr<core::Button> button) {
             // 如果当前已经在编辑模式，为新按钮设置编辑模式
             if (editModeEnabled) button->SetEditMode(true);
 
+            // 刷新按钮间对齐引用
+            RefreshButtonAlignmentReferences();
+
             Log << "Button registered for editing" << op::endl;
         }
     }
@@ -443,6 +474,8 @@ void Screen::UnregisterEditableButton(std::shared_ptr<core::Button> button) {
         if (it != additionalEditableButtons.end()) {
             // 退出编辑模式
             button->SetEditMode(false);
+            // 清理按钮的对齐引用
+            button->SetOtherButtonsForAlignment(std::vector<std::shared_ptr<core::Button>>{});
             additionalEditableButtons.erase(it);
             
             // 如果这是当前选中的按钮，清除选择
@@ -450,21 +483,28 @@ void Screen::UnregisterEditableButton(std::shared_ptr<core::Button> button) {
                 selectedButton = nullptr;
             }
             
+            // 刷新剩余按钮的对齐引用
+            RefreshButtonAlignmentReferences();
+            
             Log << "Button unregistered from editing" << op::endl;
         }
     }
 }
 
 void Screen::ClearEditableButtons() {
-    // 为所有额外按钮退出编辑模式
+    // 为所有额外按钮退出编辑模式并清理对齐引用
     for (auto& button : additionalEditableButtons) {
         if (button) {
             button->SetEditMode(false);
+            button->SetOtherButtonsForAlignment(std::vector<std::shared_ptr<core::Button>>{});
         }
     }
     
     additionalEditableButtons.clear();
     selectedButton = nullptr;
+    
+    // 刷新剩余按钮的对齐引用
+    RefreshButtonAlignmentReferences();
     
     Log << "All additional editable buttons cleared" << op::endl;
 }
@@ -604,4 +644,85 @@ void Screen::ClearCustomSnapForAllButtons() {
         }
     }
     Log << Level::Info << "Cleared all custom snap points for all buttons" << op::endl;
+}
+
+// 按钮间对齐吸附功能
+void Screen::ToggleButtonAlignSnap() {
+    bool newState = false;
+    // 检查第一个有效按钮的当前状态
+    for (const auto& button : buttons) {
+        if (button) {
+            newState = !button->IsButtonAlignSnapEnabled();
+            break;
+        }
+    }
+    SetButtonAlignSnapForAllButtons(newState);
+    Log << Level::Info << "Button align snap " << (newState ? "enabled" : "disabled") << " for all buttons" << op::endl;
+}
+
+void Screen::SetButtonAlignSnapForAllButtons(bool enable) {
+    for (const auto& button : buttons) {
+        if (button) {
+            button->SetButtonAlignSnap(enable);
+        }
+    }
+    
+    // 也设置额外的可编辑按钮
+    for (const auto& button : additionalEditableButtons) {
+        if (button) {
+            button->SetButtonAlignSnap(enable);
+        }
+    }
+    
+    // 如果启用了按钮间对齐吸附，需要设置按钮间的引用
+    if (enable) {
+        SetupButtonAlignmentForAllButtons();
+    }
+}
+
+void Screen::SetupButtonAlignmentForAllButtons() {
+    // 清空之前的引用
+    allButtonsForAlignment.clear();
+    
+    // 首先清理所有按钮的otherButtonsPtr，避免悬空指针
+    for (const auto& button : buttons) {
+        if (button) {
+            button->SetOtherButtonsForAlignment(std::vector<std::shared_ptr<core::Button>>{}); // 清空引用
+        }
+    }
+    for (const auto& button : additionalEditableButtons) {
+        if (button) {
+            button->SetOtherButtonsForAlignment(std::vector<std::shared_ptr<core::Button>>{}); // 清空引用
+        }
+    }
+    
+    // 创建包含所有按钮的持久向量
+    // 添加主要按钮
+    for (const auto& button : buttons) {
+        if (button) {
+            allButtonsForAlignment.push_back(button);
+        }
+    }
+    
+    // 添加额外的可编辑按钮
+    for (const auto& button : additionalEditableButtons) {
+        if (button) {
+            allButtonsForAlignment.push_back(button);
+        }
+    }
+    
+    // 为每个按钮设置持久容器的引用
+    for (const auto& button : allButtonsForAlignment) {
+        if (button) {
+            button->SetOtherButtonsForAlignment(allButtonsForAlignment);
+        }
+    }
+    
+    Log << Level::Info << "Setup button alignment references for " << allButtonsForAlignment.size() << " buttons" << op::endl;
+}
+
+// 刷新按钮间对齐引用方法
+void Screen::RefreshButtonAlignmentReferences() {
+    // 重新设置按钮间对齐引用
+    SetupButtonAlignmentForAllButtons();
 }

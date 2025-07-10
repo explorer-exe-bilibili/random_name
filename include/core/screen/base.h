@@ -57,6 +57,9 @@ protected:
     bool editModeEnabled = false;
     std::shared_ptr<core::Button> selectedButton = nullptr;
     std::function<void()> onEditCompleteCallback = nullptr;
+    
+    // 按钮间对齐吸附功能专用成员
+    std::vector<std::shared_ptr<core::Button>> allButtonsForAlignment; // 持久保存所有按钮的引用，用于按钮间对齐吸附
 
     // 管理额外按钮的方法
     void RegisterEditableButton(std::shared_ptr<core::Button> button);
@@ -71,7 +74,7 @@ protected:
     virtual void reloadButtonsRegion(){}
 public:
     Screen(ScreenID ID) : ID(ID) {}
-    virtual ~Screen(){background=nullptr;};
+    virtual ~Screen(); // 析构函数声明，实现在源文件中
     virtual void init();
     virtual bool Click(int x, int y);
 
@@ -104,6 +107,12 @@ public:
     virtual void AddCustomSnapXForAllButtons(float x); // 为所有按钮添加X轴吸附点
     virtual void AddCustomSnapYForAllButtons(float y); // 为所有按钮添加Y轴吸附点
     virtual void ClearCustomSnapForAllButtons(); // 清除所有按钮的自定义吸附点
+
+    // 按钮间对齐吸附功能
+    virtual void ToggleButtonAlignSnap(); // 切换所有按钮的按钮间对齐吸附功能
+    virtual void SetButtonAlignSnapForAllButtons(bool enable); // 设置所有按钮的按钮间对齐吸附功能
+    virtual void SetupButtonAlignmentForAllButtons(); // 为所有按钮设置按钮间对齐的引用
+    virtual void RefreshButtonAlignmentReferences(); // 刷新按钮间对齐引用（在动态添加/移除按钮后调用）
 
     ScreenID getID() const { return ID; }
     static std::shared_ptr<Screen> getCurrentScreen() { return currentScreen; }    // 屏幕管理系统功能

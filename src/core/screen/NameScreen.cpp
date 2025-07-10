@@ -103,6 +103,7 @@ void NameScreen::init() {
     EditingButtons.push_back(nextStatus);
     RegisterEditableButton(std::static_pointer_cast<core::Button>(nameButton));
     onEditCompleteCallback=[this]{reloadButtonsRegion();};
+    SetupButtonAlignmentForAllButtons();
 }
 
 void NameScreen::Draw() {

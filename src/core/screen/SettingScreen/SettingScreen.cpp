@@ -48,6 +48,7 @@ void SettingScreen::init() {
     buttons.push_back(last);
     buttons.push_back(next);
     buttons.push_back(openRAWFile);
+    SetupButtonAlignmentForAllButtons(); // 设置按钮间对齐吸附的引用关系
 }
 
 void SettingScreen::Draw() {
@@ -226,6 +227,11 @@ bool SettingScreen::HandleKeyInput(char key) {
         // 'S' 或 's' 键切换自定义吸附功能
         if (key == 'S' || key == 's') {
             ToggleCustomSnap();
+            return true;
+        }
+        // 'B' 或 'b' 键切换按钮间对齐吸附功能
+        if (key == 'B' || key == 'b') {
+            ToggleButtonAlignSnap();
             return true;
         }
     }

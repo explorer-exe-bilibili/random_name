@@ -74,6 +74,7 @@ public:
 
     void SetEnableText(bool enable) {this->enableText = enable;}
     void SetEnable(bool enable) {this->enable = enable;}
+    bool IsEnable() const {return enable;} // 添加获取enable状态的方法
     void SetEnableBitmap(bool enable) {this->enableBitmap = enable;}
     void SetEnableFill(bool enable) {this->enableFill = enable;}
 
@@ -118,6 +119,13 @@ public:
     void SetCustomSnapThreshold(float threshold) {customSnapThreshold = threshold;}
     const std::vector<float>& GetCustomSnapX() const {return customSnapX;}
     const std::vector<float>& GetCustomSnapY() const {return customSnapY;}
+
+    // 按钮间对齐吸附功能
+    void SetButtonAlignSnap(bool enable) {enableButtonAlignSnap = enable;}
+    bool IsButtonAlignSnapEnabled() const {return enableButtonAlignSnap;}
+    void SetButtonAlignSnapThreshold(float threshold) {buttonAlignSnapThreshold = threshold;}
+    void SetOtherButtonsForAlignment(const std::vector<std::shared_ptr<Button>>& otherButtons) {otherButtonsPtr = &otherButtons;}
+    const std::vector<std::shared_ptr<Button>>* GetOtherButtonsPtr() const {return otherButtonsPtr;}
     
     void resetRegion();
     Region GetRegion() const { return region; }
@@ -185,6 +193,12 @@ protected:
     std::vector<float> customSnapY; // 自定义Y轴吸附点列表
     bool isSnappedToCustom = false; // 当前是否已吸附到自定义点
 
+    // 按钮间对齐吸附相关成员
+    static bool enableButtonAlignSnap; // 是否启用按钮间对齐吸附功能
+    static float buttonAlignSnapThreshold; // 按钮间对齐吸附阈值
+    const std::vector<std::shared_ptr<Button>>* otherButtonsPtr = nullptr; // 其他按钮的引用
+    bool isSnappedToButton = false; // 当前是否已吸附到其他按钮
+
     // 编辑模式辅助方法
     void UpdateEditHandles();
     void UpdateRegionFromEdit(Point currentPoint);
@@ -204,5 +218,9 @@ private:
     // 自定义吸附点辅助方法
     bool ShouldSnapToCustomPoints(const Region& targetRegion, float& snapX, float& snapY) const;
     void ApplyCustomSnap(Region& targetRegion, float snapX, float snapY) const;
+
+    // 按钮间对齐吸附辅助方法
+    bool ShouldSnapToOtherButtons(const Region& targetRegion, float& snapX, float& snapY) const;
+    void ApplyButtonAlignSnap(Region& targetRegion, float snapX, float snapY) const;
 };
 }
