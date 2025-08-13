@@ -1,6 +1,10 @@
-# 中文字符输入崩溃问题修复
+# UTF-8编码问题修复方案
 
-## 问题描述
+本文档涵盖了项目中遇到的两个主要UTF-8编码问题的修复方案。
+
+## 问题1：中文字符输入崩溃问题
+
+### 问题描述
 
 在文本框中输入中文字符后按退格键会导致程序崩溃。这是一个典型的UTF-8编码处理问题。
 
@@ -218,7 +222,80 @@ if (c < 0x80 || (c >> 6) != 0x02) {
 ## 兼容性
 
 - ✅ Windows (UTF-8 + Unicode)
-- ✅ macOS (UTF-8 + Unicode)  
+- ✅ macOS (UTF-8 + Unicode)
+
+---
+
+## 问题2：中文路径下文件操作失败
+
+### 问题现象
+
+当程序在包含中文字符的路径下运行时，会出现以下错误并导致程序崩溃：
+
+```log
+[23:25:11.947] [INFO] Created backup of config file at: files/config.json.bak
+[23:25:11.951] [INFO] Config::saveToFile() finished writing config file in JSON format
+[23:25:11.951] [ERROR] [内存分配错误] 尝试 2 失败: Invalid UTF-8
+```
+
+### 根本原因
+
+在Windows系统上，当程序位于中文路径下时，标准库的文件操作函数（如`std::ofstream`和`std::ifstream`）可能无法正确处理包含中文字符的路径，导致UTF-8编码错误。
+
+这个错误是由以下代码触发的：
+
+1. **ErrorRecovery.h**第64行：`logError(errorType, "尝试 " + std::to_string(attempt) + " 失败: " + e.what());`
+2. **Config.cpp**中的`saveToFile()`和`readFromFile()`方法使用标准库文件流操作时遇到中文路径
+
+### 修复实现
+
+#### 1. 创建安全的文件操作函数
+
+在`Config.cpp`中添加了专门的UTF-8文件处理函数：
+
+- `writeFileUtf8()`: 使用Windows API安全地写入文件
+- `readFileUtf8()`: 使用Windows API安全地读取文件
+
+这些函数直接使用Windows的`CreateFileW()`、`WriteFile()`和`ReadFile()` API，并处理宽字符路径，确保正确处理中文路径。
+
+#### 2. 修改Config类的文件操作
+
+- 修改`saveToFile()`方法，在Windows平台使用`writeFileUtf8()`
+- 修改`readFromFile()`方法，在Windows平台使用`readFileUtf8()`
+- 保持非Windows平台使用标准库文件操作
+
+#### 3. 代码改动位置
+
+**文件**: `src/core/baseItem/Config.cpp`
+
+- 添加了Windows API头文件包含
+- 添加了`writeFileUtf8()`和`readFileUtf8()`函数
+- 修改了`saveToFile()`方法中的文件写入逻辑
+- 修改了`readFromFile()`方法中的文件读取逻辑
+
+### 测试验证
+
+修复后，程序应该能够：
+
+1. 在中文路径下正常启动
+2. 正确读取和写入配置文件
+3. 不再出现"Invalid UTF-8"错误
+
+### 注意事项
+
+- 这个修复方案专门针对Windows平台
+- 非Windows平台继续使用标准库文件操作
+- 建议在中文路径环境下进行充分测试
+
+## 总结
+
+本项目已修复了两个主要的UTF-8编码问题：
+
+1. **文本输入问题**：安全的UTF-8字符删除和光标处理
+2. **文件路径问题**：Windows平台下的中文路径文件操作
+
+这些修复确保了程序在中文环境下的稳定性和可用性。  
+
 - ✅ Linux (UTF-8 + Unicode)
 - ✅ 所有现代字体和输入法
 - ✅ Emoji和特殊符号
