@@ -373,3 +373,7 @@ enum{
 void SettingScreen::reloadButtonsRegion() {
     for(auto& b:buttons)b->resetRegion();
 }
+
+void SettingScreen::changeLanguage_(){
+    openRAWFile->SetText(text("settings.button.openRawFile"));
+}

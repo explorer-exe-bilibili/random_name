@@ -32,6 +32,7 @@ public:
     void Draw() override;
     void exit() override;
 private:
+    void changeLanguage_()override;
     // Video playback related members
 };
 } // namespace screen

@@ -69,5 +69,6 @@ public:
 private:
     void PaintStars() const;
     void changeName();
+    void changeLanguage_()override;
 };
 }

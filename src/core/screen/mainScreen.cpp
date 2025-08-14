@@ -195,3 +195,7 @@ void MainScreen::reloadButtonsRegion() {
     AddCustomSnapXForAllButtons(0.6f);
     AddCustomSnapXForAllButtons(0.8f);
 }
+
+void MainScreen::changeLanguage_(){
+    buttons[offVideo]->SetText(bools[boolconfig::off_video] ? text("button.video.off") : text("button.video.on"));
+}

@@ -71,6 +71,7 @@ protected:
     
     // 更新过渡状态
     static void updateTransition(int param = 0);
+    virtual void changeLanguage_(){}
     virtual void reloadButtonsRegion(){}
 public:
     Screen(ScreenID ID) : ID(ID) {}
@@ -129,6 +130,7 @@ public:
     static void setUseVideoBackground(bool use);
 
     static void reloadConfig();
+    static void changeLanguage();
 private:
 };
 

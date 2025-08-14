@@ -8,6 +8,8 @@ class MainScreen : public Screen {
     std::vector<std::shared_ptr<core::Button>> overlays;
 
     void reloadButtonsRegion() override;
+    void changeLanguage_()override;
+
     public:
         MainScreen() : Screen(ScreenID::MainMenu) { Screen::init(); init(); }
         ~MainScreen();

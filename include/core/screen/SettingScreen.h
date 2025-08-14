@@ -18,7 +18,8 @@ enum class SettingButtonType{
     ColorSelect,
     PathSelect,
     FileSelect,
-    RegionEditor
+    RegionEditor,
+    Choose
 };
 enum SettingButtonAction{
     None=0,
@@ -113,6 +114,7 @@ public:
     std::string configName;
     std::string fileChooseWindowName;
     std::string bitmapName;
+    std::vector<std::string> chooses;
     core::AudioID audioID;
     std::string outOfLimitOutPut;
     int minCount=0;
@@ -184,6 +186,7 @@ class SettingScreen : public Screen
     void updatePageTransition(); // 更新页面切换动画
     float calculateTransitionAlpha(bool isCurrentPage); // 计算页面透明度
     void reloadButtonsRegion() override;
+    void changeLanguage_()override;
 public:
     SettingScreen() : Screen(ScreenID::Settings) {init();}
     ~SettingScreen() {}

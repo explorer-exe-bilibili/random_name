@@ -105,6 +105,7 @@
   "settings.item.show_fps": "Show FPS",
   "settings.item.imgs_path": "Image Resource Directory",
   "settings.item.nosmoothui": "Disable Animation",
+  "settings.item.language": "Language",
 
   "settings.page.floatwindow": "Floating Window",
   "settings.item.floatwindow": "Floating Window",

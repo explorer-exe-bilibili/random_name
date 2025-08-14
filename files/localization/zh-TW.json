@@ -105,6 +105,7 @@
   "settings.item.show_fps": "顯示FPS",
   "settings.item.imgs_path": "圖片資源目錄",
   "settings.item.nosmoothui": "關閉動畫",
+  "settings.item.language": "語言",
 
   "settings.page.floatwindow": "懸浮窗",
   "settings.item.floatwindow": "懸浮窗",

@@ -105,6 +105,7 @@
   "settings.item.show_fps": "FPSを表示",
   "settings.item.imgs_path": "画像リソースディレクトリ",
   "settings.item.nosmoothui": "アニメーションをオフ",
+  "settings.item.language": "言語",
 
   "settings.page.floatwindow": "フロートウィンドウ",
   "settings.item.floatwindow": "フロートウィンドウ",

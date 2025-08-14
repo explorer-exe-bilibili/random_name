@@ -316,6 +316,12 @@ void NameScreen::setRegionState(RegionState mode) {
     }
 }
 
+void NameScreen::changeLanguage_(){
+    buttons[SkipButton]->SetText(text("button.skip"));
+    buttons[AddNameButton]->SetText(text("button.addName"));
+    nextStatus->SetText(text("button.nextPage"));
+}
+
 void NameButton::Draw(unsigned char alpha) {
     if(!fontPtr || !*fontPtr)return;
     int i=0;

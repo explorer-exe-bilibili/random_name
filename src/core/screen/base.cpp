@@ -296,6 +296,11 @@ void Screen::reloadConfig() {
     for(auto & s:screens)s.second->reloadButtonsRegion();
 }
 
+void Screen::changeLanguage(){
+    for(auto & s:screens)s.second->changeLanguage_();
+    exitButtonEdit->SetText(text("button.exitEdit"));
+}
+
 // 编辑模式方法实现
 void Screen::SetEditMode(bool enable) {
     editModeEnabled = enable;

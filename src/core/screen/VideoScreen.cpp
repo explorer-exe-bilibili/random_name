@@ -167,4 +167,8 @@ void VideoScreen::reloadButtonsRegion()
 {
     for(auto& b:buttons)b->resetRegion();
 }
+
+void VideoScreen::changeLanguage_(){
+    buttons[0]->SetText(text("button.skip"));
+}
 } // namespace screen
