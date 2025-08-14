@@ -375,5 +375,5 @@ void SettingScreen::reloadButtonsRegion() {
 }
 
 void SettingScreen::changeLanguage_(){
-    openRAWFile->SetText(text("settings.button.openRawFile"));
+    buttons[openRawFile]->SetText(text("settings.button.openRawFile"));
 }

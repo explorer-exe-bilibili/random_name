@@ -125,6 +125,11 @@
   "settings.button.Select.choose": "选择",
   "settings.button.error": "错误",
   "settings.button.editRegion": "编辑布局",
+  
+  "settings.language.en-US": "English",
+  "settings.language.zh-CN": "简体中文",
+  "settings.language.ja-JP": "日本語",
+  "settings.language.zh-TW": "繁體中文",
 
   "settings.editbox.default": "点击输入",
   "settings.editbox.input1": "|点击输入...",

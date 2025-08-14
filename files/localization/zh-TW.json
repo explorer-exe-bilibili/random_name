@@ -125,6 +125,11 @@
   "settings.button.Select.choose": "選擇",
   "settings.button.error": "錯誤",
   "settings.button.editRegion": "編輯佈局",
+  
+  "settings.language.en-US": "English",
+  "settings.language.zh-CN": "简体中文",
+  "settings.language.ja-JP": "日本語",
+  "settings.language.zh-TW": "繁體中文",
 
   "settings.editbox.default": "點擊輸入",
   "settings.editbox.input1": "|點擊輸入...",

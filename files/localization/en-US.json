@@ -125,6 +125,11 @@
   "settings.button.Select.choose": "Choose",
   "settings.button.error": "Error",
   "settings.button.editRegion": "Edit Layout",
+  
+  "settings.language.en-US": "English",
+  "settings.language.zh-CN": "简体中文",
+  "settings.language.ja-JP": "日本語",
+  "settings.language.zh-TW": "繁體中文",
 
   "settings.editbox.default": "Click to Enter",
   "settings.editbox.input1": "|Click to Enter...",
