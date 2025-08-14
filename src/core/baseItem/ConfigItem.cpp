@@ -1,10 +1,13 @@
 #include "core/Config.h"
 #include "core/configItem.h"
 #include "core/log.h"
+#include "core/baseItem/lang.h"
 #include "core/baseItem/Base.h"
 #include "core/explorer.h"
 #include "core/screen/base.h"
 #include "core/screen/nameScreen.h"
+#include "core/baseItem/lang.h"
+
 #include <GLFW/glfw3.h>
 #ifdef _WIN32
 #undef APIENTRY
@@ -12,6 +15,7 @@
 #define GLFW_EXPOSE_NATIVE_WIN32
 #include <GLFW/glfw3native.h>
 #endif
+using namespace core::LanguageUtils;
 
 // 实现bools映射
 std::map<boolconfig, bool> bools;
@@ -152,7 +156,7 @@ void SyncConfig() {
     core::Explorer::getInstance()->getAudio()->setSoundVolume(core::AudioIDToString(core::AudioID::click),core::Config::getInstance()->getUInt(VOLUME));
     core::Explorer::getInstance()->getAudio()->setSoundVolume(core::AudioIDToString(core::AudioID::enter),core::Config::getInstance()->getUInt(VOLUME));
 }
-
+extern std::string GetDefaultLanguage();
 void SetConfigItems(){
     core::Config* config = core::Config::getInstance();
     GLFWmonitor* primary = glfwGetPrimaryMonitor();
@@ -168,6 +172,8 @@ void SetConfigItems(){
     }
     else Log<<"Failed to get screen size"<<op::endl;
     config->setScreenSize(screenWidth,screenHeight);
+    config->setifno(LANG, GetDefaultLanguage());
+    core::LanguageUtils::setLang(core::to_languageID(config->get(LANG)));
     config->setifno(POOL_COUNT, 4);
     config->setifno(MODE, 1);
     config->setifno(SPECIAL, 0);
@@ -205,7 +211,7 @@ void SetConfigItems(){
     config->setifno(WINDOW_X,100);
     config->setifno(WINDOW_Y,100);
     config->setifno(VERTICAL_SYNC, 1);
-    config->setifno(WINDOW_TITLE, "祈愿");
+    config->setifno(WINDOW_TITLE, text("window.title"));
     config->setifno(USE_FONT_COMPATIBILITY, 0);
     config->setifno(NO_VIDEO_PRELOAD, 0);//TODO
 

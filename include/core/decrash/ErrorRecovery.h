@@ -9,6 +9,7 @@
 #include <memory>
 #include <thread>
 #include "core/log.h"
+#undef T
 
 namespace core {
 
@@ -30,7 +31,6 @@ public:
         float backoffMultiplier = 2.0f;
         bool exponentialBackoff = true;
     };
-
     template<typename T>
     static T executeWithRetry(
         std::function<T()> operation,

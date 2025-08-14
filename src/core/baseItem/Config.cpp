@@ -15,112 +15,10 @@
 #undef APIENTRY
 #include <windows.h>
 #include <shlobj.h>
-#include <io.h>
-#include <fcntl.h>
 #endif
 
 
 namespace core {
-
-// Windows 平台下的安全文件写入函数
-#ifdef _WIN32
-static bool writeFileUtf8(const std::filesystem::path& filePath, const std::string& content) {
-    try {
-        // 使用 Windows API 处理 UTF-8 路径
-        std::wstring wpath = filePath.wstring();
-        HANDLE hFile = CreateFileW(
-            wpath.c_str(),
-            GENERIC_WRITE,
-            0,
-            nullptr,
-            CREATE_ALWAYS,
-            FILE_ATTRIBUTE_NORMAL,
-            nullptr
-        );
-        
-        if (hFile == INVALID_HANDLE_VALUE) {
-            Log << Level::Error << "Failed to create file: " << filePath.string() << op::endl;
-            return false;
-        }
-        
-        DWORD bytesWritten;
-        BOOL writeResult = WriteFile(
-            hFile,
-            content.c_str(),
-            static_cast<DWORD>(content.length()),
-            &bytesWritten,
-            nullptr
-        );
-        
-        CloseHandle(hFile);
-        
-        if (!writeResult || bytesWritten != content.length()) {
-            Log << Level::Error << "Failed to write complete file content" << op::endl;
-            return false;
-        }
-        
-        return true;
-    } catch (const std::exception& e) {
-        Log << Level::Error << "Exception in writeFileUtf8: " << e.what() << op::endl;
-        return false;
-    }
-}
-
-static bool readFileUtf8(const std::filesystem::path& filePath, std::string& content) {
-    try {
-        // 使用 Windows API 处理 UTF-8 路径
-        std::wstring wpath = filePath.wstring();
-        HANDLE hFile = CreateFileW(
-            wpath.c_str(),
-            GENERIC_READ,
-            FILE_SHARE_READ,
-            nullptr,
-            OPEN_EXISTING,
-            FILE_ATTRIBUTE_NORMAL,
-            nullptr
-        );
-        
-        if (hFile == INVALID_HANDLE_VALUE) {
-            Log << Level::Error << "Failed to open file: " << filePath.string() << op::endl;
-            return false;
-        }
-        
-        DWORD fileSize = GetFileSize(hFile, nullptr);
-        if (fileSize == INVALID_FILE_SIZE) {
-            CloseHandle(hFile);
-            return false;
-        }
-        
-        if (fileSize == 0) {
-            CloseHandle(hFile);
-            content.clear();
-            return true;
-        }
-        
-        content.resize(fileSize);
-        DWORD bytesRead;
-        BOOL readResult = ReadFile(
-            hFile,
-            &content[0],
-            fileSize,
-            &bytesRead,
-            nullptr
-        );
-        
-        CloseHandle(hFile);
-        
-        if (!readResult || bytesRead != fileSize) {
-            Log << Level::Error << "Failed to read complete file content" << op::endl;
-            return false;
-        }
-        
-        return true;
-    } catch (const std::exception& e) {
-        Log << Level::Error << "Exception in readFileUtf8: " << e.what() << op::endl;
-        return false;
-    }
-}
-#endif
 
 // 初始化静态成员
 Config* Config::instance = nullptr;
@@ -779,28 +677,19 @@ bool Config::readFromFile() {
         }
     }
     
-    // 读取文件内容
-    std::string content;
-    bool readSuccess = false;
-    
-#ifdef _WIN32
-    readSuccess = readFileUtf8(configPath, content);
-#else
+    // 打开文件
     std::ifstream file(configFilePath);
-    if (file.is_open()) {
-        content = std::string((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
-        readSuccess = true;
-        file.close();
-    }
-#endif
-    
-    if (!readSuccess) {
-        // 如果文件不存在或读取失败，创建一个空的配置文件
-        Log << Level::Info << "Config file not found or read failed, creating a new one: " << configFilePath << op::endl;
+    if (!file.is_open()) {
+        // 如果文件不存在，创建一个空的配置文件
+        Log << Level::Info << "Config file not found, creating a new one: " << configFilePath << op::endl;
         return createEmptyConfigFile();
     }
-        
+    
     try {
+        // 读取整个文件内容
+        std::string content((std::istreambuf_iterator<char>(file)), std::istreambuf_iterator<char>());
+        file.close();
+        
         // 检查文件是否为空
         if (content.empty()) {
             Log << Level::Warn << "Config file is empty, initializing with default JSON structure" << op::endl;
@@ -978,6 +867,7 @@ bool Config::readFromFile() {
         return true;
     } catch (const std::exception& e) {
         Log << Level::Error << "Error in readFromFile: " << e.what() << op::endl;
+        file.close();
         return false;
     }
 }
@@ -1028,6 +918,12 @@ bool Config::saveToFile() {
     // 使用临时文件进行写入，成功后再替换原文件
     std::filesystem::path tempPath = configPath;
     tempPath += ".tmp";
+    std::ofstream file(tempPath);
+    
+    if (!file.is_open()) {
+        Log << Level::Error << "Error opening temporary config file for writing: " << tempPath.string() << op::endl;
+        return false;
+    }
     
     try {
         // 创建JSON对象
@@ -1046,28 +942,19 @@ bool Config::saveToFile() {
         }
         jsonConfig["config"] = configData;
         
-        // 格式化JSON内容
-        std::string jsonContent = jsonConfig.dump(4);  // 使用4个空格缩进，便于人类阅读
+        // 格式化JSON并写入文件
+        file << jsonConfig.dump(4);  // 使用4个空格缩进，便于人类阅读
+        file.flush();  // 确保所有数据都写入磁盘
         
-        // 使用安全的文件写入函数
-        bool writeSuccess = false;
-#ifdef _WIN32
-        writeSuccess = writeFileUtf8(tempPath, jsonContent);
-#else
-        std::ofstream file(tempPath);
-        if (file.is_open()) {
-            file << jsonContent;
-            file.flush();
-            writeSuccess = !file.fail();
-            file.close();
-        }
-#endif
-        
-        if (!writeSuccess) {
+        // 检查写入是否成功
+        if (file.fail()) {
             Log << Level::Error << "Failed to write to temporary config file" << op::endl;
+            file.close();
             std::filesystem::remove(tempPath);
             return false;
         }
+        
+        file.close();
         
         // 用临时文件替换原文件
         try {
@@ -1081,10 +968,12 @@ bool Config::saveToFile() {
         return true;
     } catch (const nlohmann::json::exception& e) {
         Log << Level::Error << "JSON error in saveToFile: " << e.what() << op::endl;
+        file.close();
         std::filesystem::remove(tempPath);
         return false;
     } catch (const std::exception& e) {
         Log << Level::Error << "Error in saveToFile: " << e.what() << op::endl;
+        file.close();
         std::filesystem::remove(tempPath);
         return false;
     }

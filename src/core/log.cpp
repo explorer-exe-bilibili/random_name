@@ -54,6 +54,18 @@ bool Log_::setFile(const std::string& filename) {
         actualFilename = filename;
     }
 
+    // 确保日志文件的目录存在
+    try {
+        std::filesystem::path logDir = std::filesystem::path(actualFilename).parent_path();
+        if (!logDir.empty() && !std::filesystem::exists(logDir)) {
+            std::filesystem::create_directories(logDir);
+            std::cout << "创建日志目录: " << logDir.string() << std::endl;
+        }
+    } catch (const std::exception& e) {
+        std::cout << "创建日志目录失败: " << e.what() << std::endl;
+        return false;
+    }
+
     // 如果文件已存在，删除它
     if(std::filesystem::exists(actualFilename)) {
         std::filesystem::remove(actualFilename);

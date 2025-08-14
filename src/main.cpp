@@ -213,8 +213,11 @@ int init(){
         // 初始化GLFW
     if (!glfwInit()) {
         return -1;
-    }    Config::getInstance()->init();
+    }
+    Config::getInstance()->init();
     SetConfigItems();
+    // 检查程序路径是否包含非ASCII字符
+    core::checkProgramPathAndWarn();
     if(std::filesystem::exists("upgrade_temp.exe")){
         std::filesystem::remove("upgrade.exe");
         Log<<Level::Info<<"Found upgrade_temp.exe, starting upgrade process"<<op::endl;

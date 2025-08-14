@@ -1,4 +1,5 @@
 #include "core/baseItem/Base.h"
+#include "core/baseItem/lang.h"
 #include "core/log.h"
 #include <iostream>
 #include <cstring>
@@ -25,6 +26,7 @@
 #include "utf8.h"
 
 using namespace core;
+using namespace core::LanguageUtils;
 
 // 定义全局变量
 namespace core {
@@ -404,5 +406,62 @@ void core::restart() {
         // fork 失败
         Log << Level::Error << "fork 失败，无法重启程序" << op::endl;
     }
+#endif
+}
+
+bool core::hasNonASCIICharacters(const std::string& path) {
+    for (unsigned char c : path) {
+        if (c > 127) {  // ASCII字符范围是0-127
+            return true;
+        }
+    }
+    return false;
+}
+
+void core::checkProgramPathAndWarn() {
+#ifdef _WIN32
+    try {
+        std::string execPath = getExecutablePath();
+        if (execPath.empty()) {
+            Log << Level::Warn << "无法获取程序路径" << op::endl;
+            return;
+        }
+        
+        Log << Level::Info << "程序路径: " << execPath << op::endl;
+        
+        if (hasNonASCIICharacters(execPath)) {
+            Log << Level::Warn << "检测到程序路径包含非ASCII字符，这可能导致某些功能异常" << op::endl;
+            
+            // 弹出警告对话框
+            std::wstring message = wtext("warn.msgbox.line1");
+            message += wtext("warn.msgbox.line2",core::string2wstring(execPath));
+            message += wtext("warn.msgbox.line3");
+            message += wtext("warn.msgbox.line4");
+            message += wtext("warn.msgbox.line5");
+            message += wtext("warn.msgbox.line6");
+            message += wtext("warn.msgbox.line7");
+            
+            // 使用Windows API显示消息框
+            int result = MessageBoxW(
+                NULL,
+                message.c_str(),
+                wtext("warn.msgbox.title").c_str(),
+                MB_YESNO | MB_ICONWARNING | MB_DEFBUTTON2
+            );
+            
+            if (result == IDNO) {
+                Log << Level::Info << "用户选择退出程序" << op::endl;
+                exit(0);
+            } else {
+                Log << Level::Info << "用户选择继续运行程序" << op::endl;
+            }
+        } else {
+            Log << Level::Info << "程序路径检查通过，未发现非ASCII字符" << op::endl;
+        }
+    } catch (const std::exception& e) {
+        Log << Level::Error << "检查程序路径时发生异常: " << e.what() << op::endl;
+    }
+#else
+    Log << Level::Info << "非Windows平台，跳过路径字符检查" << op::endl;
 #endif
 }

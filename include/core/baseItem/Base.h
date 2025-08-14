@@ -185,6 +185,10 @@ namespace core
     bool stringContains(const std::string& str, const std::string& substr);
     void quit();
     void restart();
+    
+    // 检查路径是否包含非ASCII字符
+    bool hasNonASCIICharacters(const std::string& path);
+    void checkProgramPathAndWarn();
 
     // 全局变量，用于跟踪程序目录状态
     extern std::filesystem::path g_executableDir;

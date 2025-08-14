@@ -1,4 +1,5 @@
 #include "core/screen/SettingScreen.h"
+#include "core/baseItem/lang.h"
 #include "core/log.h"
 #include "core/Config.h"
 #include <chrono>
@@ -10,6 +11,7 @@
 using namespace screen;
 using namespace core;
 using namespace settingScreen;
+using namespace core::LanguageUtils;
 
 void SettingScreen::init() {
     Screen::init();
@@ -40,7 +42,7 @@ void SettingScreen::init() {
     openRAWFile->SetClickFunc([]{ openFile("files/config.json"); });
     openRAWFile->SetColor(Color(0,0,0,255));
     openRAWFile->SetRegionStr(UI_REGION_SETTING_OPEN_CONFIG_FILE);
-    openRAWFile->SetText("打开配置文件");
+    openRAWFile->SetText(text("settings.button.openRawFile"));
     openRAWFile->SetEnableText(true);
     openRAWFile->SetEnableBitmap(true);
     openRAWFile->SetEnableFill(false);

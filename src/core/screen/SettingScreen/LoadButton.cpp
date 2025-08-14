@@ -1,4 +1,5 @@
 #include "core/screen/SettingScreen.h"
+#include "core/baseItem/lang.h"
 #include "core/log.h"
 #include "core/Config.h"
 
@@ -10,6 +11,7 @@
 using namespace screen;
 using namespace core;
 using namespace settingScreen;
+using namespace LanguageUtils;
 
 #define PAGES "pages"
 #define ITEM "item"
@@ -39,9 +41,9 @@ static nlohmann::json RollBack(std::string jsonpath) {
     nlohmann::json i;
     
     // 图片页
-    p[TITLE] = "图片";
+    p[TITLE] = text("settings.page.images");
 
-    i[NAME] = "卡池1图片";
+    i[NAME] = text("settings.item.pool1.image");
     i[CONFIG_NAME] = OVERLAY1;
     i[FILE_TYPE] = FileType::Picture;
     i[TYPE] = SettingButtonType::FileSelect;
@@ -49,7 +51,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i[BITMAP_ID] = BitmapID::Overlay0;
     p[ITEM].push_back(i); 
     i.clear();
-    i[NAME] = "卡池2图片";
+    i[NAME] = text("settings.item.pool2.image");
     i[CONFIG_NAME] = OVERLAY2;
     i[FILE_TYPE] = FileType::Picture;
     i[TYPE] = SettingButtonType::FileSelect;
@@ -57,7 +59,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i[BITMAP_ID] = BitmapID::Overlay1;
     p[ITEM].push_back(i);
     i.clear();
-    i[NAME] = "卡池3图片";
+    i[NAME] = text("settings.item.pool3.image");
     i[CONFIG_NAME] = OVERLAY3;
     i[FILE_TYPE] = FileType::Picture;
     i[TYPE] = SettingButtonType::FileSelect;
@@ -65,7 +67,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i[BITMAP_ID] = BitmapID::Overlay2;
     p[ITEM].push_back(i);
     i.clear();
-    i[NAME] = "卡池4图片";
+    i[NAME] = text("settings.item.pool4.image");
     i[CONFIG_NAME] = OVERLAY4;
     i[FILE_TYPE] = FileType::Picture;
     i[TYPE] = SettingButtonType::FileSelect;
@@ -74,29 +76,29 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "图片移动的速度";
+    i[NAME] = text("settings.item.image.speed");
     i[CONFIG_NAME] = EXCHANGE_SPEED;
     i[TYPE] = SettingButtonType::Textbox;
     i[ACTIONS] = SettingButtonAction::CountBetween;
     i[MIN_COUNT] = 1;
     i[MAX_COUNT] = 10000;
-    i[OUT_OF_LIMIT_OUTPUT] = "输入一个1-10000之间的数字";
+    i[OUT_OF_LIMIT_OUTPUT] = text("settings.outoflimit.image.speed");
     i[NUMBER] = 11;
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "默认卡池序号";
+    i[NAME] = text("settings.item.default.pool.index");
     i[CONFIG_NAME] = MODE;
     i[TYPE] = SettingButtonType::Textbox;
     i[ACTIONS] = SettingButtonAction::CountBetween;
     i[MIN_COUNT] = 0;
     i[MAX_COUNT] = 3;
-    i[OUT_OF_LIMIT_OUTPUT] = "输入一个0-3之间的数字";
+    i[OUT_OF_LIMIT_OUTPUT] = text("settings.outoflimit.default.pool");
     i[NUMBER] = 12;
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "使用动态背景";
+    i[NAME] = text("settings.item.use.video.background");
     i[CONFIG_NAME] = USE_VIDEO_BACKGROUND;
     i[TYPE] = SettingButtonType::Switch;
     i[NUMBER] = 13;
@@ -107,61 +109,61 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p.clear();
     
     // 名单与卡池页
-    p[TITLE] = "名单与卡池";
+    p[TITLE] = text("settings.page.names");
 
-    i[NAME] = "卡池1名单";
+    i[NAME] = text("settings.item.pool1.names");
     i[CONFIG_NAME] = NAMES1;
     i[FILE_TYPE] = FileType::NameFile;
     i[TYPE] = SettingButtonType::FileSelect;
     i[NUMBER] = 1;
     p[ITEM].push_back(i);
     i.clear();
-    i[NAME] = "卡池2名单";
+    i[NAME] = text("settings.item.pool2.names");
     i[CONFIG_NAME] = NAMES2;
     i[FILE_TYPE] = FileType::NameFile;
     i[TYPE] = SettingButtonType::FileSelect;
     i[NUMBER] = 2;
     p[ITEM].push_back(i);
     i.clear();
-    i[NAME] = "卡池3名单";
+    i[NAME] = text("settings.item.pool3.names");
     i[CONFIG_NAME] = NAMES3;
     i[FILE_TYPE] = FileType::NameFile;
     i[TYPE] = SettingButtonType::FileSelect;
     i[NUMBER] = 3;
     p[ITEM].push_back(i);
     i.clear();
-    i[NAME] = "卡池4名单";
+    i[NAME] = text("settings.item.pool4.names");
     i[CONFIG_NAME] = NAMES4;
     i[FILE_TYPE] = FileType::NameFile;
     i[TYPE] = SettingButtonType::FileSelect;
     i[NUMBER] = 4;
     p[ITEM].push_back(i);
     i.clear();
-    i[NAME] = "抽卡时名字的颜色";
+    i[NAME] = text("settings.item.name.color");
     i[CONFIG_NAME] = NAME_COLOR;
     i[TYPE] = SettingButtonType::ColorSelect;
     i[NUMBER] = 5;
     p[ITEM].push_back(i);
     i.clear();
-    i[NAME] = "抽卡时6星名字的颜色";
+    i[NAME] = text("settings.item.name6.color");
     i[CONFIG_NAME] = NAME_COLOR_6_STAR;
     i[TYPE] = SettingButtonType::ColorSelect;
     i[NUMBER] = 6;
     p[ITEM].push_back(i);
     i.clear();
-    i[NAME] = "抽卡时小名字的颜色";
+    i[NAME] = text("settings.item.small.name.color");
     i[CONFIG_NAME] = TEXT_COLOR;
     i[TYPE] = SettingButtonType::ColorSelect;
     i[NUMBER] = 7;
     p[ITEM].push_back(i);
     i.clear();
-    i[NAME] = "抽背卡池";
+    i[NAME] = text("settings.item.special.pool");
     i[CONFIG_NAME] = SPECIAL;
     i[TYPE] = SettingButtonType::Textbox;
     i[ACTIONS] = SettingButtonAction::CountBetween;
     i[MIN_COUNT] = 0;
     i[MAX_COUNT] = 4;
-    i[OUT_OF_LIMIT_OUTPUT] = "输入一个0-4之间的数字（0表示禁用）";
+    i[OUT_OF_LIMIT_OUTPUT] = text("settings.outoflimit.special");
     i[NUMBER] = 11;
     p[ITEM].push_back(i);
     i.clear();
@@ -170,8 +172,8 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p.clear();
     
     // 视频页
-    p[TITLE] = "视频";
-    i[NAME] = "单发3星视频";
+    p[TITLE] = text("settings.page.video");
+    i[NAME] = text("settings.item.signal3.video");
     i[CONFIG_NAME] = SIGNAL_3_STAR_VIDEO_PATH;
     i[FILE_TYPE] = FileType::Video;
     i[TYPE] = SettingButtonType::FileSelect;
@@ -179,7 +181,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i[NUMBER] = 1;
     p[ITEM].push_back(i);
     i.clear();
-    i[NAME] = "单发4星视频";
+    i[NAME] = text("settings.item.signal4.video");
     i[CONFIG_NAME] = SIGNAL_4_STAR_VIDEO_PATH;
     i[FILE_TYPE] = FileType::Video;
     i[TYPE] = SettingButtonType::FileSelect;
@@ -187,7 +189,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i[NUMBER] = 2;
     p[ITEM].push_back(i);
     i.clear();
-    i[NAME] = "单发5星视频";
+    i[NAME] = text("settings.item.signal5.video");
     i[CONFIG_NAME] = SIGNAL_5_STAR_VIDEO_PATH;
     i[FILE_TYPE] = FileType::Video;
     i[TYPE] = SettingButtonType::FileSelect;
@@ -195,7 +197,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i[NUMBER] = 3;
     p[ITEM].push_back(i);
     i.clear();
-    i[NAME] = "十发4星视频";
+    i[NAME] = text("settings.item.group4.video");
     i[CONFIG_NAME] = GROUP_4_STAR_VIDEO_PATH;
     i[FILE_TYPE] = FileType::Video;
     i[TYPE] = SettingButtonType::FileSelect;
@@ -203,7 +205,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i[NUMBER] = 4;
     p[ITEM].push_back(i);
     i.clear();
-    i[NAME] = "十发5星视频";
+    i[NAME] = text("settings.item.group5.video");
     i[CONFIG_NAME] = GROUP_5_STAR_VIDEO_PATH;
     i[FILE_TYPE] = FileType::Video;
     i[TYPE] = SettingButtonType::FileSelect;
@@ -212,7 +214,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "视频背景";
+    i[NAME] = text("settings.item.video.background");
     i[CONFIG_NAME] = BACKGROUND_VIDEO_PATH;
     i[FILE_TYPE] = FileType::Video;
     i[TYPE] = SettingButtonType::FileSelect;
@@ -221,14 +223,14 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p[ITEM].push_back(i);
     i.clear();
     
-    i[NAME] = "关闭视频";
+    i[NAME] = text("settings.item.video.off");
     i[CONFIG_NAME] = OFF_VIDEO;
     i[TYPE] = SettingButtonType::Switch;
     i[NUMBER] = 11;
     p[ITEM].push_back(i);
     i.clear();
     
-    i[NAME] = "关闭音乐";
+    i[NAME] = text("settings.item.music.off");
     i[CONFIG_NAME] = OFF_MUSIC;
     i[TYPE] = SettingButtonType::Switch;
     i[NUMBER] = 12;
@@ -239,72 +241,72 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p.clear();
     /*
     // 悬浮窗页
-    p[TITLE] = "悬浮窗";
+    p[TITLE] = text("settings.page.floatwindow");
     
-    i[NAME] = "悬浮窗";
+    i[NAME] = text("settings.item.floatwindow");
     i[CONFIG_NAME] = FLOATWINDOW;
     i[TYPE] = SettingButtonType::Switch;
     i[NUMBER] = 1;
     p[ITEM].push_back(i);
     i.clear();
     
-    i[NAME] = "初始x坐标";
+    i[NAME] = text("settings.item.floatwindow.init.x");
     i[CONFIG_NAME] = FLOAT_WINDOW_X;
     i[TYPE] = SettingButtonType::Textbox;
     i[ACTIONS] = SettingButtonAction::CountBetween;
     i[MIN_COUNT] = 1;
     i[MAX_COUNT] = screenInfo.width;
-    i[OUT_OF_LIMIT_OUTPUT] = "大小不能大于屏幕";
+    i[OUT_OF_LIMIT_OUTPUT] = text("settings.outoflimit.size");
     i[NUMBER] = 2;
     p[ITEM].push_back(i);
     i.clear();
     
-    i[NAME] = "初始y坐标";
+    i[NAME] = text("settings.item.floatwindow.init.y");
     i[CONFIG_NAME] = FLOAT_WINDOW_Y;
     i[TYPE] = SettingButtonType::Textbox;
     i[ACTIONS] = SettingButtonAction::CountBetween;
     i[MIN_COUNT] = 1;
     i[MAX_COUNT] = screenInfo.height;
-    i[OUT_OF_LIMIT_OUTPUT] = "大小不能大于屏幕";
+    i[OUT_OF_LIMIT_OUTPUT] = text("settings.outoflimit.size");
     i[NUMBER] = 3;
     p[ITEM].push_back(i);
     i.clear();
     
-    i[NAME] = "宽度";
+    i[NAME] = text("settings.item.floatwindow.width");
     i[CONFIG_NAME] = FLOAT_WINDOW_WIDTH;
     i[TYPE] = SettingButtonType::Textbox;
     i[ACTIONS] = SettingButtonAction::CountBetween;
     i[MIN_COUNT] = 1;
     i[MAX_COUNT] = screenInfo.width;
-    i[OUT_OF_LIMIT_OUTPUT] = "大小不能大于屏幕";
+    i[OUT_OF_LIMIT_OUTPUT] = text("settings.outoflimit.size");
     i[NUMBER] = 4;
     p[ITEM].push_back(i);
     i.clear();
     
-    i[NAME] = "高度";
+    i[NAME] = text("settings.item.floatwindow.height");
     i[CONFIG_NAME] = FLOAT_WINDOW_HEIGHT;
     i[TYPE] = SettingButtonType::Textbox;
     i[ACTIONS] = SettingButtonAction::CountBetween;
     i[MIN_COUNT] = 1;
     i[MAX_COUNT] = screenInfo.height;
-    i[OUT_OF_LIMIT_OUTPUT] = "大小不能大于屏幕";
+    i[OUT_OF_LIMIT_OUTPUT] = text("settings.outoflimit.size");
     i[NUMBER] = 5;
     p[ITEM].push_back(i);
     i.clear();
     
-    i[NAME] = "滑动系数";
+    i[NAME] = text("settings.item.floatwindow.mu");
     i[CONFIG_NAME] = FLOAT_WINDOW_MU;
     i[TYPE] = SettingButtonType::Textbox;
     i[ACTIONS] = SettingButtonAction::CountBetween;
     i[MIN_COUNT] = 0;
     i[MAX_COUNT] = 1;
-    i[OUT_OF_LIMIT_OUTPUT] = "大小不能超过1或小于0";
+    i[OUT_OF_LIMIT_OUTPUT] = text("settings.outoflimit.mu");
     i[NUMBER] = 6;
     p[ITEM].push_back(i);
     i.clear();
-    i[NAME] = "悬浮窗图片";
+    i[NAME] = text("settings.item.floatwindow.image");
     i[CONFIG_NAME] = FLOAT_WINDOW_IMG;
-    i[FILE_CHOOSE_WINDOW_NAME] = "选择悬浮窗图片";
+    i[FILE_CHOOSE_WINDOW_NAME] = text("settings.item.floatwindow.choose");
     i[FILE_TYPE] = FileType::Picture;
     i[TYPE] = SettingButtonType::FileSelect;
     i[ACTIONS]= SettingButtonAction::Restart;
@@ -312,13 +314,13 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i[BITMAP_ID] = BitmapID::floatWindow;
     p[ITEM].push_back(i);
     i.clear();
-    i[NAME] = "悬浮窗图片透明度";
+    i[NAME] = text("settings.item.floatwindow.alpha");
     i[CONFIG_NAME] = FLOAT_WINDOW_ALPHA;
     i[TYPE] = SettingButtonType::Textbox;
     i[ACTIONS] = SettingButtonAction::CountBetween;
     i[MIN_COUNT] = 0;
     i[MAX_COUNT] = 255;
-    i[OUT_OF_LIMIT_OUTPUT] = "大小不能超过255或小于0";
+    i[OUT_OF_LIMIT_OUTPUT] = text("settings.outoflimit.alpha");
     i[NUMBER] = 12;
     p[ITEM].push_back(i);
     i.clear();
@@ -327,16 +329,16 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p.clear();
     */
     // 外观页
-    p[TITLE] = "窗口和字体";
+    p[TITLE] = text("settings.page.appearance");
     
-    i[NAME] = "窗口模式";
+    i[NAME] = text("settings.item.window.mode");
     i[CONFIG_NAME] = INWINDOW;
     i[TYPE] = SettingButtonType::Switch;
     i[NUMBER] = 1;
     p[ITEM].push_back(i);
     i.clear();
     
-    i[NAME] = "标题";
+    i[NAME] = text("settings.item.window.title");
     i[CONFIG_NAME] = WINDOW_TITLE;
     i[TYPE] = SettingButtonType::Textbox;
     i[ACTIONS] = SettingButtonAction::ResetWindowTitle;
@@ -344,7 +346,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "垂直同步";
+    i[NAME] = text("settings.item.vsync");
     i[TYPE] = SettingButtonType::Switch;
     i[NUMBER] = 3;
     i[CONFIG_NAME] = VERTICAL_SYNC;
@@ -352,51 +354,51 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "窗口初始宽度";
+    i[NAME] = text("settings.item.window.width");
     i[CONFIG_NAME] = WINDOW_WIDTH;
     i[TYPE] = SettingButtonType::Textbox;
     i[ACTIONS] = SettingButtonAction::CountBetween;
     i[MIN_COUNT] = 100;
     i[MAX_COUNT] = 16384;
-    i[OUT_OF_LIMIT_OUTPUT] = "大小不能大于16384或小于100";
+    i[OUT_OF_LIMIT_OUTPUT] = text("settings.outoflimit.window.size");
     i[NUMBER] = 11;
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "窗口初始高度";
+    i[NAME] = text("settings.item.window.height");
     i[CONFIG_NAME] = WINDOW_HEIGHT;
     i[TYPE] = SettingButtonType::Textbox;
     i[ACTIONS] = SettingButtonAction::CountBetween;
     i[MIN_COUNT] = 100;
     i[MAX_COUNT] = 16384;
-    i[OUT_OF_LIMIT_OUTPUT] = "大小不能大于16384或小于100";
+    i[OUT_OF_LIMIT_OUTPUT] = text("settings.outoflimit.window.size");
     i[NUMBER] = 12;
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "窗口初始x坐标";
+    i[NAME] = text("settings.item.window.x");
     i[CONFIG_NAME] = WINDOW_X;
     i[TYPE] = SettingButtonType::Textbox;
     i[ACTIONS] = SettingButtonAction::CountBetween;
     i[MIN_COUNT] = 0;
     i[MAX_COUNT] = screenInfo.width;
-    i[OUT_OF_LIMIT_OUTPUT] = "大小不能大于屏幕宽度";
+    i[OUT_OF_LIMIT_OUTPUT] = text("settings.outoflimit.screen.width");
     i[NUMBER] = 13;
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "窗口初始y坐标";
+    i[NAME] = text("settings.item.window.y");
     i[CONFIG_NAME] = WINDOW_Y;
     i[TYPE] = SettingButtonType::Textbox;
     i[ACTIONS] = SettingButtonAction::CountBetween;
     i[MIN_COUNT] = 0;
     i[MAX_COUNT] = screenInfo.height;
-    i[OUT_OF_LIMIT_OUTPUT] = "大小不能大于屏幕高度";
+    i[OUT_OF_LIMIT_OUTPUT] = text("settings.outoflimit.screen.height");
     i[NUMBER] = 14;
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "文本字体";
+    i[NAME] = text("settings.item.font.text");
     i[CONFIG_NAME] = TEXT_FONT_PATH;
     i[FILE_TYPE] = FileType::Font;
     i[TYPE] = SettingButtonType::FileSelect;
@@ -405,7 +407,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "图标字体";
+    i[NAME] = text("settings.item.font.icon");
     i[CONFIG_NAME] = ICON_FONT_PATH;
     i[FILE_TYPE] = FileType::Font;
     i[TYPE] = SettingButtonType::FileSelect;
@@ -414,7 +416,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "名字字体";
+    i[NAME] = text("settings.item.font.name");
     i[CONFIG_NAME] = NAME_FONT_PATH;
     i[FILE_TYPE] = FileType::Font;
     i[TYPE] = SettingButtonType::FileSelect;
@@ -423,7 +425,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "默认字体";
+    i[NAME] = text("settings.item.font.default");
     i[CONFIG_NAME] = DEFAULT_FONT_PATH;
     i[FILE_TYPE] = FileType::Font;
     i[TYPE] = SettingButtonType::FileSelect;
@@ -436,8 +438,8 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p.clear();
 
     // 音频页
-    p[TITLE] = "音频";
-    i[NAME] = "点击按钮音效";
+    p[TITLE] = text("settings.page.audio");
+    i[NAME] = text("settings.item.audio.click");
     i[CONFIG_NAME] = CLICK_MUSIC_PATH;
     i[FILE_TYPE] = FileType::Sound;
     i[TYPE] = SettingButtonType::FileSelect;
@@ -446,7 +448,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "切换页面音效";
+    i[NAME] = text("settings.item.audio.enter");
     i[CONFIG_NAME] = ENTER_MUSIC_PATH;
     i[FILE_TYPE] = FileType::Sound;
     i[TYPE] = SettingButtonType::FileSelect;
@@ -455,7 +457,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "背景音乐";
+    i[NAME] = text("settings.item.audio.bgm");
     i[CONFIG_NAME] = BGM_PATH;
     i[FILE_TYPE] = FileType::Audio;
     i[TYPE] = SettingButtonType::FileSelect;
@@ -464,7 +466,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "3星音效";
+    i[NAME] = text("settings.item.audio.star3");
     i[CONFIG_NAME] = STAR_3_MUSIC_PATH;
     i[FILE_TYPE] = FileType::Audio;
     i[TYPE] = SettingButtonType::FileSelect;
@@ -473,7 +475,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "4星音效";
+    i[NAME] = text("settings.item.audio.star4");
     i[CONFIG_NAME] = STAR_4_MUSIC_PATH;
     i[FILE_TYPE] = FileType::Audio;
     i[TYPE] = SettingButtonType::FileSelect;
@@ -482,7 +484,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "5星音效";
+    i[NAME] = text("settings.item.audio.star5");
     i[CONFIG_NAME] = STAR_5_MUSIC_PATH;
     i[FILE_TYPE] = FileType::Audio;
     i[TYPE] = SettingButtonType::FileSelect;
@@ -491,7 +493,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "满星音效";
+    i[NAME] = text("settings.item.audio.starfull");
     i[CONFIG_NAME] = STAR_FULL_MUSIC_PATH;
     i[FILE_TYPE] = FileType::Audio;
     i[TYPE] = SettingButtonType::FileSelect;
@@ -500,13 +502,13 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "音频音量";
+    i[NAME] = text("settings.item.audio.volume");
     i[CONFIG_NAME] = VOLUME;
     i[TYPE] = SettingButtonType::Textbox;
     i[ACTIONS] = SettingButtonAction::CountBetween;
     i[MIN_COUNT] = 0;
     i[MAX_COUNT] = 100;
-    i[OUT_OF_LIMIT_OUTPUT] = "音量必须在0到100之间";
+    i[OUT_OF_LIMIT_OUTPUT] = text("settings.outoflimit.volume");
     i[NUMBER] = 11;
     
     p[ITEM].push_back(i);
@@ -515,30 +517,30 @@ static nlohmann::json RollBack(std::string jsonpath) {
     j[PAGES].push_back(p);
     p.clear();
 
-    p[TITLE] = "控件布局";
+    p[TITLE] = text("settings.page.layout");
 
-    i[NAME] = "主界面布局设置";
+    i[NAME] = text("settings.item.layout.main");
     i[TYPE] = SettingButtonType::RegionEditor;
     i[SCREENID] = ScreenID::MainMenu;
     i[NUMBER] = 1;
     p[ITEM].push_back(i);
     i.clear();
     
-    i[NAME] = "设置界面布局设置";
+    i[NAME] = text("settings.item.layout.settings");
     i[TYPE] = SettingButtonType::RegionEditor;
     i[SCREENID] = ScreenID::Settings;
     i[NUMBER] = 2;
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "姓名界面布局设置";
+    i[NAME] = text("settings.item.layout.name");
     i[TYPE] = SettingButtonType::RegionEditor;
     i[SCREENID] = ScreenID::Name;
     i[NUMBER] = 11;
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "列表界面布局设置";
+    i[NAME] = text("settings.item.layout.list");
     i[TYPE] = SettingButtonType::RegionEditor;
     i[SCREENID] = ScreenID::ListName;
     i[NUMBER] = 12;
@@ -549,44 +551,44 @@ static nlohmann::json RollBack(std::string jsonpath) {
     p.clear();
 
     // 杂项页
-    p[TITLE] = "杂项";
+    p[TITLE] = text("settings.page.misc");
 
-    i[NAME] = "设置页面使用json文件";
+    i[NAME] = text("settings.item.use_json_settings");
     i[CONFIG_NAME] = USE_JSON_SETTINGS;
     i[TYPE] = SettingButtonType::Switch;
     i[NUMBER] = 1;
     p[ITEM].push_back(i);
     i.clear();
     
-    i[NAME] = "字体兼容模式";
+    i[NAME] = text("settings.item.font_compatibility");
     i[CONFIG_NAME] = USE_FONT_COMPATIBILITY;
     i[TYPE] = SettingButtonType::Switch;
     i[NUMBER] = 2;
     p[ITEM].push_back(i);
     i.clear();
     
-    i[NAME] = "调试模式";
+    i[NAME] = text("settings.item.debug");
     i[TYPE] = SettingButtonType::Switch;
     i[NUMBER] = 3;
     i[CONFIG_NAME] = DEBUG;
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "显示FPS";
+    i[NAME] = text("settings.item.show_fps");
     i[TYPE] = SettingButtonType::Switch;
     i[NUMBER] = 4;
     i[CONFIG_NAME] = SHOW_FPS;
     p[ITEM].push_back(i);
     i.clear();
 
-    i[NAME] = "图片资源目录";
+    i[NAME] = text("settings.item.imgs_path");
     i[CONFIG_NAME] = IMGS_PATH;
     i[TYPE] = SettingButtonType::PathSelect;
     i[NUMBER] = 5;
     p[ITEM].push_back(i);
     i.clear();
     
-    i[NAME] = "关闭动画";
+    i[NAME] = text("settings.item.nosmoothui");
     i[TYPE] = SettingButtonType::Switch;
     i[NUMBER] = 6;
     i[CONFIG_NAME] = NOSMOOTHUI;
@@ -595,7 +597,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     
     j[PAGES].push_back(p);
     p.clear();
-      // 写入JSON文件
+    // 写入JSON文件
     if (bools[boolconfig::use_json_settings]) {
         std::ofstream file("files/settings.json", std::ios::out | std::ios::trunc);
         if (file.is_open()) {
@@ -667,10 +669,10 @@ void SettingScreen::loadButtons() {
     int page = 0;
     try{
         for (const auto& item : jsonData[PAGES]) {
-            titles.push_back(item.value(TITLE, "未知标题"));
+            titles.push_back(item.value(TITLE, text("settings.unknown.title")));
             for (const auto& button : item[ITEM]) {
                 sItem item;
-                item.name = button.value(NAME, "未知按钮");
+                item.name = button.value(NAME, text("settings.unknown.button"));
                 item.configName = button.value(CONFIG_NAME, "Unknown");
                 item.bitmapName = button.value(BITMAP_NAME, "");
                 item.type = button.value(TYPE, SettingButtonType::Switch);

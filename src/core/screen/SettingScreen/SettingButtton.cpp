@@ -1,6 +1,7 @@
 #include "core/screen/SettingScreen.h"
 #include "core/screen/mainScreen.h"
 #include "core/screen/nameScreen.h"
+#include "core/baseItem/lang.h"
 #include "core/log.h"
 
 #include "core/Config.h"
@@ -31,26 +32,28 @@
 using namespace core;
 using namespace screen;
 using namespace settingScreen;
+using namespace LanguageUtils;
+
 
 // 文件类型过滤器映射表实现
 static std::vector<FileTypeFilter> getFiltersForType(FileType fileType) {
     // 定义文件类型到过滤器的映射
     static const std::map<FileType, std::vector<FileTypeFilter>> fileTypeFiltersMap = {
         { FileType::All, {
-            {"所有文件(*.*)", {"*.*"}}
+            {text("filetype.all"), {"*.*"}}
         }},
         { FileType::Picture, {
-            {"图片文件(*.png;*.jpg;*.jpeg;*.bmp;*.gif;*.tiff;*.webp)", {"*.png","*.jpg","*.jpeg","*.bmp","*.gif","*.tiff","*.webp"}}
+            {text("filetype.picture"), {"*.png","*.jpg","*.jpeg","*.bmp","*.gif","*.tiff","*.webp"}}
         }},
         { FileType::Video, {
-            {"视频文件(*.mp4;*.avi;*.mkv;*.mov;*.wmv;*.flv;*.webm)", {"*.mp4","*.avi","*.mkv","*.mov","*.wmv","*.flv","*.webm"} }
+            {text("filetype.video"), {"*.mp4","*.avi","*.mkv","*.mov","*.wmv","*.flv","*.webm"}}
         }},
         { FileType::Audio, {
-            {"音频文件(*.mp3;*.wav;*.flac;*.ogg;*.aac;*.m4a)", {"*.mp3","*.wav","*.flac","*.ogg","*.aac","*.m4a"}}
+            {text("filetype.audio"), {"*.mp3","*.wav","*.flac","*.ogg","*.aac","*.m4a"}}
         }},
         { FileType::NameFile, {
             // {"文档文件(*.pdf;*.doc;*.docx;*.xlsx)", {"*.pdf","*.doc","*.docx","*.xlsx"}},
-            {"文本文件(*.txt)", {"*.txt"}}
+            {text("filetype.nameFile"), {"*.txt"}}
         }},
         // FileType::Custom 需要单独处理
     };
@@ -464,32 +467,6 @@ namespace {
         return false; // 其他平台暂不支持
 #endif
     }
-    
-    std::string GetPlatformKeyboardInfo() {
-#ifdef _WIN32
-        return "Windows屏幕键盘 (OSK)";
-#elif defined(__APPLE__)
-        return "macOS辅助功能键盘";
-#elif defined(__linux__)
-        // 返回第一个找到的键盘
-        const char* keyboards[] = {
-            "onboard", "florence", "matchbox-keyboard", "kvkbd", "cellwriter", nullptr
-        };
-        
-        for (int i = 0; keyboards[i] != nullptr; i++) {
-            std::string checkCmd = "which ";
-            checkCmd += keyboards[i];
-            checkCmd += " >/dev/null 2>&1";
-            
-            if (system(checkCmd.c_str()) == 0) {
-                return std::string("Linux虚拟键盘 (") + keyboards[i] + ")";
-            }
-        }
-        return "Linux虚拟键盘 (未安装)";
-#else
-        return "不支持的平台";
-#endif
-    }
 }
 
 SettingButton::SettingButton(sItem item_, int number, int page)
@@ -580,7 +557,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
             }
             
             boolconfig configEnum = GetBoolConfigFromString(safeConfigName);
-            button->SetText(bools[configEnum] ? "开" : "关");
+            button->SetText(bools[configEnum] ? text("settings.button.status.on") : text("settings.button.status.off"));
             button->SetClickFunc([this, safeConfigName, configEnum]{
                 try {
                     if (configEnum == boolconfig::unknown) {
@@ -588,7 +565,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
                         return;
                     }
                     bools[configEnum] = !bools[configEnum];
-                    button->SetText(bools[configEnum] ? "开" : "关");
+                    button->SetText(bools[configEnum] ? text("settings.button.status.on") : text("settings.button.status.off"));
                     SyncConfig(); // 同步到配置文件
                     checkActions();
                 }
@@ -599,13 +576,13 @@ SettingButton::SettingButton(sItem item_, int number, int page)
         }
         catch (const std::exception& e) {
             Log << Level::Error << "Error setting up switch button: " << e.what() << op::endl;
-            button->SetText("错误");
+            button->SetText(text("settings.button.status.error"));
         }
     }
     else if(item.type==SettingButtonType::Textbox){
         // 获取当前配置值作为默认文本
         std::string currentValue = Config::getInstance()->get(item.configName);
-        button->SetText(currentValue.empty() ? "点击输入" : currentValue);
+        button->SetText(currentValue.empty() ? text("settings.editbox.default") : currentValue);
         // 设置编辑区域（使用按钮区域的完全相同尺寸）
         editingTextRegion = ButtonRegion;
         
@@ -647,7 +624,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
         button->SetEnableBitmap(false);
         button->SetEnableFill(true);
         button->SetFillColor(Config::getInstance()->getUInt(item.configName));
-        button->SetText("选择颜色");
+        button->SetText(text("settings.colorSelect.text"));
         button->SetClickFunc([this, configName = item.configName]{
             // 安全地访问configName
             try {
@@ -673,7 +650,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
         if(!showText.empty()){
             if(!core::isFileExists(showText)){
                 Log<<Level::Warn<<"FileSelect button - file does not exist: "<<showText<<op::endl;
-                showText="等待选择";
+                showText=text("settings.button.fileSelect.none");
             }
             else{
                 // 只显示文件名，不显示完整路径
@@ -686,7 +663,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
         button2=std::make_shared<core::Button>(Button());
         button2->SetRegion(Button2Region);
         button2->SetBitmap(BitmapID::SettingButton);
-        button2->SetText("打开");
+        button2->SetText(text("settings.button.Select.open"));
         button2->SetEnableBitmap(true);
         button2->SetEnableText(true);
         button2->SetEnableFill(false);
@@ -696,7 +673,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
         button2->SetClickFunc([this]{
             openFile();
         });
-        button->SetText("选择");
+        button->SetText(text("settings.button.Select.choose"));
         button->SetClickFunc([this, configName = item.configName]{
             try {
                 if (configName.empty()) {
@@ -754,7 +731,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
         showText=Config::getInstance()->get(item.configName);
         if(!showText.empty()){
             if(!core::isFileExists(showText)){
-                showText="等待选择";
+                showText=text("settings.button.Select.none");
             }
             else{
                 // 只显示文件名，不显示完整路径
@@ -767,7 +744,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
         button2=std::make_shared<core::Button>(Button());
         button2->SetRegion(Button2Region);
         button2->SetBitmap(BitmapID::SettingButton);
-        button2->SetText("打开");
+        button2->SetText(text("settings.button.Select.open"));
         button2->SetEnableBitmap(true);
         button2->SetEnableText(true);
         button2->SetEnableFill(false);
@@ -777,7 +754,7 @@ SettingButton::SettingButton(sItem item_, int number, int page)
         button2->SetClickFunc([this]{
             openFile();
         });
-        button->SetText("选择");
+        button->SetText(text("settings.button.Select.choose"));
         button->SetClickFunc([this, configName = item.configName]{
             try {
                 if (configName.empty()) {
@@ -814,10 +791,10 @@ SettingButton::SettingButton(sItem item_, int number, int page)
     else if(item.type==SettingButtonType::RegionEditor){
         if(item.screenID==screen::ScreenID::Unknown){
             Log << Level::Error << "RegionEditor button requires a valid screenID" << op::endl;
-            button->SetText("错误");
+            button->SetText(text("settings.button.error"));
             return;
         }
-        button->SetText("编辑区域");
+        button->SetText(text("settings.button.editRegion"));
         button->SetClickFunc([this]{
             screen::Screen::SwitchToScreen(item.screenID,11);
             static_cast<screen::MainScreen*>(screen::Screen::getScreen(screen::ScreenID::MainMenu).get())->setMode(0);
@@ -873,7 +850,7 @@ void SettingButton::Draw(int currentPage, unsigned char alpha)const {
         
         // 如果文本为空，显示提示
         if (displayText.empty() || (displayText.size() == 1 && displayText[0] == '|')) {
-            displayText = showCursor ? "|点击输入..." : "点击输入...";
+            displayText = showCursor ? text("settings.editbox.input1") : text("settings.editbox.input2");
         }
         
         // 计算文本渲染区域（与背景区域完全一致，只是稍微缩进避免贴边）
@@ -933,7 +910,7 @@ core::Color SettingButton::selectColor(){
 
     // 创建用于接收结果的RGB数组
     unsigned char resultRGB[3] = {0, 0, 0};
-    std::string title="选择"+item.name;
+    std::string title=text("settings.title")+item.name;
     // 调用 tinyfd 的颜色选择器
     const char* result = tinyfd_colorChooser(
         title.c_str(),  // 对话框标题
@@ -1027,7 +1004,7 @@ std::string SettingButton::selectFile() {
     }
     if (descriptionList.empty()) {
         // 如果没有描述，则使用通用描述
-        descriptionList.push_back("所有文件");
+        descriptionList.push_back(text("filetype.all"));
     }
     
     // 将描述列表组合成单个字符串
@@ -1065,7 +1042,7 @@ std::string SettingButton::selectFile() {
 std::string SettingButton::selectPath(){
     // 获取当前配置的路径作为初始路径
     std::string defaultPath = Config::getInstance()->get(item.configName);
-    std::string title = "选择" + item.name;
+    std::string title = text("settings.title") + item.name;
     // 调用 tinyfiledialogs 的文件夹选择对话框
     const char* selectedFolder = tinyfd_selectFolderDialog(
         title.c_str(),       // 对话框标题
@@ -1087,7 +1064,8 @@ void SettingButton::openFile() {
 
 void SettingButton::checkActions(){
     if(item.action&SettingButtonAction::Restart){
-        int result = tinyfd_messageBox("重启提示", "修改设置后需要重启程序才能生效，是否现在重启？", "yesno", "question", 1);
+        int result = tinyfd_messageBox(text("settings.messagebox.restart.title").c_str()
+        , text("settings.messagebox.restart.message").c_str(), "yesno", "question", 1);
         if (result == 1) {
             Log << Level::Info << "User chose to restart the application" << op::endl;
             core::restart();
@@ -1232,7 +1210,8 @@ void SettingButton::FinishEditing() {
         if (!isValidNumber) {
             Log << Level::Error << "Invalid number format: " << editingText << op::endl;
             // 显示错误提示
-            tinyfd_messageBox("输入错误", "请输入有效的数字", "ok", "error", 1);
+            tinyfd_messageBox(text("settings.editbox.error.title").c_str()
+            , text("settings.editbox.error.message").c_str(), "ok", "error", 1);
             CancelEditing();
             return;
         }
@@ -1245,9 +1224,9 @@ void SettingButton::FinishEditing() {
                     << item.minCount << " and " << item.maxCount << op::endl;
 
                 // 显示警告提示
-                std::string warningMessage = "输入值 " + editingText + " 超出范围 (" + 
-                    std::to_string(item.minCount) + " - " + std::to_string(item.maxCount) + ")";
-                tinyfd_messageBox("输入错误", warningMessage.c_str(), "ok", "error", 1);
+                std::string warningMessage = text("settings.editbox.between",editingText,item.minCount,item.maxCount);
+                tinyfd_messageBox(text("settings.editbox.error.title").c_str()
+                , warningMessage.c_str(), "ok", "error", 1);
                 // 取消编辑
                 CancelEditing();               
                 return;
@@ -1257,7 +1236,8 @@ void SettingButton::FinishEditing() {
         catch (const std::exception& e) {
             Log << Level::Error << "Invalid input for count: " << editingText << ", error: " << e.what() << op::endl;
             // 显示错误提示
-            tinyfd_messageBox("输入错误", "请输入有效的数字", "ok", "error", 1);
+            tinyfd_messageBox(text("settings.editbox.error.title").c_str()
+            , text("settings.editbox.error.message").c_str(), "ok", "error", 1);
             CancelEditing();
             return;
         }
@@ -1268,7 +1248,7 @@ void SettingButton::FinishEditing() {
         Config::getInstance()->saveToFile();
 
         // 更新按钮显示
-        button->SetText(editingText.empty() ? "点击输入" : editingText);
+        button->SetText(editingText.empty() ? text("settings.editbox.input3") : editingText);
           // 关闭编辑模式
         isTextboxEditing = false;
         

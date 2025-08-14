@@ -1,4 +1,5 @@
 #include "core/screen/base.h"
+#include "core/baseItem/lang.h"
 #include "core/baseItem/VideoPlayer.h"
 #include "core/Config.h"
 #include "core/log.h"
@@ -6,6 +7,7 @@
 
 using namespace screen;
 using namespace core;
+using namespace LanguageUtils;
 
 std::shared_ptr<Screen> Screen::currentScreen = nullptr;
 ScreenID Screen::currentScreenID = ScreenID::MainMenu;
@@ -110,7 +112,7 @@ void Screen::init() {
     exitButtonEdit = std::make_unique<core::Button>();
     exitButtonEdit->SetAudioID(AudioID::enter);
     exitButtonEdit->SetEnableBitmap(false);
-    exitButtonEdit->SetText("退出编辑模式");
+    exitButtonEdit->SetText(text("button.exitEdit"));
     exitButtonEdit->SetFontID(FontID::Normal);
     exitButtonEdit->SetFillColor(Color(128,128,128,128));
     exitButtonEdit->SetFontScale(0.3f);

@@ -1,4 +1,5 @@
 #include "core/screen/mainScreen.h"
+#include "core/baseItem/lang.h"
 
 #include "core/screen/SettingScreen.h"
 
@@ -8,6 +9,7 @@
 
 using namespace screen;
 using namespace core;
+using namespace LanguageUtils;
 
 #define SETICON "'"
 
@@ -68,12 +70,12 @@ void MainScreen::init() {
     buttons[offVideo]->SetBitmap(BitmapID::MainScreenButton);
     buttons[offVideo]->SetClickFunc([this]{
         bools[boolconfig::off_video] = !bools[boolconfig::off_video];
-        buttons[offVideo]->SetText(bools[boolconfig::off_video] ? "视频:关" : "视频:开");
+        buttons[offVideo]->SetText(bools[boolconfig::off_video] ? text("button.video.off") : text("button.video.on"));
         SyncConfig(); // 同步到配置文件
     });
     buttons[offVideo]->SetEnable(true);
     buttons[offVideo]->SetFontScale(0.25f);
-    buttons[offVideo]->SetText(bools[boolconfig::off_video] ? "视频:关" : "视频:开");
+    buttons[offVideo]->SetText(bools[boolconfig::off_video] ? text("button.video.off") : text("button.video.on"));
     buttons[offVideo]->SetColor({0,0,0,255});
     buttons[offVideo]->SetFontID(FontID::Normal);
     buttons[offVideo]->SetRegionStr(UI_REGION_MAINMENU_OFFVIDEO);

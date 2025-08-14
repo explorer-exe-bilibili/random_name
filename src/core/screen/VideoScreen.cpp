@@ -1,10 +1,12 @@
 #include "core/screen/VideoScreen.h"
 
+#include "core/baseItem/lang.h"
 #include "core/explorer.h"
 #include "core/Config.h"
 #include "core/log.h"
 
 using namespace core;
+using namespace LanguageUtils;
 namespace screen
 {
 
@@ -18,7 +20,7 @@ void VideoScreen::init()
     buttons.clear();
     buttons.resize(1);
     buttons[0] = std::make_shared<Button>();
-    buttons[0]->SetText("跳过>>");
+    buttons[0]->SetText(text("button.skip"));
     buttons[0]->SetEnableBitmap(false);
     buttons[0]->SetRegionStr(UI_REGION_SKIP);
     buttons[0]->SetAudioID(AudioID::enter);

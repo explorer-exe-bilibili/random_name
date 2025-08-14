@@ -1,4 +1,5 @@
 #include "core/screen/nameScreen.h"
+#include "core/baseItem/lang.h"
 
 #include "core/log.h"
 #include "core/baseItem/Bitmap.h"
@@ -9,6 +10,7 @@
 
 using namespace screen;
 using namespace core;
+using namespace LanguageUtils;
 
 #define STAR L"E"
 
@@ -54,7 +56,7 @@ void NameScreen::init() {
     reloadButtonsRegion();
     starPositions.clear();
     buttons[SkipButton]->SetRegionStr(UI_REGION_SKIP);
-    buttons[SkipButton]->SetText("跳过>>");
+    buttons[SkipButton]->SetText(text("button.skip"));
     buttons[SkipButton]->SetFontScale(0.3f);
     buttons[SkipButton]->SetFontID(FontID::Normal);
     buttons[SkipButton]->SetAudioID(AudioID::enter);
@@ -69,7 +71,7 @@ void NameScreen::init() {
     buttons[SkipButton]->SetEnableFill(false);
     buttons[SkipButton]->SetEnable(false);
     buttons[AddNameButton]->SetRegionStr(UI_REGION_NAMESCREEN_ADDNAME);
-    buttons[AddNameButton]->SetText("增加此名字几率");
+    buttons[AddNameButton]->SetText(text("button.addName"));
     buttons[AddNameButton]->SetFontScale(0.3f);
     buttons[AddNameButton]->SetFontID(FontID::Normal);
     buttons[AddNameButton]->SetClickFunc([this] {
@@ -84,7 +86,7 @@ void NameScreen::init() {
     if(bools[boolconfig::use_font_compatibility]) nameButton->SetFontID(FontID::Default);
     else nameButton->SetFontID(FontID::Name);
     std::shared_ptr<core::Button> nextStatus=std::make_shared<core::Button>();
-    nextStatus->SetText("下一页");
+    nextStatus->SetText(text("button.nextPage"));
     nextStatus->SetFontID(FontID::Normal);
     nextStatus->SetRegion({0.85,0.43,0.95,0.46});
     nextStatus->SetAudioID(AudioID::click);

@@ -75,6 +75,7 @@
 #define VOLUME "volume"
 #define USE_FONT_COMPATIBILITY "font_compatibility"
 #define NO_VIDEO_PRELOAD "no_video_preload"
+#define LANG "lang"
 
 // Region相关配置键定义
 #define UI_REGION_EXIT "ui_region_exit"
