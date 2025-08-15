@@ -1,9 +1,16 @@
 #pragma once
 #include <string>
-#include <format>
 #include <type_traits>
 #include <algorithm>
 #include <sstream>
+
+// 检查是否支持 std::format
+#ifdef __cpp_lib_format
+    #include <format>
+    #define HAS_STD_FORMAT 1
+#else
+    #define HAS_STD_FORMAT 0
+#endif
 
 // 前向声明
 namespace core {
@@ -105,7 +112,14 @@ namespace LanguageUtils {
             return wstring2string(std::wstring(value));
         } else {
             try {
+#if HAS_STD_FORMAT
                 return std::format("{}", std::forward<T>(value));
+#else
+                // 使用 ostringstream 作为 std::format 的回退
+                std::ostringstream oss;
+                oss << std::forward<T>(value);
+                return oss.str();
+#endif
             } catch (...) {
                 return std::string("[无法转换的类型]");
             }
