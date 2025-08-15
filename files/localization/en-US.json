@@ -143,5 +143,28 @@
   "settings.title": "Select",
   "settings.messagebox.restart.title": "Restart Prompt",
   "settings.messagebox.restart.message": "Settings will take effect after restart. Restart now?",
-  "settings.button.openRawFile": "Open Configuration File"
+  "settings.button.openRawFile": "Open Configuration File",
+
+  "error.opengl.title": "OpenGL Version Incompatible",
+  "error.opengl.line1": "Current OpenGL Version: {0}\n\n",
+  "error.opengl.line2": "Minimum Required Version: {0}\n\n",
+  "error.opengl.line3": "Your graphics card or driver does not support the required OpenGL version.\n",
+  "error.opengl.line4": "Please try updating your graphics driver or use a graphics card that supports higher OpenGL versions.\n\n",
+  "error.opengl.line5": "The program will exit.",
+
+  "error.glfw.title": "GLFW Initialization Failed",
+  "error.glfw.message": "Failed to initialize GLFW library.\n\nPossible causes:\n• System does not support OpenGL\n• Missing required system libraries\n• Graphics driver issues\n\nThe program will exit.",
+
+  "error.glad.title": "GLAD Initialization Failed",
+  "error.glad.message": "Failed to load OpenGL functions.\n\nPossible causes:\n• OpenGL context creation failed\n• Incompatible graphics driver\n• Corrupted system OpenGL libraries\n\nThe program will exit.",
+
+  "error.window.title": "Window Creation Failed",
+  "error.window.message": "Failed to create program window.\n\nPossible causes:\n• Graphics card does not support required OpenGL version\n• Insufficient system resources\n• Display configuration issues\n\nThe program will exit.",
+
+  "error.config.title": "Configuration Initialization Failed",
+  "error.config.message": "Failed to initialize program configuration.\n\nPossible causes:\n• Corrupted configuration file\n• Insufficient disk permissions\n• Invalid configuration file format\n\nThe program will continue with default settings.",
+
+  "error.explorer.title": "Resource Manager Initialization Failed",
+  "error.explorer.message": "Failed to initialize resource manager.\n\nPossible causes:\n• Missing resource files\n• Insufficient file permissions\n• Audio/video codec issues\n\nThe program will exit.",
+  "error.openGL.message": "Make sure your graphics card supports OpenGL 4.0 or higher.\n\nIf you are using an integrated graphics card, consider updating your drivers or switching to a dedicated graphics card.\n\nIf you are using a virtual machine, ensure it supports OpenGL 4.0 or higher."
 }

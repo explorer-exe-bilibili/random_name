@@ -601,6 +601,7 @@ static nlohmann::json RollBack(std::string jsonpath) {
     i[NUMBER] = 11;
     i[CONFIG_NAME] = LANG;
     i[CHOICES] = { "en-US", "zh-CN", "ja-JP", "zh-TW" };
+    i[ACTIONS] = SettingButtonAction::Restart;
     p[ITEM].push_back(i);
     i.clear();
 
@@ -711,7 +712,13 @@ void SettingScreen::loadButtons() {
                     item.screenID = button.value(SCREENID, screen::ScreenID::Unknown);
                 }
                 else if(item.type==SettingButtonType::Choose){
-                    item.chooses=button.value(CHOICES, std::vector<std::string>{});
+                    if(button.contains(CHOICES) && button[CHOICES].is_array()){
+                        for(const auto& choice : button[CHOICES]){
+                            if(choice.is_string()){
+                                item.chooses.push_back(choice.get<std::string>());
+                            }
+                        }
+                    }
                 }
                 int number=button.value(NUMBER, 0);
                 s_buttons.emplace_back(std::make_shared<SettingButton>(item, number, page));

@@ -6,6 +6,7 @@
 #include <sstream>
 #include <stdexcept>
 #include <GLFW/glfw3.h>
+#include <glad/glad.h>
 #include <filesystem>
 #include <fstream>
 
@@ -463,5 +464,118 @@ void core::checkProgramPathAndWarn() {
     }
 #else
     Log << Level::Info << "非Windows平台，跳过路径字符检查" << op::endl;
+#endif
+}
+
+bool core::checkOpenGLVersion(int requiredMajor, int requiredMinor) {
+    int major, minor;
+    glGetIntegerv(GL_MAJOR_VERSION, &major);
+    glGetIntegerv(GL_MINOR_VERSION, &minor);
+    
+    Log << Level::Info << "检测到OpenGL版本: " << major << "." << minor << op::endl;
+    
+    if (major > requiredMajor || (major == requiredMajor && minor >= requiredMinor)) {
+        return true;
+    }
+    return false;
+}
+
+void core::showOpenGLVersionError(const std::string& currentVersion, const std::string& requiredVersion) {
+#ifdef _WIN32
+    std::wstring title = wtext("error.opengl.title");
+    std::wstring message = wtext("error.opengl.line1", core::string2wstring(currentVersion));
+    message += wtext("error.opengl.line2", core::string2wstring(requiredVersion));
+    message += wtext("error.opengl.line3");
+    message += wtext("error.opengl.line4");
+    message += wtext("error.opengl.line5");
+    
+    MessageBoxW(NULL, message.c_str(), title.c_str(), MB_OK | MB_ICONERROR);
+#else
+    Log << Level::Error << "OpenGL版本不足！当前版本: " << currentVersion 
+        << ", 需要版本: " << requiredVersion << op::endl;
+#endif
+}
+
+bool core::validateOpenGLSupport() {
+    const int REQUIRED_MAJOR = 4;
+    const int REQUIRED_MINOR = 1; // 降低要求到4.1以提高兼容性
+    
+    // 获取当前OpenGL版本
+    const char* versionStr = (const char*)glGetString(GL_VERSION);
+    if (!versionStr) {
+        Log << Level::Error << "无法获取OpenGL版本信息" << op::endl;
+        showOpenGLVersionError("未知", std::to_string(REQUIRED_MAJOR) + "." + std::to_string(REQUIRED_MINOR));
+        return false;
+    }
+    
+    std::string currentVersionStr(versionStr);
+    Log << Level::Info << "当前OpenGL版本字符串: " << currentVersionStr << op::endl;
+    
+    // 检查版本是否满足要求
+    if (!checkOpenGLVersion(REQUIRED_MAJOR, REQUIRED_MINOR)) {
+        Log << Level::Error << "OpenGL版本检查失败！" << op::endl;
+        showOpenGLVersionError(currentVersionStr, std::to_string(REQUIRED_MAJOR) + "." + std::to_string(REQUIRED_MINOR));
+        return false;
+    }
+    
+    Log << Level::Info << "OpenGL版本检查通过" << op::endl;
+    return true;
+}
+
+void core::showGLFWInitError() {
+#ifdef _WIN32
+    std::wstring title = wtext("error.glfw.title");
+    std::wstring message = wtext("error.glfw.message")+ L"\n\n" + wtext("error.openGL.message");
+    MessageBoxW(NULL, message.c_str(), title.c_str(), MB_OK | MB_ICONERROR);
+#else
+    Log << Level::Error << "GLFW初始化失败！请检查系统是否支持OpenGL以及显卡驱动程序。" << op::endl;
+#endif
+}
+
+void core::showGLADInitError() {
+#ifdef _WIN32
+    std::wstring title = wtext("error.glad.title");
+    std::wstring message = wtext("error.glad.message")+ L"\n\n" + wtext("error.openGL.message");
+    MessageBoxW(NULL, message.c_str(), title.c_str(), MB_OK | MB_ICONERROR);
+#else
+    Log << Level::Error << "GLAD初始化失败！无法加载OpenGL函数。" << op::endl;
+#endif
+}
+
+void core::showWindowCreationError() {
+#ifdef _WIN32
+    std::wstring title = wtext("error.window.title");
+    std::wstring message = wtext("error.window.message")+ L"\n\n" + wtext("error.openGL.message");
+    MessageBoxW(NULL, message.c_str(), title.c_str(), MB_OK | MB_ICONERROR);
+#else
+    Log << Level::Error << "窗口创建失败！请检查显卡是否支持所需的OpenGL版本。" << op::endl;
+#endif
+}
+
+void core::showConfigInitError() {
+#ifdef _WIN32
+    std::wstring title = wtext("error.config.title");
+    std::wstring message = wtext("error.config.message");
+    MessageBoxW(NULL, message.c_str(), title.c_str(), MB_OK | MB_ICONWARNING);
+#else
+    Log << Level::Warn << "配置初始化失败！将使用默认设置继续运行。" << op::endl;
+#endif
+}
+
+void core::showExplorerInitError() {
+#ifdef _WIN32
+    std::wstring title = wtext("error.explorer.title");
+    std::wstring message = wtext("error.explorer.message")+ L"\n\n" + wtext("error.openGL.message");
+    MessageBoxW(NULL, message.c_str(), title.c_str(), MB_OK | MB_ICONERROR);
+#else
+    Log << Level::Error << "资源管理器初始化失败！请检查资源文件是否完整。" << op::endl;
+#endif
+}
+
+void core::msgBox(const std::string& title, const std::string& message) {
+#ifdef _WIN32
+    MessageBoxA(NULL, message.c_str(), title.c_str(), MB_OK | MB_ICONERROR);
+#else
+    Log << Level::Info << title << ": " << message << op::endl;
 #endif
 }

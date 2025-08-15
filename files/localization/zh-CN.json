@@ -143,5 +143,29 @@
   "settings.title": "选择",
   "settings.messagebox.restart.title": "重启提示",
   "settings.messagebox.restart.message": "重启后设置将生效，是否立即重启？",
-  "settings.button.openRawFile": "打开配置文件"
+  "settings.button.openRawFile": "打开配置文件",
+
+  "error.opengl.title": "OpenGL版本不兼容",
+  "error.opengl.line1": "当前OpenGL版本：{0}\n\n",
+  "error.opengl.line2": "需要最低版本：{0}\n\n",
+  "error.opengl.line3": "您的显卡或驱动程序不支持所需的OpenGL版本。\n",
+  "error.opengl.line4": "请尝试更新显卡驱动程序，或使用支持更高OpenGL版本的显卡。\n\n",
+  "error.opengl.line5": "程序将退出。",
+
+  "error.glfw.title": "GLFW初始化失败",
+  "error.glfw.message": "无法初始化GLFW库。\n\n可能原因：\n• 系统不支持OpenGL\n• 缺少必要的系统库\n• 显卡驱动程序有问题\n\n程序将退出。",
+
+  "error.glad.title": "GLAD初始化失败",
+  "error.glad.message": "无法加载OpenGL函数。\n\n可能原因：\n• OpenGL上下文创建失败\n• 显卡驱动程序不兼容\n• 系统OpenGL库损坏\n\n程序将退出。",
+
+  "error.window.title": "窗口创建失败",
+  "error.window.message": "无法创建程序窗口。\n\n可能原因：\n• 显卡不支持所需的OpenGL版本\n• 系统资源不足\n• 显示器配置问题\n\n程序将退出。",
+
+  "error.config.title": "配置初始化失败",
+  "error.config.message": "无法初始化程序配置。\n\n可能原因：\n• 配置文件损坏\n• 磁盘权限不足\n• 配置文件格式错误\n\n程序将使用默认设置继续运行。",
+
+  "error.explorer.title": "资源管理器初始化失败",
+  "error.explorer.message": "无法初始化资源管理器。\n\n可能原因：\n• 资源文件缺失\n• 文件权限不足\n• 音频/视频编解码器问题\n\n程序将退出。",
+
+  "error.openGL.message": "请确保您的显卡支持OpenGL 4.0或更高版本。\n\n如果您使用的是集成显卡，请考虑更新驱动程序或切换到专用显卡。\n\n如果您使用的是虚拟机，请确保其支持OpenGL 4.0或更高版本。"
 }

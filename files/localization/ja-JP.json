@@ -143,5 +143,28 @@
   "settings.language.en-US": "English",
   "settings.language.zh-CN": "简体中文",
   "settings.language.ja-JP": "日本語",
-  "settings.language.zh-TW": "繁體中文"
+  "settings.language.zh-TW": "繁體中文",
+
+  "error.opengl.title": "OpenGLバージョン非互換",
+  "error.opengl.line1": "現在のOpenGLバージョン：{0}\n\n",
+  "error.opengl.line2": "必要な最小バージョン：{0}\n\n",
+  "error.opengl.line3": "お使いのグラフィックカードまたはドライバーは、必要なOpenGLバージョンをサポートしていません。\n",
+  "error.opengl.line4": "グラフィックドライバーの更新を試すか、より高いOpenGLバージョンをサポートするグラフィックカードをご使用ください。\n\n",
+  "error.opengl.line5": "プログラムを終了します。",
+
+  "error.glfw.title": "GLFW初期化失敗",
+  "error.glfw.message": "GLFWライブラリの初期化に失敗しました。\n\n考えられる原因：\n• システムがOpenGLをサポートしていない\n• 必要なシステムライブラリが不足\n• グラフィックドライバーの問題\n\nプログラムを終了します。",
+
+  "error.glad.title": "GLAD初期化失敗",
+  "error.glad.message": "OpenGL関数の読み込みに失敗しました。\n\n考えられる原因：\n• OpenGLコンテキストの作成に失敗\n• 非互換のグラフィックドライバー\n• システムOpenGLライブラリの破損\n\nプログラムを終了します。",
+
+  "error.window.title": "ウィンドウ作成失敗",
+  "error.window.message": "プログラムウィンドウの作成に失敗しました。\n\n考えられる原因：\n• グラフィックカードが必要なOpenGLバージョンをサポートしていない\n• システムリソースが不足\n• ディスプレイ設定の問題\n\nプログラムを終了します。",
+
+  "error.config.title": "設定初期化失敗",
+  "error.config.message": "プログラム設定の初期化に失敗しました。\n\n考えられる原因：\n• 設定ファイルが破損\n• ディスク権限が不足\n• 設定ファイル形式エラー\n\nデフォルト設定で続行します。",
+
+  "error.explorer.title": "リソースマネージャー初期化失敗",
+  "error.explorer.message": "リソースマネージャーの初期化に失敗しました。\n\n考えられる原因：\n• リソースファイルが不足\n• ファイル権限が不足\n• オーディオ/ビデオコーデックの問題\n\nプログラムを終了します。",
+  "error.openGL.message": "OpenGL 4.0以上をサポートするグラフィックカードを使用していることを確認してください。\n\n統合グラフィックカードを使用している場合は、ドライバーの更新や専用グラフィックカードへの切り替えを検討してください。\n\n仮想マシンを使用している場合は、OpenGL 4.0以上をサポートしていることを確認してください。"
 }

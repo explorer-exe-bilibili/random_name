@@ -804,6 +804,26 @@ SettingButton::SettingButton(sItem item_, int number, int page)
             checkActions();
         });
     }
+    else if(item.type==SettingButtonType::Choose){
+        button->SetText(Config::getInstance()->get(item.configName));
+        button->SetEnableBitmap(true);
+        button->SetEnableFill(false);
+        button->SetBitmap(BitmapID::SettingButton);
+        button->SetClickFunc([this]{
+            std::string selectedChoice= Config::getInstance()->get(item.configName);
+            int selectedIndex = -1;
+            for(auto& t:item.chooses){
+                selectedIndex++;
+                if(t==selectedChoice)break;
+            }
+            if(selectedIndex>=0){
+                if(selectedIndex+1>=item.chooses.size())selectedIndex=-1;
+                Config::getInstance()->set(item.configName,item.chooses[selectedIndex+1]);
+                Config::getInstance()->saveToFile();
+                button->SetText(Config::getInstance()->get(item.configName));
+            }
+        });
+    }
 }
 
 void SettingButton::Draw(int currentPage, unsigned char alpha)const {

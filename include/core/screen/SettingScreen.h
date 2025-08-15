@@ -53,6 +53,7 @@ public:
               videoID(core::VideoID::Unknown),
               color(core::Color(0,0,0,255)),
               screenID(screen::ScreenID::Unknown),
+              chooses({}),
               name(""),
               configName(""),
               fileChooseWindowName(""),
@@ -70,6 +71,7 @@ public:
                                 videoID(other.videoID),
                                 color(other.color),
                                 screenID(other.screenID),
+                                chooses(other.chooses),
                                 name(other.name),
                                 configName(other.configName),
                                 fileChooseWindowName(other.fileChooseWindowName),
@@ -90,6 +92,7 @@ public:
             videoID = other.videoID;
             color = other.color;
             screenID = other.screenID;
+            chooses = other.chooses;
             name = other.name;
             configName = other.configName;
             fileChooseWindowName = other.fileChooseWindowName;
@@ -180,7 +183,7 @@ class SettingScreen : public Screen
     float targetPageAlpha = 0.0f;    // 目标页面的透明度
     TransitionType transitionType = TransitionType::Fade;  // 动画类型
     float slideOffset = 0.0f;        // 滑动偏移量
-    
+
     void loadButtons();
     void changePage(bool forward);
     void updatePageTransition(); // 更新页面切换动画

@@ -185,10 +185,23 @@ namespace core
     bool stringContains(const std::string& str, const std::string& substr);
     void quit();
     void restart();
-    
+    void msgBox(const std::string& title, const std::string& message);
+
     // 检查路径是否包含非ASCII字符
     bool hasNonASCIICharacters(const std::string& path);
     void checkProgramPathAndWarn();
+
+    // OpenGL版本检测相关函数
+    bool checkOpenGLVersion(int requiredMajor, int requiredMinor);
+    void showOpenGLVersionError(const std::string& currentVersion, const std::string& requiredVersion);
+    bool validateOpenGLSupport();
+
+    // 初始化错误处理函数
+    void showGLFWInitError();
+    void showGLADInitError();
+    void showWindowCreationError();
+    void showConfigInitError();
+    void showExplorerInitError();
 
     // 全局变量，用于跟踪程序目录状态
     extern std::filesystem::path g_executableDir;

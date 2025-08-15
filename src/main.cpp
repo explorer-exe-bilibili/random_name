@@ -212,9 +212,22 @@ int init(){
     Log<<Level::Info<<"Initializing GLFW"<<op::endl;
         // 初始化GLFW
     if (!glfwInit()) {
+        Log << Level::Error << "GLFW初始化失败" << op::endl;
+        core::showGLFWInitError();
         return -1;
     }
-    Config::getInstance()->init();
+    
+    try {
+        Config::getInstance()->init();
+    } catch (const std::exception& e) {
+        Log << Level::Warn << "配置初始化失败: " << e.what() << op::endl;
+        core::showConfigInitError();
+        // 配置初始化失败不会导致程序退出，将使用默认配置
+    } catch (...) {
+        Log << Level::Warn << "配置初始化失败: 未知异常" << op::endl;
+        core::showConfigInitError();
+    }
+    
     SetConfigItems();
     // 检查程序路径是否包含非ASCII字符
     core::checkProgramPathAndWarn();
@@ -226,7 +239,7 @@ int init(){
     core::startFileWithoutWindow("upgrade.exe");
     // 设置OpenGL版本和兼容性模式
     glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 6);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
     // 启用向前兼容性
     glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
@@ -235,6 +248,8 @@ int init(){
     // 创建窗口
     WindowInfo.window = glfwCreateWindow(config.getInt(WINDOW_WIDTH), config.getInt(WINDOW_HEIGHT), config.get(WINDOW_TITLE).c_str(), nullptr, nullptr);
     if (!WindowInfo.window) {
+        Log << Level::Error << "窗口创建失败" << op::endl;
+        core::showWindowCreationError();
         glfwTerminate();
         return -1;
     }
@@ -245,13 +260,22 @@ int init(){
     Log<<Level::Info<<"Loading GLAD"<<op::endl;
     // 初始化glad
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+        Log << Level::Error << "GLAD初始化失败" << op::endl;
+        core::showGLADInitError();
         glfwTerminate();
         return -1;
     }
     
-    // 验证 OpenGL 上下文
+    // 验证 OpenGL 版本和兼容性
     Log << Level::Info << "OpenGL Version: " << (const char*)glGetString(GL_VERSION) << op::endl;
     Log << Level::Info << "OpenGL Renderer: " << (const char*)glGetString(GL_RENDERER) << op::endl;
+    
+    // 检查OpenGL版本是否满足要求
+    if (!core::validateOpenGLSupport()) {
+        Log << Level::Error << "OpenGL版本检查失败，程序将退出" << op::endl;
+        glfwTerminate();
+        return -1;
+    }
 
     // 初始化 OpenGL 错误恢复系统
     OpenGLErrorRecovery::reset();
@@ -270,9 +294,29 @@ int init(){
     core::WindowInfo.height = config.getInt(WINDOW_HEIGHT);
     
     Log<<Level::Info<<"Init explorer"<<op::endl;
-    core::Explorer::getInstance();
+    try {
+        core::Explorer::getInstance();
+    } catch (const std::exception& e) {
+        Log << Level::Error << "资源管理器初始化失败: " << e.what() << op::endl;
+        core::showExplorerInitError();
+        glfwTerminate();
+        return -1;
+    } catch (...) {
+        Log << Level::Error << "资源管理器初始化失败: 未知异常" << op::endl;
+        core::showExplorerInitError();
+        glfwTerminate();
+        return -1;
+    }
 
-    core::Explorer::getInstance()->playAudio(AudioID::bgm);
+    try {
+        core::Explorer::getInstance()->playAudio(AudioID::bgm);
+    } catch (const std::exception& e) {
+        Log << Level::Warn << "背景音乐播放失败: " << e.what() << op::endl;
+        // 音频播放失败不会导致程序退出
+    } catch (...) {
+        Log << Level::Warn << "背景音乐播放失败: 未知异常" << op::endl;
+    }
+    
     screen::Screen::RegisterScreen(screen::ScreenID::MainMenu, std::make_shared<screen::MainScreen>());
     screen::Screen::SwitchToScreen(screen::ScreenID::MainMenu);
     screen::Screen::RegisterScreen(screen::ScreenID::Settings, std::make_shared<screen::SettingScreen>());
