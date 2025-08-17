@@ -7,10 +7,16 @@
 #include "core/Config.h"
 #include "core/Drawer.h"
 #include <exception>
+#include <vector>
+#include <string>
+#include <cctype>
 
 using namespace screen;
 using namespace core;
 using namespace LanguageUtils;
+
+bool isEnglishText(const std::string& text);
+std::vector<std::string> splitEnglishName(const std::string& name);
 
 #define STAR L"E"
 
@@ -344,40 +350,176 @@ void NameButton::Draw(unsigned char alpha) {
     }
 }
 
+// 检测是否为英文文本（包含ASCII字母和常见标点）
+bool isEnglishText(const std::string& text) {
+    bool hasLetter = false;  // 确保至少包含一个字母
+    for (size_t i = 0; i < text.length(); ++i) {
+        char c = text[i];
+        if ((c >= 'A' && c <= 'Z') || (c >= 'a' && c <= 'z')) {
+            hasLetter = true;
+        } else if (c == ' ' || c == '\'' || c == '-' || c == '.' || (c >= '0' && c <= '9')) {
+            // 允许的ASCII字符：空格、撇号、连字符、句号、数字
+            continue;
+        } else if (c < 0) { // 非ASCII字符（中文、日文等）
+            return false;
+        } else {
+            // 其他不允许的ASCII字符
+            return false;
+        }
+    }
+    return hasLetter;  // 只有包含字母才算英文文本
+}
+
+// 分割英文名为单词，长单词自动分割
+std::vector<std::string> splitEnglishName(const std::string& name) {
+    std::vector<std::string> words;
+    std::string word;
+    for (size_t i = 0; i < name.length(); ++i) {
+        char c = name[i];
+        if (c == ' ' || c == '-') {
+            if (!word.empty()) {
+                words.push_back(word);
+                word.clear();
+            }
+        } else {
+            word += c;
+        }
+    }
+    if (!word.empty()) {
+        words.push_back(word);
+    }
+    
+    // 检查并分割过长的单词（超过8个字符）
+    std::vector<std::string> finalWords;
+    for (const std::string& currentWord : words) {
+        if (currentWord.length() > 8) {
+            // 长单词分割处理
+            size_t mid = currentWord.length() / 2;
+            // 寻找合适的分割点，优先在元音字母后分割
+            for (size_t i = mid; i > mid - 3 && i > 0; i--) {
+                char c = std::tolower(currentWord[i]);
+                if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') {
+                    mid = i + 1;
+                    break;
+                }
+            }
+            // 确保分割点有效
+            if (mid >= currentWord.length()) mid = currentWord.length() / 2;
+            if (mid == 0) mid = 1;
+            
+            std::string firstPart = currentWord.substr(0, mid) + "-";  // 添加连字符
+            std::string secondPart = currentWord.substr(mid);
+            finalWords.push_back(firstPart);
+            finalWords.push_back(secondPart);
+        } else {
+            finalWords.push_back(currentWord);
+        }
+    }
+    
+    return finalWords;
+}
+
 void NameButton::SetName(const core::NameEntry& name) {
     text = core::string2wstring(name.name);
-    starCount=name.star;
+    starCount = name.star;
     regions.clear();
-    switch (text.length())
-    {
-    case 1:
-        regions.emplace_back(0,0,1,1);
-        break;
-    case 2:
-        regions.emplace_back(0,0.25,0.5,0.75);
-        regions.emplace_back(0.5,0.25,1,0.75);
-        break;
-    case 3:
-        regions.emplace_back(0.25,0,0.75,0.5);
-        regions.emplace_back(0,0.5,0.5,1);
-        regions.emplace_back(0.5,0.5,1,1);
-        break;
-    case 4:
-        regions.emplace_back(0,0,0.5,0.5);
-        regions.emplace_back(0.5,0,1,0.5);
-        regions.emplace_back(0,0.5,0.5,1);
-        regions.emplace_back(0.5,0.5,1,1);
-        break;
-    case 5:
-        regions.emplace_back(0,0,0.333,0.333);
-        regions.emplace_back(0.333,0,0.666,0.333);
-        regions.emplace_back(0.666,0,1,0.333);
-        regions.emplace_back(0.16,0.333,0.49,0.666);
-        regions.emplace_back(0.50,0.333,0.84,0.666);
-        break;
-    default:break;
+    
+    // 调试输出
+    Log << Level::Info << "SetName: " << name.name << ", isEnglish: " << (isEnglishText(name.name) ? "true" : "false") << op::endl;
+    
+    // 检测是否为英文名
+    if (isEnglishText(name.name)) {
+        // 英文名处理逻辑
+        std::vector<std::string> words = splitEnglishName(name.name);
+        
+        Log << Level::Info << "英文名分词结果: 单词数=" << words.size() << op::endl;
+        for(size_t i = 0; i < words.size(); ++i) {
+            Log << Level::Info << "  单词[" << i << "]: '" << words[i] << "'" << op::endl;
+        }
+        
+        switch (words.size()) {
+        case 1: {
+            // 单个单词，检查长度决定是否需要特殊处理
+            std::string word = words[0];
+            if (word.length() <= 8) {
+                // 短单词，居中显示
+                text = core::string2wstring(word);
+                // 不创建regions，使用默认的居中渲染
+            } else {
+                // 长单词，在中间分行
+                size_t mid = word.length() / 2;
+                // 寻找合适的分割点，优先在元音字母后分割
+                for (size_t i = mid; i > mid - 3 && i > 0; i--) {
+                    char c = std::tolower(word[i]);
+                    if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') {
+                        mid = i + 1;
+                        break;
+                    }
+                }
+                
+                // 确保分割点有效
+                if (mid >= word.length()) mid = word.length() / 2;
+                if (mid == 0) mid = 1;
+                
+                // 创建分割的两部分
+                text = core::string2wstring(word); // 保持原始文本用于后续处理
+                regions.emplace_back(0, 0, 1, 0.5);     // 上半部分
+                regions.emplace_back(0, 0.5, 1, 1);     // 下半部分
+            }
+            break;
+        }
+        case 2:
+            // 两个单词，上下排列 - 保持原始名字不变
+            text = core::string2wstring(name.name);
+            regions.emplace_back(0, 0.1, 1, 0.45);   // 第一个单词区域
+            regions.emplace_back(0, 0.55, 1, 0.9);   // 第二个单词区域
+            break;
+        case 3:
+            // 三个单词，三角形布局：上1下2 - 保持原始名字不变
+            text = core::string2wstring(name.name);
+            regions.emplace_back(0, 0, 1, 0.4);      // 第一个单词（上方居中）
+            regions.emplace_back(0, 0.5, 0.5, 0.9);  // 第二个单词（左下）
+            regions.emplace_back(0.5, 0.5, 1, 0.9);  // 第三个单词（右下）
+            break;
+        default:
+            // 超过3个单词，使用传统居中显示
+            text = core::string2wstring(name.name);
+            break;
+        }
+    } else {
+        // 非英文名（中文/日文等），使用原有的字符级布局
+        switch (text.length()) {
+        case 1:
+            regions.emplace_back(0, 0, 1, 1);
+            break;
+        case 2:
+            regions.emplace_back(0, 0.25, 0.5, 0.75);
+            regions.emplace_back(0.5, 0.25, 1, 0.75);
+            break;
+        case 3:
+            regions.emplace_back(0.25, 0, 0.75, 0.5);
+            regions.emplace_back(0, 0.5, 0.5, 1);
+            regions.emplace_back(0.5, 0.5, 1, 1);
+            break;
+        case 4:
+            regions.emplace_back(0, 0, 0.5, 0.5);
+            regions.emplace_back(0.5, 0, 1, 0.5);
+            regions.emplace_back(0, 0.5, 0.5, 1);
+            regions.emplace_back(0.5, 0.5, 1, 1);
+            break;
+        case 5:
+            regions.emplace_back(0, 0, 0.333, 0.333);
+            regions.emplace_back(0.333, 0, 0.666, 0.333);
+            regions.emplace_back(0.666, 0, 1, 0.333);
+            regions.emplace_back(0.16, 0.333, 0.49, 0.666);
+            regions.emplace_back(0.50, 0.333, 0.84, 0.666);
+            break;
+        default:
+            break;
+        }
     }
-    for(auto& r: regions){
+    
+    for(auto& r: regions) {
         r.setFatherRegion(region);
     }
 }
