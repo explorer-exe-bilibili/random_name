@@ -1,3 +1,0 @@
-sudo mklink /D C:\Users\j1387\source\repos\explorer-exe-bilibili\random_name\build\bin\release\files C:\Users\j1387\source\repos\explorer-exe-bilibili\random_name\files
-sudo mklink /D C:\Users\j1387\source\repos\explorer-exe-bilibili\random_name\build\bin\files C:\Users\j1387\source\repos\explorer-exe-bilibili\random_name\files
-sudo mklink /D C:\Users\j1387\source\repos\explorer-exe-bilibili\random_name\build\bin\debug\files C:\Users\j1387\source\repos\explorer-exe-bilibili\random_name\files
