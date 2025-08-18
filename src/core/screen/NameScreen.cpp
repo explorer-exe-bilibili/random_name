@@ -18,7 +18,6 @@ using namespace LanguageUtils;
 bool isEnglishText(const std::string& text);
 std::vector<std::string> splitEnglishName(const std::string& name);
 
-float NameButton::wordScale = 10.0f;
 
 #define STAR L"E"
 
@@ -141,7 +140,6 @@ void NameScreen::Draw() {
 }
 
 void NameScreen::enter(int times) {
-    NameButton::wordScale=10;
     if(times==11){
         currentIndex=0;
         nameCount=1;
@@ -218,7 +216,6 @@ void NameScreen::changeName() {
             return;
         }
         SwitchToScreenWithFade(ScreenID::ListName);
-        NameButton::wordScale=10;
         return;
     }
     currentIndex++;
@@ -343,10 +340,9 @@ void NameButton::Draw(unsigned char alpha) {
                 Drawer::getInstance()->DrawSquare(region,Color(255,0,255,255),false);
             }
             if(starCount<6)
-                (*fontPtr)->RenderCharFitRegion(c, regions[i].getx(), regions[i].gety(), regions[i].getxend(), regions[i].getyend(), color);
+                (*fontPtr)->RenderCharFitRegion(c, regions[i], color);
             else
-                (*fontPtr)->RenderCharFitRegion(c, regions[i].getx(), regions[i].gety()
-                ,regions[i].getxend(), regions[i].getyend(), star6Color);
+                (*fontPtr)->RenderCharFitRegion(c, regions[i], star6Color);
             i++;
         }
     }
@@ -357,11 +353,12 @@ void NameButton::Draw(unsigned char alpha) {
                 Drawer::getInstance()->DrawSquare({regions[i].getx(), regions[i].gety(), regions[i].getxend(), regions[i].getyend(),false},Color(0,255,0,255),false);
             }
             if(starCount<6)
-                (*fontPtr)->RenderTextCentered(t, {regions[i].getx(), regions[i].gety(), regions[i].getxend(), regions[i].getyend(), false}, wordScale, color);
+                // (*fontPtr)->RenderTextCentered(t, regions[i], wordScale, color);
+                (*fontPtr)->RenderStringFitRegion(t, regions[i], color);
             else
-                (*fontPtr)->RenderTextCentered(t, {regions[i].getx(), regions[i].gety(), regions[i].getxend(), regions[i].getyend(), false}, wordScale, star6Color);
+                // (*fontPtr)->RenderTextCentered(t, regions[i], wordScale, star6Color);
+                (*fontPtr)->RenderStringFitRegion(t, regions[i], star6Color);
             i++;
-            if(wordScale>1)wordScale-=0.01;
         }
     }
     else {
@@ -440,7 +437,6 @@ std::vector<std::string> splitEnglishName(const std::string& name) {
 
 void NameButton::SetName(const core::NameEntry& name) {
     isEnglish=0;
-    wordScale=10;
     text = core::string2wstring(name.name);
     starCount = name.star;
     regions.clear();
@@ -500,18 +496,18 @@ void NameButton::SetName(const core::NameEntry& name) {
     }
 }
 
-float NameRegion::getx() const {
+float SubRegion::getx() const {
     return fatherRegion.getx() + x * fatherRegion.getWidth();
 }
 
-float NameRegion::gety() const {
+float SubRegion::gety() const {
     return fatherRegion.gety() + y * (fatherRegion.getyend_()-fatherRegion.gety_());
 }
 
-float NameRegion::getxend() const {
+float SubRegion::getxend() const {
     return fatherRegion.getxend() - (1-xend)* fatherRegion.getWidth();
 }
 
-float NameRegion::getyend() const {
+float SubRegion::getyend() const {
     return fatherRegion.gety() + yend * (fatherRegion.getyend_()-fatherRegion.gety_());
 }

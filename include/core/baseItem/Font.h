@@ -33,22 +33,35 @@ public:
     // 居中渲染文本
     void RenderTextBetween(const std::wstring& text, Region region, float scale, const glm::vec4& color);
     void RenderTextBetween(const std::string& text, Region region, float scale, const glm::vec4& color);
-    
+    void RenderTextBetween(const std::wstring& text, SubRegion region, float scale, const glm::vec4& color);
+    void RenderTextBetween(const std::string& text, SubRegion region, float scale, const glm::vec4& color);
+
     // 居中渲染文本（不截断）
     void RenderTextCentered(const std::wstring& text, Region region, float scale, const glm::vec4& color);
     void RenderTextCentered(const std::string& text, Region region, float scale, const glm::vec4& color);
+    void RenderTextCentered(const std::wstring& text, SubRegion region, float scale, const glm::vec4& color);
+    void RenderTextCentered(const std::string& text, SubRegion region, float scale, const glm::vec4& color);
     
     // 垂直渲染文本
     void RenderTextVertical(const std::wstring& text, float x, float y, float scale, const glm::vec4& color);
     void RenderTextVertical(const std::string& text, float x, float y, float scale, const glm::vec4& color);
     // 垂直居中渲染文本
+    void RenderTextVerticalBetween(const std::wstring& text, SubRegion region, float scale, const glm::vec4& color);
+    void RenderTextVerticalBetween(const std::string& text, SubRegion region, float scale, const glm::vec4& color);
     void RenderTextVerticalBetween(const std::wstring& text, Region region, float scale, const glm::vec4& color);
     void RenderTextVerticalBetween(const std::string& text, Region region, float scale, const glm::vec4& color);
 
     void RenderChar(wchar_t text, float x, float y, float scale, const glm::vec4& color);
     
     // 渲染字符，自动计算缩放以铺满指定区域
-    void RenderCharFitRegion(wchar_t text, float x, float y, float xend, float yend, const glm::vec4& color);
+    void RenderCharFitRegion(wchar_t text, Region region, const glm::vec4& color);
+    void RenderCharFitRegion(wchar_t text, SubRegion region, const glm::vec4& color);
+
+    // 渲染字符串，自动计算缩放以铺满指定区域（横向填充）
+    void RenderStringFitRegion(const std::wstring& text, Region region, const glm::vec4& color);
+    void RenderStringFitRegion(const std::string& text, Region region, const glm::vec4& color);
+    void RenderStringFitRegion(const std::wstring& text, SubRegion region, const glm::vec4& color);
+    void RenderStringFitRegion(const std::string& text, SubRegion region, const glm::vec4& color);
 
     unsigned int GetFontSize() const;
 

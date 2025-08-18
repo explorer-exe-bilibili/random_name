@@ -114,7 +114,24 @@ namespace core
         float getyend_() const { return screenRatio ? yend * WindowInfo.height : yend; }
 
         operator glm::vec4() const { return glm::vec4(getx(), gety(), getxend(), getyend()); }
-    };    
+    };
+    class SubRegion:public core::Region{
+        core::Region fatherRegion;
+    public:
+        float x,xend,y,yend;
+        
+        // 构造函数
+        SubRegion() : core::Region(), x(0), y(0), xend(0), yend(0) {}
+        SubRegion(double x, double y, double xend, double yend) 
+            : core::Region(x, y, xend, yend), x(x), y(y), xend(xend), yend(yend) {}
+        
+        void setFatherRegion(core::Region& father){fatherRegion=father;}
+        float getx() const ;
+        float gety() const ;
+        float getxend() const;
+        float getyend() const ;
+    };
+    
     // Region预设名称
     enum class RegionName
     {

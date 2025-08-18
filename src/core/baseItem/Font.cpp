@@ -207,6 +207,14 @@ void Font::RenderText(const std::wstring& text, float x, float y_origin, float s
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void Font::RenderTextBetween(const std::string& text, SubRegion region, float scale, const glm::vec4& color) {
+	RenderTextBetween(string2wstring(text), region, scale, color);
+}
+
+void Font::RenderTextBetween(const std::wstring& text, SubRegion region, float scale,const glm::vec4& color){
+	RenderTextBetween(text, Region(region.getx(), region.gety(), region.getxend(), region.getyend(), false), scale, color);
+}
+
 void Font::RenderTextBetween(const std::string& text, Region region, float scale, const glm::vec4& color) {
 	std::wstring wtext=string2wstring(text);
 	RenderTextBetween(wtext, region, scale, color);
@@ -260,6 +268,14 @@ void Font::RenderTextBetween(const std::wstring& text, Region region, float scal
 
 	// 渲染截断后的文本
 	RenderText(displayText, x, y, scale_, color);
+}
+
+void Font::RenderTextCentered(const std::string& text, SubRegion region, float scale, const glm::vec4& color) {
+	RenderTextCentered(string2wstring(text), region, scale, color);
+}
+
+void Font::RenderTextCentered(const std::wstring& text, SubRegion region, float scale, const glm::vec4& color){
+	RenderTextCentered(text, Region(region.getx(), region.gety(), region.getxend(), region.getyend(), false), scale, color);
 }
 
 void Font::RenderTextCentered(const std::string& text, Region region, float scale, const glm::vec4& color) {
@@ -354,37 +370,51 @@ void Font::RenderChar(wchar_t text, float x, float y_origin, float scale, const 
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
-void Font::RenderCharFitRegion(wchar_t text, float x, float y, float xend, float yend, const glm::vec4& color) {
+void Font::RenderCharFitRegion(wchar_t text, Region region, const glm::vec4& color) {
+	float x = region.getx();
+	float y = region.gety();
+	float xend = region.getxend();
+	float yend = region.getyend();
+
 	// 检查区域有效性
-	if (xend <= x || yend <= y) {
-		return; // 无效区域，直接返回
-	}
+	if (xend <= x || yend <= y) return;
 
 	// 检查是否包含未加载的字符
-	if (!Characters.contains(text)) {
-		LoadCharacter(text);
-	}
+	if (!Characters.contains(text)) LoadCharacter(text);
 
 	Character ch = Characters[text];
-	
-	// 计算可用区域的宽度和高度
+
+	// 计算可用区域的宽度
 	float availableWidth = xend - x;
-	
-	// 计算字符的实际尺寸（不含缩放）
-	float charWidth = ch.Advance >> 6; // 字符的原始宽度（单位为像素）
-	
-	// 如果字符尺寸为0，则无法渲染
-	if (charWidth <= 0) {
-		return;
-	}
-	
-	// 计算缩放因子，确保字符能完全填充区域
-	float scaleX = availableWidth / charWidth;
-	
-	float scale=DeCalculateDynamicScale(scaleX);
-	x-= ch.Bearing.x * scale;
-	y-= ch.Bearing.y * scale/2.0;
-	RenderChar(text, x, y, scale, color);
+	float availableHeight = yend - y;
+
+	// 字符原始宽度
+	float charWidth = ch.Advance >> 6;
+	if (charWidth <= 0) return;
+
+	// 基于宽度的 baseScale
+	float baseScaleWidth = DeCalculateDynamicScale(availableWidth / charWidth);
+	// 基于高度的 baseScale（以字符像素高度或 fontSize 为准，使用字符像素高度更准确）
+	float charPixelHeight = static_cast<float>(ch.Size.y);
+	float baseScaleHeight = DeCalculateDynamicScale(availableHeight / charPixelHeight);
+
+	float baseScale = std::min(baseScaleWidth, baseScaleHeight);
+	if (baseScale <= 0.0f) return;
+
+	float scaleUsed = CalculateDynamicScale(baseScale);
+
+	// 计算缩放后的字符宽度并水平居中
+	float scaledCharWidth = static_cast<float>(charWidth) * scaleUsed;
+	float x_pos = x + (availableWidth - scaledCharWidth) / 2.0f;
+	float y_pos = y + (availableHeight - static_cast<float>(ch.Size.y) * scaleUsed) / 2.0f;
+
+	x_pos -= ch.Bearing.x * baseScale;
+	y_pos -= ch.Bearing.y * baseScale / 2.0f;
+	RenderChar(text, x_pos, y_pos, baseScale, color);
+}
+
+void Font::RenderCharFitRegion(wchar_t text, SubRegion region, const glm::vec4& color) {
+	RenderCharFitRegion(text, Region(region.getx(), region.gety(), region.getxend(), region.getyend(), false), color);
 }
 
 bool Font::operator==(const Font& b) const
@@ -530,6 +560,14 @@ void Font::RenderTextVertical(const std::wstring& text, float x, float y_origin,
 	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
+void Font::RenderTextVerticalBetween(const std::string& text, SubRegion region, float scale, const glm::vec4& color) {
+	RenderTextVerticalBetween(string2wstring(text), region, scale, color);
+}
+
+void Font::RenderTextVerticalBetween(const std::wstring& text, SubRegion region, float scale, const glm::vec4& color) {
+	RenderTextVerticalBetween(text, Region(region.getx(), region.gety(), region.getxend(), region.getyend(), false), scale, color);
+}
+
 void Font::RenderTextVerticalBetween(const std::string& text, Region region, float scale, const glm::vec4& color) {
 	std::wstring wtext = string2wstring(text);
 	RenderTextVerticalBetween(wtext, region, scale, color);
@@ -625,4 +663,61 @@ float Font::DeCalculateDynamicScale(float scaledValue) const {
 
     // 反向应用缩放因子
     return scaledValue / scaleFactor;
+}
+
+void Font::RenderStringFitRegion(const std::string& text, Region region, const glm::vec4& color) {
+	RenderStringFitRegion(string2wstring(text), region, color);
+}
+
+void Font::RenderStringFitRegion(const std::wstring& text, Region region, const glm::vec4& color) {
+	float x = region.getx();
+	float y = region.gety();
+	float xend = region.getxend();
+	float yend = region.getyend();
+
+	// 校验区域
+	if (xend <= x || yend <= y) return;
+	if (text.empty()) return;
+
+	// 确保字符已加载
+	for (auto c = text.begin(); c != text.end(); ++c) {
+		if (!Characters.contains(*c)) LoadCharacter(*c);
+	}
+
+	float availableWidth = xend - x;
+	float availableHeight = yend - y;
+	if (availableWidth <= 0 || availableHeight <= 0) return;
+
+	// 计算原始文本宽度
+	float textWidth = 0.0f;
+	for (auto c = text.begin(); c != text.end(); ++c) {
+		Character ch = Characters[*c];
+		textWidth += static_cast<float>(ch.Advance >> 6);
+	}
+	if (textWidth <= 0.0f) return;
+
+	// 计算基于宽度的 baseScale
+	float baseScaleWidth = DeCalculateDynamicScale(availableWidth / textWidth);
+	// 计算基于高度的 baseScale（以字体高度为准）
+	float baseScaleHeight = DeCalculateDynamicScale(availableHeight / static_cast<float>(fontSize));
+
+	float baseScale = std::min(baseScaleWidth, baseScaleHeight);
+	if (baseScale <= 0.0f) return;
+
+	float scaleUsed = CalculateDynamicScale(baseScale);
+	float scaledFontHeight = static_cast<float>(fontSize) * scaleUsed;
+	float scaledTextWidth = textWidth * scaleUsed;
+
+	float x_pos = x + (availableWidth - scaledTextWidth) / 2.0f;
+	float y_pos = y + (availableHeight - scaledFontHeight) / 2.0f;
+
+	RenderText(text, x_pos, y_pos, baseScale, color);
+}
+
+void Font::RenderStringFitRegion(const std::wstring& text, SubRegion region, const glm::vec4& color) {
+	RenderStringFitRegion(text, Region(region.getx(), region.gety(), region.getxend(), region.getyend(), false), color);
+}
+
+void Font::RenderStringFitRegion(const std::string& text, SubRegion region, const glm::vec4& color) {
+	RenderStringFitRegion(string2wstring(text), Region(region.getx(), region.gety(), region.getxend(), region.getyend(), false), color);
 }

@@ -3,10 +3,14 @@
 #include "base.h"
 #include "../baseItem/Button.h"
 #include "core/nameRandomer.h"
+#include <vector>
 
 namespace screen {
 class ListNameButton: public core::Button {
     core::Region textRegion;
+    bool isEnglish;
+    std::vector<std::string> words;
+    std::vector<core::SubRegion> wordRegions;
 public:
     ListNameButton();
     ~ListNameButton();

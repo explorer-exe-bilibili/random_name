@@ -129,7 +129,7 @@ void SettingScreen::Draw() {
         if(currentPage < titles.size()) {
             float alpha = calculateTransitionAlpha(true);
             if (font && *font) {
-                (*font)->RenderTextBetween(titles[currentPage], {0,0.05,1,0.1}, 0.7f, 
+                (*font)->RenderTextBetween(titles[currentPage], Region(0,0.05,1,0.1), 0.7f, 
                     Color(255, 255, 255, static_cast<unsigned char>(alpha * 255.0f)));
             }
         }
@@ -138,7 +138,7 @@ void SettingScreen::Draw() {
         if (targetPage < titles.size()) {
             float alpha = calculateTransitionAlpha(false);
             if (font && *font) {
-                (*font)->RenderTextBetween(titles[targetPage], {0,0.05,1,0.1}, 0.7f, 
+                (*font)->RenderTextBetween(titles[targetPage], Region(0,0.05,1,0.1), 0.7f, 
                     Color(255, 255, 255, static_cast<unsigned char>(alpha * 255.0f)));
             }
         }
@@ -146,13 +146,13 @@ void SettingScreen::Draw() {
         // 没有动画时，正常绘制标题
         if(currentPage < titles.size()) {
             if (font && *font) {
-                (*font)->RenderTextBetween(titles[currentPage], {0,0.05,1,0.1}, 0.7f, Color(255, 255, 255, 255));
+                (*font)->RenderTextBetween(titles[currentPage], Region(0,0.05,1,0.1), 0.7f, Color(255, 255, 255, 255));
             }
         }
     }
     if (font && *font) {
         (*font)->RenderTextBetween(std::to_string(currentPage + 1) + "/" + std::to_string(pages + 1), 
-            {0.9, 0.9, 0.96, 0.93}, 0.3f, Color(255, 150, 20, 255));
+            Region(0.9, 0.9, 0.96, 0.93), 0.3f, Color(255, 150, 20, 255));
     }
     if (exitButton) {
         exitButton->Draw(static_cast<unsigned char>(alpha * 255.0f));

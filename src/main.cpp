@@ -11,6 +11,7 @@
 #include "core/decrash/ErrorRecovery.h"
 #include "core/decrash/OpenGLErrorRecovery.h"
 #include "core/decrash/MemoryMonitor.h"
+#include <tinyfiledialogs.h>
 
 #ifdef _WIN32
 #undef APIENTRY
@@ -176,6 +177,9 @@ int init(){
             Log << Level::Error << "无法创建用户数据目录: " << e.what() << op::endl;
         }
     }
+#else
+    // 非Windows平台弹出未经测试的提示
+    tinyfd_messageBox("警告", "此程序在非Windows平台上运行，可能会遇到未测试的情况。\nThis Program may not work as expected as no tests have been conducted.", "ok", "warning", 1);
 #endif
     
     ErrorRecovery::registerErrorHandler(

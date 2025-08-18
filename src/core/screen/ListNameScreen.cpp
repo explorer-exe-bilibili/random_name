@@ -1,9 +1,13 @@
 #include "core/screen/ListNameScreen.h"
+#include "core/Drawer.h"
 
 #include <algorithm>
 
 using namespace core;
 using namespace screen;
+
+std::vector<std::string> splitEnglishName(const std::string& name);
+bool isEnglishText(const std::string& text);
 
 void ListNameScreen::init() {
     background=Explorer::getInstance()->getBitmapPtr(BitmapID::NameBg);
@@ -102,7 +106,16 @@ ListNameButton::~ListNameButton() {
 }
 
 void ListNameButton::SetName(const NameEntry& nameEntry) {
-    SetText(nameEntry.name);
+    isEnglish = isEnglishText(nameEntry.name);
+    if(!isEnglish)SetText(nameEntry.name);
+    else{
+        words=splitEnglishName(nameEntry.name);
+        float delta=0.09f;
+        float starty=0.5f-delta*words.size()/2;
+        for(int i=0;i<words.size();i++){
+            wordRegions.push_back({0, starty+delta*i, 1, starty+delta*(i+1)});
+        }
+    }
     BitmapID t=BitmapID::Unknown;
     switch (nameEntry.star)
     {
@@ -122,6 +135,19 @@ void ListNameButton::Draw() {
     }
     if (enableText && fontPtr && *fontPtr) {
         Region textRegion={region.getOriginX(), region.getOriginY() + 0.1f, region.getOriginXEnd(), region.getOriginYEnd() - 0.2f, region.isScreenRatio()};
-        (*fontPtr)->RenderTextVerticalBetween(text, textRegion, fontScale,color);
+        if(!isEnglish){
+            (*fontPtr)->RenderTextVerticalBetween(text, textRegion, fontScale,color);
+            if(bools[boolconfig::debug]) {
+                Drawer::getInstance()->DrawSquare(textRegion, Color(255, 0, 0, 100), false);
+            }
+        }
+        else {
+            if(words.size()>0&&wordRegions.size()>=words.size()){
+                for(int i=0;i<words.size();i++){
+                    wordRegions[i].setFatherRegion(region);
+                    (*fontPtr)->RenderStringFitRegion(words[i], wordRegions[i],color);
+                }
+            }
+        }
     }
 }
