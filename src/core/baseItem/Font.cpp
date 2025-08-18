@@ -11,7 +11,9 @@
 #include "core/render/GLBase.h"
 #include "core/baseItem/Base.h"
 #include "core/decrash/OpenGLErrorRecovery.h"
+#include "core/configItem.h"
 #include "core/log.h"
+#include "core/Drawer.h"
 
 using namespace core;
 
@@ -267,7 +269,7 @@ void Font::RenderTextCentered(const std::string& text, Region region, float scal
 
 void Font::RenderTextCentered(const std::wstring& text, Region region, float scale_, const glm::vec4& color) {
 	float scale = CalculateDynamicScale(scale_);
-	
+	Region region_ = Region(region.getx(), region.gety(), region.getxend(), region.getyend(), false);
 	// 计算可用的区域宽度和高度
 	float availableWidth = region.getxend() - region.getx();
 	float availableHeight = region.getyend() - region.gety();
@@ -292,8 +294,7 @@ void Font::RenderTextCentered(const std::wstring& text, Region region, float sca
 	
 	// 计算起始位置（水平和垂直居中）
 	float x = region.getx() + (availableWidth - textWidth) / 2.0f;
-	float y = region.gety() + (availableHeight - fontSize * scale) / 2.0f;
-
+	float y = region.gety() + (availableHeight - fontSize * scale) / 2.0f ;
 	// 渲染完整文本（不截断）
 	RenderText(text, x, y, scale_, color);
 }

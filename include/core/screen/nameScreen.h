@@ -29,6 +29,8 @@ public:
 class NameButton:public core::Button {
     std::vector<NameRegion> regions;
     std::wstring text;
+    std::vector<std::string> words;
+    bool isEnglish = false;
     int starCount=0;
     static core::Color color;
     static core::Color star6Color;
@@ -37,6 +39,7 @@ public:
     void SetName(const core::NameEntry& name);
     static void setColor(const core::Color& newColor){color=newColor;}
     static void set6Color(const core::Color& newColor){star6Color=newColor;}
+    static float wordScale;
 };
 enum RegionState{
     NameAppear,

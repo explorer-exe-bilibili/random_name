@@ -18,6 +18,8 @@ using namespace LanguageUtils;
 bool isEnglishText(const std::string& text);
 std::vector<std::string> splitEnglishName(const std::string& name);
 
+float NameButton::wordScale = 10.0f;
+
 #define STAR L"E"
 
 core::Color NameButton::color = core::Color(255, 255, 255, 255);
@@ -139,6 +141,7 @@ void NameScreen::Draw() {
 }
 
 void NameScreen::enter(int times) {
+    NameButton::wordScale=10;
     if(times==11){
         currentIndex=0;
         nameCount=1;
@@ -215,6 +218,7 @@ void NameScreen::changeName() {
             return;
         }
         SwitchToScreenWithFade(ScreenID::ListName);
+        NameButton::wordScale=10;
         return;
     }
     currentIndex++;
@@ -331,19 +335,34 @@ void NameScreen::changeLanguage_(){
 void NameButton::Draw(unsigned char alpha) {
     if(!fontPtr || !*fontPtr)return;
     int i=0;
-    for(auto&r: regions) 
-        r.setFatherRegion(region);
-        if(text.length()<=regions.size()) for(const auto& c: text){
-        if(bools[boolconfig::debug]){
-            Drawer::getInstance()->DrawSquare({regions[i].getx(), regions[i].gety(), regions[i].getxend(), regions[i].getyend(),false},Color(255,0,0,255),false);
-            Drawer::getInstance()->DrawSquare(region,Color(255,0,255,255),false);
+    for(auto&r: regions)r.setFatherRegion(region);
+    if(text.length()<=regions.size()&&!isEnglish){
+        for(const auto& c: text){
+            if(bools[boolconfig::debug]){
+                Drawer::getInstance()->DrawSquare({regions[i].getx(), regions[i].gety(), regions[i].getxend(), regions[i].getyend(),false},Color(255,0,0,255),false);
+                Drawer::getInstance()->DrawSquare(region,Color(255,0,255,255),false);
+            }
+            if(starCount<6)
+                (*fontPtr)->RenderCharFitRegion(c, regions[i].getx(), regions[i].gety(), regions[i].getxend(), regions[i].getyend(), color);
+            else
+                (*fontPtr)->RenderCharFitRegion(c, regions[i].getx(), regions[i].gety()
+                ,regions[i].getxend(), regions[i].getyend(), star6Color);
+            i++;
         }
-        if(starCount<6)
-            (*fontPtr)->RenderCharFitRegion(c, regions[i].getx(), regions[i].gety(), regions[i].getxend(), regions[i].getyend(), color);
-        else
-            (*fontPtr)->RenderCharFitRegion(c, regions[i].getx(), regions[i].gety()
-            ,regions[i].getxend(), regions[i].getyend(), star6Color);
-        i++;
+    }
+    else if(isEnglish&&words.size()<=regions.size()){
+        for(const auto& t:words){
+            if(bools[boolconfig::debug]){
+                Drawer::getInstance()->DrawSquare(region,Color(255,0,255,255),false);
+                Drawer::getInstance()->DrawSquare({regions[i].getx(), regions[i].gety(), regions[i].getxend(), regions[i].getyend(),false},Color(0,255,0,255),false);
+            }
+            if(starCount<6)
+                (*fontPtr)->RenderTextCentered(t, {regions[i].getx(), regions[i].gety(), regions[i].getxend(), regions[i].getyend(), false}, wordScale, color);
+            else
+                (*fontPtr)->RenderTextCentered(t, {regions[i].getx(), regions[i].gety(), regions[i].getxend(), regions[i].getyend(), false}, wordScale, star6Color);
+            i++;
+            if(wordScale>1)wordScale-=0.01;
+        }
     }
     else {
         (*fontPtr)->RenderTextCentered(text, region, fontScale, color);
@@ -420,6 +439,8 @@ std::vector<std::string> splitEnglishName(const std::string& name) {
 }
 
 void NameButton::SetName(const core::NameEntry& name) {
+    isEnglish=0;
+    wordScale=10;
     text = core::string2wstring(name.name);
     starCount = name.star;
     regions.clear();
@@ -429,62 +450,17 @@ void NameButton::SetName(const core::NameEntry& name) {
     
     // 检测是否为英文名
     if (isEnglishText(name.name)) {
+        isEnglish = true;
         // 英文名处理逻辑
-        std::vector<std::string> words = splitEnglishName(name.name);
+        words = splitEnglishName(name.name);
         
         Log << Level::Info << "英文名分词结果: 单词数=" << words.size() << op::endl;
         for(size_t i = 0; i < words.size(); ++i) {
             Log << Level::Info << "  单词[" << i << "]: '" << words[i] << "'" << op::endl;
         }
-        
-        switch (words.size()) {
-        case 1: {
-            // 单个单词，检查长度决定是否需要特殊处理
-            std::string word = words[0];
-            if (word.length() <= 8) {
-                // 短单词，居中显示
-                text = core::string2wstring(word);
-                // 不创建regions，使用默认的居中渲染
-            } else {
-                // 长单词，在中间分行
-                size_t mid = word.length() / 2;
-                // 寻找合适的分割点，优先在元音字母后分割
-                for (size_t i = mid; i > mid - 3 && i > 0; i--) {
-                    char c = std::tolower(word[i]);
-                    if (c == 'a' || c == 'e' || c == 'i' || c == 'o' || c == 'u') {
-                        mid = i + 1;
-                        break;
-                    }
-                }
-                
-                // 确保分割点有效
-                if (mid >= word.length()) mid = word.length() / 2;
-                if (mid == 0) mid = 1;
-                
-                // 创建分割的两部分
-                text = core::string2wstring(word); // 保持原始文本用于后续处理
-                regions.emplace_back(0, 0, 1, 0.5);     // 上半部分
-                regions.emplace_back(0, 0.5, 1, 1);     // 下半部分
-            }
-            break;
-        }
-        case 2:
-            // 两个单词，上下排列 - 保持原始名字不变
-            text = core::string2wstring(name.name);
-            regions.emplace_back(0, 0.1, 1, 0.45);   // 第一个单词区域
-            regions.emplace_back(0, 0.55, 1, 0.9);   // 第二个单词区域
-            break;
-        case 3:
-            // 三个单词，三角形布局：上1下2 - 保持原始名字不变
-            text = core::string2wstring(name.name);
-            regions.emplace_back(0, 0, 1, 0.4);      // 第一个单词（上方居中）
-            regions.emplace_back(0, 0.5, 0.5, 0.9);  // 第二个单词（左下）
-            regions.emplace_back(0.5, 0.5, 1, 0.9);  // 第三个单词（右下）
-            break;
-        default:
-            // 超过3个单词，使用传统居中显示
-            text = core::string2wstring(name.name);
-            break;
+        float height = 1.0f / words.size();
+        for (size_t i = 0; i < words.size(); ++i) {
+            regions.emplace_back(0, i * height, 1, (i + 1) * height);
         }
     } else {
         // 非英文名（中文/日文等），使用原有的字符级布局

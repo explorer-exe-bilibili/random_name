@@ -287,6 +287,11 @@ void executeRenderingWithRecovery() {
         // 使用屏幕管理系统的当前屏幕
         if (screen::Screen::getCurrentScreen()) {
             screen::Screen::getCurrentScreen()->Draw();
+            if(bools[boolconfig::debug]) {
+                for(auto i=0;i<=4000;i+=50) {
+                    Drawer::getInstance()->DrawLine(Point(0,i,false),Point(WindowInfo.width,i,false),Color(255,255,255,255));
+                }
+            }
         } else {
             Log << Level::Error << "当前屏幕为空，无法绘制" << op::endl;
         }
