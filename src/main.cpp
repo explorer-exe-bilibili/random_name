@@ -9,6 +9,8 @@
 #include "core/screen/nameScreen.h"
 #include "core/screen/ListNameScreen.h"
 #include <tinyfiledialogs.h>
+#include "core/render/OpenGLFontRenderer.h"
+#include "core/baseItem/Font.h"
 
 #ifdef _WIN32
 #undef APIENTRY
@@ -216,6 +218,18 @@ int init(){
         Log << Level::Error << "OpenGL版本检查失败，程序将退出" << op::endl;
         glfwTerminate();
         return -1;
+    }
+
+    // 创建并初始化字体渲染后端（OpenGL）并注入到 Font
+    {
+        static core::OpenGLFontRenderer s_fontRenderer;
+        if (!s_fontRenderer.Initialize(WindowInfo.window)) {
+            Log << Level::Error << "Font renderer initialization failed" << op::endl;
+            // 失败时继续，但 Font::SetFontRenderer 不会被设置，创建 Font 时会报错并安全返回
+        } else {
+            core::Font::SetFontRenderer(&s_fontRenderer);
+            Log << Level::Info << "Injected OpenGLFontRenderer into Font" << op::endl;
+        }
     }
     
     glfwSetMouseButtonCallback(WindowInfo.window, MouseButtonEvent);

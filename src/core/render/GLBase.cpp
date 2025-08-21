@@ -1,4 +1,5 @@
 #include "core/render/GLBase.h"
+#include "core/render/Renderer.h"
 #include "core/log.h"
 
 #include <iostream>
@@ -26,13 +27,15 @@ void SetOpenGLContextInvalid() {
 void GLClearError(const char* function, const char* file, int line) {
     // 只清除错误，不打印日志
     // 这可以避免日志被大量错误消息淹没
-    while (glGetError() != GL_NO_ERROR) {
+    while (glGetError() != GL_NO_ERROR && g_OpenGLContextValid) {
         // 仅清除错误，不记录
     }
 }
 
 bool GLLogCall(const char* function, const char* file, int line)
 {
+    if (!g_OpenGLContextValid) return false;
+
     using namespace core;
     GLenum error = glGetError();
     if (error != GL_NO_ERROR)

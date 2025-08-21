@@ -6,8 +6,7 @@
 #include <freetype/freetype.h>
 #include <glm/glm.hpp>
 
-#include "../render/Shader.h"
-#include "../render/VertexArray.h"
+#include "../render/IFontRenderer.h"
 #include "Base.h"
 
 namespace core
@@ -25,6 +24,10 @@ class Font {
     FT_Face face;
     static std::shared_ptr<Font> spare_font;
 public:
+    // 注入渲染器（程序启动时设置一次）
+    static void SetFontRenderer(IFontRenderer* r) { fontRenderer = r; }
+    static IFontRenderer* GetFontRenderer() { return fontRenderer; }
+
     Font(const std::string& fontPath, bool needPreLoad = true, unsigned int fontSize = 48.0f);
     ~Font(); 
     // 渲染文本
@@ -76,9 +79,8 @@ private:
     bool isOK=false;
     unsigned int fontSize; // 字体大小
     std::map<wchar_t, Character> Characters;
-    VertexArray VAO;
-    VertexBuffer VBO;
-    static Shader shader;
+    // 渲染器指针（由程序注入）
+    static IFontRenderer* fontRenderer;
     // 如果需要的话，添加其他成员变量
 };
 }

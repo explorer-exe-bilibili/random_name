@@ -1,14 +1,10 @@
 #include "core/baseItem/Font.h"
-#include "core/render/VertexArray.h"
 #include FT_FREETYPE_H
 
 #include <iostream>
 #include <mutex>
-#include <glad/glad.h>
-#include <glm/ext/matrix_clip_space.hpp>
 #include <filesystem>
 
-#include "core/render/GLBase.h"
 #include "core/baseItem/Base.h"
 #include "core/configItem.h"
 #include "core/log.h"
@@ -17,39 +13,9 @@
 using namespace core;
 
 FT_Library Font::ft = nullptr;
-
-static std::string vertexShader = R"(
-#version 330 core
-layout(location = 0) in vec4 vertex; // <vec2 pos, vec2 tex>
-out vec2 TexCoords;
-
-uniform mat4 projection;
-
-void main()
-{
-	gl_Position = projection * vec4(vertex.xy, 0.0, 1.0);
-	TexCoords = vertex.zw;
-}
-)";
-
-static std::string fragmentShader = R"(
-#version 330 core
-in vec2 TexCoords;
-out vec4 color;
-
-uniform sampler2D text;
-uniform vec3 textColor;
-uniform float alphaMultiplier;
-
-void main()
-{
-	float alpha = texture(text, TexCoords).r * alphaMultiplier;
-	color = vec4(textColor, alpha);
-}
-)";
+IFontRenderer* Font::fontRenderer = nullptr;
 
 std::shared_ptr<Font> Font::spare_font = nullptr;
-Shader Font::shader;
 
 Font::Font(const std::string& fontPath,bool needPreLoad, unsigned int fontSize)
 	: fontSize(fontSize), face(nullptr), isOK(false)
@@ -58,9 +24,9 @@ Font::Font(const std::string& fontPath,bool needPreLoad, unsigned int fontSize)
 	if(!std::filesystem::exists(fontPath)){
 		return;
 	}
-	if (!shader)
-	{
-		shader.init(vertexShader, fragmentShader);
+	if (Font::fontRenderer == nullptr) {
+		Log << Level::Error << "Font renderer not set. Call Font::SetFontRenderer(...) before creating Font" << op::endl;
+		return;
 	}
 	// 初始化 FreeType 字库
 	if(ft==nullptr) {
@@ -86,8 +52,7 @@ Font::Font(const std::string& fontPath,bool needPreLoad, unsigned int fontSize)
 	// 设置字体大小
 	FT_Set_Pixel_Sizes(face, 0, fontSize);
 
-	// 加载字符
-	glPixelStorei(GL_UNPACK_ALIGNMENT, 1); // 禁用字节对齐限制
+	// 预加载字符（如果需要）
 	if (needPreLoad)
 	{
 		for (wchar_t c = 0; c < 128; c++) {
@@ -103,16 +68,10 @@ Font::Font(const std::string& fontPath,bool needPreLoad, unsigned int fontSize)
 	{
 		LoadCharacter(L'?');
 	}
-	// 设置 VAO 和 VBO
-	VAO.Bind();
-	VBO.Bind();
-	VBO.BufferData(nullptr, sizeof(float) * 6 * 4); // 6 个顶点， 每个顶点 4 个 float
 
-	// 配置顶点属性
-	VAO.AddBuffer(VBO, 0, 4, GL_FLOAT, false, 4 * sizeof(float), (void*)0);
+	// 告知后端准备（后端可能需要做初始化）
+	Font::fontRenderer->PrepareForText();
 
-	VertexArray::Unbind();
-	VertexBuffer::Unbind();
 	std::cout << "Load font finished"<<fontPath<<std::endl;
 	isOK=true;
 }
@@ -120,7 +79,7 @@ Font::Font(const std::string& fontPath,bool needPreLoad, unsigned int fontSize)
 Font::~Font() {
 	for (auto& pair : Characters) {
 		try {
-			glDeleteTextures(1, &pair.second.TextureID);
+			if (Font::fontRenderer) Font::fontRenderer->DeleteTexture(pair.second.TextureID);
 		} catch (const std::exception& e) {
 			Log << Level::Error << "Exception while deleting texture for character: " << e.what() << op::endl;
 		} catch (...) {
@@ -151,16 +110,11 @@ void Font::RenderText(const std::wstring& text, float x, float y_origin, float s
 	}
 	// 设置正交投影矩阵
 	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(WindowInfo.width), 0.0f, static_cast<float>(WindowInfo.height));
-	// 设置字体着色器中的投影矩阵
-	shader.use();
-	shader.setMat4("projection", projection);
-	shader.setVec3("textColor", color);
-	shader.setFloat("alphaMultiplier", color.a);
-	// 启用混合以处理文本的透明度
-	GLCall(glEnable(GL_BLEND));
-	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-	GLCall(glActiveTexture(GL_TEXTURE0));
-	VAO.Bind();
+	// 使用渲染器设置投影和颜色
+	Font::fontRenderer->SetProjection(projection);
+	Font::fontRenderer->SetTextColor(glm::vec3(color.r, color.g, color.b), color.a);
+	Font::fontRenderer->PrepareForText();
+
 	// 遍历文本中的字符
 	for (auto c = text.begin(); c != text.end(); ++c) {
 		Character ch = Characters[*c];
@@ -171,7 +125,7 @@ void Font::RenderText(const std::wstring& text, float x, float y_origin, float s
 		float w = ch.Size.x * scale;
 		float h = ch.Size.y * scale;
 
-		// 更新 VBO
+		// 更新 VBO 数据
 		float vertices[6][4] = {
 			{ xpos,     ypos + h,   0.0f, 0.0f },
 			{ xpos,     ypos,       0.0f, 1.0f },
@@ -182,24 +136,19 @@ void Font::RenderText(const std::wstring& text, float x, float y_origin, float s
 			{ xpos + w, ypos + h,   1.0f, 0.0f }
 		};
 
-		// 绑定纹理
-		GLCall(glBindTexture(GL_TEXTURE_2D, ch.TextureID));
-
-		// 更新顶点缓冲
-		VBO.Bind();
-		VBO.BufferSubData(0, sizeof(vertices), vertices);
-		VertexBuffer::Unbind();
-
-		// 绘制
-		GLCall(glDrawArrays(GL_TRIANGLES, 0, 6));
+		// 绑定纹理由后端管理
+		Font::fontRenderer->BindTexture(ch.TextureID);
+		// 更新顶点缓冲并绘制
+		Font::fontRenderer->UpdateVertexBuffer(vertices, sizeof(vertices));
+		Font::fontRenderer->DrawTriangles(6);
 
 		// 移动到下一个字符位置
 		x += (ch.Advance >> 6) * scale; // 位移单位是1/64像素，所以位移6位
 	}
 
-	VertexArray::Unbind();
-	glBindTexture(GL_TEXTURE_2D, 0);
+	// 解绑或恢复由后端负责
 }
+
 
 void Font::RenderTextBetween(const std::string& text, SubRegion region, float scale, const glm::vec4& color) {
 	RenderTextBetween(string2wstring(text), region, scale, color);
@@ -317,18 +266,11 @@ void Font::RenderChar(wchar_t text, float x, float y_origin, float scale, const 
 	{
 		LoadCharacter(text);
 	}
-	// 设置正交投影矩阵
+	// 设置正交投影矩阵并通知渲染后端
 	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(WindowInfo.width), 0.0f, static_cast<float>(WindowInfo.height));
-	// 设置字体着色器中的投影矩阵
-	shader.use();
-	shader.setMat4("projection", projection);
-	shader.setVec3("textColor", color);
-	shader.setFloat("alphaMultiplier", color.a);
-	// 启用混合以处理文本的透明度
-	GLCall(glEnable(GL_BLEND));
-	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-	GLCall(glActiveTexture(GL_TEXTURE0));
-	VAO.Bind();
+	Font::fontRenderer->SetProjection(projection);
+	Font::fontRenderer->SetTextColor(glm::vec3(color.r, color.g, color.b), color.a);
+	Font::fontRenderer->PrepareForText();
 	// 遍历文本中的字符
 	Character ch = Characters[text];
 
@@ -349,19 +291,10 @@ void Font::RenderChar(wchar_t text, float x, float y_origin, float scale, const 
 		{ xpos + w, ypos + h,   1.0f, 0.0f }
 	};
 
-	// 绑定纹理
-	GLCall(glBindTexture(GL_TEXTURE_2D, ch.TextureID));
-
-	// 更新顶点缓冲
-	VBO.Bind();
-	VBO.BufferSubData(0, sizeof(vertices), vertices);
-	VertexBuffer::Unbind();
-
-	// 绘制
-	GLCall(glDrawArrays(GL_TRIANGLES, 0, 6));
-
-	VertexArray::Unbind();
-	glBindTexture(GL_TEXTURE_2D, 0);
+	// 由后端绑定纹理并绘制
+	Font::fontRenderer->BindTexture(ch.TextureID);
+	Font::fontRenderer->UpdateVertexBuffer(vertices, sizeof(vertices));
+	Font::fontRenderer->DrawTriangles(6);
 }
 
 void Font::RenderCharFitRegion(wchar_t text, Region region, const glm::vec4& color) {
@@ -437,27 +370,16 @@ bool Font::LoadCharacter(wchar_t c)
 		std::wcerr << L"加载字符失败: " << c << std::endl;
 		return false;
 	}
-	// 生成纹理
-	unsigned int texture;
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	glTexImage2D(
-		GL_TEXTURE_2D,
-		0,
-		GL_RED,
-		face->glyph->bitmap.width,
-		face->glyph->bitmap.rows,
-		0,
-		GL_RED,
-		GL_UNSIGNED_BYTE,
-		face->glyph->bitmap.buffer
-	);
-
-	// 设置纹理选项
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	// 生成纹理（交给渲染后端）
+	IFontRenderer::TextureId texId = 0;
+	if (Font::fontRenderer) {
+		texId = Font::fontRenderer->CreateGlyphTexture(
+			face->glyph->bitmap.width,
+			face->glyph->bitmap.rows,
+			face->glyph->bitmap.buffer
+		);
+	}
+	unsigned int texture = static_cast<unsigned int>(texId);
 
 	// 存储字符
 	Character character = {
@@ -500,19 +422,11 @@ void Font::RenderTextVertical(const std::wstring& text, float x, float y_origin,
 			LoadCharacter(*c);
 		}
 	}
-	// 设置正交投影矩阵
+	// 设置正交投影矩阵并通知渲染后端
 	glm::mat4 projection = glm::ortho(0.0f, static_cast<float>(WindowInfo.width), 0.0f, static_cast<float>(WindowInfo.height));
-	// 设置字体着色器中的投影矩阵
-	shader.use();
-	shader.setMat4("projection", projection);
-	shader.setVec3("textColor", color);
-	shader.setFloat("alphaMultiplier", color.a);
-	// 启用混合以处理文本的透明度
-	GLCall(glEnable(GL_BLEND));
-	GLCall(glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA));
-	GLCall(glActiveTexture(GL_TEXTURE0));
-	VAO.Bind();
-	
+	Font::fontRenderer->SetProjection(projection);
+	Font::fontRenderer->SetTextColor(glm::vec3(color.r, color.g, color.b), color.a);
+	Font::fontRenderer->PrepareForText();
 	float current_y = y;
 	// 垂直方向从上到下渲染文本
 	for (auto c = text.begin(); c != text.end(); ++c) {
@@ -535,23 +449,15 @@ void Font::RenderTextVertical(const std::wstring& text, float x, float y_origin,
 			{ xpos + w, ypos + h,   1.0f, 0.0f }
 		};
 
-		// 绑定纹理
-		GLCall(glBindTexture(GL_TEXTURE_2D, ch.TextureID));
+	// 由后端绑定纹理并绘制
+	Font::fontRenderer->BindTexture(ch.TextureID);
+	Font::fontRenderer->UpdateVertexBuffer(vertices, sizeof(vertices));
+	Font::fontRenderer->DrawTriangles(6);
 
-		// 更新顶点缓冲
-		VBO.Bind();
-		VBO.BufferSubData(0, sizeof(vertices), vertices);
-		VertexBuffer::Unbind();
-
-		// 绘制
-		GLCall(glDrawArrays(GL_TRIANGLES, 0, 6));
-
-		// 移动到下一个字符位置（向下移动）
-		current_y -= ch.Size.y * scale * 1.2f; // 添加一点额外间距
+	// 移动到下一个字符位置（向下移动）
+	current_y -= ch.Size.y * scale * 1.2f; // 添加一点额外间距
 	}
 
-	VertexArray::Unbind();
-	glBindTexture(GL_TEXTURE_2D, 0);
 }
 
 void Font::RenderTextVerticalBetween(const std::string& text, SubRegion region, float scale, const glm::vec4& color) {

@@ -6,6 +6,7 @@
 #include <sstream>
 
 #include "core/log.h"
+#include "core/render/RenderAPI.h"
 #include "core/explorer.h"
 #include "core/render/GLBase.h"
 #include "core/baseItem/Base.h"
@@ -27,7 +28,7 @@ void framebuffer_size_callback(GLFWwindow* window, int width, int height) {
     WindowInfo.aspectRatio = static_cast<float>(width) / static_cast<float>(height);
     
     // 设置OpenGL视口大小
-    GLCall(glViewport(0, 0, width, height));
+    core::RenderAPI::Get().Viewport(0, 0, width, height);
     
     Log << Level::Info << "Window resized to " << width << "x" << height << op::endl;
 }
@@ -38,15 +39,15 @@ int mainloop() {
     
     try {
         
-        GLCall(glClearColor(0.2f, 0.2f, 0.2f, 1.0f));
-        
+        core::RenderAPI::Get().ClearColor(0.2f, 0.2f, 0.2f, 1.0f);
+            
         // 清除颜色和深度缓冲区
-        GLCall(glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT));
+        core::RenderAPI::Get().Clear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         // 设置视口和投影矩阵（如果需要）
         int width, height;
         glfwGetFramebufferSize(WindowInfo.window, &width, &height);
-        GLCall(glViewport(0, 0, width, height));
+        core::RenderAPI::Get().Viewport(0, 0, width, height);
 
         // FPS计算
         // 获取当前时间
@@ -92,10 +93,10 @@ int mainloop() {
                 (*font)->RenderText(fpsText, 0, 0, 0.5f, color::black);
             }
         }
-        // 确保所有 OpenGL 命令完成
-        glFinish();
-        // 安全地交换缓冲区
-        glfwSwapBuffers(WindowInfo.window);
+    // 确保所有 OpenGL 命令完成
+    core::RenderAPI::Get().Finish();
+    // 安全地交换缓冲区
+    core::RenderAPI::Get().SwapBuffers(WindowInfo.window);
 
         // 处理事件
         glfwPollEvents();
