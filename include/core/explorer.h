@@ -7,8 +7,6 @@
 #include "core/baseItem/Font.h"
 #include "core/baseItem/Audio.h"
 #include "core/baseItem/VideoPlayer.h"
-#include "core/decrash/ErrorRecovery.h"
-#include "core/decrash/MemoryMonitor.h"
 
 namespace core
 {

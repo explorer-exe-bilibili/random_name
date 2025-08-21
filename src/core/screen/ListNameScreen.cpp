@@ -1,4 +1,5 @@
 #include "core/screen/ListNameScreen.h"
+#include "core/log.h"
 #include "core/Drawer.h"
 
 #include <algorithm>

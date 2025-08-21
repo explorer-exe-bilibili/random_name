@@ -22,7 +22,6 @@ struct AVRational;
 namespace core
 {
 class Bitmap;
-class VideoPlayerErrorRecovery;
 
 class VideoPlayer
 {   
@@ -32,9 +31,6 @@ class VideoPlayer
     std::shared_ptr<FrameData> convertFrameToFrameData(AVFrame* frame);
     void applyVolume(uint8_t* audioBuffer, int bufferSize, int channels);
     void cleanup();
-    
-    // 错误恢复相关的内部方法
-    bool loadInternal(const std::string& path);
     
     // 音视频同步辅助函数
     double getAudioClock();
@@ -61,9 +57,6 @@ public:
     void setLoop(bool loop);
     void setVolume(int volume);
     void cleanBuffer();
-    
-    // 错误恢复友元类
-    friend class VideoPlayerErrorRecovery;
     
 private:
     std::atomic<bool> loop{true};
@@ -118,7 +111,6 @@ private:
     std::string videoPath="";
     
     // 错误恢复相关
-    std::unique_ptr<VideoPlayerErrorRecovery> errorRecovery;
     std::mutex renderMutex;
     std::thread::id mainThreadId;
     // 音视频同步相关

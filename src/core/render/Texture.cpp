@@ -2,7 +2,6 @@
 
 #include "core/log.h"
 #include "core/render/GLBase.h"
-#include "core/decrash/OpenGLErrorRecovery.h"
 #include <glm/gtc/matrix_transform.hpp>
 #include <mutex>
 
@@ -149,7 +148,7 @@ Texture::Texture(const int width, const int height, bool isRGB)
 }
 
 Texture::~Texture() {
-    if (textureID != 0 && core::OpenGLErrorRecovery::isContextValid()) {
+    if (textureID != 0) {
         GLCall(glDeleteTextures(1, &textureID));
     }
     textureID = 0;

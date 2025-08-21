@@ -10,7 +10,6 @@
 
 #include "core/render/GLBase.h"
 #include "core/baseItem/Base.h"
-#include "core/decrash/OpenGLErrorRecovery.h"
 #include "core/configItem.h"
 #include "core/log.h"
 #include "core/Drawer.h"
@@ -119,19 +118,14 @@ Font::Font(const std::string& fontPath,bool needPreLoad, unsigned int fontSize)
 }
 
 Font::~Font() {
-	// 释放纹理 - 使用OpenGL错误恢复
-	if (core::OpenGLErrorRecovery::isContextValid()) {
-		for (auto& pair : Characters) {
-			try {
-				glDeleteTextures(1, &pair.second.TextureID);
-			} catch (const std::exception& e) {
-				Log << Level::Error << "Exception while deleting texture for character: " << e.what() << op::endl;
-			} catch (...) {
-				Log << Level::Error << "Unknown exception while deleting texture" << op::endl;
-			}
+	for (auto& pair : Characters) {
+		try {
+			glDeleteTextures(1, &pair.second.TextureID);
+		} catch (const std::exception& e) {
+			Log << Level::Error << "Exception while deleting texture for character: " << e.what() << op::endl;
+		} catch (...) {
+			Log << Level::Error << "Unknown exception while deleting texture" << op::endl;
 		}
-	} else {
-		Log << Level::Warn << "OpenGL context invalid, skipping texture deletion in Font destructor" << op::endl;
 	}
 
 	// 释放 FreeType 资源

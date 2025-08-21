@@ -1,6 +1,5 @@
 #include"core/render/IndexBuffer.h"
 #include"core/log.h"
-#include"core/decrash/OpenGLErrorRecovery.h"
 #include"core/render/GLBase.h"
 #include<glad/glad.h>
 
@@ -37,7 +36,7 @@ IndexBuffer::IndexBuffer(const IndexBuffer& ib)
 IndexBuffer::~IndexBuffer()
 {
     Log<<Level::Info<<"IndexBuffer::~IndexBuffer() "<<rendererID<<op::endl;
-    if (core::OpenGLErrorRecovery::isContextValid() && rendererID != 0) {
+    if (rendererID != 0) {
         try {
             GLCall(glDeleteBuffers(1, &rendererID));
         } catch (const std::exception& e) {
@@ -56,7 +55,7 @@ IndexBuffer& IndexBuffer::operator=(const IndexBuffer& ib)
     Log<<Level::Info<<"IndexBuffer& IndexBuffer::operator=(const IndexBuffer& ib) "<<rendererID<<op::endl;
     if (this != &ib)
     {
-        if (core::OpenGLErrorRecovery::isContextValid() && rendererID != 0) {
+        if (rendererID != 0) {
             GLCall(glDeleteBuffers(1, &rendererID));
         }
         rendererID = 0;

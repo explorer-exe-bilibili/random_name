@@ -2,9 +2,6 @@
 
 #include "core/log.h"
 #include "core/baseItem/Bitmap.h"
-#include "core/decrash/ErrorRecovery.h"
-#include "core/decrash/VideoPlayerErrorRecovery.h"
-#include "core/decrash/MemoryMonitor.h"
 
 extern "C" {
 #include <libavformat/avformat.h>
@@ -22,8 +19,6 @@ using namespace core;
 std::atomic<float> VideoPlayer::volume{1.0f};
 
 VideoPlayer::VideoPlayer() : playing(false), loop(false), shouldExit(false) {
-    // 初始化错误恢复系统
-    errorRecovery = std::make_unique<VideoPlayerErrorRecovery>();
     mainThreadId = std::this_thread::get_id();
     
     if(!SDL_WasInit(SDL_INIT_AUDIO)){
@@ -51,14 +46,6 @@ VideoPlayer::~VideoPlayer() {
 }
 
 bool VideoPlayer::load(const std::string& path) {
-    // 使用错误恢复执行加载
-    return ErrorRecovery::executeWithRetry<bool>([this, &path]() {
-        return loadInternal(path);
-    }, {.maxRetries = 3, .baseDelay = std::chrono::milliseconds(500)}, 
-       ErrorRecovery::ErrorType::FFMPEG_DECODE);
-}
-
-bool VideoPlayer::loadInternal(const std::string& path) {
     isCleanedUp = false;
     static std::mutex ffmpeg_init_mutex;
     std::lock_guard<std::mutex> lock(ffmpeg_init_mutex);
@@ -898,11 +885,9 @@ void VideoPlayer::cleanup() {
         
         // 清理其他缓冲区
         if (rgbBuffer) {
+            delete[] rgbBuffer;
             rgbBuffer = nullptr;
-            if (rgbBufferSize > 0) {
-                MemoryMonitor::getInstance().trackDeallocation(rgbBufferSize);
-                rgbBufferSize = 0;
-            }
+            rgbBufferSize = 0;
         }
         
         // 重置状态变量

@@ -34,38 +34,32 @@ Explorer::~Explorer()
 bool Explorer::loadBitmap(const std::string &name, const std::string &path)
 {
     Log << Level::Info << "Loading bitmap: " << name << " from path: " << path << op::endl;
+    // 创建新的Bitmap实例
+    auto bitmap = std::make_shared<Bitmap>();
 
-    return ErrorRecovery::executeWithRetry<bool>([this, &name, &path]() {
-        // 检查内存压力
-        MemoryMonitor::getInstance().isMemoryPressure();
+    // 尝试加载图像文件
+    if (bitmap->Load(path))
+    {
+        // 如果成功加载，将其存储在映射表中
+        Name_bitmaps[name] = bitmap;
         
-        // 创建新的Bitmap实例
-        auto bitmap = std::make_shared<Bitmap>();
-
-        // 尝试加载图像文件
-        if (bitmap->Load(path))
-        {
-            // 如果成功加载，将其存储在映射表中
-            Name_bitmaps[name] = bitmap;
-            
-            // 更新或创建稳定的指针地址
-            if (!name_bitmap_ptrs.contains(name)) {
-                name_bitmap_ptrs[name] = std::make_unique<Bitmap*>(bitmap.get());
-            } else {
-                *name_bitmap_ptrs[name] = bitmap.get();
-            }
-            
-            Log << Level::Info << "Bitmap loaded successfully: " << name << " (width: " << bitmap->getWidth()
-                << ", height: " << bitmap->getHeight()
-                << ", texture valid: " << (*bitmap ? "true" : "false") << ")" << op::endl;
-            return true;
+        // 更新或创建稳定的指针地址
+        if (!name_bitmap_ptrs.contains(name)) {
+            name_bitmap_ptrs[name] = std::make_unique<Bitmap*>(bitmap.get());
+        } else {
+            *name_bitmap_ptrs[name] = bitmap.get();
         }
-        else
-        {
-            Log << Level::Error << "Failed to load bitmap: " << name << " from path: " << path << op::endl;
-            throw std::runtime_error("Bitmap loading failed: " + name);
-        }    }, {.maxRetries = 2, .baseDelay = std::chrono::milliseconds(500)}, 
-       ErrorRecovery::ErrorType::MEMORY_ALLOCATION);
+        
+        Log << Level::Info << "Bitmap loaded successfully: " << name << " (width: " << bitmap->getWidth()
+            << ", height: " << bitmap->getHeight()
+            << ", texture valid: " << (*bitmap ? "true" : "false") << ")" << op::endl;
+        return true;
+    }
+    else
+    {
+        Log << Level::Error << "Failed to load bitmap: " << name << " from path: " << path << op::endl;
+        throw std::runtime_error("Bitmap loading failed: " + name);
+    } 
 }
 
 bool Explorer::loadBitmap(BitmapID id, const std::string &path)
@@ -249,27 +243,20 @@ int Explorer::loadFont(FontID id, const std::string &path, bool needPreLoad, uns
 bool Explorer::loadVideo(VideoID id, const std::string &path)
 {
     Log << Level::Info << "Loading video from path: " << path << op::endl;
-    
-    // 使用错误恢复机制加载视频
-    return ErrorRecovery::executeWithRetry<bool>([this, id, &path]() {
-        // 检查内存压力
-        MemoryMonitor::getInstance().isMemoryPressure();
 
-        auto video = std::make_shared<VideoPlayer>();
-        if (video->load(path))
-        {
-            video->pause();
-            videos[id] = video;
-            Log << Level::Info << "Video loaded successfully: " << static_cast<int>(id) << op::endl;
-            return true;
-        }
-        else
-        {
-            Log << Level::Error << "Failed to load video: " << static_cast<int>(id) << op::endl;
-            throw std::runtime_error("Video loading failed for ID: " + std::to_string(static_cast<int>(id)));
-        }
-    }, {.maxRetries = 2, .baseDelay = std::chrono::milliseconds(1000)}, 
-       ErrorRecovery::ErrorType::FFMPEG_DECODE);
+    auto video = std::make_shared<VideoPlayer>();
+    if (video->load(path))
+    {
+        video->pause();
+        videos[id] = video;
+        Log << Level::Info << "Video loaded successfully: " << static_cast<int>(id) << op::endl;
+        return true;
+    }
+    else
+    {
+        Log << Level::Error << "Failed to load video: " << static_cast<int>(id) << op::endl;
+        throw std::runtime_error("Video loading failed for ID: " + std::to_string(static_cast<int>(id)));
+    }
 }
 
 bool Explorer::loadAudio(AudioID id, const std::string &path)
@@ -614,9 +601,6 @@ void Explorer::cleanupVideoResources()
     }
     videos.clear();
     
-    // 触发垃圾回收
-    MemoryMonitor::getInstance().forceGarbageCollection();
-    
     Log << Level::Info << "Video resources cleanup completed" << op::endl;
 }
 
@@ -628,9 +612,6 @@ void Explorer::cleanupBitmapResources()
     
     bitmaps.clear();
     Name_bitmaps.clear();
-    
-    // 触发垃圾回收
-    MemoryMonitor::getInstance().forceGarbageCollection();
     
     Log << Level::Info << "Cleaned up " << bitmapCount << " bitmap resources" << op::endl;
 }

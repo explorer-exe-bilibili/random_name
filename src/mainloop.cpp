@@ -11,9 +11,6 @@
 #include "core/baseItem/Base.h"
 #include "core/screen/mainScreen.h"
 #include "core/Drawer.h"
-#include "core/decrash/ErrorRecovery.h"
-#include "core/decrash/OpenGLErrorRecovery.h"
-#include "core/decrash/MemoryMonitor.h"
 
 using namespace core;
 
@@ -40,16 +37,6 @@ int mainloop() {
     const int MAX_CONSECUTIVE_ERRORS = 10;
     
     try {
-        // 检查并恢复 OpenGL 错误
-        if (!OpenGLErrorRecovery::checkAndRecoverOpenGLErrors()) {
-            consecutiveErrors++;
-            if (consecutiveErrors >= MAX_CONSECUTIVE_ERRORS) {
-                Log << Level::Error << "连续 OpenGL 错误过多，程序退出" << op::endl;
-                glfwSetWindowShouldClose(WindowInfo.window, GLFW_TRUE);
-                return -1;
-            }
-            return 0;
-        }
         
         GLCall(glClearColor(0.2f, 0.2f, 0.2f, 1.0f));
         
@@ -79,10 +66,18 @@ int mainloop() {
             Log << Level::Debug << "FPS: " << ss.str() << op::endl;
             Log<<Level::Info<<"Current screen :"<<(int)screen::Screen::getCurrentScreen()->getID()<<op::endl;
         }
-
-        // 安全地执行渲染
-        executeRenderingWithRecovery();
-        
+        // 绘制场景
+        // 使用屏幕管理系统的当前屏幕
+        if (screen::Screen::getCurrentScreen()) {
+            screen::Screen::getCurrentScreen()->Draw();
+            if(bools[boolconfig::debug]) {
+                for(auto i=0;i<=4000;i+=50) {
+                    Drawer::getInstance()->DrawLine(Point(0,i,false),Point(WindowInfo.width,i,false),Color(255,255,255,255));
+                }
+            }
+        } else {
+            Log << Level::Error << "当前屏幕为空，无法绘制" << op::endl;
+        }
         // 如果启用了FPS显示，则绘制FPS文本
         if (bools[boolconfig::show_fps]) {
             // 创建FPS文本
@@ -97,9 +92,10 @@ int mainloop() {
                 (*font)->RenderText(fpsText, 0, 0, 0.5f, color::black);
             }
         }
-        
+        // 确保所有 OpenGL 命令完成
+        glFinish();
         // 安全地交换缓冲区
-        OpenGLErrorRecovery::safeSwapBuffers(WindowInfo.window);
+        glfwSwapBuffers(WindowInfo.window);
 
         // 处理事件
         glfwPollEvents();
@@ -274,44 +270,6 @@ void CharEvent(GLFWwindow* window, unsigned int codepoint) {
     if (screen::Screen::getCurrentScreen()) {
         if (screen::Screen::getCurrentScreen()->HandleUnicodeInput(utf8_char)) {
             return; // 如果屏幕处理了输入，就不继续处理
-        }
-    }
-}
-
-void executeRenderingWithRecovery() {
-    static int renderFailures = 0;
-    const int MAX_RENDER_FAILURES = 5;
-    
-    try {
-        // 绘制场景
-        // 使用屏幕管理系统的当前屏幕
-        if (screen::Screen::getCurrentScreen()) {
-            screen::Screen::getCurrentScreen()->Draw();
-            if(bools[boolconfig::debug]) {
-                for(auto i=0;i<=4000;i+=50) {
-                    Drawer::getInstance()->DrawLine(Point(0,i,false),Point(WindowInfo.width,i,false),Color(255,255,255,255));
-                }
-            }
-        } else {
-            Log << Level::Error << "当前屏幕为空，无法绘制" << op::endl;
-        }
-        
-        renderFailures = 0; // 重置失败计数
-        
-    } catch (const std::exception& e) {
-        renderFailures++;
-        Log << Level::Warn << "渲染失败: " << e.what() 
-            << " (失败次数: " << renderFailures << ")" << op::endl;
-        
-        if (renderFailures >= MAX_RENDER_FAILURES) {
-            Log << Level::Error << "渲染失败次数过多，尝试重新初始化图形资源" << op::endl;
-            
-            // 重新初始化图形资源
-            if (OpenGLErrorRecovery::recoverLostContext(WindowInfo.window)) {
-                renderFailures = 0;
-            } else {
-                throw std::runtime_error("无法恢复图形渲染");
-            }
         }
     }
 }

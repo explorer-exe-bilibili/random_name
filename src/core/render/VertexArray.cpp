@@ -1,7 +1,6 @@
 #include "core/render/VertexArray.h"
 #include "core/log.h"
 #include "core/render/GLBase.h"
-#include "core/decrash/OpenGLErrorRecovery.h"
 
 
 using namespace core;
@@ -78,7 +77,7 @@ VertexArray::VertexArray(const VertexArray& va) {
 }
 
 VertexArray::~VertexArray() {
-    if (core::OpenGLErrorRecovery::isContextValid() && rendererID != 0) {
+    if (rendererID != 0) {
         GLCall(glDeleteVertexArrays(1, &rendererID));
     }
     rendererID = 0;
@@ -110,16 +109,9 @@ VertexArray& VertexArray::operator=(const VertexArray& va) {
     Log<<Level::Info<<"VertexArray& VertexArray::operator=(const VertexArray& va) "<<this->rendererID<<" from "<<va.rendererID<<op::endl;
     if (this != &va) {
         
-        // 先删除当前的VAO（带上下文验证）
-        if(rendererID != 0 && core::OpenGLErrorRecovery::isContextValid()) {
+        // 先删除当前的VAO
+        if(rendererID != 0) {
             GLCall(glDeleteVertexArrays(1, &rendererID));
-        }
-        
-        // 检查上下文是否有效
-        if (!core::OpenGLErrorRecovery::isContextValid()) {
-            Log << Level::Error << "OpenGL context invalid during VertexArray assignment" << op::endl;
-            rendererID = 0;
-            return *this;
         }
         
         // 生成新的顶点数组对象
