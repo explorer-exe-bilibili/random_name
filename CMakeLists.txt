@@ -718,6 +718,33 @@ if(UNIX AND NOT APPLE)
     endif()
 endif()
 
+# ============================================================================
+# 测试配置 / Test Configuration
+# ============================================================================
+option(BUILD_TESTS "Build test executables" ON)
+
+if(BUILD_TESTS)
+    enable_testing()
+    
+    # 测试：格式化修复测试
+    # 注意：test_format_fix 只测试 to_string_helper 模板函数，它在头文件中定义
+    # 因此不需要链接 lang.cpp 或其他依赖
+    add_executable(test_format_fix test_format_fix.cpp)
+    target_include_directories(test_format_fix PRIVATE 
+        ${CMAKE_CURRENT_SOURCE_DIR}/include
+        ${CMAKE_CURRENT_SOURCE_DIR}/src
+    )
+    target_compile_features(test_format_fix PRIVATE cxx_std_20)
+    
+    if(WIN32)
+        target_compile_options(test_format_fix PRIVATE /utf-8)
+    endif()
+    
+    add_test(NAME format_fix_test COMMAND test_format_fix)
+    
+    message(STATUS "Tests enabled. Run 'ctest' to execute tests.")
+endif()
+
 # 设置安装规则
 install(TARGETS ${PROJECT_NAME} upgrade DESTINATION bin)
 
