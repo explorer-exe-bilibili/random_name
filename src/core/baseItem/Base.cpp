@@ -497,8 +497,8 @@ void core::showOpenGLVersionError(const std::string& currentVersion, const std::
 }
 
 bool core::validateOpenGLSupport() {
-    const int REQUIRED_MAJOR = 4;
-    const int REQUIRED_MINOR = 1; // 降低要求到4.1以提高兼容性
+    const int REQUIRED_MAJOR = 3;
+    const int REQUIRED_MINOR = 3; // 匹配GLFW上下文版本要求
     
     // 获取当前OpenGL版本
     const char* versionStr = (const char*)glGetString(GL_VERSION);

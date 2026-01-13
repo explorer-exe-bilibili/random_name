@@ -166,5 +166,5 @@
 
   "error.explorer.title": "Resource Manager Initialization Failed",
   "error.explorer.message": "Failed to initialize resource manager.\n\nPossible causes:\n• Missing resource files\n• Insufficient file permissions\n• Audio/video codec issues\n\nThe program will exit.",
-  "error.openGL.message": "Make sure your graphics card supports OpenGL 4.0 or higher.\n\nIf you are using an integrated graphics card, consider updating your drivers or switching to a dedicated graphics card.\n\nIf you are using a virtual machine, ensure it supports OpenGL 4.0 or higher."
+  "error.openGL.message": "Make sure your graphics card supports OpenGL 3.3 or higher.\n\nIf you are using an integrated graphics card, consider updating your drivers or switching to a dedicated graphics card.\n\nIf you are using a virtual machine, ensure it supports OpenGL 3.3 or higher."
 }
