@@ -60,7 +60,7 @@ jobs:
           #   use_system_deps: true
 
           # macOS x64
-          - os: macos-13  # Intel-based
+          - os: macos-15-intel  # Intel-based
             arch: x64
             c_compiler: clang
             cpp_compiler: clang++
