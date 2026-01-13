@@ -181,11 +181,9 @@ int init(){
     }
     core::startFileWithoutWindow("upgrade.exe");
     // 设置OpenGL版本和兼容性模式
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
-    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_COMPAT_PROFILE);
-    // 启用向前兼容性
-    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);
     Config& config=*Config::getInstance();
     Log<<Level::Info<<"Creating window"<<op::endl;
     // 创建窗口
