@@ -79,6 +79,17 @@ ctest -V
 
 **位置 / Location**: `test_format_fix.cpp`
 
+### test_basic
+
+**目的 / Purpose**: 演示测试基础设施的基本示例测试。
+
+**测试内容 / What it tests**:
+- 基本算术运算 / Basic arithmetic operations
+- 字符串操作 / String operations
+- 测试断言框架 / Test assertion framework
+
+**位置 / Location**: `test_basic.cpp`
+
 ## 禁用测试 / Disabling Tests
 
 如果不想构建测试，可以在配置时禁用 / To build without tests, disable them during configuration:

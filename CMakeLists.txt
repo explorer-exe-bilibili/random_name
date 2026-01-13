@@ -726,7 +726,7 @@ option(BUILD_TESTS "Build test executables" ON)
 if(BUILD_TESTS)
     enable_testing()
     
-    # 测试：格式化修复测试
+    # 测试1：格式化修复测试
     # 注意：test_format_fix 只测试 to_string_helper 模板函数，它在头文件中定义
     # 因此不需要链接 lang.cpp 或其他依赖
     add_executable(test_format_fix test_format_fix.cpp)
@@ -741,6 +741,17 @@ if(BUILD_TESTS)
     endif()
     
     add_test(NAME format_fix_test COMMAND test_format_fix)
+    
+    # 测试2：基础功能测试
+    # 这是一个简单的示例测试，演示如何添加更多测试
+    add_executable(test_basic test_basic.cpp)
+    target_compile_features(test_basic PRIVATE cxx_std_20)
+    
+    if(WIN32)
+        target_compile_options(test_basic PRIVATE /utf-8)
+    endif()
+    
+    add_test(NAME basic_test COMMAND test_basic)
     
     message(STATUS "Tests enabled. Run 'ctest' to execute tests.")
 endif()
