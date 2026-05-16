@@ -5,35 +5,35 @@
 ### 高层架构
 
 ```
-┌─────────────────────────────────────────┐
-│         Application Layer               │
-│  (mainloop, UI Screens, Input Handling) │
-└────────────────┬────────────────────────┘
-                 │
-         ┌───────┴────────┐
-         │                │
-┌────────▼─────┐  ┌──────▼────────┐
-│  Core System │  │  Render System│
-│  - Explorer  │  │  - OpenGL     │
-│  - Config    │  │  - Shaders    │
-│  - Log       │  │  - Textures   │
-└────────┬─────┘  └──────┬────────┘
-         │                │
-         └────────┬───────┘
-                  │
-         ┌────────▼──────────┐
-         │  Base Items Layer │
-         │ - Audio, Video    │
-         │ - Bitmap, Font    │
-         │ - Button          │
-         └────────┬──────────┘
-                  │
-         ┌────────▼──────────┐
-         │ External Libraries│
-         │ - GLFW, SDL2      │
-         │ - FFmpeg, Curl    │
-         │ - FreeType        │
-         └───────────────────┘
+  ┌─────────────────────────────────────────┐
+  │                                Application Layer                                               │
+  │                     (mainloop, UI Screens, Input Handling)                            │
+  └────────────────┬────────────────────────┘
+                                             │
+                           ┌──────┴───────┐
+                           │                                  │
+    ┌────────▼─────┐  ┌──────▼────────┐
+    │ Core System                 │  │ Render System                │
+    │ - Explorer                    │  │ - OpenGL                       │
+    │ - Config                       │  │ - Shaders                       │
+    │ - Log                           │  │ - Textures                      │
+    └────────┬─────┘  └──────┬────────┘
+                           │                                  │
+                          └──────┬───────┘
+                                            │
+                      ┌────────▼──────────┐
+                      │ Base Items Layer                       │
+                      │ - Audio, Video                           │
+                      │ - Bitmap, Font                          │
+                      │ - Button                                  │
+                      └────────┬──────────┘
+                                             │
+                      ┌────────▼──────────┐
+                      │External Libraries                       │
+                      │ - GLFW, SDL2                            │   
+                      │ - FFmpeg, Curl                          │
+                      │ - FreeType                                │
+                      └───────────────────┘
 ```
 
 ---

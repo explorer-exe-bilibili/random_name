@@ -79,6 +79,9 @@ bool NameRandomer::setFile(const std::string& filePath) {
             name = line; // 如果全是数字，保留原始字符串作为名字
         }
         
+        while (!name.empty() && name.back() == '-') {
+            name.pop_back();
+        }
         entry.name = name;
         
         // 解析数字部分，默认值
